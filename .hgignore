@@ -1,0 +1,8 @@
+bin
+Bin
+obj
+.user
+.suo
+_ReSharper*
+TestResults
+.nupkg
