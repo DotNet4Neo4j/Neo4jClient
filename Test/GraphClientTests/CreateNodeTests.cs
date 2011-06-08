@@ -1,8 +1,7 @@
 ﻿using System;
-using Neo4jClient;
 using NUnit.Framework;
 
-namespace Test.GraphClientTests
+namespace Neo4jClient.Test.GraphClientTests
 {
     [TestFixture]
     public class CreateNodeTests

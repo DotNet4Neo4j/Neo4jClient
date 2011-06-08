@@ -3,7 +3,7 @@ using System.Linq;
 using NSubstitute;
 using RestSharp;
 
-namespace Test.GraphClientTests
+namespace Neo4jClient.Test.GraphClientTests
 {
     public static class MockHttpFactory
     {

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using Neo4jClient;
 using NUnit.Framework;
 using RestSharp;
 
-namespace Test.GraphClientTests
+namespace Neo4jClient.Test.GraphClientTests
 {
     [TestFixture]
     public class ConnectTests
