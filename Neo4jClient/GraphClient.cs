@@ -7,7 +7,7 @@ namespace Neo4jClient
     public class GraphClient : IGraphClient
     {
         readonly RestClient client;
-        ApiEndpoints apiEndpoints;
+        public ApiEndpoints ApiEndpoints;
 
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
@@ -33,7 +33,7 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            apiEndpoints = response.Data;
+            ApiEndpoints = response.Data;
         }
 
         public NodeReference Create<TNode>(TNode node, params OutgoingRelationship<TNode>[] outgoingRelationships) where TNode : class

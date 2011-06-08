@@ -14,7 +14,7 @@ namespace Test.GraphClientTests
         [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received a non-200 HTTP response when connecting to the server. The response status was: 500 Internal Server Error")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -26,8 +26,42 @@ namespace Test.GraphClientTests
                 }
             });
 
-            var graphClient = new GraphClient(new Uri("http://foo"), httpFactory);
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
+        }
+
+        [Test]
+        public void ShouldRetrieveApiEndpoints()
+        {
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = @"{
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions'' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            Assert.AreEqual("http://foo/db/data/node", graphClient.ApiEndpoints.Node);
+            Assert.AreEqual("http://foo/db/data/index/node", graphClient.ApiEndpoints.NodeIndex);
+            Assert.AreEqual("http://foo/db/data/index/relationship", graphClient.ApiEndpoints.RelationshipIndex);
+            Assert.AreEqual("http://foo/db/data/node/0", graphClient.ApiEndpoints.ReferenceNode);
+            Assert.AreEqual("http://foo/db/data/ext", graphClient.ApiEndpoints.ExtensionsInfo);
         }
     }
 }
