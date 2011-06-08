@@ -2,6 +2,7 @@
 {
     public interface IGraphClient
     {
+        void Connect();
         NodeReference Create<TNode>(TNode node, params OutgoingRelationship<TNode>[] outgoingRelationships) where TNode : class;
     }
 }
