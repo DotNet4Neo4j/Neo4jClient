@@ -6,3 +6,4 @@ obj
 _ReSharper*
 TestResults
 .nupkg
+.docstates
