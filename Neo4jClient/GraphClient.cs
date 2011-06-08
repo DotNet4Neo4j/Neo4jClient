@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using RestSharp;
 
 namespace Neo4jClient
@@ -15,13 +16,18 @@ namespace Neo4jClient
 
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
         {
-            client = new RestClient(rootUri.AbsolutePath) { HttpFactory = httpFactory };
+            client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
         }
 
         public void Connect()
         {
-            var request = new RestRequest("");
+            var request = new RestRequest("", Method.GET);
             var response = client.Execute<ApiEndpoints>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed ||
+                response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException("Failed to connect to server.");
+
             apiEndpoints = response.Data;
         }
 

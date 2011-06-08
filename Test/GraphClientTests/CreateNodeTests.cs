@@ -11,7 +11,8 @@ namespace Test.GraphClientTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowArgumentNullExceptionForNullNode()
         {
-            new GraphClient().Create<object>(null);
+            var client = new GraphClient(new Uri("http://foo"));
+            client.Create<object>(null);
         }
     }
 }
