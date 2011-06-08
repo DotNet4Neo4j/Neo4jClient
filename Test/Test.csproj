@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NSubstitute">
+      <HintPath>..\packages\NSubstitute.1.1.0.0\lib\35\NSubstitute.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
     </Reference>
