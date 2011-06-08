@@ -24,9 +24,14 @@ namespace Neo4jClient
             var request = new RestRequest("", Method.GET);
             var response = client.Execute<ApiEndpoints>(request);
 
-            if (response.ResponseStatus != ResponseStatus.Completed ||
-                response.StatusCode != HttpStatusCode.OK)
-                throw new ApplicationException("Failed to connect to server.");
+            if (response.ResponseStatus != ResponseStatus.Completed)
+                throw new ApplicationException("Failed to connect to server.", response.ErrorException);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException(string.Format(
+                    "Received a non-200 HTTP response when connecting to the server. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
 
             apiEndpoints = response.Data;
         }

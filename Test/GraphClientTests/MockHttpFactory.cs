@@ -26,7 +26,13 @@ namespace Test.GraphClientTests
             return cannedResponses
                 .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource)
                 .Where(can => can.Key.Method == method)
-                .Select(can => can.Value)
+                .Select(can =>
+                {
+                    var response = can.Value;
+                    if (response.ResponseStatus == ResponseStatus.None)
+                        response.ResponseStatus = ResponseStatus.Completed;
+                    return response;
+                })
                 .SingleOrDefault();
         }
     }
