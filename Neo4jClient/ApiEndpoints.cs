@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient
 {
-    public class ApiEndpoints
+    class ApiEndpoints
     {
         public string Node { get; set; }
         public string NodeIndex { get; set; }

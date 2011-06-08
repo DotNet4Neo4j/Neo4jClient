@@ -7,7 +7,7 @@ namespace Neo4jClient
     public class GraphClient : IGraphClient
     {
         readonly RestClient client;
-        public ApiEndpoints ApiEndpoints;
+        internal ApiEndpoints ApiEndpoints;
 
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
