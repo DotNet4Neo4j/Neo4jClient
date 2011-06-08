@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using Neo4jClient;
-using NSubstitute;
 using NUnit.Framework;
 using RestSharp;
 
@@ -14,18 +14,13 @@ namespace Test.GraphClientTests
         [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Failed to connect to server.")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
-            var httpFactory = Substitute.For<IHttpFactory>();
-            httpFactory
-                .Create()
-                .Returns(callInfo =>
+            var httpFactory = MockHttpFactory.Generate("http://foo", new Dictionary<RestRequest, HttpResponse>
+            {
                 {
-                    var http = Substitute.For<IHttp>();
-                    http.Get().Returns(ci =>
-                        http.Url == new Uri("http://foo/")
-                        ? new HttpResponse {StatusCode = HttpStatusCode.InternalServerError}
-                        : null);
-                    return http;
-                });
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse { StatusCode = HttpStatusCode.InternalServerError }
+                }
+            });
 
             var graphClient = new GraphClient(new Uri("http://foo"), httpFactory);
             graphClient.Connect();

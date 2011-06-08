@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="GraphClientTests\ConnectTests.cs" />
     <Compile Include="GraphClientTests\CreateNodeTests.cs" />
+    <Compile Include="GraphClientTests\MockHttpFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
