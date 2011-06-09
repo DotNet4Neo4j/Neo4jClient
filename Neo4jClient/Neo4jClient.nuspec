@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Neo4jClient</id>
+    <version>1.0.0.0</version>
+    <authors>Tatham Oddie</authors>
+    <owners>Tatham Oddie</owners>
+    <projectUrl>https://bitbucket.org/tatham/neo4jclient</projectUrl>
+    <projectUrl>https://bitbucket.org/tatham/neo4jclient</projectUrl>
+    <description>Neo4jClient is a .NET client for the Neo4j Rest Server. Neo4j is an open sourced java based transactional graph database that stores data structured in graphs rather than in tables.</description>
+    <tags>Neo4j REST</tags>
+    <dependencies>
+      <dependency id="RestSharp" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\Neo4jClient.dll" target="lib" />
+    <file src="bin\Release\Neo4jClient.pdb" target="lib" />
+  </files>
+</package>
