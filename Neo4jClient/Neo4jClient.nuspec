@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Neo4jClient</id>
-    <version>x.x.x.x</version>
+    <version>0.0.0.0</version>
     <authors>Tatham Oddie</authors>
     <owners>Tatham Oddie</owners>
     <licenseUrl>https://bitbucket.org/tatham/neo4jclient</licenseUrl>
