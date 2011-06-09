@@ -50,3 +50,11 @@ if (-not $?)
 {
 	throw "The NuGet process returned an error code."
 }
+
+# Upload the NuGet package
+$NuPkgPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient.Edge.$ReleaseVersionNumber.nupkg"
+& nuget push $NuPkgPath
+if (-not $?)
+{
+	throw "The NuGet process returned an error code."
+}
