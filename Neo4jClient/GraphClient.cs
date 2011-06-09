@@ -43,7 +43,7 @@ namespace Neo4jClient
             RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
         }
 
-        public NodeReference Create<TNode>(TNode node, params OutgoingRelationship<TNode>[] outgoingRelationships) where TNode : class
+        public NodeReference Create<TNode>(TNode node, params IRelationship<TNode>[] relationships) where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
@@ -51,7 +51,7 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            if (outgoingRelationships.Any())
+            if (relationships.Any())
                 throw new NotImplementedException("Relationships aren't implemented yet.");
 
             var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
@@ -90,6 +90,27 @@ namespace Neo4jClient
                     response.StatusDescription));
 
             return response.Data.Data;
+        }
+
+        public RelationshipReference CreateRelationship<TRelationshipType>(NodeReference sourceNode, NodeReference targetNode) where TRelationshipType : IRelationshipType, new()
+        {
+            return CreateRelationshipInternal(sourceNode, targetNode, new TRelationshipType(), null);
+        }
+
+        public RelationshipReference CreateRelationship<TRelationshipType, TData>(NodeReference sourceNode, NodeReference targetNode, TData data) where TRelationshipType : IRelationshipType<TData>, new()
+        {
+            return CreateRelationshipInternal(sourceNode, targetNode, new TRelationshipType(), data);
+        }
+
+        RelationshipReference CreateRelationshipInternal(NodeReference sourceNode, NodeReference targetNode, IRelationshipType relationshipType, object data)
+        {
+            if (sourceNode == null) throw new ArgumentNullException("sourceNode");
+            if (targetNode == null) throw new ArgumentNullException("targetNode");
+
+            if (RootEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            throw new NotImplementedException();
         }
 
         static string GetLastPathSegment(string uri)

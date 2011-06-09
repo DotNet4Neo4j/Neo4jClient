@@ -58,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
+    <Compile Include="RelationshipReferenceTests.cs" />
     <Compile Include="GraphClientTests\ConnectTests.cs" />
     <Compile Include="GraphClientTests\CreateNodeTests.cs" />
     <Compile Include="GraphClientTests\GetNodeTests.cs" />
