@@ -8,46 +8,43 @@ namespace Neo4jClient.Test
     {
         void Foo()
         {
-            IGraphClient client = new GraphClient(new Uri(""));
+            IGraphClient graph = new GraphClient(new Uri(""));
 
-            var readify = client.Create(
-                new Organisation {Name = "Readify"});
-            
-            // Can create a node from a POCO
-            var erik = client.Create(
-                new User { FirstName = "Erik", LastName = "Natoli", DateOfBirth = new DateTime(1988, 1, 1) });
+            // Based on http://wiki.neo4j.org/content/Image:Warehouse.png
+
+            // Can create nodes from POCOs
+            var frameStore = graph.Create(
+                new StorageLocation {Name = "Frame Store"});
+            var mainStore = graph.Create(
+                new StorageLocation { Name = "Main Store" });
 
             // Can create a node with outgoing relationships
-            var sofia = client.Create(
-                new User { FirstName = "Sofia", LastName = "Brighton", DateOfBirth = new DateTime(1969, 6, 25) },
-                new HasMet(erik, new HasMet.Payload {DateMet = DateTime.UtcNow}),
-                new BelongsTo(readify));
+            var frame = graph.Create(
+                new Part { Name = "Frame" },
+                new StoredIn(frameStore));
 
-            // Can create a node with incoming relationships
-            client.Create(
-                new SecurityGroup {Name = "Administrators"},
-                new BelongsTo(erik));
+            // Can create multiple outgoing relationships and relationships with payloads
+            graph.Create(
+                new Product { Name = "Trike", Weight = 2 },
+                new StoredIn(mainStore),
+                new Requires(frame, new Requires.Payload { Count = 1 }));
 
-            // Can create a node with incoming and outgoing relationships
-            client.Create(
-                new SecurityGroup { Name = "Power Users" },
-                new BelongsTo(erik),
-                new BelongsTo(readify));
+            // Can create relationships in both directions
+            graph.Create(
+                new Part { Name = "Frame" },
+                new StoredIn(frameStore),
+                new Requires(frame, new Requires.Payload{ Count = 2 })
+                    { Direction = RelationshipDirection.Incoming });
 
-            // Can create outgoing relationships
-            client.CreateRelationships(
-                erik,
-                new BelongsTo(readify));
+            var wheel = graph.Create(
+                 new Part { Name = "Wheel" },
+                 new Requires(frame, new Requires.Payload { Count = 2 })
+                    { Direction = RelationshipDirection.Incoming });
 
-            // Can create incoming relationships
-            client.CreateRelationships(
-                readify,
-                new BelongsTo(sofia));
-
-            // Can create self-referencing relationships
-            client.CreateRelationships(
-                readify,
-                new BelongsTo(readify));
+            // Can create implicit incoming relationships
+            graph.Create(
+                new StorageLocation { Name = "Wheel Store" },
+                new StoredIn(wheel));
         }
     }
 }

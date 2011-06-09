@@ -58,10 +58,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Domain\SecurityGroup.cs" />
-    <Compile Include="Relationships\HasMet.cs" />
-    <Compile Include="Relationships\BelongsTo.cs" />
-    <Compile Include="Domain\Organisation.cs" />
+    <Compile Include="Domain\Product.cs" />
+    <Compile Include="Relationships\Requires.cs" />
+    <Compile Include="Relationships\StoredIn.cs" />
+    <Compile Include="Domain\StorageLocation.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="RelationshipReferenceTests.cs" />
     <Compile Include="GraphClientTests\ConnectTests.cs" />

@@ -26,6 +26,8 @@ namespace Neo4jClient
                     targetNode.GetType().FullName),
                     "targetNode");
             }
+
+            Direction = RelationshipDirection.Automatic;
         }
 
         public abstract string RelationshipTypeKey { get; }
@@ -34,5 +36,7 @@ namespace Neo4jClient
         {
             get { return data; }
         }
+
+        public RelationshipDirection Direction { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient.Test.Domain
 {
-    public class SecurityGroup
+    public class StorageLocation
     {
         public string Name { get; set; }
     }
