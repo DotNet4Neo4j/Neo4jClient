@@ -45,6 +45,12 @@ namespace Neo4jClient.Test
             graph.Create(
                 new StorageLocation { Name = "Wheel Store" },
                 new StoredIn(wheel));
+
+            // Can create relationships against the root node
+            graph.Create(
+                new StorageLocation {Name = "Auxillary Store"},
+                new StoredIn(wheel),
+                new OwnedBy(NodeReference.RootNode));
         }
     }
 }

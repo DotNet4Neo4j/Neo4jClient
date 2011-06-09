@@ -2,7 +2,7 @@
 {
     public class NodeReference
     {
-        public static readonly NodeReference RootNode = new NodeReference(0);
+        public static readonly RootNode RootNode = new RootNode();
 
         readonly int id;
 
