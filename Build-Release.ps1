@@ -44,7 +44,7 @@ if (-not $?)
 }
 
 # Build the NuGet package
-$NuSpecPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient\Neo4jClient.nuspec"
+$NuSpecPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient\Neo4jClient.Edge.nuspec"
 & nuget pack $NuSpecPath -OutputDirectory $SolutionRoot -Version $ReleaseVersionNumber
 if (-not $?)
 {

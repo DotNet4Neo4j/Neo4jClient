@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Neo4jClient</id>
+    <id>Neo4jClient.Edge</id>
     <version>0.0.0.0</version>
     <authors>Tatham Oddie</authors>
     <owners>Tatham Oddie</owners>
     <licenseUrl>https://bitbucket.org/tatham/neo4jclient</licenseUrl>
     <projectUrl>https://bitbucket.org/tatham/neo4jclient</projectUrl>
-    <description>Neo4jClient is a .NET client for the Neo4j Rest Server. Neo4j is an open sourced java based transactional graph database that stores data structured in graphs rather than in tables.</description>
+    <description>This edge release is just whatever comes straight off our CI server. Neo4jClient is a .NET client for the Neo4j Rest Server. Neo4j is an open sourced java based transactional graph database that stores data structured in graphs rather than in tables.</description>
     <tags>Neo4j REST</tags>
     <dependencies>
       <dependency id="RestSharp" />
