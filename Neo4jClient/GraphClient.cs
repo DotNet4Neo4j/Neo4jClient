@@ -48,6 +48,9 @@ namespace Neo4jClient
             if (node == null)
                 throw new ArgumentNullException("node");
 
+            if (ApiEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
             if (outgoingRelationships.Any())
                 throw new NotImplementedException("Relationships aren't implemented yet.");
 

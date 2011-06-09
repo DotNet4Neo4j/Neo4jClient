@@ -18,6 +18,14 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void ShouldThrowInvalidOperationExceptionIfNotConnected()
+        {
+            var client = new GraphClient(new Uri("http://foo"));
+            client.Create(new object());
+        }
+
+        [Test]
         public void ShouldReturnIdOfCreatedNode()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
