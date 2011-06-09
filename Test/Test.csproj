@@ -58,6 +58,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\SecurityGroup.cs" />
+    <Compile Include="Relationships\HasMet.cs" />
+    <Compile Include="Relationships\BelongsTo.cs" />
+    <Compile Include="Domain\Organisation.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="RelationshipReferenceTests.cs" />
     <Compile Include="GraphClientTests\ConnectTests.cs" />
@@ -66,6 +70,7 @@
     <Compile Include="GraphClientTests\MockHttpFactory.cs" />
     <Compile Include="NodeReferenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Domain\User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

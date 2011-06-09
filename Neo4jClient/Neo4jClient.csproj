@@ -46,8 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IAllowsSourceNode.cs" />
-    <Compile Include="IAllowsTargetNode.cs" />
+    <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
+    <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
+    <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />
     <Compile Include="ITypedNodeReference.cs" />
     <Compile Include="NodeReference`TNode.cs" />
     <Compile Include="Relationship`TData.cs" />

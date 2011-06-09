@@ -10,76 +10,44 @@ namespace Neo4jClient.Test
         {
             IGraphClient client = new GraphClient(new Uri(""));
 
-            var barnardos = client.Create(
-                new Agency {Name = "Barnardos"});
+            var readify = client.Create(
+                new Organisation {Name = "Readify"});
             
-            var bob = client.Create(
-                new User {Name = "Bob"});
+            // Can create a node from a POCO
+            var erik = client.Create(
+                new User { FirstName = "Erik", LastName = "Natoli", DateOfBirth = new DateTime(1988, 1, 1) });
 
+            // Can create a node with outgoing relationships
+            var sofia = client.Create(
+                new User { FirstName = "Sofia", LastName = "Brighton", DateOfBirth = new DateTime(1969, 6, 25) },
+                new HasMet(erik, new HasMet.Payload {DateMet = DateTime.UtcNow}),
+                new BelongsTo(readify));
+
+            // Can create a node with incoming relationships
             client.Create(
-                new User {Name = "John"},
-                new HasMet(bob, new HasMet.Payload {DateMet = DateTime.UtcNow}),
-                new BelongsTo(barnardos));
+                new SecurityGroup {Name = "Administrators"},
+                new BelongsTo(erik));
 
-            client.CreateOutgoingRelationships(
-                bob,
-                new BelongsTo(barnardos));
+            // Can create a node with incoming and outgoing relationships
+            client.Create(
+                new SecurityGroup { Name = "Power Users" },
+                new BelongsTo(erik),
+                new BelongsTo(readify));
 
-            client.CreateOutgoingRelationships(
-                barnardos,
-                new BelongsTo(barnardos));
-        }
-    }
+            // Can create outgoing relationships
+            client.CreateRelationships(
+                erik,
+                new BelongsTo(readify));
 
-    namespace Domain
-    {
-        public class User
-        {
-            public string Name { get; set; }
-        }
+            // Can create incoming relationships
+            client.CreateRelationships(
+                readify,
+                new BelongsTo(sofia));
 
-        public class Agency
-        {
-            public string Name { get; set; }
-        }
-    }
-
-    namespace Relationships
-    {
-        public class HasMet :
-            Relationship<HasMet.Payload>,
-            IAllowsSourceNode<User>,
-            IAllowsTargetNode<User>
-        {
-            public HasMet(NodeReference<User> otherUser, Payload data)
-                : base(otherUser, data)
-            {}
-
-            public class Payload
-            {
-                public DateTime DateMet { get; set; }
-            }
-
-            public override string RelationshipTypeKey
-            {
-                get { return "HAS_MET"; }
-            }
-        }
-
-        public class BelongsTo :
-            Relationship,
-            IAllowsSourceNode<User>,
-            IAllowsSourceNode<Agency>,
-            IAllowsTargetNode<Agency>
-        {
-            public BelongsTo(NodeReference<Agency> agency)
-                : base(agency)
-            { }
-
-            public override string RelationshipTypeKey
-            {
-                get { return "BELONGS_TO"; }
-            }
+            // Can create self-referencing relationships
+            client.CreateRelationships(
+                readify,
+                new BelongsTo(readify));
         }
     }
 }

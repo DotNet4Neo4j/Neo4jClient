@@ -43,7 +43,7 @@ namespace Neo4jClient
             RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
         }
 
-        public NodeReference<TNode> Create<TNode>(TNode node, params IAllowsSourceNode<TNode>[] outgoingRelationships) where TNode : class
+        public NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] outgoingRelationships) where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
@@ -98,7 +98,7 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public RelationshipReference CreateOutgoingRelationships<TSourceNode>(NodeReference<TSourceNode> node, params IAllowsSourceNode<TSourceNode>[] outgoingRelationship) where TSourceNode : class
+        public RelationshipReference CreateRelationships<TSourceNode>(NodeReference<TSourceNode> node, params IRelationshipAllowingParticipantNode<TSourceNode>[] outgoingRelationship) where TSourceNode : class
         {
             throw new NotImplementedException();
         }
