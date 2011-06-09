@@ -33,7 +33,7 @@ namespace Neo4jClient.Test
             graph.Create(
                 new Part { Name = "Frame" },
                 new StoredIn(frameStore),
-                new Requires(frame, new Requires.Payload{ Count = 2 })
+                new Requires(frame, new Requires.Payload { Count = 2 })
                     { Direction = RelationshipDirection.Incoming });
 
             var wheel = graph.Create(
