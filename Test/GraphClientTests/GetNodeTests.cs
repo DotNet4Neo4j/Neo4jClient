@@ -73,6 +73,44 @@ namespace Neo4jClient.Test.GraphClientTests
             Assert.AreEqual("baz", node.Baz);
         }
 
+        [Test]
+        public void ShouldReturnNullWhenNodeDoesntExist()
+        {
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = @"{
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions'' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                },
+                {
+                    new RestRequest { Resource = "/node/456", Method = Method.GET },
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.NotFound,
+                        StatusDescription = "Node not found"
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+            var node = graphClient.Get<TestNode>(456);
+
+            Assert.IsNull(node);
+        }
+
         public class TestNode
         {
             public string Foo { get; set; }

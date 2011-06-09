@@ -80,6 +80,15 @@ namespace Neo4jClient
             var request = new RestRequest(nodeResouce, Method.GET);
             var response = client.Execute<NodePacket<TNode>>(request);
 
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return default(TNode);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
             return response.Data.Data;
         }
 
