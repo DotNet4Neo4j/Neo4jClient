@@ -5,7 +5,7 @@
     <version>1.0.0.0</version>
     <authors>Tatham Oddie</authors>
     <owners>Tatham Oddie</owners>
-    <projectUrl>https://bitbucket.org/tatham/neo4jclient</projectUrl>
+    <licenseUrl>https://bitbucket.org/tatham/neo4jclient</licenseUrl>
     <projectUrl>https://bitbucket.org/tatham/neo4jclient</projectUrl>
     <description>Neo4jClient is a .NET client for the Neo4j Rest Server. Neo4j is an open sourced java based transactional graph database that stores data structured in graphs rather than in tables.</description>
     <tags>Neo4j REST</tags>
