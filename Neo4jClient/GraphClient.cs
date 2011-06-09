@@ -95,7 +95,7 @@ namespace Neo4jClient
 
         public TNode Get<TNode>(NodeReference<TNode> reference)
         {
-            throw new NotImplementedException();
+            return Get<TNode>((NodeReference) reference);
         }
 
         public RelationshipReference CreateOutgoingRelationships<TSourceNode>(NodeReference<TSourceNode> node, params IAllowsSourceNode<TSourceNode>[] outgoingRelationship) where TSourceNode : class
