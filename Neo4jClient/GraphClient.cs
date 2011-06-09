@@ -71,6 +71,18 @@ namespace Neo4jClient
             return new NodeReference(nodeId);
         }
 
+        public TNode Get<TNode>(NodeReference reference)
+        {
+            if (ApiEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            var nodeResouce = ApiEndpoints.Node + "/" + reference.Id;
+            var request = new RestRequest(nodeResouce, Method.GET);
+            var response = client.Execute<NodePacket<TNode>>(request);
+
+            return response.Data.Data;
+        }
+
         static string GetLastPathSegment(string uri)
         {
             var path = new Uri(uri).AbsolutePath;

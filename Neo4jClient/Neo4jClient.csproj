@@ -49,6 +49,7 @@
     <Compile Include="ApiEndpoints.cs" />
     <Compile Include="GraphClient.cs" />
     <Compile Include="IGraphClient.cs" />
+    <Compile Include="NodePacket.cs" />
     <Compile Include="NodeReference.cs" />
     <Compile Include="OutgoingRelationship.cs" />
     <Compile Include="ParameterExtensions.cs" />
