@@ -14,7 +14,7 @@ namespace Neo4jClient.Test
 
             // Can create nodes from POCOs
             var frameStore = graph.Create(
-                new StorageLocation {Name = "Frame Store"});
+                new StorageLocation { Name = "Frame Store" });
             var mainStore = graph.Create(
                 new StorageLocation { Name = "Main Store" });
 
