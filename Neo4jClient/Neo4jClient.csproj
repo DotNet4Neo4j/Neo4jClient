@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiRootEndpoints.cs" />
+    <Compile Include="RootEndpoints.cs" />
     <Compile Include="GraphClient.cs" />
     <Compile Include="IGraphClient.cs" />
     <Compile Include="NodePacket.cs" />

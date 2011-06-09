@@ -56,11 +56,11 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
 
-            Assert.AreEqual("/node", graphClient.ApiRootEndpoints.Node);
-            Assert.AreEqual("/index/node", graphClient.ApiRootEndpoints.NodeIndex);
-            Assert.AreEqual("/index/relationship", graphClient.ApiRootEndpoints.RelationshipIndex);
-            Assert.AreEqual("/node/0", graphClient.ApiRootEndpoints.ReferenceNode);
-            Assert.AreEqual("/ext", graphClient.ApiRootEndpoints.ExtensionsInfo);
+            Assert.AreEqual("/node", graphClient.RootEndpoints.Node);
+            Assert.AreEqual("/index/node", graphClient.RootEndpoints.NodeIndex);
+            Assert.AreEqual("/index/relationship", graphClient.RootEndpoints.RelationshipIndex);
+            Assert.AreEqual("/node/0", graphClient.RootEndpoints.ReferenceNode);
+            Assert.AreEqual("/ext", graphClient.RootEndpoints.ExtensionsInfo);
         }
     }
 }
