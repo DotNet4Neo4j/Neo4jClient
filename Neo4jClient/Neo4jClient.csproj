@@ -46,12 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IRelationship.cs" />
-    <Compile Include="RelationshipDirection.cs" />
-    <Compile Include="Relationship`TNode`TRelationshipData.cs" />
-    <Compile Include="Relationship`TNode.cs" />
-    <Compile Include="IRelationshipType.cs" />
-    <Compile Include="IRelationshipType`TData.cs" />
+    <Compile Include="IAllowsSourceNode.cs" />
+    <Compile Include="IAllowsTargetNode.cs" />
+    <Compile Include="ITypedNodeReference.cs" />
+    <Compile Include="NodeReference`TNode.cs" />
+    <Compile Include="Relationship`TData.cs" />
+    <Compile Include="Relationship.cs" />
     <Compile Include="RelationshipReference.cs" />
     <Compile Include="RootEndpoints.cs" />
     <Compile Include="GraphClient.cs" />

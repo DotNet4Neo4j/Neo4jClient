@@ -43,13 +43,16 @@ namespace Neo4jClient
             RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
         }
 
-        public NodeReference Create<TNode>(TNode node, params IRelationship<TNode>[] relationships) where TNode : class
+        public NodeReference<TNode> Create<TNode>(TNode node, params IAllowsSourceNode<TNode>[] outgoingRelationships) where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
 
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            if (outgoingRelationships.Any())
+                throw new NotImplementedException("Relationships aren't implemented yet.");
 
             var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
             request.AddBody(node);
@@ -64,26 +67,7 @@ namespace Neo4jClient
 
             var nodeLocation = response.Headers.GetParameter("Location");
             var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
-            var nodeReference = new NodeReference(nodeId);
-
-            foreach (var relationship in relationships)
-            {
-                NodeReference sourceNode, targetNode;
-                switch (relationship.Direction)
-                {
-                    case RelationshipDirection.Outbound:
-                        sourceNode = nodeReference;
-                        targetNode = relationship.OtherNode;
-                        break;
-                    case RelationshipDirection.Inbound:
-                        sourceNode = relationship.OtherNode;
-                        targetNode = nodeReference;
-                        break;
-                    default:
-                        throw new NotSupportedException(string.Format("Unsupported relationship direction: {0}", relationship.Direction));
-                }
-                CreateRelationshipInternal(sourceNode, targetNode, relationship.Type, relationship.Data);
-            }
+            var nodeReference = new NodeReference<TNode>(nodeId);
 
             return nodeReference;
         }
@@ -109,24 +93,13 @@ namespace Neo4jClient
             return response.Data.Data;
         }
 
-        public RelationshipReference CreateRelationship<TRelationshipType>(NodeReference sourceNode, NodeReference targetNode) where TRelationshipType : IRelationshipType, new()
+        public TNode Get<TNode>(NodeReference<TNode> reference)
         {
-            return CreateRelationshipInternal(sourceNode, targetNode, new TRelationshipType(), null);
+            throw new NotImplementedException();
         }
 
-        public RelationshipReference CreateRelationship<TRelationshipType, TData>(NodeReference sourceNode, NodeReference targetNode, TData data) where TRelationshipType : IRelationshipType<TData>, new()
+        public RelationshipReference CreateOutgoingRelationships<TSourceNode>(NodeReference<TSourceNode> node, params IAllowsSourceNode<TSourceNode>[] outgoingRelationship) where TSourceNode : class
         {
-            return CreateRelationshipInternal(sourceNode, targetNode, new TRelationshipType(), data);
-        }
-
-        RelationshipReference CreateRelationshipInternal(NodeReference sourceNode, NodeReference targetNode, IRelationshipType relationshipType, object data)
-        {
-            if (sourceNode == null) throw new ArgumentNullException("sourceNode");
-            if (targetNode == null) throw new ArgumentNullException("targetNode");
-
-            if (RootEndpoints == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
-
             throw new NotImplementedException();
         }
 

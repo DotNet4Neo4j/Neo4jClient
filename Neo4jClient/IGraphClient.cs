@@ -3,9 +3,9 @@
     public interface IGraphClient
     {
         void Connect();
-        NodeReference Create<TNode>(TNode node, params IRelationship<TNode>[] outgoingRelationships) where TNode : class;
+        NodeReference<TNode> Create<TNode>(TNode node, params IAllowsSourceNode<TNode>[] outgoingRelationships) where TNode : class;
         TNode Get<TNode>(NodeReference reference);
-        RelationshipReference CreateRelationship<TRelationship>(NodeReference sourceNode, NodeReference targetNode) where TRelationship : IRelationshipType, new();
-        RelationshipReference CreateRelationship<TRelationship, TData>(NodeReference sourceNode, NodeReference targetNode, TData data) where TRelationship : IRelationshipType<TData>, new();
+        TNode Get<TNode>(NodeReference<TNode> reference);
+        RelationshipReference CreateOutgoingRelationships<TSourceNode>(NodeReference<TSourceNode> node, params IAllowsSourceNode<TSourceNode>[] outgoingRelationship) where TSourceNode : class;
     }
 }
