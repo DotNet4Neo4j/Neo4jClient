@@ -48,6 +48,9 @@ namespace Neo4jClient
             if (node == null)
                 throw new ArgumentNullException("node");
 
+            if (outgoingRelationships.Any())
+                throw new NotImplementedException("Relationships aren't implemented yet.");
+
             var request = new RestRequest(ApiEndpoints.Node, Method.POST);
             request.AddBody(node);
 
