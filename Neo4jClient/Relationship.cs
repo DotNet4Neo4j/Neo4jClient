@@ -5,15 +5,18 @@ namespace Neo4jClient
     public abstract class Relationship
     {
         readonly object data;
+        readonly NodeReference otherNode;
 
         protected Relationship(NodeReference targetNode)
             : this(targetNode, null)
         {
         }
 
-        internal Relationship(NodeReference targetNode, object data)
+        protected internal Relationship(NodeReference targetNode, object data)
         {
             this.data = data;
+            otherNode = targetNode;
+
             if (targetNode == null)
                 throw new ArgumentNullException("targetNode");
 
@@ -28,6 +31,11 @@ namespace Neo4jClient
             }
 
             Direction = RelationshipDirection.Automatic;
+        }
+
+        public NodeReference OtherNode
+        {
+            get { return otherNode; }
         }
 
         public abstract string RelationshipTypeKey { get; }

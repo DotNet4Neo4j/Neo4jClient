@@ -51,9 +51,6 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            if (relationships.Any())
-                throw new NotImplementedException("Relationships aren't implemented yet.");
-
             var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
             request.AddBody(node);
 
@@ -69,7 +66,44 @@ namespace Neo4jClient
             var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
             var nodeReference = new NodeReference<TNode>(nodeId);
 
+            foreach (var relationship in relationships.Cast<Relationship>())
+            {
+                CreateRelationship(
+                    nodeReference,
+                    relationship.OtherNode,
+                    relationship.RelationshipTypeKey,
+                    relationship.Data);
+            }
+
             return nodeReference;
+        }
+
+        void CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey, object data)
+        {
+            var relationship = new RelationshipPacket
+            {
+                To = client.BaseUrl + ResolveEndpoint(targetNode),
+                Data = data,
+                Type = relationshipTypeKey
+            };
+
+            var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";
+            var request = new RestRequest(sourceNodeEndpoint, Method.POST) { RequestFormat = DataFormat.Json };
+            request.AddBody(relationship);
+
+            var response = client.Execute(request);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                throw new ApplicationException(string.Format(
+                    "One of the nodes referenced in the relationship could not be found. Referenced nodes were {0} and {1}.",
+                    sourceNode.Id,
+                    targetNode.Id));
+
+            if (response.StatusCode != HttpStatusCode.Created)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
         }
 
         public TNode Get<TNode>(NodeReference reference)
@@ -77,8 +111,8 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            var nodeResouce = RootEndpoints.Node + "/" + reference.Id;
-            var request = new RestRequest(nodeResouce, Method.GET);
+            var nodeEndpoint = ResolveEndpoint(reference);
+            var request = new RestRequest(nodeEndpoint, Method.GET);
             var response = client.Execute<NodePacket<TNode>>(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -96,6 +130,11 @@ namespace Neo4jClient
         public TNode Get<TNode>(NodeReference<TNode> reference)
         {
             return Get<TNode>((NodeReference) reference);
+        }
+
+        private string ResolveEndpoint(NodeReference node)
+        {
+            return RootEndpoints.Node + "/" + node.Id;
         }
 
         static string GetLastPathSegment(string uri)
