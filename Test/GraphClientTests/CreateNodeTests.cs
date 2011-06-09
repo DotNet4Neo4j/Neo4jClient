@@ -26,7 +26,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShouldReturnIdOfCreatedNode()
+        public void ShouldReturnReferenceToCreatedNode()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
