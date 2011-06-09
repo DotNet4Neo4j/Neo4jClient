@@ -43,7 +43,7 @@ namespace Neo4jClient
             RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
         }
 
-        public NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] outgoingRelationships) where TNode : class
+        public NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
@@ -51,7 +51,7 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            if (outgoingRelationships.Any())
+            if (relationships.Any())
                 throw new NotImplementedException("Relationships aren't implemented yet.");
 
             var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
