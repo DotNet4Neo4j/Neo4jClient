@@ -51,6 +51,7 @@
     <Compile Include="IGraphClient.cs" />
     <Compile Include="NodeReference.cs" />
     <Compile Include="OutgoingRelationship.cs" />
+    <Compile Include="ParameterExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

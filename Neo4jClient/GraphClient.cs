@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Net;
 using RestSharp;
 
@@ -34,6 +36,11 @@ namespace Neo4jClient
                     response.StatusDescription));
 
             ApiEndpoints = response.Data;
+            ApiEndpoints.Node = ApiEndpoints.Node.Substring(client.BaseUrl.Length);
+            ApiEndpoints.NodeIndex = ApiEndpoints.NodeIndex.Substring(client.BaseUrl.Length);
+            ApiEndpoints.RelationshipIndex = ApiEndpoints.RelationshipIndex.Substring(client.BaseUrl.Length);
+            ApiEndpoints.ReferenceNode = ApiEndpoints.ReferenceNode.Substring(client.BaseUrl.Length);
+            ApiEndpoints.ExtensionsInfo = ApiEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
         }
 
         public NodeReference Create<TNode>(TNode node, params OutgoingRelationship<TNode>[] outgoingRelationships) where TNode : class
@@ -41,7 +48,29 @@ namespace Neo4jClient
             if (node == null)
                 throw new ArgumentNullException("node");
 
-            throw new NotImplementedException();
+            var request = new RestRequest(ApiEndpoints.Node, Method.POST);
+            request.AddBody(node);
+
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.Created)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            var nodeLocation = response.Headers.GetParameter("Location");
+            var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
+
+            return new NodeReference(nodeId);
+        }
+
+        static string GetLastPathSegment(string uri)
+        {
+            var path = new Uri(uri).AbsolutePath;
+            return path
+                .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .LastOrDefault();
         }
     }
 }
