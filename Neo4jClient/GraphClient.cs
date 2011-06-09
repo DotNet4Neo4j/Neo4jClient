@@ -98,11 +98,6 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public RelationshipReference CreateRelationships<TSourceNode>(NodeReference<TSourceNode> node, params IRelationshipAllowingParticipantNode<TSourceNode>[] outgoingRelationship) where TSourceNode : class
-        {
-            throw new NotImplementedException();
-        }
-
         static string GetLastPathSegment(string uri)
         {
             var path = new Uri(uri).AbsolutePath;
