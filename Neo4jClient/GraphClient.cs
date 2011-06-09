@@ -9,7 +9,7 @@ namespace Neo4jClient
     public class GraphClient : IGraphClient
     {
         readonly RestClient client;
-        internal ApiEndpoints ApiEndpoints;
+        internal ApiRootEndpoints ApiRootEndpoints;
 
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
@@ -24,7 +24,7 @@ namespace Neo4jClient
         public void Connect()
         {
             var request = new RestRequest("", Method.GET);
-            var response = client.Execute<ApiEndpoints>(request);
+            var response = client.Execute<ApiRootEndpoints>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
                 throw new ApplicationException("Failed to connect to server.", response.ErrorException);
@@ -35,12 +35,12 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            ApiEndpoints = response.Data;
-            ApiEndpoints.Node = ApiEndpoints.Node.Substring(client.BaseUrl.Length);
-            ApiEndpoints.NodeIndex = ApiEndpoints.NodeIndex.Substring(client.BaseUrl.Length);
-            ApiEndpoints.RelationshipIndex = ApiEndpoints.RelationshipIndex.Substring(client.BaseUrl.Length);
-            ApiEndpoints.ReferenceNode = ApiEndpoints.ReferenceNode.Substring(client.BaseUrl.Length);
-            ApiEndpoints.ExtensionsInfo = ApiEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
+            ApiRootEndpoints = response.Data;
+            ApiRootEndpoints.Node = ApiRootEndpoints.Node.Substring(client.BaseUrl.Length);
+            ApiRootEndpoints.NodeIndex = ApiRootEndpoints.NodeIndex.Substring(client.BaseUrl.Length);
+            ApiRootEndpoints.RelationshipIndex = ApiRootEndpoints.RelationshipIndex.Substring(client.BaseUrl.Length);
+            ApiRootEndpoints.ReferenceNode = ApiRootEndpoints.ReferenceNode.Substring(client.BaseUrl.Length);
+            ApiRootEndpoints.ExtensionsInfo = ApiRootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
         }
 
         public NodeReference Create<TNode>(TNode node, params OutgoingRelationship<TNode>[] outgoingRelationships) where TNode : class
@@ -48,13 +48,13 @@ namespace Neo4jClient
             if (node == null)
                 throw new ArgumentNullException("node");
 
-            if (ApiEndpoints == null)
+            if (ApiRootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
             if (outgoingRelationships.Any())
                 throw new NotImplementedException("Relationships aren't implemented yet.");
 
-            var request = new RestRequest(ApiEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
+            var request = new RestRequest(ApiRootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
             request.AddBody(node);
 
             var response = client.Execute(request);
@@ -73,10 +73,10 @@ namespace Neo4jClient
 
         public TNode Get<TNode>(NodeReference reference)
         {
-            if (ApiEndpoints == null)
+            if (ApiRootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            var nodeResouce = ApiEndpoints.Node + "/" + reference.Id;
+            var nodeResouce = ApiRootEndpoints.Node + "/" + reference.Id;
             var request = new RestRequest(nodeResouce, Method.GET);
             var response = client.Execute<NodePacket<TNode>>(request);
 
