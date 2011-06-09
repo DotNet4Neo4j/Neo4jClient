@@ -24,9 +24,26 @@ namespace Neo4jClient.Test.GraphClientTests
 
         static HttpResponse HandleRequest(IHttp http, Method method, string baseUri, IEnumerable<KeyValuePair<RestRequest, HttpResponse>> cannedResponses)
         {
-            return cannedResponses
+            var matchingRequests = cannedResponses
                 .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource)
-                .Where(can => can.Key.Method == method)
+                .Where(can => can.Key.Method == method);
+
+            if (method == Method.POST)
+            {
+                matchingRequests = matchingRequests
+                    .Where(can =>
+                    {
+                        var request = can.Key;
+                        var requestBody = request
+                            .Parameters
+                            .Where(p => p.Type == ParameterType.RequestBody)
+                            .Select(p => p.Value as string)
+                            .SingleOrDefault();
+                        return requestBody == http.RequestBody;
+                    });
+            }
+
+            return matchingRequests
                 .Select(can =>
                 {
                     var response = can.Value;

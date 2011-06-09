@@ -20,6 +20,8 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnIdOfCreatedNode()
         {
+            var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
@@ -43,7 +45,8 @@ namespace Neo4jClient.Test.GraphClientTests
                     new RestRequest {
                         Resource = "/node",
                         Method = Method.POST,
-                    }.AddBody("{foo:\"foo\",bar:\"bar\",baz:\"baz\"}"),
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(testNode),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.Created,
                         Headers = {
@@ -56,7 +59,6 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
 
-            var testNode = new TestNode {Foo = "foo", Bar = "bar", Baz = "baz"};
             var node = graphClient.Create(testNode);
 
             Assert.AreEqual(456, node.Id);
