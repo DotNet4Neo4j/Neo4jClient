@@ -52,6 +52,15 @@ namespace Neo4jClient
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
 
+            var calculatedRelationships = relationships
+                .Cast<Relationship>()
+                .Select(r => new
+                {
+                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof(TNode), r),
+                    Relationship = r
+                })
+                .ToArray();
+
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
@@ -70,13 +79,30 @@ namespace Neo4jClient
             var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
             var nodeReference = new NodeReference<TNode>(nodeId);
 
-            foreach (var relationship in relationships.Cast<Relationship>())
+            foreach (var relationship in calculatedRelationships)
             {
+                var participants = new[] {nodeReference, relationship.Relationship.OtherNode};
+                NodeReference sourceNode, targetNode;
+                switch (relationship.CalculatedDirection)
+                {
+                    case RelationshipDirection.Outgoing:
+                        sourceNode = participants[0];
+                        targetNode = participants[1];
+                        break;
+                    case RelationshipDirection.Incoming:
+                        sourceNode = participants[1];
+                        targetNode = participants[0];
+                        break;
+                    default:
+                        throw new NotSupportedException(string.Format(
+                            "The specified relationship direction is not supported: {0}", relationship.CalculatedDirection));
+                }
+
                 CreateRelationship(
-                    nodeReference,
-                    relationship.OtherNode,
-                    relationship.RelationshipTypeKey,
-                    relationship.Data);
+                    sourceNode,
+                    targetNode,
+                    relationship.Relationship.RelationshipTypeKey,
+                    relationship.Relationship.Data);
             }
 
             return nodeReference;
