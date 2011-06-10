@@ -1,4 +1,6 @@
-﻿namespace Neo4jClient
+﻿using System;
+
+namespace Neo4jClient
 {
     public class NodeReference
     {
@@ -12,6 +14,15 @@
         }
 
         public int Id { get { return id; } }
+
+        public Type NodeType
+        {
+            get
+            {
+                var typedThis = this as ITypedNodeReference;
+                return typedThis == null ? null : typedThis.NodeType;
+            }
+        }
 
         public static implicit operator NodeReference(int nodeId)
         {

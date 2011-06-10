@@ -73,5 +73,19 @@ namespace Neo4jClient.Test
             var rhs = new NodeReference(4);
             Assert.IsFalse(lhs == rhs);
         }
+
+        [Test]
+        public void NodeTypeShouldReturnTypedNodeType()
+        {
+            var reference = (NodeReference)new NodeReference<Randomizer>(123);
+            Assert.AreEqual(typeof(Randomizer), reference.NodeType);
+        }
+
+        [Test]
+        public void NodeTypeShouldReturnNullWhenUntyped()
+        {
+            var reference = new NodeReference(123);
+            Assert.IsNull(reference.NodeType);
+        }
     }
 }
