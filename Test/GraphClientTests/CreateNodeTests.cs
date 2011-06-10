@@ -84,7 +84,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShouldCreateRelationship()
+        public void ShouldCreateOutgoingRelationship()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var testPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
