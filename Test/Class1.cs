@@ -31,7 +31,7 @@ namespace Neo4jClient.Test
 
             // Can create relationships in both directions
             graph.Create(
-                new Part { Name = "Frame" },
+                new Part { Name = "Pedal" },
                 new StoredIn(frameStore),
                 new Requires(frame, new Requires.Payload { Count = 2 })
                     { Direction = RelationshipDirection.Incoming });
