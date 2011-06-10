@@ -11,12 +11,6 @@ $PSScriptFilePath = (Get-Item $MyInvocation.MyCommand.Path).FullName
 
 $SolutionRoot = Split-Path -Path $PSScriptFilePath -Parent
 
-# Set the version number in AssemblyInfo.cs
-$AssemblyInfoPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient\Properties\AssemblyInfo.cs"
-(gc -Path $AssemblyInfoPath) `
-	-replace "(?<=Version\(`")[.\d]*(?=`"\))", $ReleaseVersionNumber |
-	sc -Path $AssemblyInfoPath -Encoding UTF8
-
 # Build the NuGet package
 $NuSpecPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient\Neo4jClient.Edge.nuspec"
 & nuget pack $NuSpecPath -OutputDirectory $SolutionRoot -Version $ReleaseVersionNumber
