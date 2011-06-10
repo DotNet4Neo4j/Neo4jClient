@@ -45,8 +45,33 @@ namespace Neo4jClient
                 return relationship.Direction;
 
             var otherNodeType = relationship.OtherNode.NodeType;
+
             var allowedSourceNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.SourceNode);
+            var isBaseNodeValidAsSourceNode = baseNodeType == null || allowedSourceNodeTypes.Contains(baseNodeType);
+            var isOtherNodeValidAsSourceNode = otherNodeType == null || allowedSourceNodeTypes.Contains(otherNodeType);
+
             var allowedTargetNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.TargetNode);
+            var isBaseNodeValidAsTargetNode = baseNodeType == null || allowedTargetNodeTypes.Contains(baseNodeType);
+            var isOtherNodeValidAsTargetNode = otherNodeType == null || allowedTargetNodeTypes.Contains(otherNodeType);
+
+            if (isBaseNodeValidAsSourceNode &&
+                otherNodeType == null)
+                return RelationshipDirection.Outgoing;
+
+            if (isBaseNodeValidAsSourceNode &&
+                !isBaseNodeValidAsTargetNode)
+                return RelationshipDirection.Outgoing;
+
+            if (!isBaseNodeValidAsSourceNode &&
+                isBaseNodeValidAsTargetNode &&
+                isOtherNodeValidAsSourceNode)
+                return RelationshipDirection.Incoming;
+
+            if (isBaseNodeValidAsSourceNode &&
+                isBaseNodeValidAsTargetNode &&
+                isOtherNodeValidAsSourceNode &&
+                isOtherNodeValidAsTargetNode)
+                throw new AmbiguousRelationshipDirectionException();
 
             return RelationshipDirection.Automatic;
         }
