@@ -33,6 +33,17 @@ namespace Neo4jClient.Test
             );
         }
 
+        [Test]
+        [TestCase(RelationshipDirection.Incoming)]
+        [TestCase(RelationshipDirection.Outgoing)]
+        public void DetermineRelationshipDirectionShouldReturnExplicitDirection(RelationshipDirection direction)
+        {
+            // Arrange
+            var relationship = new TestRelationship(NodeReference.RootNode) { Direction = direction };
+            var calculatedDirection = Relationship.DetermineRelationshipDirection(null, relationship);
+            Assert.AreEqual(direction, calculatedDirection);
+        }
+
         public class Foo { }
         public class Bar { }
         public class Baz { }
@@ -44,10 +55,6 @@ namespace Neo4jClient.Test
             IRelationshipAllowingTargetNode<Baz>
         {
             public TestRelationship(NodeReference targetNode) : base(targetNode)
-            {
-            }
-
-            public TestRelationship(NodeReference targetNode, object data) : base(targetNode, data)
             {
             }
 

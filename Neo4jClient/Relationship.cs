@@ -39,8 +39,12 @@ namespace Neo4jClient
 
         public RelationshipDirection Direction { get; set; }
 
-        internal static RelationshipDirection DetermineRelationshipDirection<TBaseNode>(Type baseNodeType, Relationship relationship)
+        internal static RelationshipDirection DetermineRelationshipDirection(Type baseNodeType, Relationship relationship)
         {
+            if (relationship.Direction != RelationshipDirection.Automatic)
+                return relationship.Direction;
+
+            var otherNodeType = relationship.OtherNode.NodeType;
             var allowedSourceNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.SourceNode);
             var allowedTargetNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.TargetNode);
 
