@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using NUnit.Framework;
 using RestSharp;
@@ -23,6 +24,16 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var client = new GraphClient(new Uri("http://foo"));
             client.Create(new object());
+        }
+
+        [Test]
+        [ExpectedException(typeof(ValidationException))]
+        public void ShouldThrowValidationExceptionForInvalidNodes()
+        {
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
+
+            var testNode = new TestNode {Foo = "text is too long", Bar = null, Baz = "123"};
+            graphClient.Create(testNode);
         }
 
         [Test]
@@ -143,8 +154,13 @@ namespace Neo4jClient.Test.GraphClientTests
 
         public class TestNode
         {
+            [StringLength(4)]
             public string Foo { get; set; }
+
+            [Required]
             public string Bar { get; set; }
+
+            [RegularExpression(@"\w*")]
             public string Baz { get; set; }
         }
 

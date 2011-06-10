@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -47,6 +48,9 @@ namespace Neo4jClient
         {
             if (node == null)
                 throw new ArgumentNullException("node");
+
+            var validationContext = new ValidationContext(node, null, null);
+            Validator.ValidateObject(node, validationContext);
 
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
