@@ -53,6 +53,7 @@
     <Compile Include="ITypedNodeReference.cs" />
     <Compile Include="NodeReference`TNode.cs" />
     <Compile Include="RelationshipDirection.cs" />
+    <Compile Include="RelationshipEnd.cs" />
     <Compile Include="RelationshipPacket.cs" />
     <Compile Include="Relationship`TData.cs" />
     <Compile Include="Relationship.cs" />
