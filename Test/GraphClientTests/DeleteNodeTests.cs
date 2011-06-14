@@ -14,11 +14,11 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.Delete(123);
+            client.Delete(123, DeleteMode.NodeOnly);
         }
 
         [Test]
-        public void ShouldDeleteNode()
+        public void ShouldDeleteNodeOnly()
         {
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -47,7 +47,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
-            graphClient.Delete(456);
+            graphClient.Delete(456, DeleteMode.NodeOnly);
 
             Assert.Inconclusive("Not actually asserting that the node was deleted");
         }
@@ -83,7 +83,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
-            graphClient.Delete(456);
+            graphClient.Delete(456, DeleteMode.NodeOnly);
         }
 
         public class TestNode

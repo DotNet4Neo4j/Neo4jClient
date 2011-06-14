@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmbiguousRelationshipDirectionException.cs" />
+    <Compile Include="DeleteMode.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />

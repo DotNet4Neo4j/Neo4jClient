@@ -162,10 +162,13 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public void Delete(NodeReference reference)
+        public void Delete(NodeReference reference, DeleteMode mode)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            if (mode != DeleteMode.NodeOnly)
+                throw new NotSupportedException();
 
             var nodeEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(nodeEndpoint, Method.DELETE);
