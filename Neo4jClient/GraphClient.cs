@@ -29,7 +29,10 @@ namespace Neo4jClient
             var response = client.Execute<RootEndpoints>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
-                throw new ApplicationException("Failed to connect to server.", response.ErrorException);
+                throw new ApplicationException(string.Format(
+                    "Failed to connect to server at {0}. Failure details are described in the inner exception.",
+                    client.BaseUrl),
+                    response.ErrorException);
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
