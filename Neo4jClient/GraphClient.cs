@@ -162,6 +162,28 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
+        public void Delete(NodeReference reference)
+        {
+            if (RootEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            var nodeEndpoint = ResolveEndpoint(reference);
+            var request = new RestRequest(nodeEndpoint, Method.DELETE);
+            var response = client.Execute(request);
+
+            if (response.StatusCode == HttpStatusCode.Conflict)
+                throw new ApplicationException(string.Format(
+                    "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            if (response.StatusCode != HttpStatusCode.NoContent)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+        }
+
         private string ResolveEndpoint(NodeReference node)
         {
             return RootEndpoints.Node + "/" + node.Id;
