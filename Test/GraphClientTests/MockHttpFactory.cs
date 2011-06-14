@@ -15,6 +15,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 .Returns(callInfo =>
                 {
                     var http = Substitute.For<IHttp>();
+                    http.Delete().Returns(ci => HandleRequest(http, Method.DELETE, baseUri, cannedResponses));
                     http.Get().Returns(ci => HandleRequest(http, Method.GET, baseUri, cannedResponses));
                     http.Post().Returns(ci => HandleRequest(http, Method.POST, baseUri, cannedResponses));
                     return http;
