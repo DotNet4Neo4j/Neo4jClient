@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -110,7 +111,7 @@ namespace Neo4jClient
 
         void CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey, object data)
         {
-            var relationship = new RelationshipPacket
+            var relationship = new RelationshipTemplate
             {
                 To = client.BaseUrl + ResolveEndpoint(targetNode),
                 Data = data,
@@ -167,8 +168,10 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            if (mode != DeleteMode.NodeOnly)
-                throw new NotSupportedException();
+            if (mode == DeleteMode.NodeAndRelationships)
+            {
+                DeleteAllRelationships(reference);
+            }
 
             var nodeEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(nodeEndpoint, Method.DELETE);
@@ -185,6 +188,24 @@ namespace Neo4jClient
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
                     (int)response.StatusCode,
                     response.StatusDescription));
+        }
+
+        void DeleteAllRelationships(NodeReference reference)
+        {
+            //TODO: Make this a dynamic endpoint resolution
+            var relationshipsEndpoint = ResolveEndpoint(reference) + "/relationships/all";
+            var request = new RestRequest(relationshipsEndpoint, Method.GET);
+            var response = client.Execute<List<RelationshipPacket>>(request);
+
+            var relationshipResources = response
+                .Data
+                .Select(r => r.Self.Substring(client.BaseUrl.Length));
+
+            foreach (var relationshipResource in relationshipResources)
+            {
+                request = new RestRequest(relationshipResource, Method.DELETE);
+                client.Execute(request);
+            }
         }
 
         private string ResolveEndpoint(NodeReference node)

@@ -127,7 +127,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }
-                    .AddBody(new RelationshipPacket
+                    .AddBody(new RelationshipTemplate
                     {
                         To = "http://foo/db/data/node/789",
                         Data = testPayload,
@@ -196,7 +196,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }
-                    .AddBody(new RelationshipPacket
+                    .AddBody(new RelationshipTemplate
                     {
                         To = "http://foo/db/data/node/456",
                         Data = testPayload,
