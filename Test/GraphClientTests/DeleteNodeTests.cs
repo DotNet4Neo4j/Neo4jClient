@@ -85,12 +85,5 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
             graphClient.Delete(456, DeleteMode.NodeOnly);
         }
-
-        public class TestNode
-        {
-            public string Foo { get; set; }
-            public string Bar { get; set; }
-            public string Baz { get; set; }
-        }
     }
 }
