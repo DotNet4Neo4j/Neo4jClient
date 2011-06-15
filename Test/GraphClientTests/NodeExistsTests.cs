@@ -22,7 +22,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldReturnACountOf1()
         {
             //Arrange
-            const string gremlinQueryExpected = @"g.V.outE[[label:'HOSTS']].inV[['Key':'foo']]";
+            const string gremlinQueryExpected = @"g.V.outE[[label:'HOSTS']].inV[['Key':'foo']].count()";
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -70,7 +70,7 @@ namespace Neo4jClient.Test.GraphClientTests
             };
 
             //Act
-            const string gremlinQuery = @"g.V.outE[[label:'<<RelationshipType>>']].inV[['Key':'<<AgencyKey>>']]";
+            const string gremlinQuery = @"g.V.outE[[label:'<<RelationshipType>>']].inV[['Key':'<<AgencyKey>>']].count()";
             var node = graphClient.ExecuteScalarGremlin(gremlinQuery, queryParamaters);
 
             //Assert
