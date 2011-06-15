@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -41,6 +42,9 @@ namespace Neo4jClient
             RootEndpoints.RelationshipIndex = RootEndpoints.RelationshipIndex.Substring(client.BaseUrl.Length);
             RootEndpoints.ReferenceNode = RootEndpoints.ReferenceNode.Substring(client.BaseUrl.Length);
             RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
+            if (RootEndpoints.Extensions != null && RootEndpoints.Extensions.GremlinPlugin != null)
+            RootEndpoints.Extensions.GremlinPlugin.ExecuteScript =
+                RootEndpoints.Extensions.GremlinPlugin.ExecuteScript.Substring(client.BaseUrl.Length);
         }
 
         public NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
@@ -104,6 +108,30 @@ namespace Neo4jClient
             return path
                 .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                 .LastOrDefault();
+        }
+
+        public string ExecuteScalarGremlin(string query, NameValueCollection queryParamters)
+        {
+            if (RootEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            foreach(string  key in queryParamters.Keys)
+            {
+               query = query.Replace(key, queryParamters[key]);
+            }
+
+            var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
+            var request = new RestRequest(nodeResource, Method.POST);
+            request.AddParameter("script", query, ParameterType.GetOrPost);
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            return response.Content;
         }
     }
 }

@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
+    <Compile Include="GremlinPlugin.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />
@@ -66,7 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Neo4jClient.Edge.nuspec" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
