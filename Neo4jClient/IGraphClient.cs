@@ -1,4 +1,6 @@
-﻿namespace Neo4jClient
+﻿using System.Collections.Specialized;
+
+namespace Neo4jClient
 {
     public interface IGraphClient
     {
@@ -7,5 +9,6 @@
         TNode Get<TNode>(NodeReference reference);
         TNode Get<TNode>(NodeReference<TNode> reference);
         void Delete(NodeReference reference, DeleteMode mode);
+        string ExecuteScalarGremlin(string query, NameValueCollection queryParamters);
     }
 }
