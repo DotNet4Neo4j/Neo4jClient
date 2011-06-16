@@ -24,7 +24,7 @@ namespace Neo4jClient
             client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
         }
 
-        public void Connect()
+        public virtual void Connect()
         {
             var request = new RestRequest("", Method.GET);
             var response = client.Execute<RootEndpoints>(request);
@@ -54,7 +54,7 @@ namespace Neo4jClient
             }
         }
 
-        public NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
+        public virtual NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
@@ -146,7 +146,7 @@ namespace Neo4jClient
                     response.StatusDescription));
         }
 
-        public TNode Get<TNode>(NodeReference reference)
+        public virtual TNode Get<TNode>(NodeReference reference)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
@@ -167,12 +167,12 @@ namespace Neo4jClient
             return response.Data.Data;
         }
 
-        public TNode Get<TNode>(NodeReference<TNode> reference)
+        public virtual TNode Get<TNode>(NodeReference<TNode> reference)
         {
             return Get<TNode>((NodeReference) reference);
         }
 
-        public void Delete(NodeReference reference, DeleteMode mode)
+        public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
@@ -230,7 +230,7 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public string ExecuteScalarGremlin(string query, NameValueCollection queryParamters)
+        public virtual string ExecuteScalarGremlin(string query, NameValueCollection queryParamters)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
