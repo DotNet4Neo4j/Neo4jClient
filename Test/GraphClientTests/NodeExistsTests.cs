@@ -22,7 +22,8 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldReturnACountOf1()
         {
             //Arrange
-            const string gremlinQueryExpected = @"g.V.outE[[label:'HOSTS']].inV[['Key':'foo']].count()";
+            const string relationshipType = "GENCIES_CATEGORY";
+            const string gremlinQueryExpected = @"g.V.outE[[label:'" + relationshipType + "']].inV[['Key':'foo']].count()";
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -65,7 +66,7 @@ namespace Neo4jClient.Test.GraphClientTests
             const string agencyKey = "foo";
             var queryParamaters =  new NameValueCollection
             {
-                {"<<RelationshipType>>", "HOSTS"},
+                {"<<RelationshipType>>", relationshipType},
                 {"<<AgencyKey>>", agencyKey}
             };
 
