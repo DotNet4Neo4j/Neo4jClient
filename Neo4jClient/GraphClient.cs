@@ -230,14 +230,14 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public virtual string ExecuteScalarGremlin(string query, NameValueCollection queryParamters)
+        public virtual string ExecuteScalarGremlin(string query, NameValueCollection queryParameters)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            foreach(string key in queryParamters.Keys)
+            foreach(string key in queryParameters.Keys)
             {
-               query = query.Replace(key, queryParamters[key]);
+               query = query.Replace(key, queryParameters[key]);
             }
 
             var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
