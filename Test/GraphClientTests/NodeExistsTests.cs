@@ -22,8 +22,15 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldReturnACountOf1()
         {
             //Arrange
-            const string relationshipType = "GENCIES_CATEGORY";
-            const string gremlinQueryExpected = @"g.V.outE[[label:'" + relationshipType + "']].inV[['Key':'foo']].count()";
+
+            const string relationshipTypeFirst = "AGENCIES_CATEGORY";
+            const string relationshipTypeSecond = "IS_AGENCY";
+            const string key = "foo";
+            const string rawCountQuery = "g.v(0).outE[[label:'{0}']].inV.outE[[label:'{1}']].inV[['Key':'{2}']].count()";
+            var gremlinQueryExpected = string.Format(rawCountQuery, relationshipTypeFirst, relationshipTypeSecond, key);
+
+
+//@"g.V.outE[[label:'" + relationshipType + "']].inV[['Key':'foo']].count()";
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -66,13 +73,14 @@ namespace Neo4jClient.Test.GraphClientTests
             const string agencyKey = "foo";
             var queryParamaters =  new NameValueCollection
             {
-                {"<<RelationshipType>>", relationshipType},
+                {"<<RelationshipType1>>", relationshipTypeFirst},
+                {"<<RelationshipType2>>", relationshipTypeSecond},
                 {"<<AgencyKey>>", agencyKey}
             };
 
             //Act
-            const string gremlinQuery = @"g.V.outE[[label:'<<RelationshipType>>']].inV[['Key':'<<AgencyKey>>']].count()";
-            var node = graphClient.ExecuteScalarGremlin(gremlinQuery, queryParamaters);
+            var gremlinQueryActual = string.Format(rawCountQuery, "<<RelationshipType1>>", "<<RelationshipType2>>", "<<AgencyKey>>");
+            var node = graphClient.ExecuteScalarGremlin(gremlinQueryActual, queryParamaters);
 
             //Assert
             Assert.AreEqual(1, int.Parse(node));
