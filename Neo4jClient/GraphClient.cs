@@ -235,7 +235,7 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            foreach(string  key in queryParamters.Keys)
+            foreach(string key in queryParamters.Keys)
             {
                query = query.Replace(key, queryParamters[key]);
             }
