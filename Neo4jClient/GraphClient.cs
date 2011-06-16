@@ -235,10 +235,7 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            foreach(string key in queryParameters.Keys)
-            {
-               query = query.Replace(key, queryParameters[key]);
-            }
+            query = ApplyQueryParameters(queryParameters, query);
 
             var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
@@ -253,5 +250,34 @@ namespace Neo4jClient
 
             return response.Content;
         }
+
+        public virtual IEnumerable<TNode> ExecuteGremlinGetAllNodes<TNode>(string query, NameValueCollection queryParameters)
+        {
+            if (RootEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            query = ApplyQueryParameters(queryParameters, query);
+            var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
+            var request = new RestRequest(nodeResource, Method.POST);
+            request.AddParameter("script", query, ParameterType.GetOrPost);
+            var response = client.Execute<List<TNode>>(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            return response.Data;
+        }
+
+        private string ApplyQueryParameters(NameValueCollection queryParameters, string query)
+        {
+            foreach (string key in queryParameters.Keys)
+            {
+                query = query.Replace(key, queryParameters[key]);
+            }
+            return query;
+        }
+
     }
 }

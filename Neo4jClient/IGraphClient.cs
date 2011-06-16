@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace Neo4jClient
 {
@@ -10,5 +11,6 @@ namespace Neo4jClient
         TNode Get<TNode>(NodeReference<TNode> reference);
         void Delete(NodeReference reference, DeleteMode mode);
         string ExecuteScalarGremlin(string query, NameValueCollection queryParameters);
+        IEnumerable<TNode> ExecuteGremlinGetAllNodes<TNode>(string query, NameValueCollection queryParameters);
     }
 }
