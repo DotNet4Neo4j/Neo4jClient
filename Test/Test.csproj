@@ -62,7 +62,7 @@
     <Compile Include="Domain\Product.cs" />
     <Compile Include="GraphClientTests\DeleteNodeTests.cs" />
     <Compile Include="RelationshipTests.cs" />
-    <Compile Include="GraphClientTests\NodeExistsTests.cs" />
+    <Compile Include="GraphClientTests\ExecuteScalarGremlinTests.cs" />
     <Compile Include="Relationships\OwnedBy.cs" />
     <Compile Include="Relationships\Requires.cs" />
     <Compile Include="Relationships\StoredIn.cs" />
