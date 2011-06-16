@@ -48,8 +48,10 @@ namespace Neo4jClient
             RootEndpoints.ReferenceNode = RootEndpoints.ReferenceNode.Substring(client.BaseUrl.Length);
             RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
             if (RootEndpoints.Extensions != null && RootEndpoints.Extensions.GremlinPlugin != null)
-            RootEndpoints.Extensions.GremlinPlugin.ExecuteScript =
-                RootEndpoints.Extensions.GremlinPlugin.ExecuteScript.Substring(client.BaseUrl.Length);
+            {
+                RootEndpoints.Extensions.GremlinPlugin.ExecuteScript =
+                    RootEndpoints.Extensions.GremlinPlugin.ExecuteScript.Substring(client.BaseUrl.Length);
+            }
         }
 
         public NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
