@@ -21,6 +21,13 @@ namespace Neo4jClient.Test
         }
 
         [Test]
+        public void ShouldAllowDirectCreationOfTypedReference()
+        {
+            var nodeReference = new NodeReference<object>(3);
+            Assert.AreEqual(3, nodeReference.Id);
+        }
+
+        [Test]
         [TestCase(1, 2, Result = false)]
         [TestCase(3, 3, Result = true)]
         public bool Equals(int lhs, int rhs)
