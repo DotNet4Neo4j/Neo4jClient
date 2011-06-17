@@ -251,7 +251,7 @@ namespace Neo4jClient
             return response.Content;
         }
 
-        public virtual IEnumerable<TNode> ExecuteGremlinGetAllNodes<TNode>(string query, NameValueCollection queryParameters)
+        public virtual IEnumerable<TNode> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
