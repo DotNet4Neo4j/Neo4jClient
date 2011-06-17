@@ -4,7 +4,7 @@ namespace Neo4jClient
 {
     public class NodeReference<TNode> : NodeReference, ITypedNodeReference
     {
-        internal NodeReference(int id)
+        public NodeReference(int id)
             : base(id)
         {
         }
