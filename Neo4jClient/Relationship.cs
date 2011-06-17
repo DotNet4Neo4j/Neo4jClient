@@ -46,11 +46,11 @@ namespace Neo4jClient
 
             var otherNodeType = relationship.OtherNode.NodeType;
 
-            var allowedSourceNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.SourceNode);
+            var allowedSourceNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.SourceNode).ToArray();
             var isBaseNodeValidAsSourceNode = baseNodeType == null || allowedSourceNodeTypes.Contains(baseNodeType);
             var isOtherNodeValidAsSourceNode = otherNodeType == null || allowedSourceNodeTypes.Contains(otherNodeType);
 
-            var allowedTargetNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.TargetNode);
+            var allowedTargetNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.TargetNode).ToArray();
             var isBaseNodeValidAsTargetNode = baseNodeType == null || allowedTargetNodeTypes.Contains(baseNodeType);
             var isOtherNodeValidAsTargetNode = otherNodeType == null || allowedTargetNodeTypes.Contains(otherNodeType);
 
