@@ -267,7 +267,7 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            return response.Data;
+            return response.Data ?? Enumerable.Empty<TNode>();
         }
 
         private string ApplyQueryParameters(NameValueCollection queryParameters, string query)
