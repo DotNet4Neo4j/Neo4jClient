@@ -111,7 +111,9 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            var nodes = graphClient.ExecuteGetAllNodesGremlin<NodePacket<string>>(gremlinQueryExpected, new NameValueCollection());
+            var nodes = graphClient
+                .ExecuteGetAllNodesGremlin<NodePacket<string>>(gremlinQueryExpected, new NameValueCollection())
+                .ToList();
 
             //Assert
             Assert.IsNotEmpty(nodes.Where(x => x.Data == expectedNode1.Data && x.Self == expectedNode1.Self).ToList());
