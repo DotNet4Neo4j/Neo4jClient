@@ -259,7 +259,7 @@ namespace Neo4jClient
             var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
             request.AddParameter("script", query, ParameterType.GetOrPost);
-            var response = client.Execute<List<TNode>>(request);
+            var response = client.Execute<List<NodePacket<TNode>>>(request);
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
@@ -267,7 +267,9 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            return response.Data ?? Enumerable.Empty<TNode>();
+            return response.Data == null
+                ? Enumerable.Empty<TNode>()
+                : response.Data.Select(r => r.Data);
         }
 
         private string ApplyQueryParameters(NameValueCollection queryParameters, string query)

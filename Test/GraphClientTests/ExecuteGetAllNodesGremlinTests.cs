@@ -19,22 +19,17 @@ namespace Neo4jClient.Test.GraphClientTests
             client.ExecuteGetAllNodesGremlin<object>("", null);
         }
 
+        public class Foo
+        {
+            public string Bar { get; set; }
+            public string Baz { get; set; }
+        }
+
         [Test]
         public void ShouldReturnIEnumerableOfObjects()
         {
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
-            var expectedNode1 = new NodePacket<String>
-                                   {
-                                       Data = "{\r\n  \"Name\": \"My Agency 1\",\r\n  \"Key\": \"MyAgency1\"\r\n}",
-                                       Self = "http://foo/db/data/node/5" 
-                                   };
-
-            var expectedNode2 = new NodePacket<String>
-            {
-                Data = "{\r\n  \"Name\": \"My Agency 2\",\r\n  \"Key\": \"MyAgency2\"\r\n}",
-                Self = "http://foo/db/data/node/6"
-            };
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -70,8 +65,8 @@ namespace Neo4jClient.Test.GraphClientTests
                         Content =@"[ {
                             'outgoing_relationships' : 'http://foo/db/data/node/5/relationships/out',
                             'data' : {
-                            'Name' : 'My Agency 1',
-                            'Key' : 'MyAgency1'
+                                'Bar' : 'bar',
+                                'Baz' : 'baz'
                             },
                             'traverse' : 'http://foo/db/data/node/5/traverse/{returnType}',
                             'all_typed_relationships' : 'http://foo/db/data/node/5/relationships/all/{-list|&|types}',
@@ -88,8 +83,8 @@ namespace Neo4jClient.Test.GraphClientTests
                         }, {
                             'outgoing_relationships' : 'http://foo/db/data/node/6/relationships/out',
                             'data' : {
-                            'Name' : 'My Agency 2',
-                            'Key' : 'MyAgency2'
+                                'Bar' : '123',
+                                'Baz' : '456'
                             },
                             'traverse' : 'http://foo/db/data/node/6/traverse/{returnType}',
                             'all_typed_relationships' : 'http://foo/db/data/node/6/relationships/all/{-list|&|types}',
@@ -112,12 +107,15 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<NodePacket<string>>(gremlinQueryExpected, new NameValueCollection())
+                .ExecuteGetAllNodesGremlin<Foo>(gremlinQueryExpected, new NameValueCollection())
                 .ToList();
 
             //Assert
-            Assert.IsNotEmpty(nodes.Where(x => x.Data == expectedNode1.Data && x.Self == expectedNode1.Self).ToList());
-            Assert.IsNotEmpty(nodes.Where(x => x.Data == expectedNode2.Data && x.Self == expectedNode2.Self).ToList());
+            Assert.AreEqual(2, nodes.Count());
+            Assert.AreEqual("bar", nodes.ElementAt(0).Bar);
+            Assert.AreEqual("baz", nodes.ElementAt(0).Baz);
+            Assert.AreEqual("123", nodes.ElementAt(1).Bar);
+            Assert.AreEqual("456", nodes.ElementAt(1).Baz);
         }
 
         [Test]
