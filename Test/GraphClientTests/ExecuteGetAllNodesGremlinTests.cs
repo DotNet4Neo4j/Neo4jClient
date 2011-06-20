@@ -16,7 +16,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteScalarGremlin("", null);
+            client.ExecuteGetAllNodesGremlin<object>("", null);
         }
 
         [Test]
