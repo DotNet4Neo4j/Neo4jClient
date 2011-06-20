@@ -125,17 +125,6 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
-            var expectedNode1 = new NodePacket<String>
-            {
-                Data = "{\r\n  \"Name\": \"My Agency 1\",\r\n  \"Key\": \"MyAgency1\"\r\n}",
-                Self = "http://foo/db/data/node/5"
-            };
-
-            var expectedNode2 = new NodePacket<String>
-            {
-                Data = "{\r\n  \"Name\": \"My Agency 2\",\r\n  \"Key\": \"MyAgency2\"\r\n}",
-                Self = "http://foo/db/data/node/6"
-            };
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
