@@ -25,7 +25,7 @@ namespace Neo4jClient
 
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
         {
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            NullValueHandling = NullValueHandling.Ignore;
             client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
         }
 
