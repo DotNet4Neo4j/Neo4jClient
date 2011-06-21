@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
 using Neo4jClient.Serializer;
-using Neo4jClient.Test.GraphClientTests;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using RestSharp;
-using RestSharp.Serializers;
 
 namespace Neo4jClient.Test.RestSharpTests
 {
