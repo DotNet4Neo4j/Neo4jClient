@@ -16,7 +16,7 @@ namespace Neo4jClient
         readonly RestClient client;
         internal RootEndpoints RootEndpoints;
 
-        public NullValueHandling NullValueHandling { get; set; }
+        public NullValueHandling JsonSerializerNullValueHandling { get; set; }
 
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
@@ -25,7 +25,7 @@ namespace Neo4jClient
 
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
         {
-            NullValueHandling = NullValueHandling.Ignore;
+            JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
         }
 
@@ -82,7 +82,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootEndpoints.Node, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling }
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(node);
             var response = client.Execute(request);
@@ -139,7 +139,7 @@ namespace Neo4jClient
             var request = new RestRequest(sourceNodeEndpoint, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling }
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(relationship);
             var response = client.Execute(request);
