@@ -84,9 +84,7 @@ namespace Neo4jClient
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling }
             };
-
             request.AddBody(node);
-            
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.Created)
@@ -137,13 +135,12 @@ namespace Neo4jClient
                 Type = relationshipTypeKey
             };
 
-            var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";            
+            var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";
             var request = new RestRequest(sourceNodeEndpoint, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling }
             };
-
             request.AddBody(relationship);
             var response = client.Execute(request);
 
@@ -253,6 +250,7 @@ namespace Neo4jClient
 
             var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
+
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute(request);
 
