@@ -76,7 +76,7 @@ namespace Neo4jClient
 
             var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
             request.AddBody(node);
-
+            
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.Created)
