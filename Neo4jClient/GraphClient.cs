@@ -5,6 +5,8 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient
@@ -74,7 +76,12 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
+            var request = new RestRequest(RootEndpoints.Node, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+            };
+
             request.AddBody(node);
             
             var response = client.Execute(request);
@@ -127,10 +134,14 @@ namespace Neo4jClient
                 Type = relationshipTypeKey
             };
 
-            var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";
-            var request = new RestRequest(sourceNodeEndpoint, Method.POST) { RequestFormat = DataFormat.Json };
-            request.AddBody(relationship);
+            var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";            
+            var request = new RestRequest(sourceNodeEndpoint, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+            };
 
+            request.AddBody(relationship);
             var response = client.Execute(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)

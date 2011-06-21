@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using Neo4jClient.Serializer;
 using Neo4jClient.Test.GraphClientTests;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using RestSharp;
 using RestSharp.Serializers;
@@ -34,7 +36,7 @@ namespace Neo4jClient.Test.RestSharpTests
             var request = new RestRequest(uri, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new JsonSerializerIgnoreNulls()
+                JsonSerializer = new CustomJsonSerializer {NullHandling =  NullValueHandling.Ignore}
             };
             request.AddBody(testNode);
 

@@ -3,18 +3,20 @@ using Newtonsoft.Json;
 using RestSharp.Serializers;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
-namespace Neo4jClient
+namespace Neo4jClient.Serializer
 {
-    public class JsonSerializerIgnoreNulls : ISerializer
+    public class CustomJsonSerializer : ISerializer
     {
         public string ContentType { get; set; }
         public string DateFormat { get; set; }
         public string Namespace { get; set; }
         public string RootElement { get; set; }
+        public NullValueHandling NullHandling {get; set;}
 
-        public JsonSerializerIgnoreNulls()
+        public CustomJsonSerializer()
         {
             ContentType = "application/json";
+            NullHandling = NullValueHandling.Ignore;
         }
 
         public string Serialize(object obj)
@@ -23,7 +25,7 @@ namespace Neo4jClient
             var serializer2 = new JsonSerializer
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore,
+                NullValueHandling = NullHandling,
                 DefaultValueHandling = DefaultValueHandling.Include
             };
             var serializer = serializer2;
