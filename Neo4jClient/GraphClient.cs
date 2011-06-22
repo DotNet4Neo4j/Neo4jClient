@@ -157,7 +157,7 @@ namespace Neo4jClient
                     response.StatusDescription));
         }
 
-        public virtual TNode Get<TNode>(NodeReference reference)
+        public virtual Node<TNode> Get<TNode>(NodeReference reference)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
@@ -167,7 +167,7 @@ namespace Neo4jClient
             var response = client.Execute<NodePacket<TNode>>(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
-                return default(TNode);
+                return null;
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
@@ -175,10 +175,10 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            return response.Data.Data;
+            return response.Data.ToNode();
         }
 
-        public virtual TNode Get<TNode>(NodeReference<TNode> reference)
+        public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
         {
             return Get<TNode>((NodeReference) reference);
         }
@@ -189,7 +189,7 @@ namespace Neo4jClient
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
             var node = Get(nodeReference);
-            updateCallback(node);
+            updateCallback(node.Data);
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
@@ -289,7 +289,7 @@ namespace Neo4jClient
             return response.Content;
         }
 
-        public virtual IEnumerable<TNode> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
         {
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
@@ -306,8 +306,8 @@ namespace Neo4jClient
                     response.StatusDescription));
 
             return response.Data == null
-                ? Enumerable.Empty<TNode>()
-                : response.Data.Select(r => r.Data);
+                ? Enumerable.Empty<Node<TNode>>()
+                : response.Data.Select(r => r.ToNode());
         }
 
         private string ApplyQueryParameters(NameValueCollection queryParameters, string query)

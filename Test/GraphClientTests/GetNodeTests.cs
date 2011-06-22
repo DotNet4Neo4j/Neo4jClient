@@ -68,9 +68,10 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
             var node = graphClient.Get<TestNode>(456);
 
-            Assert.AreEqual("foo", node.Foo);
-            Assert.AreEqual("bar", node.Bar);
-            Assert.AreEqual("baz", node.Baz);
+            Assert.AreEqual(456, node.Reference.Id);
+            Assert.AreEqual("foo", node.Data.Foo);
+            Assert.AreEqual("bar", node.Data.Bar);
+            Assert.AreEqual("baz", node.Data.Baz);
         }
 
         [Test]

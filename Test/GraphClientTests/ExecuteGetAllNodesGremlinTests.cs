@@ -112,10 +112,12 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Assert
             Assert.AreEqual(2, nodes.Count());
-            Assert.AreEqual("bar", nodes.ElementAt(0).Bar);
-            Assert.AreEqual("baz", nodes.ElementAt(0).Baz);
-            Assert.AreEqual("123", nodes.ElementAt(1).Bar);
-            Assert.AreEqual("456", nodes.ElementAt(1).Baz);
+            Assert.AreEqual(5, nodes.ElementAt(0).Reference.Id);
+            Assert.AreEqual("bar", nodes.ElementAt(0).Data.Bar);
+            Assert.AreEqual("baz", nodes.ElementAt(0).Data.Baz);
+            Assert.AreEqual(6, nodes.ElementAt(1).Reference.Id);
+            Assert.AreEqual("123", nodes.ElementAt(1).Data.Bar);
+            Assert.AreEqual("456", nodes.ElementAt(1).Data.Baz);
         }
 
         [Test]
