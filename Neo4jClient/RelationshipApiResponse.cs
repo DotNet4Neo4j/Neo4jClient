@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient
 {
-    internal class RelationshipPacket
+    internal class RelationshipApiResponse
     {
         public string Self { get; set; }
     }

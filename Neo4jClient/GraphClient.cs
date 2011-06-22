@@ -241,7 +241,7 @@ namespace Neo4jClient
             //TODO: Make this a dynamic endpoint resolution
             var relationshipsEndpoint = ResolveEndpoint(reference) + "/relationships/all";
             var request = new RestRequest(relationshipsEndpoint, Method.GET);
-            var response = client.Execute<List<RelationshipPacket>>(request);
+            var response = client.Execute<List<RelationshipApiResponse>>(request);
 
             var relationshipResources = response
                 .Data
