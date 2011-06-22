@@ -192,7 +192,6 @@ namespace Neo4jClient
             updateCallback(node);
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
-
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
             {
                 RequestFormat = DataFormat.Json,

@@ -3,10 +3,6 @@
     <ExternalPath IsNull="False">
     </ExternalPath>
     <Sharing>SOLUTION</Sharing>
-    <CSS>
-      <FormatSettings />
-      <Naming2 />
-    </CSS>
     <CSharp>
       <FormatSettings>
         <ALIGN_LINQ_QUERY>False</ALIGN_LINQ_QUERY>
@@ -37,21 +33,6 @@
         <EventHandlerPatternShort>$event$Handler</EventHandlerPatternShort>
       </Naming2>
     </CSharp>
-    <HTML>
-      <FormatSettings />
-    </HTML>
-    <JavaScript>
-      <FormatSettings />
-      <Naming2>
-        <UserRule Name="JS_LOCAL_VARIABLE" Inspect="True" Prefix="" Suffix="" Style="aaBb" />
-        <UserRule Name="JS_FUNCTION" Inspect="True" Prefix="" Suffix="" Style="aaBb" />
-        <UserRule Name="JS_PARAMETER" Inspect="True" Prefix="" Suffix="" Style="aaBb" />
-        <UserRule Name="JS_LABEL" Inspect="True" Prefix="" Suffix="" Style="aaBb" />
-        <UserRule Name="JS_GLOBAL_VARIABLE" Inspect="True" Prefix="" Suffix="" Style="AaBb" />
-        <UserRule Name="JS_OBJECT_PROPERTY_OF_FUNCTION" Inspect="True" Prefix="" Suffix="" Style="aaBb" />
-        <UserRule Name="JS_CONSTRUCTOR" Inspect="True" Prefix="" Suffix="" Style="AaBb" />
-      </Naming2>
-    </JavaScript>
     <VB>
       <FormatSettings />
       <ImportsSettings />
@@ -63,12 +44,12 @@
     <Web>
       <Naming2 />
     </Web>
-    <XML>
-      <FormatSettings />
-    </XML>
     <Xaml>
       <Naming2 />
     </Xaml>
+    <XML>
+      <FormatSettings />
+    </XML>
     <GenerateMemberBody />
     <Naming2>
       <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
