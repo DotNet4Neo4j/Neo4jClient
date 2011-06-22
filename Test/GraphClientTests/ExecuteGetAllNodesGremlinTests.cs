@@ -166,7 +166,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<NodePacket<string>>(gremlinQueryExpected, new NameValueCollection())
+                .ExecuteGetAllNodesGremlin<NodeApiResponse<string>>(gremlinQueryExpected, new NameValueCollection())
                 .ToList();
 
             //Assert

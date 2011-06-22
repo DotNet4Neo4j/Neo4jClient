@@ -164,7 +164,7 @@ namespace Neo4jClient
 
             var nodeEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(nodeEndpoint, Method.GET);
-            var response = client.Execute<NodePacket<TNode>>(request);
+            var response = client.Execute<NodeApiResponse<TNode>>(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return null;
@@ -297,7 +297,7 @@ namespace Neo4jClient
             var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
             request.AddParameter("script", query, ParameterType.GetOrPost);
-            var response = client.Execute<List<NodePacket<TNode>>>(request);
+            var response = client.Execute<List<NodeApiResponse<TNode>>>(request);
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(

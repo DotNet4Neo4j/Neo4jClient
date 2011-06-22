@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Neo4jClient
 {
-    internal class NodePacket<TNode>
+    internal class NodeApiResponse<TNode>
     {
         public string Self { get; set; }
         public TNode Data { get; set; }
