@@ -14,7 +14,7 @@ namespace Neo4jClient
     public class GraphClient : IGraphClient
     {
         readonly RestClient client;
-        internal RootEndpoints RootEndpoints;
+        internal RootApiResponse RootApiResponse;
 
         public NullValueHandling JsonSerializerNullValueHandling { get; set; }
 
@@ -32,7 +32,7 @@ namespace Neo4jClient
         public virtual void Connect()
         {
             var request = new RestRequest("", Method.GET);
-            var response = client.Execute<RootEndpoints>(request);
+            var response = client.Execute<RootApiResponse>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
                 throw new ApplicationException(string.Format(
@@ -46,16 +46,16 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            RootEndpoints = response.Data;
-            RootEndpoints.Node = RootEndpoints.Node.Substring(client.BaseUrl.Length);
-            RootEndpoints.NodeIndex = RootEndpoints.NodeIndex.Substring(client.BaseUrl.Length);
-            RootEndpoints.RelationshipIndex = RootEndpoints.RelationshipIndex.Substring(client.BaseUrl.Length);
-            RootEndpoints.ReferenceNode = RootEndpoints.ReferenceNode.Substring(client.BaseUrl.Length);
-            RootEndpoints.ExtensionsInfo = RootEndpoints.ExtensionsInfo.Substring(client.BaseUrl.Length);
-            if (RootEndpoints.Extensions != null && RootEndpoints.Extensions.GremlinPlugin != null)
+            RootApiResponse = response.Data;
+            RootApiResponse.Node = RootApiResponse.Node.Substring(client.BaseUrl.Length);
+            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(client.BaseUrl.Length);
+            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(client.BaseUrl.Length);
+            RootApiResponse.ReferenceNode = RootApiResponse.ReferenceNode.Substring(client.BaseUrl.Length);
+            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(client.BaseUrl.Length);
+            if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
             {
-                RootEndpoints.Extensions.GremlinPlugin.ExecuteScript =
-                    RootEndpoints.Extensions.GremlinPlugin.ExecuteScript.Substring(client.BaseUrl.Length);
+                RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(client.BaseUrl.Length);
             }
         }
 
@@ -76,10 +76,10 @@ namespace Neo4jClient
                 })
                 .ToArray();
 
-            if (RootEndpoints == null)
+            if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            var request = new RestRequest(RootEndpoints.Node, Method.POST)
+            var request = new RestRequest(RootApiResponse.Node, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
@@ -159,7 +159,7 @@ namespace Neo4jClient
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
         {
-            if (RootEndpoints == null)
+            if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
             var nodeEndpoint = ResolveEndpoint(reference);
@@ -185,7 +185,7 @@ namespace Neo4jClient
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback)
         {
-            if (RootEndpoints == null)
+            if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
             var node = Get(nodeReference);
@@ -211,7 +211,7 @@ namespace Neo4jClient
 
         public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
-            if (RootEndpoints == null)
+            if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
             if (mode == DeleteMode.NodeAndRelationships)
@@ -256,7 +256,7 @@ namespace Neo4jClient
 
         private string ResolveEndpoint(NodeReference node)
         {
-            return RootEndpoints.Node + "/" + node.Id;
+            return RootApiResponse.Node + "/" + node.Id;
         }
 
         static string GetLastPathSegment(string uri)
@@ -269,12 +269,12 @@ namespace Neo4jClient
 
         public virtual string ExecuteScalarGremlin(string query, NameValueCollection queryParameters)
         {
-            if (RootEndpoints == null)
+            if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
             query = ApplyQueryParameters(queryParameters, query);
 
-            var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
+            var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
 
             request.AddParameter("script", query, ParameterType.GetOrPost);
@@ -291,10 +291,10 @@ namespace Neo4jClient
 
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
         {
-            if (RootEndpoints == null)
+            if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
             query = ApplyQueryParameters(queryParameters, query);
-            var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
+            var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute<List<NodeApiResponse<TNode>>>(request);

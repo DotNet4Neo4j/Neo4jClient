@@ -64,7 +64,7 @@
     <Compile Include="Relationship`TData.cs" />
     <Compile Include="Relationship.cs" />
     <Compile Include="RelationshipReference.cs" />
-    <Compile Include="RootEndpoints.cs" />
+    <Compile Include="RootApiResponse.cs" />
     <Compile Include="GraphClient.cs" />
     <Compile Include="IGraphClient.cs" />
     <Compile Include="NodeApiResponse.cs" />
