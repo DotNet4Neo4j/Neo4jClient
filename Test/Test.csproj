@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain\Product.cs" />
+    <Compile Include="GraphClientTests\UpdateNodeTests.cs" />
     <Compile Include="GraphClientTests\ExecuteGetAllNodesGremlinTests.cs" />
     <Compile Include="GraphClientTests\DeleteNodeTests.cs" />
     <Compile Include="RelationshipTests.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="NodeReferenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Domain\User.cs" />
+    <Compile Include="RestSharpTests\RestClientTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -87,6 +89,7 @@
       <Name>Neo4jClient</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

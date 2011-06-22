@@ -5,6 +5,8 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient
@@ -14,6 +16,8 @@ namespace Neo4jClient
         readonly RestClient client;
         internal RootEndpoints RootEndpoints;
 
+        public NullValueHandling JsonSerializerNullValueHandling { get; set; }
+
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
         {
@@ -21,6 +25,7 @@ namespace Neo4jClient
 
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
         {
+            JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
         }
 
@@ -74,9 +79,12 @@ namespace Neo4jClient
             if (RootEndpoints == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
 
-            var request = new RestRequest(RootEndpoints.Node, Method.POST) {RequestFormat = DataFormat.Json};
+            var request = new RestRequest(RootEndpoints.Node, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
             request.AddBody(node);
-
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.Created)
@@ -128,9 +136,12 @@ namespace Neo4jClient
             };
 
             var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";
-            var request = new RestRequest(sourceNodeEndpoint, Method.POST) { RequestFormat = DataFormat.Json };
+            var request = new RestRequest(sourceNodeEndpoint, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
             request.AddBody(relationship);
-
             var response = client.Execute(request);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -170,6 +181,32 @@ namespace Neo4jClient
         public virtual TNode Get<TNode>(NodeReference<TNode> reference)
         {
             return Get<TNode>((NodeReference) reference);
+        }
+
+        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback)
+        {
+            if (RootEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            var node = Get(nodeReference);
+            updateCallback(node);
+
+            var nodeEndpoint = ResolveEndpoint(nodeReference);
+            var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(node);
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                    throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+            }
         }
 
         public virtual void Delete(NodeReference reference, DeleteMode mode)
@@ -239,6 +276,7 @@ namespace Neo4jClient
 
             var nodeResource = RootEndpoints.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
+
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute(request);
 

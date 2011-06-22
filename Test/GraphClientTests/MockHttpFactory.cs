@@ -19,6 +19,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     http.Get().Returns(ci => HandleRequest(http, Method.GET, baseUri, cannedResponses));
                     http.Post().Returns(ci => HandleRequest(http, Method.POST, baseUri, cannedResponses));
                     http.Parameters.ReturnsForAnyArgs(ci => HandleParameters(http, Method.POST, baseUri, cannedResponses));
+                    http.Put().Returns(ci => HandleRequest(http, Method.PUT, baseUri, cannedResponses));
                     return http;
                 });
             return httpFactory;
