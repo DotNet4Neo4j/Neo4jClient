@@ -183,6 +183,33 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
+        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback)
+        {
+            if (RootEndpoints == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            var node = Get(nodeReference);
+            updateCallback(node);
+
+            var nodeEndpoint = ResolveEndpoint(nodeReference);
+
+            var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(node);
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                    throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+            }
+        }
+
         public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
             if (RootEndpoints == null)
