@@ -55,6 +55,7 @@
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />
     <Compile Include="ITypedNodeReference.cs" />
+    <Compile Include="Node`TNode.cs" />
     <Compile Include="NodeReference`TNode.cs" />
     <Compile Include="RelationshipDirection.cs" />
     <Compile Include="RelationshipEnd.cs" />
