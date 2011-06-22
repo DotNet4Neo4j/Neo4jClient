@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain\Product.cs" />
+    <Compile Include="GraphClientTests\UpdateNodeTests.cs" />
     <Compile Include="GraphClientTests\ExecuteGetAllNodesGremlinTests.cs" />
     <Compile Include="GraphClientTests\DeleteNodeTests.cs" />
     <Compile Include="RelationshipTests.cs" />
