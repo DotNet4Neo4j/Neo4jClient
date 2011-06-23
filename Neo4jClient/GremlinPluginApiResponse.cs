@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient
 {
-    class GremlinPlugin
+    class GremlinPluginApiResponse
     {
         public string ExecuteScript { get; set; }
     }

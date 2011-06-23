@@ -7,6 +7,6 @@
         public string RelationshipIndex { get; set; }
         public string ReferenceNode { get; set; }
         public string ExtensionsInfo { get; set; }
-        public Extensions Extensions { get; set; }
+        public ExtensionsApiResponse Extensions { get; set; }
     }
 }
