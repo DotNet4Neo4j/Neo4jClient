@@ -202,7 +202,7 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                    throw new ApplicationException(string.Format(
+                throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
                     (int)response.StatusCode,
                     response.StatusDescription));
