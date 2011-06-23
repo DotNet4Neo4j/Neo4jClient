@@ -31,6 +31,14 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void OutVShouldCombineWithInE()
+        {
+            var node = new NodeReference(123);
+            var queryText = node.InE().OutV<object>().QueryText;
+            Assert.AreEqual("g.v(123).inE.outV", queryText);
+        }
+
+        [Test]
         public void InVShouldAppendStepToGremlinQuery()
         {
             var node = new NodeReference(123);
@@ -44,6 +52,30 @@ namespace Neo4jClient.Test.Gremlin
             var node = new NodeReference(123);
             var query = node.InV<object>();
             Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
+        }
+
+        [Test]
+        public void InVShouldCombineWithOutE()
+        {
+            var node = new NodeReference(123);
+            var queryText = node.OutE().InV<object>().QueryText;
+            Assert.AreEqual("g.v(123).outE.inV", queryText);
+        }
+
+        [Test]
+        public void OutEShouldAppendStepToGremlinQuery()
+        {
+            var node = new NodeReference(123);
+            var queryText = node.OutE().QueryText;
+            Assert.AreEqual("g.v(123).outE", queryText);
+        }
+
+        [Test]
+        public void InEShouldAppendStepToGremlinQuery()
+        {
+            var node = new NodeReference(123);
+            var queryText = node.InE().QueryText;
+            Assert.AreEqual("g.v(123).inE", queryText);
         }
     }
 }
