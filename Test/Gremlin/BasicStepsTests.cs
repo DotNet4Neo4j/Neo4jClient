@@ -21,5 +21,13 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = node.OutV().OutV().QueryText;
             Assert.AreEqual("g.v(123).outV.outV", queryText);
         }
+
+        [Test]
+        public void OutEShouldAppendToGremlinQueryWithLabel()
+        {
+            var node = new NodeReference(123);
+            var queryText = node.OutE("FOO").QueryText;
+            Assert.AreEqual("g.v(123).outE[[label:'FOO']]", queryText);
+        }
     }
 }
