@@ -9,6 +9,11 @@ namespace Neo4jClient
         {
         }
 
+        internal NodeReference(int id, IGraphClient client)
+            : base(id, client)
+        {
+        }
+
         Type ITypedNodeReference.NodeType
         {
             get { return typeof (TNode); }

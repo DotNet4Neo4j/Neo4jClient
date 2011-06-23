@@ -51,6 +51,12 @@
     <Compile Include="DeleteMode.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="GremlinPlugin.cs" />
+    <Compile Include="Gremlin\GremlinReferenceEnumerable.cs" />
+    <Compile Include="Gremlin\IGremlinQuery.cs" />
+    <Compile Include="Gremlin\GremlinNodeEnumerable.cs" />
+    <Compile Include="Gremlin\BasicSteps.cs" />
+    <Compile Include="Gremlin\IGremlinNodeQuery.cs" />
+    <Compile Include="Gremlin\IGremlinReferenceQuery.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />

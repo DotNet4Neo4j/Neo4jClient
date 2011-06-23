@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Neo4jClient.Gremlin;
 
 namespace Neo4jClient.Test
 {
@@ -93,6 +94,14 @@ namespace Neo4jClient.Test
         {
             var reference = new NodeReference(123);
             Assert.IsNull(reference.NodeType);
+        }
+
+        [Test]
+        public void GremlinQueryTextShouldReturnSimpleVectorStep()
+        {
+            var reference = new NodeReference(123);
+            var queryText = ((IGremlinQuery) reference).QueryText;
+            Assert.AreEqual("g.v(123)", queryText);
         }
     }
 }
