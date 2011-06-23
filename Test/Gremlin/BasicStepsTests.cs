@@ -93,5 +93,21 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = node.InE("FOO").QueryText;
             Assert.AreEqual("g.v(123).inE[[label:'FOO']]", queryText);
         }
+
+        [Test]
+        public void ShouldCombineMultiStepQuery()
+        {
+            var queryText = NodeReference
+                .RootNode
+                .OutE("E_FOO")
+                .InV<Foo>()
+                .InE("E_BAR")
+                .InV<Bar>()
+                .QueryText;
+            Assert.AreEqual("g.v(0).outE[[label:'E_FOO']].inV.inE[[label:'E_BAR']].inV", queryText);
+        }
+
+        public class Foo { }
+        public class Bar { }
     }
 }
