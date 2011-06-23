@@ -214,14 +214,14 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void CountShouldExecuteScalar()
+        public void NodeCountShouldExecuteScalar()
         {
             var client = Substitute.For<IGraphClient>();
             client
                 .ExecuteScalarGremlin("g.v(123).count()", Arg.Any<NameValueCollection>())
                 .Returns("456");
             var node = new NodeReference(123, client);
-            var result = node.Count();
+            var result = node.NodeCount();
             Assert.AreEqual(456, result);
         }
 

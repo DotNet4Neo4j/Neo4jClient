@@ -124,7 +124,7 @@ namespace Neo4jClient.Gremlin
             return new GremlinReferenceEnumerable(query.Client, queryText);
         }
 
-        public static int Count(this IGremlinQuery query)
+        public static int NodeCount(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.count()", query.QueryText);
             var scalarResult = query.Client.ExecuteScalarGremlin(queryText, new NameValueCollection());
