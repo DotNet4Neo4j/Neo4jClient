@@ -310,7 +310,7 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToNode());
         }
 
-        private string ApplyQueryParameters(NameValueCollection queryParameters, string query)
+        string ApplyQueryParameters(NameValueCollection queryParameters, string query)
         {
             foreach (string key in queryParameters.Keys)
             {
@@ -318,6 +318,5 @@ namespace Neo4jClient
             }
             return query;
         }
-
     }
 }
