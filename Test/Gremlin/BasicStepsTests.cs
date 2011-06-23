@@ -52,6 +52,31 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void OutVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsConstantExpressionFilter()
+        {
+            var node = new NodeReference(123);
+            var queryText = node
+                .OutV<Foo>(f => f.Prop1 == "abc") // This must be a constant - do not refactor this line
+                .QueryText;
+            Assert.AreEqual("g.v(123).outV[['Prop1':'abc']]", queryText);
+        }
+
+        [Test]
+        public void OutVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsLocalExpressionFilter()
+        {
+            // ReSharper disable ConvertToConstant.Local
+
+            var node = new NodeReference(123);
+            var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
+            var queryText = node
+                .OutV<Foo>(f => f.Prop1 == prop1Value)
+                .QueryText;
+            Assert.AreEqual("g.v(123).outV[['Prop1':'abc']]", queryText);
+
+            // ReSharper restore ConvertToConstant.Local
+        }
+
+        [Test]
         public void OutVShouldReturnTypedGremlinEnumerable()
         {
             var node = new NodeReference(123);

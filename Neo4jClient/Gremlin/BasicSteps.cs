@@ -26,6 +26,13 @@ namespace Neo4jClient.Gremlin
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
+        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter)
+        {
+            var simpleFilters = new NameValueCollection();
+            TranslateFilter(filter, simpleFilters);
+            return query.OutV<TNode>(simpleFilters);
+        }
+
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.inV", query.QueryText);
