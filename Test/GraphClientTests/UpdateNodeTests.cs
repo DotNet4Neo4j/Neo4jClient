@@ -63,7 +63,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         RequestFormat = DataFormat.Json
                     }.AddBody(nodeToUpdate),
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.OK
+                        StatusCode = HttpStatusCode.NoContent
                     }
                 }
             });
