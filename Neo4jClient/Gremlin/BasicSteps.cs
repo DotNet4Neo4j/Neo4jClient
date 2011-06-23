@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient.Gremlin
 {
-    public static class GremlinQueryExtensions
+    public static class BasicSteps
     {
         public static IGremlinQuery OutV(this IGremlinQuery query)
         {
