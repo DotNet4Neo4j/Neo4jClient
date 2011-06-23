@@ -10,7 +10,7 @@ namespace Neo4jClient.Test.Gremlin
         public void OutVShouldAppendStepToNodeReference()
         {
             var node = new NodeReference(123);
-            var queryText = node.OutV().QueryText;
+            var queryText = node.OutV<object>().QueryText;
             Assert.AreEqual("g.v(123).outV", queryText);
         }
 
@@ -18,32 +18,32 @@ namespace Neo4jClient.Test.Gremlin
         public void OutVShouldAppendStepToGremlinQuery()
         {
             var node = new NodeReference(123);
-            var queryText = node.OutV().OutV().QueryText;
+            var queryText = node.OutV<object>().OutV<object>().QueryText;
             Assert.AreEqual("g.v(123).outV.outV", queryText);
+        }
+
+        [Test]
+        public void OutVShouldReturnTypedGremlinEnumerable()
+        {
+            var node = new NodeReference(123);
+            var query = node.OutV<object>();
+            Assert.IsInstanceOf<GremlinEnumerable<object>>(query);
         }
 
         [Test]
         public void InVShouldAppendStepToGremlinQuery()
         {
             var node = new NodeReference(123);
-            var queryText = node.InV().QueryText;
+            var queryText = node.InV<object>().QueryText;
             Assert.AreEqual("g.v(123).inV", queryText);
         }
 
         [Test]
-        public void OutEShouldAppendToGremlinQueryWithLabel()
+        public void InVShouldReturnTypedGremlinEnumerable()
         {
             var node = new NodeReference(123);
-            var queryText = node.OutE("FOO").QueryText;
-            Assert.AreEqual("g.v(123).outE[[label:'FOO']]", queryText);
-        }
-
-        [Test]
-        public void InEShouldAppendToGremlinQueryWithLabel()
-        {
-            var node = new NodeReference(123);
-            var queryText = node.InE("FOO").QueryText;
-            Assert.AreEqual("g.v(123).inE[[label:'FOO']]", queryText);
+            var query = node.InV<object>();
+            Assert.IsInstanceOf<GremlinEnumerable<object>>(query);
         }
     }
 }

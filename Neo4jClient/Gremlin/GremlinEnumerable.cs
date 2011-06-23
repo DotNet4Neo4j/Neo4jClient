@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Neo4jClient.Gremlin
 {
-    internal class GremlinEnumerable : IGremlinEnumerable
+    internal class GremlinEnumerable<TNode> : IGremlinEnumerable<TNode>
     {
         readonly string queryText;
 
@@ -12,7 +12,7 @@ namespace Neo4jClient.Gremlin
             this.queryText = queryText;
         }
 
-        IEnumerator<NodeReference> IEnumerable<NodeReference>.GetEnumerator()
+        IEnumerator<NodeReference<TNode>> IEnumerable<NodeReference<TNode>>.GetEnumerator()
         {
             throw new System.NotImplementedException(queryText);
         }
