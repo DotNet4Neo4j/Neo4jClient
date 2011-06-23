@@ -1,8 +1,9 @@
 ﻿using System;
+using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
-    public class NodeReference
+    public class NodeReference : IGremlinQuery
     {
         public static readonly RootNode RootNode = new RootNode();
 
@@ -50,6 +51,11 @@ namespace Neo4jClient
         public override int GetHashCode()
         {
             return id;
+        }
+
+        string IGremlinQuery.QueryText
+        {
+            get { return string.Format("g.v({0})", Id); }
         }
     }
 }
