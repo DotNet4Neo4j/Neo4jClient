@@ -103,6 +103,16 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsConstantExpressionFilter()
+        {
+            var node = new NodeReference(123);
+            var queryText = node
+                .InV<Foo>(f => f.Prop1 == "abc") // This must be a constant - do not refactor this line
+                .QueryText;
+            Assert.AreEqual("g.v(123).inV[['Prop1':'abc']]", queryText);
+        }
+
+        [Test]
         public void InVShouldReturnTypedGremlinEnumerable()
         {
             var node = new NodeReference(123);
@@ -175,7 +185,16 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual(456, result);
         }
 
-        public class Foo { }
-        public class Bar { }
+        public class Foo
+        {
+            public string Prop1 { get; set; }
+            public string Prop2 { get; set; }
+        }
+
+        public class Bar
+        {
+            public string Prop1 { get; set; }
+            public string Prop2 { get; set; }
+        }
     }
 }
