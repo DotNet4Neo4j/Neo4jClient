@@ -27,7 +27,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var query = node.OutV<object>();
-            Assert.IsInstanceOf<GremlinEnumerable<object>>(query);
+            Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var query = node.InV<object>();
-            Assert.IsInstanceOf<GremlinEnumerable<object>>(query);
+            Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
         }
     }
 }

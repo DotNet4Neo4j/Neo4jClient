@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.Gremlin
                 .Returns(expectedResults);
 
             // Act
-            var enumerable = new GremlinEnumerable<object>(client, "abc");
+            var enumerable = new GremlinNodeEnumerable<object>(client, "abc");
             var results = enumerable.ToArray();
 
             // Assert

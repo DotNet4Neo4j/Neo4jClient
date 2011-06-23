@@ -4,12 +4,12 @@ using System.Collections.Specialized;
 
 namespace Neo4jClient.Gremlin
 {
-    internal class GremlinEnumerable<TNode> : IGremlinEnumerable<TNode>
+    internal class GremlinNodeEnumerable<TNode> : IGremlinNodeQuery<TNode>
     {
         readonly IGraphClient client;
         readonly string queryText;
 
-        public GremlinEnumerable(IGraphClient client, string queryText)
+        public GremlinNodeEnumerable(IGraphClient client, string queryText)
         {
             this.client = client;
             this.queryText = queryText;

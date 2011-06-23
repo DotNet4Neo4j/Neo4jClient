@@ -52,9 +52,9 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="GremlinPlugin.cs" />
     <Compile Include="Gremlin\IGremlinQuery.cs" />
-    <Compile Include="Gremlin\GremlinEnumerable.cs" />
+    <Compile Include="Gremlin\GremlinNodeEnumerable.cs" />
     <Compile Include="Gremlin\BasicSteps.cs" />
-    <Compile Include="Gremlin\IGremlinEnumerable.cs" />
+    <Compile Include="Gremlin\IGremlinNodeQuery.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />
