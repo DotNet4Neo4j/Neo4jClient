@@ -202,7 +202,7 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.NoContent)
             {
-                    throw new ApplicationException(string.Format(
+                throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
                     (int)response.StatusCode,
                     response.StatusDescription));
@@ -310,7 +310,7 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToNode());
         }
 
-        private string ApplyQueryParameters(NameValueCollection queryParameters, string query)
+        string ApplyQueryParameters(NameValueCollection queryParameters, string query)
         {
             foreach (string key in queryParameters.Keys)
             {
@@ -318,6 +318,5 @@ namespace Neo4jClient
             }
             return query;
         }
-
     }
 }
