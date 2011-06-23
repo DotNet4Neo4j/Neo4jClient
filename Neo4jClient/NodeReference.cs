@@ -8,10 +8,14 @@ namespace Neo4jClient
         public static readonly RootNode RootNode = new RootNode();
 
         readonly int id;
+        readonly IGraphClient client;
 
-        public NodeReference(int id)
+        public NodeReference(int id) : this(id, null) {}
+
+        internal NodeReference(int id, IGraphClient client)
         {
             this.id = id;
+            this.client = client;
         }
 
         public int Id { get { return id; } }
@@ -51,6 +55,11 @@ namespace Neo4jClient
         public override int GetHashCode()
         {
             return id;
+        }
+
+        IGraphClient IGremlinQuery.Client
+        {
+            get { return client; }
         }
 
         string IGremlinQuery.QueryText

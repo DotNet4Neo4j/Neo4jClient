@@ -64,6 +64,9 @@
     <Compile Include="GraphClientTests\ExecuteGetAllNodesGremlinTests.cs" />
     <Compile Include="GraphClientTests\DeleteNodeTests.cs" />
     <Compile Include="Gremlin\BasicStepsTests.cs" />
+    <Compile Include="Gremlin\GremlinEnumerableTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="RelationshipTests.cs" />
     <Compile Include="GraphClientTests\ExecuteScalarGremlinTests.cs" />
     <Compile Include="Relationships\OwnedBy.cs" />

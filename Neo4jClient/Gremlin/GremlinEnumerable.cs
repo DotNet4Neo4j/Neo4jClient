@@ -1,25 +1,34 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace Neo4jClient.Gremlin
 {
     internal class GremlinEnumerable<TNode> : IGremlinEnumerable<TNode>
     {
+        readonly IGraphClient client;
         readonly string queryText;
 
-        public GremlinEnumerable(string queryText)
+        public GremlinEnumerable(IGraphClient client, string queryText)
         {
+            this.client = client;
             this.queryText = queryText;
         }
 
-        IEnumerator<NodeReference<TNode>> IEnumerable<NodeReference<TNode>>.GetEnumerator()
+        IEnumerator<Node<TNode>> IEnumerable<Node<TNode>>.GetEnumerator()
         {
-            throw new System.NotImplementedException(queryText);
+            var results = client.ExecuteGetAllNodesGremlin<TNode>(queryText, new NameValueCollection());
+            return results.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<NodeReference>)this).GetEnumerator();
+        }
+
+        IGraphClient IGremlinQuery.Client
+        {
+            get { return client; }
         }
 
         string IGremlinQuery.QueryText

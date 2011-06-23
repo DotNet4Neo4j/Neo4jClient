@@ -2,6 +2,7 @@
 {
     public interface IGremlinQuery
     {
+        IGraphClient Client { get; }
         string QueryText { get; }
     }
 }
