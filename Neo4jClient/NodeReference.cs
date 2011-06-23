@@ -12,7 +12,7 @@ namespace Neo4jClient
 
         public NodeReference(int id) : this(id, null) {}
 
-        internal NodeReference(int id, IGraphClient client)
+        public NodeReference(int id, IGraphClient client)
         {
             this.id = id;
             this.client = client;

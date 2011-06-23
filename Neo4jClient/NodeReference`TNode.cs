@@ -9,7 +9,7 @@ namespace Neo4jClient
         {
         }
 
-        internal NodeReference(int id, IGraphClient client)
+        public NodeReference(int id, IGraphClient client)
             : base(id, client)
         {
         }
