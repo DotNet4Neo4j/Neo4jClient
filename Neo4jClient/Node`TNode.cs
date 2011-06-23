@@ -13,6 +13,12 @@ namespace Neo4jClient
             this.reference = reference;
         }
 
+        public Node(TNode data, int id, IGraphClient client)
+        {
+            this.data = data;
+            reference = new NodeReference<TNode>(id, client);
+        }
+
         public NodeReference<TNode> Reference
         {
             get { return reference; }
