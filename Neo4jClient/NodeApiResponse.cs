@@ -9,10 +9,10 @@ namespace Neo4jClient
         public string Self { get; set; }
         public TNode Data { get; set; }
 
-        public Node<TNode> ToNode()
+        public Node<TNode> ToNode(IGraphClient client)
         {
             var nodeId = int.Parse(GetLastPathSegment(Self));
-            return new Node<TNode>(Data, new NodeReference<TNode>(nodeId));
+            return new Node<TNode>(Data, new NodeReference<TNode>(nodeId, client));
         }
 
         static string GetLastPathSegment(string uri)

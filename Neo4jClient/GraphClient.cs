@@ -180,7 +180,7 @@ namespace Neo4jClient
                     (int)response.StatusCode,
                     response.StatusDescription));
 
-            return response.Data.ToNode();
+            return response.Data.ToNode(this);
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
@@ -312,7 +312,7 @@ namespace Neo4jClient
 
             return response.Data == null
                 ? Enumerable.Empty<Node<TNode>>()
-                : response.Data.Select(r => r.ToNode());
+                : response.Data.Select(r => r.ToNode(this));
         }
 
         string ApplyQueryParameters(NameValueCollection queryParameters, string query)
