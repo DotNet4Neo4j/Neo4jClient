@@ -197,7 +197,7 @@ namespace Neo4jClient
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
-            request.AddBody(node);
+            request.AddBody(node.Data);
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.OK)
