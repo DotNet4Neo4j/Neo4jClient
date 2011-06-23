@@ -52,29 +52,45 @@ namespace Neo4jClient.Gremlin
 
         static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, NameValueCollection simpleFilters)
         {
-            const string plea = " If you'd like to use something more complex, feel free to contribute a patch to the project.";
-
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
-                throw new NotSupportedException("Only binary expressions are supported at this time." + plea);
+                throw new NotSupportedException("Only binary expressions are supported at this time.");
             if (binaryExpression.NodeType != ExpressionType.Equal)
-                throw new NotSupportedException("Only equality expressions are supported at this time." + plea);
+                throw new NotSupportedException("Only equality expressions are supported at this time.");
 
-            var memberExpression = binaryExpression.Left as MemberExpression;
-            if (memberExpression == null)
-                throw new NotSupportedException("Only member expressions are supported as the left-hand side of an expression at this time." + plea);
-            if (memberExpression.Member.MemberType != MemberTypes.Property)
-                throw new NotSupportedException("Only properties are supported as the left-hand side of an expression at this time." + plea);
+            var propertyName = ParseKeyFromExpression(binaryExpression.Left);
+            var constantValue = ParseValueFromExpression(binaryExpression.Right);
 
-            var propertyName = memberExpression.Member.Name;
+            simpleFilters.Add(propertyName, constantValue);
+        }
 
-            var constantExpression = binaryExpression.Right as ConstantExpression;
-            if (constantExpression == null)
-                throw new NotSupportedException("Only constant expressions are supported as the right-hand side of an expression at this time." + plea);
+        static string ParseKeyFromExpression(Expression expression)
+        {
+            var memberExpression = expression as MemberExpression;
+            if (memberExpression != null &&
+                memberExpression.Member.MemberType == MemberTypes.Property)
+                return memberExpression.Member.Name;
 
-            var constantValue = constantExpression.Value;
+            throw new NotSupportedException("The left-hand side of the expression contains nodes that aren't yet supported.");
+        }
 
-            simpleFilters.Add(propertyName, constantValue.ToString());
+        static string ParseValueFromExpression(Expression expression)
+        {
+            var constantExpression = expression as ConstantExpression;
+            if (constantExpression != null)
+                return constantExpression.Value.ToString();
+
+            var memberExpression = expression as MemberExpression;
+            if (memberExpression != null &&
+                memberExpression.Expression is ConstantExpression)
+            {
+                var fieldInfo = (FieldInfo) memberExpression.Member;
+                var memberConstantExpression = (ConstantExpression) memberExpression.Expression;
+                var value = fieldInfo.GetValue(memberConstantExpression.Value);
+                return value.ToString();
+            }
+
+            throw new NotSupportedException("The right-hand side of the expression contains nodes that aren't yet supported.");
         }
 
         public static IGremlinReferenceQuery OutE(this IGremlinQuery query)

@@ -113,6 +113,21 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsLocalExpressionFilter()
+        {
+            // ReSharper disable ConvertToConstant.Local
+
+            var node = new NodeReference(123);
+            var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
+            var queryText = node
+                .InV<Foo>(f => f.Prop1 == prop1Value)
+                .QueryText;
+            Assert.AreEqual("g.v(123).inV[['Prop1':'abc']]", queryText);
+
+            // ReSharper restore ConvertToConstant.Local
+        }
+
+        [Test]
         public void InVShouldReturnTypedGremlinEnumerable()
         {
             var node = new NodeReference(123);
