@@ -20,9 +20,21 @@
             return new GremlinReferenceEnumerable(query.Client, queryText);
         }
 
+        public static IGremlinReferenceQuery OutE(this IGremlinQuery query, string label)
+        {
+            var queryText = string.Format("{0}.outE[[label:'{1}']]", query.QueryText, label);
+            return new GremlinReferenceEnumerable(query.Client, queryText);
+        }
+
         public static IGremlinReferenceQuery InE(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.{1}", query.QueryText, "inE");
+            return new GremlinReferenceEnumerable(query.Client, queryText);
+        }
+
+        public static IGremlinReferenceQuery InE(this IGremlinQuery query, string label)
+        {
+            var queryText = string.Format("{0}.inE[[label:'{1}']]", query.QueryText, label);
             return new GremlinReferenceEnumerable(query.Client, queryText);
         }
     }
