@@ -59,6 +59,11 @@ namespace Neo4jClient
             }
         }
 
+        public RootNode RootNode
+        {
+            get { return new RootNode(this); }
+        }
+
         public virtual NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
         {
             if (node == null)
