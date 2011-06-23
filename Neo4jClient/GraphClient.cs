@@ -200,7 +200,7 @@ namespace Neo4jClient
             request.AddBody(node.Data);
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.NoContent)
             {
                     throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
