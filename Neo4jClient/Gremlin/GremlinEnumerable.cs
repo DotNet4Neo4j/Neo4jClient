@@ -3,13 +3,11 @@ using System.Collections.Generic;
 
 namespace Neo4jClient.Gremlin
 {
-    internal class GremlinQueryEnumerable :
-        IEnumerable<NodeReference>,
-        IGremlinQuery
+    internal class GremlinEnumerable : IGremlinEnumerable
     {
         readonly string queryText;
 
-        public GremlinQueryEnumerable(string queryText)
+        public GremlinEnumerable(string queryText)
         {
             this.queryText = queryText;
         }

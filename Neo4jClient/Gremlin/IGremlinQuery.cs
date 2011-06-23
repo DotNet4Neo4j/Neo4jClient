@@ -1,4 +1,4 @@
-namespace Neo4jClient.Gremlin
+﻿namespace Neo4jClient.Gremlin
 {
     public interface IGremlinQuery
     {
