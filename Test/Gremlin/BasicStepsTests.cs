@@ -218,7 +218,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var client = Substitute.For<IGraphClient>();
             client
-                .ExecuteScalarGremlin("g.v(123).count()", Arg.Any<NameValueCollection>())
+                .ExecuteScalarGremlin("g.v(123).count()")
                 .Returns("456");
             var node = new NodeReference(123, client);
             var result = node.NodeCount();

@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.Gremlin
             };
             var client = Substitute.For<IGraphClient>();
             client
-                .ExecuteGetAllNodesGremlin<object>("abc", Arg.Any<NameValueCollection>())
+                .ExecuteGetAllNodesGremlin<object>("abc")
                 .Returns(expectedResults);
 
             // Act
