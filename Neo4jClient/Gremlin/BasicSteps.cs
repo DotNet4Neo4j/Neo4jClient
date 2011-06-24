@@ -78,7 +78,7 @@ namespace Neo4jClient.Gremlin
                 memberExpression.Member.MemberType == MemberTypes.Property)
                 return memberExpression.Member.Name;
 
-            throw new NotSupportedException("The left-hand side of the expression contains nodes that aren't yet supported.");
+            throw new NotSupportedException("Only property accessors are supported for the left-hand side of the expression at this time.");
         }
 
         static object ParseValueFromExpression(Expression expression)
