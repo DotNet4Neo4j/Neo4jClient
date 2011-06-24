@@ -294,6 +294,16 @@ namespace Neo4jClient
             return response.Content;
         }
 
+        public string ExecuteScalarGremlin(string query)
+        {
+            return ExecuteScalarGremlin(query, new NameValueCollection());
+        }
+
+        public IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query)
+        {
+            return ExecuteGetAllNodesGremlin<TNode>(query, new NameValueCollection());
+        }
+
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
         {
             if (RootApiResponse == null)

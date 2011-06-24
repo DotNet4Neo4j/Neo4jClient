@@ -12,7 +12,9 @@ namespace Neo4jClient
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
         void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback);
         void Delete(NodeReference reference, DeleteMode mode);
+        string ExecuteScalarGremlin(string query);
         string ExecuteScalarGremlin(string query, NameValueCollection queryParameters);
+        IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query);
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters);
     }
 }
