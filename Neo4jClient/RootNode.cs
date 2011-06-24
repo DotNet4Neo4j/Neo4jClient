@@ -2,8 +2,8 @@
 {
     public class RootNode : NodeReference<RootNode>
     {
-        internal RootNode() : base(0) {}
+        public RootNode() : base(0) {}
 
-        internal RootNode(IGraphClient client) : base(0, client) {}
+        public RootNode(IGraphClient client) : base(0, client) {}
     }
 }
