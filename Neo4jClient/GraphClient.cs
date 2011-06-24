@@ -59,7 +59,7 @@ namespace Neo4jClient
             }
         }
 
-        public RootNode RootNode
+        public virtual RootNode RootNode
         {
             get { return new RootNode(this); }
         }
