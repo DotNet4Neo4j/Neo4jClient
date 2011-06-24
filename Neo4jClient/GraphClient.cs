@@ -272,6 +272,11 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
+        public string ExecuteScalarGremlin(string query)
+        {
+            return ExecuteScalarGremlin(query, null);
+        }
+
         public virtual string ExecuteScalarGremlin(string query, NameValueCollection queryParameters)
         {
             if (RootApiResponse == null)
@@ -294,14 +299,9 @@ namespace Neo4jClient
             return response.Content;
         }
 
-        public string ExecuteScalarGremlin(string query)
-        {
-            return ExecuteScalarGremlin(query, new NameValueCollection());
-        }
-
         public IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query)
         {
-            return ExecuteGetAllNodesGremlin<TNode>(query, new NameValueCollection());
+            return ExecuteGetAllNodesGremlin<TNode>(query, null);
         }
 
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
@@ -327,6 +327,7 @@ namespace Neo4jClient
 
         string ApplyQueryParameters(NameValueCollection queryParameters, string query)
         {
+            if (queryParameters == null) return query;
             foreach (string key in queryParameters.Keys)
             {
                 query = query.Replace(key, queryParameters[key]);
