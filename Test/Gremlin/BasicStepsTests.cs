@@ -153,6 +153,27 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsAnotherPropertyExpressionFilter()
+        {
+            var node = new NodeReference(123);
+            var bar = new Bar {Prop1 = "def"};
+            var queryText = node
+                .InV<Foo>(f => f.Prop1 == bar.Prop1) // This must be a property accessor - do not refactor this line
+                .QueryText;
+            Assert.AreEqual("g.v(123).inV[['Prop1':'def']]", queryText);
+        }
+
+        [Test]
+        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsAFunctionExpressionFilter()
+        {
+            var node = new NodeReference(123);
+            var queryText = node
+                .InV<Foo>(f => f.Prop1 == string.Format("{0}.{1}", "abc", "def").ToUpperInvariant()) // This must be a method call - do not refactor this line
+                .QueryText;
+            Assert.AreEqual("g.v(123).inV[['Prop1':'ABC.DEF']]", queryText);
+        }
+
+        [Test]
         public void InVShouldReturnTypedGremlinEnumerable()
         {
             var node = new NodeReference(123);

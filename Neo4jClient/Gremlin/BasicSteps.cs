@@ -68,7 +68,7 @@ namespace Neo4jClient.Gremlin
             var propertyName = ParseKeyFromExpression(binaryExpression.Left);
             var constantValue = ParseValueFromExpression(binaryExpression.Right);
 
-            simpleFilters.Add(propertyName, constantValue);
+            simpleFilters.Add(propertyName, constantValue.ToString());
         }
 
         static string ParseKeyFromExpression(Expression expression)
@@ -81,23 +81,10 @@ namespace Neo4jClient.Gremlin
             throw new NotSupportedException("The left-hand side of the expression contains nodes that aren't yet supported.");
         }
 
-        static string ParseValueFromExpression(Expression expression)
+        static object ParseValueFromExpression(Expression expression)
         {
-            var constantExpression = expression as ConstantExpression;
-            if (constantExpression != null)
-                return constantExpression.Value.ToString();
-
-            var memberExpression = expression as MemberExpression;
-            if (memberExpression != null &&
-                memberExpression.Expression is ConstantExpression)
-            {
-                var fieldInfo = (FieldInfo) memberExpression.Member;
-                var memberConstantExpression = (ConstantExpression) memberExpression.Expression;
-                var value = fieldInfo.GetValue(memberConstantExpression.Value);
-                return value.ToString();
-            }
-
-            throw new NotSupportedException("The right-hand side of the expression contains nodes that aren't yet supported.");
+            var lambdaExpression = Expression.Lambda(expression);
+            return lambdaExpression.Compile().DynamicInvoke();
         }
 
         public static IGremlinReferenceQuery OutE(this IGremlinQuery query)
