@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="AmbiguousRelationshipDirectionException.cs" />
     <Compile Include="DeleteMode.cs" />
+    <Compile Include="Deserializer\CustomJsonDeSerializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
     <Compile Include="ExtensionsApiResponse.cs" />
     <Compile Include="GremlinPluginApiResponse.cs" />
