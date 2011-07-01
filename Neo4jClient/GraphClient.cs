@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Neo4jClient.Deserializer;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 using RestSharp;
@@ -27,6 +28,8 @@ namespace Neo4jClient
         {
             JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
+            client.RemoveHandler("application/json");
+            client.AddHandler("application/json",new CustomJsonDeserializer());
         }
 
         public virtual void Connect()
