@@ -219,7 +219,8 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
             var node = graphClient.Get<TestNode>(456);
 
-            Assert.AreEqual("01/07/2011 08:11:48", node.Data.DateOffSet.Value.ToString("dd/MM/yyyy hh:mm:ss"));
+            Assert.NotNull(node.Data.DateOffSet);
+            Assert.AreEqual("2011-06-30 08:15:46Z", node.Data.DateOffSet.Value.ToString("u"));
         }
 
         [Test]
@@ -273,8 +274,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
             var node = graphClient.Get<TestNode>(456);
-
-            Assert.AreEqual("01/07/2011 08:11:48", node.Data.Date.ToString("dd/MM/yyyy hh:mm:ss"));
+            Assert.AreEqual("2011-06-30 08:15:46Z", node.Data.Date.ToString("u"));
         }
 
         public class TestNode
