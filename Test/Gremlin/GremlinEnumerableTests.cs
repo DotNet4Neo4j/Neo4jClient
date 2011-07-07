@@ -1,4 +1,4 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
@@ -14,8 +14,8 @@ namespace Neo4jClient.Test.Gremlin
         public void GetEnumeratorShouldThrowDetachedNodeExceptionWhenClientNotSet()
         {
             // ReSharper disable ReturnValueOfPureMethodIsNotUsed
-            var enumerable = new GremlinNodeEnumerable<object>(null, "abc");
-            enumerable.ToArray();
+            IEnumerable<Node<object>> enumerable = new GremlinNodeEnumerable<object>(null, "abc");
+            enumerable.GetEnumerator();
             // ReSharper restore ReturnValueOfPureMethodIsNotUsed
         }
 
