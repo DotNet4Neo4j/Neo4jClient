@@ -52,10 +52,10 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        public void EqualsOperatorShouldReturnFalseWhenComparingNullWithNull()
+        public void EqualsOperatorShouldReturnTrueWhenComparingNullWithNull()
         {
             NodeReference lhs = null;
-            Assert.IsFalse(lhs == null);
+            Assert.IsTrue(lhs == null);
         }
 
         [Test]
