@@ -36,7 +36,7 @@ namespace Neo4jClient
 
         public static bool operator ==(NodeReference lhs, NodeReference rhs)
         {
-            return lhs.Equals(rhs);
+            return (object)lhs != null && lhs.Equals(rhs);
         }
 
         public static bool operator !=(NodeReference lhs, NodeReference rhs)
