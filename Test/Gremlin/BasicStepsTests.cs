@@ -1,4 +1,5 @@
 ﻿using System.Collections.Specialized;
+using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Gremlin;
@@ -49,31 +50,6 @@ namespace Neo4jClient.Test.Gremlin
                 })
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
-        }
-
-        [Test]
-        public void OutVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsConstantExpressionFilter()
-        {
-            var node = new NodeReference(123);
-            var queryText = node
-                .OutV<Foo>(f => f.Prop1 == "abc") // This must be a constant - do not refactor this line
-                .QueryText;
-            Assert.AreEqual("g.v(123).outV[['Prop1':'abc']]", queryText);
-        }
-
-        [Test]
-        public void OutVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsLocalExpressionFilter()
-        {
-            // ReSharper disable ConvertToConstant.Local
-
-            var node = new NodeReference(123);
-            var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
-            var queryText = node
-                .OutV<Foo>(f => f.Prop1 == prop1Value)
-                .QueryText;
-            Assert.AreEqual("g.v(123).outV[['Prop1':'abc']]", queryText);
-
-            // ReSharper restore ConvertToConstant.Local
         }
 
         [Test]
@@ -128,49 +104,53 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsConstantExpressionFilter()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantExpression()
         {
-            var node = new NodeReference(123);
-            var queryText = node
-                .InV<Foo>(f => f.Prop1 == "abc") // This must be a constant - do not refactor this line
-                .QueryText;
-            Assert.AreEqual("g.v(123).inV[['Prop1':'abc']]", queryText);
+            var filters = new NameValueCollection();
+            BasicSteps.TranslateFilter<Foo>(
+                f => f.Prop1 == "abc", // This must be a constant - do not refactor this line
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("abc", filters["Prop1"]);
         }
 
         [Test]
-        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsLocalExpressionFilter()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsLocalExpression()
         {
-            // ReSharper disable ConvertToConstant.Local
-
-            var node = new NodeReference(123);
+            var filters = new NameValueCollection();
             var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
-            var queryText = node
-                .InV<Foo>(f => f.Prop1 == prop1Value)
-                .QueryText;
-            Assert.AreEqual("g.v(123).inV[['Prop1':'abc']]", queryText);
-
-            // ReSharper restore ConvertToConstant.Local
+            BasicSteps.TranslateFilter<Foo>(
+                f => f.Prop1 == prop1Value,
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("abc", filters["Prop1"]);
         }
 
         [Test]
-        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsAnotherPropertyExpressionFilter()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsAnotherPropertyExpression()
         {
-            var node = new NodeReference(123);
-            var bar = new Bar {Prop1 = "def"};
-            var queryText = node
-                .InV<Foo>(f => f.Prop1 == bar.Prop1) // This must be a property accessor - do not refactor this line
-                .QueryText;
-            Assert.AreEqual("g.v(123).inV[['Prop1':'def']]", queryText);
+            var filters = new NameValueCollection();
+            var bar = new Bar { Prop1 = "def" };
+            BasicSteps.TranslateFilter<Foo>(
+                f => f.Prop1 == bar.Prop1, // This must be a method call - do not refactor this line
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("def", filters["Prop1"]);
         }
 
         [Test]
-        public void InVShouldAppendStepToGremlinQueryWithSinglePropertyEqualsAFunctionExpressionFilter()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsAFunctionExpression()
         {
-            var node = new NodeReference(123);
-            var queryText = node
-                .InV<Foo>(f => f.Prop1 == string.Format("{0}.{1}", "abc", "def").ToUpperInvariant()) // This must be a method call - do not refactor this line
-                .QueryText;
-            Assert.AreEqual("g.v(123).inV[['Prop1':'ABC.DEF']]", queryText);
+            var filters = new NameValueCollection();
+            BasicSteps.TranslateFilter<Foo>(
+                f => f.Prop1 == string.Format("{0}.{1}", "abc", "def").ToUpperInvariant(), // This must be a method call - do not refactor this line
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("ABC.DEF", filters["Prop1"]);
         }
 
         [Test]

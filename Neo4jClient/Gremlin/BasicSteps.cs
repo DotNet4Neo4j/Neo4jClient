@@ -62,7 +62,7 @@ namespace Neo4jClient.Gremlin
             return concatenatedFilters;
         }
 
-        static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, NameValueCollection simpleFilters)
+        internal static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, NameValueCollection simpleFilters)
         {
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
