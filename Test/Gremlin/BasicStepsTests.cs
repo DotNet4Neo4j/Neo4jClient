@@ -34,7 +34,7 @@ namespace Neo4jClient.Test.Gremlin
                 .OutV<object>(new NameValueCollection
                 {
                     { "Foo", "Bar" }
-                })
+                }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar']]", queryText);
         }
@@ -48,7 +48,7 @@ namespace Neo4jClient.Test.Gremlin
                 {
                     { "Foo", "Bar" },
                     { "Baz", "Qak" }
-                })
+                }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
         }
@@ -85,7 +85,7 @@ namespace Neo4jClient.Test.Gremlin
                 .InV<object>(new NameValueCollection
                 {
                     { "Foo", "Bar" }
-                })
+                }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inV[['Foo':'Bar']]", queryText);
         }
@@ -99,7 +99,7 @@ namespace Neo4jClient.Test.Gremlin
                 {
                     { "Foo", "Bar" },
                     { "Baz", "Qak" }
-                })
+                }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
         }
@@ -208,7 +208,7 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = NodeReference
                 .RootNode
                 .OutE("E_FOO")
-                .InV<Foo>(new NameValueCollection { { "Foo", "Bar" } })
+                .InV<Foo>(new NameValueCollection { { "Foo", "Bar" } }, StringComparison.Ordinal)
                 .InE("E_BAR")
                 .InV<Bar>()
                 .QueryText;
