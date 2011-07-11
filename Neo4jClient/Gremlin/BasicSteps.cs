@@ -17,12 +17,8 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, NameValueCollection filters)
         {
-            var formattedFilters = filters
-                .AllKeys
-                .Select(k => new KeyValuePair<string, string>(k, filters[k]))
-                .Select(f => string.Format("['{0}':'{1}']", f.Key, f.Value))
-                .ToArray();
-            var queryText = string.Format("{0}.outV[{1}]", query.QueryText, string.Join(",", formattedFilters));
+            var concatenatedFilters = FormatGremlinFilter(filters);
+            var queryText = string.Format("{0}.outV{1}", query.QueryText, concatenatedFilters);
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
@@ -41,12 +37,8 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, NameValueCollection filters)
         {
-            var formattedFilters = filters
-                .AllKeys
-                .Select(k => new KeyValuePair<string, string>(k, filters[k]))
-                .Select(f => string.Format("['{0}':'{1}']", f.Key, f.Value))
-                .ToArray();
-            var queryText = string.Format("{0}.inV[{1}]", query.QueryText, string.Join(",", formattedFilters));
+            var concatenatedFilters = FormatGremlinFilter(filters);
+            var queryText = string.Format("{0}.inV{1}", query.QueryText, concatenatedFilters);
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
@@ -55,6 +47,19 @@ namespace Neo4jClient.Gremlin
             var simpleFilters = new NameValueCollection();
             TranslateFilter(filter, simpleFilters);
             return query.InV<TNode>(simpleFilters);
+        }
+
+        internal static string FormatGremlinFilter(NameValueCollection filters)
+        {
+            var formattedFilters = filters
+                .AllKeys
+                .Select(k => new KeyValuePair<string, string>(k, filters[k]))
+                .Select(f => string.Format("['{0}':'{1}']", f.Key, f.Value))
+                .ToArray();
+            var concatenatedFilters = string.Join(",", formattedFilters);
+            if (!string.IsNullOrWhiteSpace(concatenatedFilters))
+                concatenatedFilters = string.Format("[{0}]", concatenatedFilters);
+            return concatenatedFilters;
         }
 
         static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, NameValueCollection simpleFilters)
