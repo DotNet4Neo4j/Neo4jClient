@@ -15,18 +15,18 @@ namespace Neo4jClient.Gremlin
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
-        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, NameValueCollection filters)
+        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, NameValueCollection filters, StringComparison comparison = StringComparison.Ordinal)
         {
-            var concatenatedFilters = FormatGremlinFilter(filters);
+            var concatenatedFilters = FormatGremlinFilter(filters, comparison);
             var queryText = string.Format("{0}.outV{1}", query.QueryText, concatenatedFilters);
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
-        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter)
+        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.Ordinal)
         {
             var simpleFilters = new NameValueCollection();
             TranslateFilter(filter, simpleFilters);
-            return query.OutV<TNode>(simpleFilters);
+            return query.OutV<TNode>(simpleFilters, comparison);
         }
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query)
@@ -35,30 +35,47 @@ namespace Neo4jClient.Gremlin
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
-        public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, NameValueCollection filters)
+        public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, NameValueCollection filters, StringComparison comparison = StringComparison.Ordinal)
         {
-            var concatenatedFilters = FormatGremlinFilter(filters);
+            var concatenatedFilters = FormatGremlinFilter(filters, comparison);
             var queryText = string.Format("{0}.inV{1}", query.QueryText, concatenatedFilters);
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
-        public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter)
+        public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.Ordinal)
         {
             var simpleFilters = new NameValueCollection();
             TranslateFilter(filter, simpleFilters);
-            return query.InV<TNode>(simpleFilters);
+            return query.InV<TNode>(simpleFilters, comparison);
         }
 
-        internal static string FormatGremlinFilter(NameValueCollection filters)
+        internal static string FormatGremlinFilter(NameValueCollection filters, StringComparison comparison)
         {
+            string filterFormat, filterSeparator, concatenatedFiltersFormat;
+            switch (comparison)
+            {
+                case StringComparison.Ordinal:
+                    filterFormat = "['{0}':'{1}']";
+                    filterSeparator = ",";
+                    concatenatedFiltersFormat = "[{0}]";
+                    break;
+                case StringComparison.OrdinalIgnoreCase:
+                    filterFormat = "it.'{0}'.equalsIgnoreCase('{1}')";
+                    filterSeparator = " && ";
+                    concatenatedFiltersFormat = "{{ {0} }}";
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));
+            }
+
             var formattedFilters = filters
                 .AllKeys
                 .Select(k => new KeyValuePair<string, string>(k, filters[k]))
-                .Select(f => string.Format("['{0}':'{1}']", f.Key, f.Value))
+                .Select(f => string.Format(filterFormat, f.Key, f.Value))
                 .ToArray();
-            var concatenatedFilters = string.Join(",", formattedFilters);
+            var concatenatedFilters = string.Join(filterSeparator, formattedFilters);
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))
-                concatenatedFilters = string.Format("[{0}]", concatenatedFilters);
+                concatenatedFilters = string.Format(concatenatedFiltersFormat, concatenatedFilters);
             return concatenatedFilters;
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
@@ -227,10 +228,10 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnEmptyStringForNoFilters()
+        public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
             var filters = new NameValueCollection();
-            var filterText = BasicSteps.FormatGremlinFilter(filters);
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual(string.Empty, filterText);
         }
 
@@ -241,7 +242,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", "Bar" }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters);
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar']]", filterText);
         }
 
@@ -253,8 +254,39 @@ namespace Neo4jClient.Test.Gremlin
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters);
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar'],['Baz':'Qak']]", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
+        {
+            var filters = new NameValueCollection();
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual(string.Empty, filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveFilter()
+        {
+            var filters = new NameValueCollection
+            {
+                { "Foo", "Bar" }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseInsensititiveFilters()
+        {
+            var filters = new NameValueCollection
+            {
+                { "Foo", "Bar" },
+                { "Baz", "Qak" }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filterText);
         }
 
         public class Foo
