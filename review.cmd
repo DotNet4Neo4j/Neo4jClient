@@ -1,0 +1,1 @@
+cls && hg log -pr "outgoing(%1) and not merge()"
