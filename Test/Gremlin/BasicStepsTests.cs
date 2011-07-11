@@ -226,6 +226,37 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual(456, result);
         }
 
+        [Test]
+        public void FormatGremlinFilterShouldReturnEmptyStringForNoFilters()
+        {
+            var filters = new NameValueCollection();
+            var filterText = BasicSteps.FormatGremlinFilter(filters);
+            Assert.AreEqual(string.Empty, filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilter()
+        {
+            var filters = new NameValueCollection
+            {
+                { "Foo", "Bar" }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters);
+            Assert.AreEqual("[['Foo':'Bar']]", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFilters()
+        {
+            var filters = new NameValueCollection
+            {
+                { "Foo", "Bar" },
+                { "Baz", "Qak" }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters);
+            Assert.AreEqual("[['Foo':'Bar'],['Baz':'Qak']]", filterText);
+        }
+
         public class Foo
         {
             public string Prop1 { get; set; }
