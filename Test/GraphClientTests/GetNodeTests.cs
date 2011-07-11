@@ -125,8 +125,6 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
             var node = graphClient.Get<TestNodeWithEnum>(456);
 
-            Assert.AreEqual(456, node.Reference.Id);
-            Assert.AreEqual("foo", node.Data.Foo);
             Assert.AreEqual(TestEnum.Value1, node.Data.Status);
         }
 
@@ -274,7 +272,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
             var node = graphClient.Get<TestNode>(456);
 
-            Assert.NotNull(node.Data.DateOffSet);
+            Assert.IsNotNull(node.Data.DateOffSet);
             Assert.AreEqual("2011-06-30 08:15:46Z", node.Data.DateOffSet.Value.ToString("u"));
         }
 
