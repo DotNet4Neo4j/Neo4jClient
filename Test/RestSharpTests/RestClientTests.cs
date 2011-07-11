@@ -10,7 +10,7 @@ namespace Neo4jClient.Test.RestSharpTests
     class RestClientTests
     {
         [Test]
-        public void ExecuteShouldJSonSerializeAllProperties()
+        public void ExecuteShouldJsonSerializeAllProperties()
         {
             var uri = new Uri("http://foo/db/data");
             var testNode = new TestNode { Foo = "foo", Bar = "bar" };
@@ -26,7 +26,7 @@ namespace Neo4jClient.Test.RestSharpTests
         public void ExecuteShouldNotJSonSerializeNullProperties()
         {
             var uri = new Uri("http://foo/db/data");
-            var testNode = new TestNode { Foo = "foo", Bar = null, Status = TestEnum.Value1 };
+            var testNode = new TestNode { Foo = "foo", Bar = null };
 
             var request = new RestRequest(uri, Method.POST)
             {
@@ -35,7 +35,7 @@ namespace Neo4jClient.Test.RestSharpTests
             };
             request.AddBody(testNode);
 
-            const string expectedValue = "{\r\n  \"Foo\": \"foo\",\r\n  \"Status\": \"Value1\"\r\n}";
+            const string expectedValue = "{\r\n  \"Foo\": \"foo\"\r\n}";
             Assert.AreEqual(expectedValue, request.Parameters[0].Value);
         }
 
@@ -43,7 +43,7 @@ namespace Neo4jClient.Test.RestSharpTests
         public void ExecuteShouldSerializeEnumTypesToString()
         {
             var uri = new Uri("http://foo/db/data");
-            var testNode = new TestNode { Status = TestEnum.Value1};
+            var testNode = new TestNodeWithEnum { Status = TestEnum.Value1 };
 
             var request = new RestRequest(uri, Method.POST)
             {
@@ -57,6 +57,12 @@ namespace Neo4jClient.Test.RestSharpTests
         }
 
         public class TestNode
+        {
+            public string Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        public class TestNodeWithEnum
         {
             public string Foo { get; set; }
             public string Bar { get; set; }
