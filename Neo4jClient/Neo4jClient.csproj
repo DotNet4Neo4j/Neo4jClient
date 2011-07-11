@@ -81,6 +81,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootNode.cs" />
     <Compile Include="Serializer\CustomJsonSerializer.cs" />
+    <Compile Include="Serializer\EnumValueConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Neo4jClient.Edge.nuspec" />

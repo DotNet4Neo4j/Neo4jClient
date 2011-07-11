@@ -28,6 +28,7 @@ namespace Neo4jClient.Serializer
                 NullValueHandling = NullHandling,
                 DefaultValueHandling = DefaultValueHandling.Include
             };
+            serializer2.Converters.Add(new EnumValueConverter());
             var serializer = serializer2;
             using (var writer = new StringWriter())
             using (var writer2 = new JsonTextWriter(writer))
