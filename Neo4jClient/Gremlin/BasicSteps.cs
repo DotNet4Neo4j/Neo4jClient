@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,7 +14,7 @@ namespace Neo4jClient.Gremlin
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
-        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, NameValueCollection filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, IDictionary<string, string> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             var concatenatedFilters = FormatGremlinFilter(filters, comparison);
             var queryText = string.Format("{0}.outV{1}", query.QueryText, concatenatedFilters);
@@ -23,7 +23,7 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            var simpleFilters = new NameValueCollection();
+            var simpleFilters = new Dictionary<string, string>();
             TranslateFilter(filter, simpleFilters);
             return query.OutV<TNode>(simpleFilters, comparison);
         }
@@ -34,7 +34,7 @@ namespace Neo4jClient.Gremlin
             return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
         }
 
-        public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, NameValueCollection filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, IDictionary<string, string> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             var concatenatedFilters = FormatGremlinFilter(filters, comparison);
             var queryText = string.Format("{0}.inV{1}", query.QueryText, concatenatedFilters);
@@ -43,12 +43,12 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            var simpleFilters = new NameValueCollection();
+            var simpleFilters = new Dictionary<string, string>();
             TranslateFilter(filter, simpleFilters);
             return query.InV<TNode>(simpleFilters, comparison);
         }
 
-        internal static string FormatGremlinFilter(NameValueCollection filters, StringComparison comparison)
+        internal static string FormatGremlinFilter(IDictionary<string, string> filters, StringComparison comparison)
         {
             string filterFormat, nullFilterFormat, filterSeparator, concatenatedFiltersFormat;
             switch (comparison)
@@ -70,11 +70,10 @@ namespace Neo4jClient.Gremlin
             }
 
             var formattedFilters = filters
-                .AllKeys
-                .Select(k => new {
-                    Key = k,
-                    Value = filters[k],
-                    FilterFormat = filters[k] == null ? nullFilterFormat : filterFormat
+                .Select(filter => new {
+                    filter.Key,
+                    filter.Value,
+                    FilterFormat = filter.Value == null ? nullFilterFormat : filterFormat
                 })
                 .Select(f => string.Format(f.FilterFormat, f.Key, f.Value))
                 .ToArray();
@@ -84,7 +83,7 @@ namespace Neo4jClient.Gremlin
             return concatenatedFilters;
         }
 
-        internal static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, NameValueCollection simpleFilters)
+        internal static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, IDictionary<string, string> simpleFilters)
         {
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
@@ -95,7 +94,8 @@ namespace Neo4jClient.Gremlin
             var propertyName = ParseKeyFromExpression(binaryExpression.Left);
             var constantValue = ParseValueFromExpression(binaryExpression.Right);
 
-            simpleFilters.Add(propertyName, constantValue.ToString());
+            var stringValue = constantValue == null ? null : constantValue.ToString();
+            simpleFilters.Add(propertyName, stringValue);
         }
 
         static string ParseKeyFromExpression(Expression expression)

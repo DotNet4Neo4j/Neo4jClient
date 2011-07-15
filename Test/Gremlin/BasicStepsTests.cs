@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .OutV<object>(new NameValueCollection
+                .OutV<object>(new Dictionary<string, string>
                 {
                     { "Foo", "Bar" }
                 }, StringComparison.Ordinal)
@@ -44,7 +44,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .OutV<object>(new NameValueCollection
+                .OutV<object>(new Dictionary<string, string>
                 {
                     { "Foo", "Bar" },
                     { "Baz", "Qak" }
@@ -82,7 +82,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .InV<object>(new NameValueCollection
+                .InV<object>(new Dictionary<string, string>
                 {
                     { "Foo", "Bar" }
                 }, StringComparison.Ordinal)
@@ -95,7 +95,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .InV<object>(new NameValueCollection
+                .InV<object>(new Dictionary<string, string>
                 {
                     { "Foo", "Bar" },
                     { "Baz", "Qak" }
@@ -107,51 +107,63 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsConstantExpression()
         {
-            var filters = new NameValueCollection();
+            var filters = new Dictionary<string, string>();
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == "abc", // This must be a constant - do not refactor this line
                 filters
             );
-            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("Prop1", filters.Keys.Single());
             Assert.AreEqual("abc", filters["Prop1"]);
         }
 
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsLocalExpression()
         {
-            var filters = new NameValueCollection();
+            var filters = new Dictionary<string, string>();
             var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == prop1Value,
                 filters
             );
-            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("Prop1", filters.Keys.Single());
             Assert.AreEqual("abc", filters["Prop1"]);
         }
 
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsAnotherPropertyExpression()
         {
-            var filters = new NameValueCollection();
+            var filters = new Dictionary<string, string>();
             var bar = new Bar { Prop1 = "def" };
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == bar.Prop1, // This must be a method call - do not refactor this line
                 filters
             );
-            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("Prop1", filters.Keys.Single());
             Assert.AreEqual("def", filters["Prop1"]);
         }
 
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsAFunctionExpression()
         {
-            var filters = new NameValueCollection();
+            var filters = new Dictionary<string, string>();
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == string.Format("{0}.{1}", "abc", "def").ToUpperInvariant(), // This must be a method call - do not refactor this line
                 filters
             );
-            Assert.AreEqual("Prop1", filters.AllKeys.Single());
+            Assert.AreEqual("Prop1", filters.Keys.Single());
             Assert.AreEqual("ABC.DEF", filters["Prop1"]);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsNull()
+        {
+            var filters = new Dictionary<string, string>();
+            BasicSteps.TranslateFilter<Foo>(
+                f => f.Prop1 == null,
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(null, filters["Prop1"]);
         }
 
         [Test]
@@ -208,7 +220,7 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = NodeReference
                 .RootNode
                 .OutE("E_FOO")
-                .InV<Foo>(new NameValueCollection { { "Foo", "Bar" } }, StringComparison.Ordinal)
+                .InV<Foo>(new Dictionary<string, string> { { "Foo", "Bar" } }, StringComparison.Ordinal)
                 .InE("E_BAR")
                 .InV<Bar>()
                 .QueryText;
@@ -230,7 +242,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
-            var filters = new NameValueCollection();
+            var filters = new Dictionary<string, string>();
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual(string.Empty, filterText);
         }
@@ -238,7 +250,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilter()
         {
-            var filters = new NameValueCollection
+            var filters = new Dictionary<string, string>
             {
                 { "Foo", "Bar" }
             };
@@ -249,7 +261,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldRetainNullIndexerSyntaxForSingleCaseSensititiveFilter()
         {
-            var filters = new NameValueCollection
+            var filters = new Dictionary<string, string>
             {
                 { "Foo", null }
             };
@@ -260,7 +272,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFilters()
         {
-            var filters = new NameValueCollection
+            var filters = new Dictionary<string, string>
             {
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
@@ -272,7 +284,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
         {
-            var filters = new NameValueCollection();
+            var filters = new Dictionary<string, string>();
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual(string.Empty, filterText);
         }
@@ -280,7 +292,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveFilter()
         {
-            var filters = new NameValueCollection
+            var filters = new Dictionary<string, string>
             {
                 { "Foo", "Bar" }
             };
@@ -291,7 +303,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseInsensititiveFilters()
         {
-            var filters = new NameValueCollection
+            var filters = new Dictionary<string, string>
             {
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
@@ -303,7 +315,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterRetainNullInIndexerSyntaxForSingleCaseInsensititiveFilter()
         {
-            var filters = new NameValueCollection
+            var filters = new Dictionary<string, string>
             {
                 { "Foo", null }
             };
