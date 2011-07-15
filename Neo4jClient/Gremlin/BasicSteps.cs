@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
@@ -51,16 +50,18 @@ namespace Neo4jClient.Gremlin
 
         internal static string FormatGremlinFilter(NameValueCollection filters, StringComparison comparison)
         {
-            string filterFormat, filterSeparator, concatenatedFiltersFormat;
+            string filterFormat, nullFilterFormat, filterSeparator, concatenatedFiltersFormat;
             switch (comparison)
             {
                 case StringComparison.Ordinal:
                     filterFormat = "['{0}':'{1}']";
+                    nullFilterFormat = "['{0}':null]";
                     filterSeparator = ",";
                     concatenatedFiltersFormat = "[{0}]";
                     break;
                 case StringComparison.OrdinalIgnoreCase:
                     filterFormat = "it.'{0}'.equalsIgnoreCase('{1}')";
+                    nullFilterFormat = "it.'{0}' == null";
                     filterSeparator = " && ";
                     concatenatedFiltersFormat = "{{ {0} }}";
                     break;
@@ -70,8 +71,12 @@ namespace Neo4jClient.Gremlin
 
             var formattedFilters = filters
                 .AllKeys
-                .Select(k => new KeyValuePair<string, string>(k, filters[k]))
-                .Select(f => string.Format(filterFormat, f.Key, f.Value))
+                .Select(k => new {
+                    Key = k,
+                    Value = filters[k],
+                    FilterFormat = filters[k] == null ? nullFilterFormat : filterFormat
+                })
+                .Select(f => string.Format(f.FilterFormat, f.Key, f.Value))
                 .ToArray();
             var concatenatedFilters = string.Join(filterSeparator, formattedFilters);
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))

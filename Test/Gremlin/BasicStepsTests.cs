@@ -247,6 +247,17 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldRetainNullIndexerSyntaxForSingleCaseSensititiveFilter()
+        {
+            var filters = new NameValueCollection
+            {
+                { "Foo", null }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("[['Foo':null]]", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFilters()
         {
             var filters = new NameValueCollection
@@ -287,6 +298,17 @@ namespace Neo4jClient.Test.Gremlin
             };
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterRetainNullInIndexerSyntaxForSingleCaseInsensititiveFilter()
+        {
+            var filters = new NameValueCollection
+            {
+                { "Foo", null }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' == null }", filterText);
         }
 
         public class Foo
