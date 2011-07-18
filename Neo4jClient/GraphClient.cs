@@ -134,6 +134,23 @@ namespace Neo4jClient
             return nodeReference;
         }
 
+        public virtual void CreateRelationship<TSourceNode, TRelationship>(
+            NodeReference<TSourceNode> sourceNodeReference,
+            TRelationship relationship)
+            where TRelationship :
+                Relationship,
+                IRelationshipAllowingSourceNode<TSourceNode>
+        {
+            if (relationship.Direction == RelationshipDirection.Incoming)
+                throw new NotSupportedException("Incoming relationships are not yet supported by this method.");
+
+            CreateRelationship(
+                sourceNodeReference,
+                relationship.OtherNode,
+                relationship.RelationshipTypeKey,
+                relationship.Data);
+        }
+
         void CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey, object data)
         {
             var relationship = new RelationshipTemplate
