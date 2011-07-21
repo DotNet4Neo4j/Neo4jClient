@@ -248,7 +248,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilter()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithStringValue()
         {
             var filters = new Dictionary<string, string>
             {
@@ -259,7 +259,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldRetainNullIndexerSyntaxForSingleCaseSensititiveFilter()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithNullValue()
         {
             var filters = new Dictionary<string, string>
             {
@@ -270,7 +270,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFilters()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFiltersWithStringValues()
         {
             var filters = new Dictionary<string, string>
             {
@@ -290,7 +290,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveFilter()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithStringValue()
         {
             var filters = new Dictionary<string, string>
             {
@@ -301,7 +301,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseInsensititiveFilters()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForMultipleCaseInsensititiveFiltersWithStringValues()
         {
             var filters = new Dictionary<string, string>
             {
@@ -313,7 +313,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterRetainNullInIndexerSyntaxForSingleCaseInsensititiveFilter()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithNullValue()
         {
             var filters = new Dictionary<string, string>
             {
