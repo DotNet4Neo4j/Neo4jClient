@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .OutV<object>(new Dictionary<string, string>
+                .OutV<object>(new Dictionary<string, object>
                 {
                     { "Foo", "Bar" }
                 }, StringComparison.Ordinal)
@@ -44,7 +44,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .OutV<object>(new Dictionary<string, string>
+                .OutV<object>(new Dictionary<string, object>
                 {
                     { "Foo", "Bar" },
                     { "Baz", "Qak" }
@@ -82,7 +82,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .InV<object>(new Dictionary<string, string>
+                .InV<object>(new Dictionary<string, object>
                 {
                     { "Foo", "Bar" }
                 }, StringComparison.Ordinal)
@@ -95,7 +95,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .InV<object>(new Dictionary<string, string>
+                .InV<object>(new Dictionary<string, object>
                 {
                     { "Foo", "Bar" },
                     { "Baz", "Qak" }
@@ -107,7 +107,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsConstantExpression()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == "abc", // This must be a constant - do not refactor this line
                 filters
@@ -119,7 +119,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsLocalExpression()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == prop1Value,
@@ -132,7 +132,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsAnotherPropertyExpression()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             var bar = new Bar { Prop1 = "def" };
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == bar.Prop1, // This must be a method call - do not refactor this line
@@ -145,7 +145,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsAFunctionExpression()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == string.Format("{0}.{1}", "abc", "def").ToUpperInvariant(), // This must be a method call - do not refactor this line
                 filters
@@ -157,7 +157,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsNull()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             BasicSteps.TranslateFilter<Foo>(
                 f => f.Prop1 == null,
                 filters
@@ -220,7 +220,7 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = NodeReference
                 .RootNode
                 .OutE("E_FOO")
-                .InV<Foo>(new Dictionary<string, string> { { "Foo", "Bar" } }, StringComparison.Ordinal)
+                .InV<Foo>(new Dictionary<string, object> { { "Foo", "Bar" } }, StringComparison.Ordinal)
                 .InE("E_BAR")
                 .InV<Bar>()
                 .QueryText;
@@ -242,7 +242,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual(string.Empty, filterText);
         }
@@ -250,7 +250,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithStringValue()
         {
-            var filters = new Dictionary<string, string>
+            var filters = new Dictionary<string, object>
             {
                 { "Foo", "Bar" }
             };
@@ -261,7 +261,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithNullValue()
         {
-            var filters = new Dictionary<string, string>
+            var filters = new Dictionary<string, object>
             {
                 { "Foo", null }
             };
@@ -272,7 +272,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFiltersWithStringValues()
         {
-            var filters = new Dictionary<string, string>
+            var filters = new Dictionary<string, object>
             {
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
@@ -284,7 +284,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
         {
-            var filters = new Dictionary<string, string>();
+            var filters = new Dictionary<string, object>();
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual(string.Empty, filterText);
         }
@@ -292,7 +292,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithStringValue()
         {
-            var filters = new Dictionary<string, string>
+            var filters = new Dictionary<string, object>
             {
                 { "Foo", "Bar" }
             };
@@ -303,7 +303,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForMultipleCaseInsensititiveFiltersWithStringValues()
         {
-            var filters = new Dictionary<string, string>
+            var filters = new Dictionary<string, object>
             {
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
@@ -315,7 +315,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithNullValue()
         {
-            var filters = new Dictionary<string, string>
+            var filters = new Dictionary<string, object>
             {
                 { "Foo", null }
             };
