@@ -94,8 +94,7 @@ namespace Neo4jClient.Gremlin
             var propertyName = ParseKeyFromExpression(binaryExpression.Left);
             var constantValue = ParseValueFromExpression(binaryExpression.Right);
 
-            var stringValue = constantValue == null ? null : constantValue.ToString();
-            simpleFilters.Add(propertyName, stringValue);
+            simpleFilters.Add(propertyName, constantValue);
         }
 
         static string ParseKeyFromExpression(Expression expression)

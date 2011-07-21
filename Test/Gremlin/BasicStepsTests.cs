@@ -117,6 +117,42 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantIntExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            BasicSteps.TranslateFilter<NodeWithIntegers>(
+                f => f.Prop1 == 123, // This must be a constant - do not refactor this line
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(123, filters["Prop1"]);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantLongExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            BasicSteps.TranslateFilter<NodeWithLongs>(
+                f => f.Prop1 == 123, // This must be a constant - do not refactor this line
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual((long)123, filters["Prop1"]);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantLongMaxExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            BasicSteps.TranslateFilter<NodeWithLongs>(
+                f => f.Prop1 == long.MaxValue, // This must be a constant - do not refactor this line
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(long.MaxValue, filters["Prop1"]);
+        }
+
+        [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsLocalStringExpression()
         {
             var filters = new Dictionary<string, object>();
@@ -127,6 +163,45 @@ namespace Neo4jClient.Test.Gremlin
             );
             Assert.AreEqual("Prop1", filters.Keys.Single());
             Assert.AreEqual("abc", filters["Prop1"]);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsLocalIntExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            var prop1Value = int.Parse("123"); // This must be a local - do not refactor this to a constant
+            BasicSteps.TranslateFilter<NodeWithIntegers>(
+                f => f.Prop1 == prop1Value,
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(123, filters["Prop1"]);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsLocalLongExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            var prop1Value = long.Parse("123"); // This must be a local - do not refactor this to a constant
+            BasicSteps.TranslateFilter<NodeWithLongs>(
+                f => f.Prop1 == prop1Value,
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(123, filters["Prop1"]);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsLocalLongMaxExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            var prop1Value = long.Parse(long.MaxValue.ToString()); // This must be a local - do not refactor this to a constant
+            BasicSteps.TranslateFilter<NodeWithLongs>(
+                f => f.Prop1 == prop1Value,
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(long.MaxValue, filters["Prop1"]);
         }
 
         [Test]
@@ -333,6 +408,18 @@ namespace Neo4jClient.Test.Gremlin
         {
             public string Prop1 { get; set; }
             public string Prop2 { get; set; }
+        }
+
+        public class NodeWithIntegers
+        {
+            public int Prop1 { get; set; }
+            public int Prop2 { get; set; }
+        }
+
+        public class NodeWithLongs
+        {
+            public long Prop1 { get; set; }
+            public long Prop2 { get; set; }
         }
     }
 }
