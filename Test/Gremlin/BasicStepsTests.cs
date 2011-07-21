@@ -105,7 +105,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantExpression()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantStringExpression()
         {
             var filters = new Dictionary<string, object>();
             BasicSteps.TranslateFilter<Foo>(
@@ -117,7 +117,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void TranslateFilterShouldResolveSinglePropertyEqualsLocalExpression()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsLocalStringExpression()
         {
             var filters = new Dictionary<string, object>();
             var prop1Value = new string(new[] { 'a', 'b', 'c' }); // This must be a local - do not refactor this to a constant
@@ -130,7 +130,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void TranslateFilterShouldResolveSinglePropertyEqualsAnotherPropertyExpression()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsAnotherStringPropertyExpression()
         {
             var filters = new Dictionary<string, object>();
             var bar = new Bar { Prop1 = "def" };
@@ -143,7 +143,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void TranslateFilterShouldResolveSinglePropertyEqualsAFunctionExpression()
+        public void TranslateFilterShouldResolveSinglePropertyEqualsAStringFunctionExpression()
         {
             var filters = new Dictionary<string, object>();
             BasicSteps.TranslateFilter<Foo>(
