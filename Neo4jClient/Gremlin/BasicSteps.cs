@@ -50,18 +50,29 @@ namespace Neo4jClient.Gremlin
 
         internal static string FormatGremlinFilter(IDictionary<string, object> filters, StringComparison comparison)
         {
-            string filterFormat, nullFilterFormat, filterSeparator, concatenatedFiltersFormat;
+            IDictionary<Type, string> typeFilterFormats;
+            string nullFilterExpression, filterSeparator, concatenatedFiltersFormat;
             switch (comparison)
             {
                 case StringComparison.Ordinal:
-                    filterFormat = "['{0}':'{1}']";
-                    nullFilterFormat = "['{0}':null]";
+                    typeFilterFormats = new Dictionary<Type, string>
+                    {
+                        { typeof(string), "['{0}':'{1}']" },
+                        { typeof(int), "['{0}':{1}]" },
+                        { typeof(long), "['{0}':{1}]" },
+                    };
+                    nullFilterExpression = "['{0}':null]";
                     filterSeparator = ",";
                     concatenatedFiltersFormat = "[{0}]";
                     break;
                 case StringComparison.OrdinalIgnoreCase:
-                    filterFormat = "it.'{0}'.equalsIgnoreCase('{1}')";
-                    nullFilterFormat = "it.'{0}' == null";
+                    typeFilterFormats = new Dictionary<Type, string>
+                    {
+                        { typeof(string), "it.'{0}'.equalsIgnoreCase('{1}')" },
+                        { typeof(int), "it.'{0}' == {1}" },
+                        { typeof(long), "it.'{0}' == {1}" },
+                    };
+                    nullFilterExpression = "it.'{0}' == null";
                     filterSeparator = " && ";
                     concatenatedFiltersFormat = "{{ {0} }}";
                     break;
@@ -69,13 +80,35 @@ namespace Neo4jClient.Gremlin
                     throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));
             }
 
-            var formattedFilters = filters
-                .Select(filter => new {
-                    filter.Key,
-                    filter.Value,
-                    FilterFormat = filter.Value == null ? nullFilterFormat : filterFormat
-                })
-                .Select(f => string.Format(f.FilterFormat, f.Key, f.Value))
+            var expandedFilters =
+                from f in filters
+                let filterValueType = f.Value == null ? null : f.Value.GetType()
+                let supportedType = filterValueType == null || typeFilterFormats.ContainsKey(filterValueType)
+                let filterFormat = supportedType
+                    ? filterValueType == null ? nullFilterExpression : typeFilterFormats[filterValueType]
+                    : null
+                select new
+                {
+                    f.Key,
+                    f.Value,
+                    SupportedType = supportedType,
+                    ValueType = filterValueType,
+                    Format = filterFormat
+                };
+
+            expandedFilters = expandedFilters.ToArray();
+
+            var unsupportedFilters = expandedFilters
+                .Where(f => !f.SupportedType)
+                .Select(f => string.Format("{0} of type {1}", f.Key, f.ValueType.FullName))
+                .ToArray();
+            if (unsupportedFilters.Any())
+                throw new NotSupportedException(string.Format(
+                    "One or more of the supplied filters is of an unsupported type. Unsupported filters were: {0}",
+                    string.Join(", ", unsupportedFilters)));
+
+            var formattedFilters = expandedFilters
+                .Select(f => string.Format(f.Format, f.Key, f.Value == null ? null : f.Value.ToString()))
                 .ToArray();
             var concatenatedFilters = string.Join(filterSeparator, formattedFilters);
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))

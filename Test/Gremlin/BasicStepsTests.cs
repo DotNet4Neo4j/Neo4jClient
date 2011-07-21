@@ -334,6 +334,39 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithIntValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", 123 }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("[['Foo':123]]", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithLongValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", (long)123 }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("[['Foo':123]]", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithLongMaxValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", long.MaxValue }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("[['Foo':9223372036854775807]]", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithNullValue()
         {
             var filters = new Dictionary<string, object>
@@ -373,6 +406,39 @@ namespace Neo4jClient.Test.Gremlin
             };
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithIntValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", 123 }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithLongValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", (long)123 }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithLongMaxValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", long.MaxValue }
+            };
+            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
         }
 
         [Test]
