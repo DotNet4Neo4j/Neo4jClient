@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Neo4jClient.Gremlin
 {
-    internal class FilterFormatters
+    internal static class FilterFormatters
     {
         internal static string FormatGremlinFilter(IDictionary<string, object> filters, StringComparison comparison)
         {
