@@ -68,6 +68,7 @@
     <Compile Include="Gremlin\GremlinEnumerableTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Gremlin\TranslateFilterTests.cs" />
     <Compile Include="NodeTests.cs" />
     <Compile Include="RelationshipTests.cs" />
     <Compile Include="GraphClientTests\ExecuteScalarGremlinTests.cs" />

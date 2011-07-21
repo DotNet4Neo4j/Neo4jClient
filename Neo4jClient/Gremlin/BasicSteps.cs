@@ -170,6 +170,26 @@ namespace Neo4jClient.Gremlin
             return new GremlinReferenceEnumerable(query.Client, queryText);
         }
 
+        public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label, IDictionary<string, object> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return query.OutE(label).InV<TNode>(filters, comparison);
+        }
+
+        public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return query.OutE(label).InV(filter, comparison);
+        }
+
+        public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, IDictionary<string, object> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return query.InE(label).OutV<TNode>(filters, comparison);
+        }
+
+        public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return query.InE(label).OutV(filter, comparison);
+        }
+
         public static int NodeCount(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.count()", query.QueryText);
