@@ -390,6 +390,19 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
+        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseSensitiveFilterOfUnsupportedType()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", new ThreadStaticAttribute() }
+            };
+            BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
         {
             var filters = new Dictionary<string, object>();
@@ -462,6 +475,19 @@ namespace Neo4jClient.Test.Gremlin
             };
             var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == null }", filterText);
+        }
+
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
+        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseInsensitiveFilterOfUnsupportedType()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", new ThreadStaticAttribute() }
+            };
+            BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
         }
 
         public class Foo
