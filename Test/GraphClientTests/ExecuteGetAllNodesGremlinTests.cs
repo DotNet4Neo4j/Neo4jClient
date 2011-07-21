@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net;
 using NUnit.Framework;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteGetAllNodesGremlin<object>("", null);
+            client.ExecuteGetAllNodesGremlin<object>("");
         }
 
         public class Foo
@@ -107,7 +106,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<Foo>(gremlinQueryExpected, new NameValueCollection())
+                .ExecuteGetAllNodesGremlin<Foo>(gremlinQueryExpected)
                 .ToList();
 
             //Assert
@@ -166,7 +165,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<NodeApiResponse<string>>(gremlinQueryExpected, new NameValueCollection())
+                .ExecuteGetAllNodesGremlin<NodeApiResponse<string>>(gremlinQueryExpected)
                 .ToList();
 
             //Assert

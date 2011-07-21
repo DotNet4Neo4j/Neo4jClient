@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net;
 using NUnit.Framework;
 using RestSharp;
@@ -15,7 +14,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteScalarGremlin("", null);
+            client.ExecuteScalarGremlin("");
         }
 
         [Test]
@@ -63,7 +62,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            var node = graphClient.ExecuteScalarGremlin(gremlinQueryExpected, new NameValueCollection());
+            var node = graphClient.ExecuteScalarGremlin(gremlinQueryExpected);
 
             //Assert
             Assert.AreEqual(1, int.Parse(node));
@@ -112,12 +111,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            graphClient.ExecuteScalarGremlin(
-                "foo <<bar>> query",
-                new NameValueCollection
-                {
-                    { "<<bar>>", "baz" }
-                });
+            graphClient.ExecuteScalarGremlin("foo <<bar>> query");
 
             //Assert
             Assert.Inconclusive("Not actually asserting that the correct query was sent");

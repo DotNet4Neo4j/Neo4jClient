@@ -292,17 +292,10 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public string ExecuteScalarGremlin(string query)
-        {
-            return ExecuteScalarGremlin(query, null);
-        }
-
-        public virtual string ExecuteScalarGremlin(string query, NameValueCollection queryParameters)
+        public virtual string ExecuteScalarGremlin(string query)
         {
             if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
-
-            query = ApplyQueryParameters(queryParameters, query);
 
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
@@ -319,16 +312,11 @@ namespace Neo4jClient
             return response.Content;
         }
 
-        public IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query)
-        {
-            return ExecuteGetAllNodesGremlin<TNode>(query, null);
-        }
-
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, NameValueCollection queryParameters)
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query)
         {
             if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
-            query = ApplyQueryParameters(queryParameters, query);
+
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
             request.AddParameter("script", query, ParameterType.GetOrPost);
@@ -343,16 +331,6 @@ namespace Neo4jClient
             return response.Data == null
                 ? Enumerable.Empty<Node<TNode>>()
                 : response.Data.Select(r => r.ToNode(this));
-        }
-
-        string ApplyQueryParameters(NameValueCollection queryParameters, string query)
-        {
-            if (queryParameters == null) return query;
-            foreach (string key in queryParameters.Keys)
-            {
-                query = query.Replace(key, queryParameters[key]);
-            }
-            return query;
         }
     }
 }
