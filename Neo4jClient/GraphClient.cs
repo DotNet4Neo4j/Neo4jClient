@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -305,8 +304,9 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
                     (int)response.StatusCode,
+                    query,
                     response.StatusDescription));
 
             return response.Content;
@@ -324,8 +324,9 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
                     (int)response.StatusCode,
+                    query,
                     response.StatusDescription));
 
             return response.Data == null
