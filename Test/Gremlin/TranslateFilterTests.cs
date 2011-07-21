@@ -5,7 +5,8 @@ using Neo4jClient.Gremlin;
 
 namespace Neo4jClient.Test.Gremlin
 {
-    class TranslateFilterTests
+    [TestFixture]
+    public class TranslateFilterTests
     {
         [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsConstantStringExpression()
