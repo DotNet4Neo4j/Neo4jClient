@@ -69,6 +69,16 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void OutShouldAppendStepToGremlinQueryWithNoFilter()
+        {
+            var node = new NodeReference(123);
+            var queryText = node
+                .Out<object>("REL")
+                .QueryText;
+            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV", queryText);
+        }
+
+        [Test]
         public void OutShouldAppendStepToGremlinQueryWithSingleCaseSensitiveFilter()
         {
             var node = new NodeReference(123);
@@ -96,6 +106,16 @@ namespace Neo4jClient.Test.Gremlin
                     })
                 .QueryText;
             Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
+        }
+
+        [Test]
+        public void InShouldAppendStepToGremlinQueryWithNoFilter()
+        {
+            var node = new NodeReference(123);
+            var queryText = node
+                .In<object>("REL")
+                .QueryText;
+            Assert.AreEqual("g.v(123).inE[[label:'REL']].outV", queryText);
         }
 
         [Test]

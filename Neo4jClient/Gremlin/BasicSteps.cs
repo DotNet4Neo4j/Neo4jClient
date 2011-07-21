@@ -170,6 +170,11 @@ namespace Neo4jClient.Gremlin
             return new GremlinReferenceEnumerable(query.Client, queryText);
         }
 
+        public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)
+        {
+            return query.OutE(label).InV<TNode>();
+        }
+
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label, IDictionary<string, object> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             return query.OutE(label).InV<TNode>(filters, comparison);
@@ -178,6 +183,11 @@ namespace Neo4jClient.Gremlin
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             return query.OutE(label).InV(filter, comparison);
+        }
+
+        public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label)
+        {
+            return query.InE(label).OutV<TNode>();
         }
 
         public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, IDictionary<string, object> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
