@@ -12,7 +12,7 @@ namespace Neo4jClient.Test.Gremlin
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
             var filters = new Dictionary<string, object>();
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual(string.Empty, filterText);
         }
 
@@ -23,7 +23,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", "Bar" }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar']]", filterText);
         }
 
@@ -34,7 +34,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", 123 }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':123]]", filterText);
         }
 
@@ -45,7 +45,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", (long)123 }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':123]]", filterText);
         }
 
@@ -56,7 +56,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", long.MaxValue }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':9223372036854775807]]", filterText);
         }
 
@@ -67,7 +67,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", null }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':null]]", filterText);
         }
 
@@ -79,7 +79,7 @@ namespace Neo4jClient.Test.Gremlin
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar'],['Baz':'Qak']]", filterText);
         }
 
@@ -93,14 +93,14 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", new ThreadStaticAttribute() }
             };
-            BasicSteps.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
         }
 
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
         {
             var filters = new Dictionary<string, object>();
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual(string.Empty, filterText);
         }
 
@@ -111,7 +111,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", "Bar" }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
         }
 
@@ -122,7 +122,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", 123 }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
         }
 
@@ -133,7 +133,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", (long)123 }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
         }
 
@@ -144,7 +144,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", long.MaxValue }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
         }
 
@@ -156,7 +156,7 @@ namespace Neo4jClient.Test.Gremlin
                 { "Foo", "Bar" },
                 { "Baz", "Qak" }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filterText);
         }
 
@@ -167,7 +167,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", null }
             };
-            var filterText = BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == null }", filterText);
         }
 
@@ -181,7 +181,7 @@ namespace Neo4jClient.Test.Gremlin
             {
                 { "Foo", new ThreadStaticAttribute() }
             };
-            BasicSteps.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

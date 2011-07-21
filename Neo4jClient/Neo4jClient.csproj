@@ -53,6 +53,7 @@
     <Compile Include="DetachedNodeException.cs" />
     <Compile Include="ExtensionsApiResponse.cs" />
     <Compile Include="GremlinPluginApiResponse.cs" />
+    <Compile Include="Gremlin\FilterFormatters.cs" />
     <Compile Include="Gremlin\GremlinReferenceEnumerable.cs" />
     <Compile Include="Gremlin\IGremlinQuery.cs" />
     <Compile Include="Gremlin\GremlinNodeEnumerable.cs" />
