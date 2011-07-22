@@ -102,7 +102,7 @@ namespace Neo4jClient
 
             var nodeLocation = response.Headers.GetParameter("Location");
             var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
-            var nodeReference = new NodeReference<TNode>(nodeId);
+            var nodeReference = new NodeReference<TNode>(nodeId, this);
 
             foreach (var relationship in calculatedRelationships)
             {

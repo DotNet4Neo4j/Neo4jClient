@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using NUnit.Framework;
+using Neo4jClient.Gremlin;
 using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -81,6 +82,53 @@ namespace Neo4jClient.Test.GraphClientTests
             var node = graphClient.Create(testNode);
 
             Assert.AreEqual(456, node.Id);
+        }
+
+        [Test]
+        public void ShouldReturnAttachedNodeReference()
+        {
+            var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = @"{
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions'' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                },
+                {
+                    new RestRequest {
+                        Resource = "/node",
+                        Method = Method.POST,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(testNode),
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.Created,
+                        Headers = {
+                            new HttpHeader { Name = "Location", Value ="http://foo/db/data/node/456" }
+                        }
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            var node = graphClient.Create(testNode);
+
+            Assert.IsNotNull(((IGremlinQuery)node).Client);
         }
 
         [Test]
