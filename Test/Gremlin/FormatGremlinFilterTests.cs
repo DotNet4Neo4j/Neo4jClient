@@ -61,6 +61,17 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithEnumValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", EnumForTesting.Bar }
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("[['Foo':'Bar']]", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithNullValue()
         {
             var filters = new Dictionary<string, object>
@@ -149,6 +160,17 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithEnumValue()
+        {
+            var filters = new Dictionary<string, object>
+            {
+                { "Foo", EnumForTesting.Bar }
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForMultipleCaseInsensititiveFiltersWithStringValues()
         {
             var filters = new Dictionary<string, object>
@@ -182,6 +204,11 @@ namespace Neo4jClient.Test.Gremlin
                 { "Foo", new ThreadStaticAttribute() }
             };
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+        }
+
+        enum EnumForTesting
+        {
+            Bar
         }
     }
 }

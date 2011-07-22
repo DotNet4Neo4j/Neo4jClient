@@ -10,6 +10,12 @@ namespace Neo4jClient.Gremlin
     {
         internal static string FormatGremlinFilter(IDictionary<string, object> filters, StringComparison comparison)
         {
+            foreach (var enumKey in filters
+                .Keys
+                .Where(k => filters[k] != null && filters[k].GetType().IsEnum)
+                .ToArray())
+                filters[enumKey] = filters[enumKey].ToString();
+
             IDictionary<Type, string> typeFilterFormats;
             string nullFilterExpression, filterSeparator, concatenatedFiltersFormat;
             switch (comparison)
