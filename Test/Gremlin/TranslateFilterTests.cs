@@ -109,6 +109,18 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TranslateFilterShouldResolveSinglePropertyEqualsConstantEnumExpression()
+        {
+            var filters = new Dictionary<string, object>();
+            FilterFormatters.TranslateFilter<NodeWithEnums>(
+                f => f.Prop1 == EnumForTesting.Foo,
+                filters
+            );
+            Assert.AreEqual("Prop1", filters.Keys.Single());
+            Assert.AreEqual(EnumForTesting.Foo, filters["Prop1"]);
+        }
+
+        [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsAnotherStringPropertyExpression()
         {
             var filters = new Dictionary<string, object>();
@@ -167,6 +179,18 @@ namespace Neo4jClient.Test.Gremlin
         {
             public long Prop1 { get; set; }
             public long Prop2 { get; set; }
+        }
+
+        public enum EnumForTesting
+        {
+            Foo,
+            Bar,
+            Baz
+        }
+
+        public class NodeWithEnums
+        {
+            public EnumForTesting Prop1 { get; set; }
         }
     }
 }

@@ -84,18 +84,31 @@ namespace Neo4jClient.Gremlin
             if (binaryExpression.NodeType != ExpressionType.Equal)
                 throw new NotSupportedException("Only equality expressions are supported at this time.");
 
-            var propertyName = ParseKeyFromExpression(binaryExpression.Left);
+            var key = ParseKeyFromExpression(binaryExpression.Left);
             var constantValue = ParseValueFromExpression(binaryExpression.Right);
+            var convertedValue = key.PropertyType.IsEnum
+                ? Enum.Parse(key.PropertyType, key.PropertyType.GetEnumName(constantValue))
+                : constantValue;
 
-            simpleFilters.Add(propertyName, constantValue);
+            simpleFilters.Add(key.Name, convertedValue);
         }
 
-        static string ParseKeyFromExpression(Expression expression)
+        static ExpressionKey ParseKeyFromExpression(Expression expression)
         {
+            var unaryExpression = expression as UnaryExpression;
+            if (unaryExpression != null &&
+                unaryExpression.NodeType == ExpressionType.Convert)
+                expression = unaryExpression.Operand;
+
             var memberExpression = expression as MemberExpression;
             if (memberExpression != null &&
+                memberExpression.Member is PropertyInfo &&
                 memberExpression.Member.MemberType == MemberTypes.Property)
-                return memberExpression.Member.Name;
+                return new ExpressionKey
+                {
+                    Name = memberExpression.Member.Name,
+                    PropertyType = ((PropertyInfo)memberExpression.Member).PropertyType
+                };
 
             throw new NotSupportedException("Only property accessors are supported for the left-hand side of the expression at this time.");
         }
@@ -104,6 +117,12 @@ namespace Neo4jClient.Gremlin
         {
             var lambdaExpression = Expression.Lambda(expression);
             return lambdaExpression.Compile().DynamicInvoke();
+        }
+
+        class ExpressionKey
+        {
+            public string Name { get; set; }
+            public Type PropertyType { get; set; }
         }
     }
 }
