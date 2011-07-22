@@ -305,8 +305,8 @@ namespace Neo4jClient
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    (int)response.StatusCode,
                     query,
+                    (int)response.StatusCode,
                     response.StatusDescription));
 
             return response.Content;
@@ -325,8 +325,8 @@ namespace Neo4jClient
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    (int)response.StatusCode,
                     query,
+                    (int)response.StatusCode,
                     response.StatusDescription));
 
             return response.Data == null
