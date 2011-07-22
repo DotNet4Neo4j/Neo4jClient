@@ -102,6 +102,9 @@ namespace Neo4jClient.Gremlin
 
         public static int NodeCount(this IGremlinQuery query)
         {
+            if (query.Client == null)
+                throw new DetachedNodeException();
+
             var queryText = string.Format("{0}.count()", query.QueryText);
             var scalarResult = query.Client.ExecuteScalarGremlin(queryText);
 

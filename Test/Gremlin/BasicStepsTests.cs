@@ -256,6 +256,14 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual(456, result);
         }
 
+        [Test]
+        [ExpectedException(typeof(DetachedNodeException))]
+        public void NodeCountShouldThrowDetachedNodeExceptionWhenBaseReferenceClientIsNull()
+        {
+            var node = new NodeReference(123);
+            node.NodeCount();
+        }
+
         public class Foo
         {
             public string Prop1 { get; set; }
