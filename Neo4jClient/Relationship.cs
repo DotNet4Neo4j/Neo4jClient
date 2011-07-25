@@ -52,7 +52,6 @@ namespace Neo4jClient
 
             var allowedTargetNodeTypes = GetAllowedNodeTypes(relationship.GetType(), RelationshipEnd.TargetNode).ToArray();
             var isBaseNodeValidAsTargetNode = baseNodeType == null || allowedTargetNodeTypes.Contains(baseNodeType);
-            var isOtherNodeValidAsTargetNode = otherNodeType == null || allowedTargetNodeTypes.Contains(otherNodeType);
 
             if (isBaseNodeValidAsSourceNode &&
                 otherNodeType == null)
