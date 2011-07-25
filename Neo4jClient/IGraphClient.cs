@@ -21,6 +21,8 @@ namespace Neo4jClient
         void CreateRelationship<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship)
             where TRelationship : Relationship, IRelationshipAllowingSourceNode<TSourceNode>;
 
+        void DeleteRelationship(RelationshipReference reference);
+
         string ExecuteScalarGremlin(string query);
 
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query);

@@ -181,6 +181,11 @@ namespace Neo4jClient
                     response.StatusDescription));
         }
 
+        public void DeleteRelationship(RelationshipReference reference)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
         {
             if (RootApiResponse == null)
