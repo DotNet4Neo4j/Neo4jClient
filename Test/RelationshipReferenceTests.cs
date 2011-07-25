@@ -19,5 +19,49 @@ namespace Neo4jClient.Test
             Assert.IsInstanceOf(typeof(RelationshipReference), relationshipReference);
             Assert.AreEqual(3, relationshipReference.Id);
         }
+
+        [Test]
+        [TestCase(1, 2, Result = false)]
+        [TestCase(3, 3, Result = true)]
+        public bool Equals(int lhs, int rhs)
+        {
+            return new RelationshipReference(lhs) == new RelationshipReference(rhs);
+        }
+
+        [Test]
+        [TestCase(1, 2, Result = false)]
+        [TestCase(3, 3, Result = true)]
+        public bool GetHashCode(int lhs, int rhs)
+        {
+            return new RelationshipReference(lhs).GetHashCode() == new RelationshipReference(rhs).GetHashCode();
+        }
+
+        [Test]
+        public void EqualsOperatorShouldReturnFalseWhenComparingInstanceWithNull()
+        {
+            var lhs = new RelationshipReference(3);
+            Assert.IsFalse(lhs == null);
+        }
+
+        [Test]
+        public void EqualsOperatorShouldReturnTrueWhenComparingNullWithNull()
+        {
+            RelationshipReference lhs = null;
+            Assert.IsTrue(lhs == null);
+        }
+
+        [Test]
+        public void EqualsShouldReturnFalseWhenComparingWithNull()
+        {
+            var lhs = new RelationshipReference(3);
+            Assert.IsFalse(lhs.Equals(null));
+        }
+
+        [Test]
+        public void EqualsShouldReturnFalseWhenComparingWithDifferentType()
+        {
+            var lhs = new RelationshipReference(3);
+            Assert.IsFalse(lhs.Equals(new object()));
+        }
     }
 }
