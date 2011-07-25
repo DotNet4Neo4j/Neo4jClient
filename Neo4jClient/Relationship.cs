@@ -67,13 +67,7 @@ namespace Neo4jClient
                 isOtherNodeValidAsSourceNode)
                 return RelationshipDirection.Incoming;
 
-            if (isBaseNodeValidAsSourceNode &&
-                isBaseNodeValidAsTargetNode &&
-                isOtherNodeValidAsSourceNode &&
-                isOtherNodeValidAsTargetNode)
-                throw new AmbiguousRelationshipDirectionException();
-
-            return RelationshipDirection.Automatic;
+            throw new AmbiguousRelationshipDirectionException();
         }
 
         internal static IEnumerable<Type> GetAllowedNodeTypes(Type relationshipType, RelationshipEnd end)

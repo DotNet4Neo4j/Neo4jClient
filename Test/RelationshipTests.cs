@@ -94,6 +94,24 @@ namespace Neo4jClient.Test
         }
 
         [Test]
+        [ExpectedException(typeof(AmbiguousRelationshipDirectionException))]
+        public void DetermineRelationshipDirectionShouldReturnIncomingWhenBaseNodeOnlyValidAsTargetAndSourceNodeNotDefinedAsEither()
+        {
+            var baseNodeType = typeof(Baz);
+            var relationship = new TestRelationship(new NodeReference<Qak>(123));
+            Assert.AreEqual(RelationshipDirection.Incoming, Relationship.DetermineRelationshipDirection(baseNodeType, relationship));
+        }
+
+        [Test]
+        [ExpectedException(typeof(AmbiguousRelationshipDirectionException))]
+        public void DetermineRelationshipDirectionShouldThrowExceptionWhenNeitherNodeIsValidAtEitherEnd()
+        {
+            var baseNodeType = typeof(Zip);
+            var relationship = new TestRelationship(new NodeReference<Qak>(123));
+            Relationship.DetermineRelationshipDirection(baseNodeType, relationship);
+        }
+
+        [Test]
         public void DetermineRelationshipDirectionShouldReturnOutgoingWhenBaseNodeIsValidAsASourceNodeAndOtherNodeIsAnUntypedReference()
         {
             var baseNodeType = typeof(Bar);
@@ -106,6 +124,8 @@ namespace Neo4jClient.Test
         public class Foo { }
         public class Bar { }
         public class Baz { }
+        public class Qak { }
+        public class Zip { }
 
         public class TestRelationship : Relationship,
             IRelationshipAllowingSourceNode<Foo>,
