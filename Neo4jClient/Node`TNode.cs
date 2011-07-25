@@ -1,4 +1,5 @@
-﻿using Neo4jClient.Gremlin;
+﻿using System;
+using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
@@ -9,6 +10,9 @@ namespace Neo4jClient
 
         public Node(TNode data, NodeReference<TNode> reference)
         {
+            if (reference == null)
+                throw new ArgumentNullException("reference");
+
             this.data = data;
             this.reference = reference;
         }
@@ -37,6 +41,32 @@ namespace Neo4jClient
         string IGremlinQuery.QueryText
         {
             get { return ((IGremlinQuery)reference).QueryText; }
+        }
+
+        public static bool operator ==(Node<TNode> lhs, Node<TNode> rhs)
+        {
+            if (ReferenceEquals(lhs, null) && ReferenceEquals(rhs, null))
+                return true;
+
+            return !ReferenceEquals(lhs, null) && lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(Node<TNode> lhs, Node<TNode> rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Node<TNode>;
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.Reference == Reference;
+        }
+
+        public override int GetHashCode()
+        {
+            return Reference.Id;
         }
     }
 }
