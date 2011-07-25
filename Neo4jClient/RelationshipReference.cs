@@ -11,9 +11,9 @@
 
         public int Id { get { return id; } }
 
-        public static implicit operator RelationshipReference(int nodeId)
+        public static implicit operator RelationshipReference(int relationshipId)
         {
-            return new RelationshipReference(nodeId);
+            return new RelationshipReference(relationshipId);
         }
     }
 }
