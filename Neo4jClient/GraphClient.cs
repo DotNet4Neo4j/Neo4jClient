@@ -183,7 +183,24 @@ namespace Neo4jClient
 
         public void DeleteRelationship(RelationshipReference reference)
         {
-            throw new NotImplementedException();
+            if (RootApiResponse == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            var relationshipEndpoint = ResolveEndpoint(reference);
+            var request = new RestRequest(relationshipEndpoint, Method.DELETE);
+            var response = client.Execute(request);
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                throw new ApplicationException(string.Format(
+                    "Unable to delete the relationship. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            if (response.StatusCode != HttpStatusCode.NoContent)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
@@ -286,6 +303,12 @@ namespace Neo4jClient
         private string ResolveEndpoint(NodeReference node)
         {
             return RootApiResponse.Node + "/" + node.Id;
+        }
+
+        string ResolveEndpoint(RelationshipReference relationship)
+        {
+            //TODO: Make this a dynamic endpoint resolution
+            return "relationship/" + relationship.Id;
         }
 
         static string GetLastPathSegment(string uri)
