@@ -1,5 +1,8 @@
+using System.Diagnostics;
+
 namespace Neo4jClient
 {
+    [DebuggerDisplay("Relationship {Reference.Id} from node {StartNodeReference.Id} to node {EndNodeReference.Id}")]
     public class RelationshipInstance
     {
         readonly RelationshipReference reference;

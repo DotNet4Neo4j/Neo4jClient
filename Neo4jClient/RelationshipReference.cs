@@ -1,5 +1,8 @@
-﻿namespace Neo4jClient
+﻿using System.Diagnostics;
+
+namespace Neo4jClient
 {
+    [DebuggerDisplay("Relationship {id}")]
     public class RelationshipReference
     {
         readonly int id;

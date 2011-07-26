@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Neo4jClient.Gremlin
 {
+    [DebuggerDisplay("{queryText}")]
     internal class GremlinRelationshipEnumerable : IGremlinRelationshipQuery
     {
         readonly IGraphClient client;

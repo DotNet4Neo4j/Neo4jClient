@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
+    [DebuggerDisplay("Node {id}")]
     public class NodeReference : IGremlinQuery
     {
         public static readonly RootNode RootNode = new RootNode();
