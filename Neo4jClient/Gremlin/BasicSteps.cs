@@ -46,28 +46,28 @@ namespace Neo4jClient.Gremlin
             return query.InV<TNode>(simpleFilters, comparison);
         }
 
-        public static IGremlinReferenceQuery OutE(this IGremlinQuery query)
+        public static IGremlinRelationshipQuery OutE(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.outE", query.QueryText);
-            return new GremlinReferenceEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText);
         }
 
-        public static IGremlinReferenceQuery OutE(this IGremlinQuery query, string label)
+        public static IGremlinRelationshipQuery OutE(this IGremlinQuery query, string label)
         {
             var queryText = string.Format("{0}.outE[[label:'{1}']]", query.QueryText, label);
-            return new GremlinReferenceEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText);
         }
 
-        public static IGremlinReferenceQuery InE(this IGremlinQuery query)
+        public static IGremlinRelationshipQuery InE(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.inE", query.QueryText);
-            return new GremlinReferenceEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText);
         }
 
-        public static IGremlinReferenceQuery InE(this IGremlinQuery query, string label)
+        public static IGremlinRelationshipQuery InE(this IGremlinQuery query, string label)
         {
             var queryText = string.Format("{0}.inE[[label:'{1}']]", query.QueryText, label);
-            return new GremlinReferenceEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)

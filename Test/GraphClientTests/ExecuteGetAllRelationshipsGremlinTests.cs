@@ -15,19 +15,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteGetAllRelationshipsGremlin<Knows>("");
-        }
-
-        public class Knows : Relationship
-        {
-            public Knows(NodeReference targetNode) : base(targetNode)
-            {
-            }
-
-            public override string RelationshipTypeKey
-            {
-                get { return "KNOWS"; }
-            }
+            client.ExecuteGetAllRelationshipsGremlin("");
         }
 
         [Test]
@@ -87,7 +75,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var relationships = graphClient
-                .ExecuteGetAllRelationshipsGremlin<Knows>(gremlinQueryExpected)
+                .ExecuteGetAllRelationshipsGremlin(gremlinQueryExpected)
                 .ToList();
 
             //Assert
@@ -143,7 +131,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllRelationshipsGremlin<Knows>(gremlinQueryExpected)
+                .ExecuteGetAllRelationshipsGremlin(gremlinQueryExpected)
                 .ToList();
 
             //Assert

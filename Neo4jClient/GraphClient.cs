@@ -362,8 +362,7 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToNode(this));
         }
 
-        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin<TRelationship>(string query)
-            where TRelationship : Relationship
+        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query)
         {
             if (RootApiResponse == null)
                 throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");

@@ -54,12 +54,12 @@
     <Compile Include="ExtensionsApiResponse.cs" />
     <Compile Include="GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\FilterFormatters.cs" />
-    <Compile Include="Gremlin\GremlinReferenceEnumerable.cs" />
+    <Compile Include="Gremlin\GremlinRelationshipEnumerable.cs" />
     <Compile Include="Gremlin\IGremlinQuery.cs" />
     <Compile Include="Gremlin\GremlinNodeEnumerable.cs" />
     <Compile Include="Gremlin\BasicSteps.cs" />
     <Compile Include="Gremlin\IGremlinNodeQuery.cs" />
-    <Compile Include="Gremlin\IGremlinReferenceQuery.cs" />
+    <Compile Include="Gremlin\IGremlinRelationshipQuery.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />
