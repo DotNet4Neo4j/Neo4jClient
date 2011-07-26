@@ -361,5 +361,28 @@ namespace Neo4jClient
                 ? Enumerable.Empty<Node<TNode>>()
                 : response.Data.Select(r => r.ToNode(this));
         }
+
+        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin<TRelationship>(string query)
+            where TRelationship : Relationship
+        {
+            if (RootApiResponse == null)
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+
+            var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
+            var request = new RestRequest(nodeResource, Method.POST);
+            request.AddParameter("script", query, ParameterType.GetOrPost);
+            var response = client.Execute<List<RelationshipApiResponse>>(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    query,
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            return response.Data == null
+                ? Enumerable.Empty<RelationshipInstance>()
+                : response.Data.Select(r => r.ToRelationshipInstance(this));
+        }
     }
 }

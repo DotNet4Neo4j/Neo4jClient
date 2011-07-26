@@ -26,5 +26,8 @@ namespace Neo4jClient
         string ExecuteScalarGremlin(string query);
 
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query);
+
+        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin<TRelationship>(string query)
+            where TRelationship : Relationship;
     }
 }
