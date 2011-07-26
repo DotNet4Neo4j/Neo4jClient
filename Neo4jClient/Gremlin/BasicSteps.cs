@@ -100,7 +100,7 @@ namespace Neo4jClient.Gremlin
             return query.InE(label).OutV(filter, comparison);
         }
 
-        public static int NodeCount(this IGremlinQuery query)
+        public static int GremlinCount(this IGremlinQuery query)
         {
             if (query.Client == null)
                 throw new DetachedNodeException();

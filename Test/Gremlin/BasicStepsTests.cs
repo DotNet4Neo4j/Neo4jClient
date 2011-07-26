@@ -245,23 +245,23 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void NodeCountShouldExecuteScalar()
+        public void GremlinCountShouldExecuteScalar()
         {
             var client = Substitute.For<IGraphClient>();
             client
                 .ExecuteScalarGremlin("g.v(123).count()")
                 .Returns("456");
             var node = new NodeReference(123, client);
-            var result = node.NodeCount();
+            var result = node.GremlinCount();
             Assert.AreEqual(456, result);
         }
 
         [Test]
         [ExpectedException(typeof(DetachedNodeException))]
-        public void NodeCountShouldThrowDetachedNodeExceptionWhenBaseReferenceClientIsNull()
+        public void GremlinCountShouldThrowDetachedNodeExceptionWhenBaseReferenceClientIsNull()
         {
             var node = new NodeReference(123);
-            node.NodeCount();
+            node.GremlinCount();
         }
 
         public class Foo
