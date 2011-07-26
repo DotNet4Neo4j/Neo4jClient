@@ -234,14 +234,14 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void ShouldCombineMultiStepQuery()
         {
-            var queryText = NodeReference
+            var query = NodeReference
                 .RootNode
                 .OutE("E_FOO")
                 .InV<Foo>(new Dictionary<string, object> { { "Foo", "Bar" } }, StringComparison.Ordinal)
                 .InE("E_BAR")
-                .InV<Bar>()
-                .QueryText;
-            Assert.AreEqual("g.v(0).outE[[label:'E_FOO']].inV[['Foo':'Bar']].inE[[label:'E_BAR']].inV", queryText);
+                .InV<Bar>();
+
+            Assert.AreEqual("g.v(0).outE[[label:'E_FOO']].inV[['Foo':'Bar']].inE[[label:'E_BAR']].inV", query.QueryText);
         }
 
         [Test]
