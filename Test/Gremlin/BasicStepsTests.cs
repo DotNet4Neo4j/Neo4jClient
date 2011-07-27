@@ -30,9 +30,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .OutV<object>(new Dictionary<string, object>
+                .OutV<object>(new List<Filter>
                 {
-                    { "Foo", "Bar" }
+                    new Filter { PropertyName = "Foo", Value = "Bar" }
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar']]", queryText);
@@ -43,10 +43,10 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .OutV<object>(new Dictionary<string, object>
+                .OutV<object>(new List<Filter>
                 {
-                    { "Foo", "Bar" },
-                    { "Baz", "Qak" }
+                    new Filter { PropertyName = "Foo", Value = "Bar" },
+                    new Filter { PropertyName = "Baz", Value = "Qak" },
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
@@ -85,9 +85,9 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = node
                 .Out<object>(
                     "REL",
-                    new Dictionary<string, object>
+                    new List<Filter>
                     {
-                        { "Foo", "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar" }
                     }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outE[[label:'REL']].inV[['Foo':'Bar']]", queryText);
@@ -100,9 +100,9 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = node
                 .Out<object>(
                     "REL",
-                    new Dictionary<string, object>
+                    new List<Filter>
                     {
-                        { "Foo", "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar" }
                     })
                 .QueryText;
             Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
@@ -125,9 +125,9 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = node
                 .In<object>(
                     "REL",
-                    new Dictionary<string, object>
+                    new List<Filter>
                     {
-                        { "Foo", "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar" }
                     }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inE[[label:'REL']].outV[['Foo':'Bar']]", queryText);
@@ -140,9 +140,9 @@ namespace Neo4jClient.Test.Gremlin
             var queryText = node
                 .In<object>(
                     "REL",
-                    new Dictionary<string, object>
+                    new List<Filter>
                     {
-                        { "Foo", "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar" }
                     })
                 .QueryText;
             Assert.AreEqual("g.v(123).inE[[label:'REL']].outV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
@@ -161,9 +161,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .InV<object>(new Dictionary<string, object>
+                .InV<object>(new List<Filter>
                 {
-                    { "Foo", "Bar" }
+                    new Filter { PropertyName = "Foo", Value = "Bar" }
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inV[['Foo':'Bar']]", queryText);
@@ -174,10 +174,10 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             var queryText = node
-                .InV<object>(new Dictionary<string, object>
+                .InV<object>(new List<Filter>
                 {
-                    { "Foo", "Bar" },
-                    { "Baz", "Qak" }
+                    new Filter { PropertyName = "Foo", Value = "Bar" },
+                    new Filter { PropertyName = "Baz", Value = "Qak" },
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
@@ -237,7 +237,7 @@ namespace Neo4jClient.Test.Gremlin
             var query = NodeReference
                 .RootNode
                 .OutE("E_FOO")
-                .InV<Foo>(new Dictionary<string, object> { { "Foo", "Bar" } }, StringComparison.Ordinal)
+                .InV<Foo>(new List<Filter> { new Filter { PropertyName = "Foo", Value = "Bar" } }, StringComparison.Ordinal)
                 .InE("E_BAR")
                 .InV<Bar>();
 
