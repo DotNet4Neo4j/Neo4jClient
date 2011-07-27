@@ -55,6 +55,7 @@
     <Compile Include="GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\Back.cs" />
     <Compile Include="Gremlin\FilterFormatters.cs" />
+    <Compile Include="Gremlin\Filter.cs" />
     <Compile Include="Gremlin\GremlinRelationshipEnumerable.cs" />
     <Compile Include="Gremlin\IGremlinQuery.cs" />
     <Compile Include="Gremlin\GremlinNodeEnumerable.cs" />

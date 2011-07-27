@@ -11,7 +11,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
-            var filters = new Dictionary<string, object>();
+            var filters = new List<Filter>();
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual(string.Empty, filterText);
         }
@@ -19,9 +19,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithStringValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", "Bar" }
+                new Filter { PropertyName= "Foo", Value = "Bar" }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar']]", filterText);
@@ -30,9 +30,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithIntValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", 123 }
+                new Filter { PropertyName= "Foo", Value = 123 }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':123]]", filterText);
@@ -41,9 +41,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithLongValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", (long)123 }
+                new Filter { PropertyName= "Foo", Value = (long)123 }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':123]]", filterText);
@@ -52,9 +52,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithLongMaxValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", long.MaxValue }
+                new Filter { PropertyName= "Foo", Value = long.MaxValue }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':9223372036854775807]]", filterText);
@@ -63,9 +63,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithEnumValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", EnumForTesting.Bar }
+                new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar']]", filterText);
@@ -74,9 +74,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithNullValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", null }
+                new Filter { PropertyName= "Foo", Value = null }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':null]]", filterText);
@@ -85,10 +85,10 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFiltersWithStringValues()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", "Bar" },
-                { "Baz", "Qak" }
+                new Filter { PropertyName= "Foo", Value = "Bar" },
+                new Filter { PropertyName= "Baz", Value = "Qak" }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar'],['Baz':'Qak']]", filterText);
@@ -100,9 +100,9 @@ namespace Neo4jClient.Test.Gremlin
             ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
         public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseSensitiveFilterOfUnsupportedType()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", new ThreadStaticAttribute() }
+                new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute() },
             };
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
         }
@@ -110,7 +110,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
         {
-            var filters = new Dictionary<string, object>();
+            var filters = new List<Filter>();
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual(string.Empty, filterText);
         }
@@ -118,9 +118,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithStringValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", "Bar" }
+                new Filter { PropertyName= "Foo", Value = "Bar" },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
@@ -129,9 +129,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithIntValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", 123 }
+                new Filter { PropertyName= "Foo", Value = 123 },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
@@ -140,9 +140,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithLongValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", (long)123 }
+                new Filter { PropertyName= "Foo", Value = (long)123 },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
@@ -151,9 +151,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithLongMaxValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", long.MaxValue }
+                new Filter { PropertyName= "Foo", Value = long.MaxValue },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
@@ -162,9 +162,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithEnumValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", EnumForTesting.Bar }
+                new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
@@ -173,10 +173,10 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForMultipleCaseInsensititiveFiltersWithStringValues()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", "Bar" },
-                { "Baz", "Qak" }
+                new Filter {PropertyName = "Foo", Value = "Bar"},
+                new Filter {PropertyName = "Baz", Value = "Qak"},
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filterText);
@@ -185,9 +185,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithNullValue()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", null }
+                new Filter { PropertyName= "Foo", Value = null },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == null }", filterText);
@@ -199,9 +199,9 @@ namespace Neo4jClient.Test.Gremlin
             ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
         public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseInsensitiveFilterOfUnsupportedType()
         {
-            var filters = new Dictionary<string, object>
+            var filters = new List<Filter>
             {
-                { "Foo", new ThreadStaticAttribute() }
+                new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute() },
             };
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
         }

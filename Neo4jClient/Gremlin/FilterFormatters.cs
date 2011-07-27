@@ -8,13 +8,17 @@ namespace Neo4jClient.Gremlin
 {
     internal static class FilterFormatters
     {
-        internal static string FormatGremlinFilter(IDictionary<string, object> filters, StringComparison comparison)
+        internal static string FormatGremlinFilter(IEnumerable<Filter> filters, StringComparison comparison)
         {
-            foreach (var enumKey in filters
-                .Keys
-                .Where(k => filters[k] != null && filters[k].GetType().IsEnum)
-                .ToArray())
-                filters[enumKey] = filters[enumKey].ToString();
+            filters = filters
+                .Select(f =>
+                {
+                    if (f.Value != null && f.Value.GetType().IsEnum)
+                        f.Value = f.Value.ToString();
+
+                    return f;
+                })
+                .ToArray();
 
             IDictionary<Type, string> typeFilterFormats;
             string nullFilterExpression, filterSeparator, concatenatedFiltersFormat;
@@ -55,7 +59,7 @@ namespace Neo4jClient.Gremlin
                     : null
                 select new
                 {
-                    f.Key,
+                    f.PropertyName,
                     f.Value,
                     SupportedType = supportedType,
                     ValueType = filterValueType,
@@ -66,7 +70,7 @@ namespace Neo4jClient.Gremlin
 
             var unsupportedFilters = expandedFilters
                 .Where(f => !f.SupportedType)
-                .Select(f => string.Format("{0} of type {1}", f.Key, f.ValueType.FullName))
+                .Select(f => string.Format("{0} of type {1}", f.PropertyName, f.ValueType.FullName))
                 .ToArray();
             if (unsupportedFilters.Any())
                 throw new NotSupportedException(string.Format(
@@ -74,7 +78,7 @@ namespace Neo4jClient.Gremlin
                     string.Join(", ", unsupportedFilters)));
 
             var formattedFilters = expandedFilters
-                .Select(f => string.Format(f.Format, f.Key, f.Value == null ? null : f.Value.ToString()))
+                .Select(f => string.Format(f.Format, f.PropertyName, f.Value == null ? null : f.Value.ToString()))
                 .ToArray();
             var concatenatedFilters = string.Join(filterSeparator, formattedFilters);
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))
