@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Gremlin;
@@ -26,27 +27,27 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void OutVShouldAppendStepToGremlinQueryWithSingleFilter()
+        public void OutVShouldAppendStepToGremlinQueryWithSingleEqualFilter()
         {
             var node = new NodeReference(123);
             var queryText = node
                 .OutV<object>(new List<Filter>
                 {
-                    new Filter { PropertyName = "Foo", Value = "Bar" }
+                    new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar']]", queryText);
         }
 
         [Test]
-        public void OutVShouldAppendStepToGremlinQueryWithTwoFilters()
+        public void OutVShouldAppendStepToGremlinQueryWithTwoEqualFilters()
         {
             var node = new NodeReference(123);
             var queryText = node
                 .OutV<object>(new List<Filter>
                 {
-                    new Filter { PropertyName = "Foo", Value = "Bar" },
-                    new Filter { PropertyName = "Baz", Value = "Qak" },
+                    new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
+                    new Filter { PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  },
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
@@ -79,7 +80,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void OutShouldAppendStepToGremlinQueryWithSingleCaseSensitiveFilter()
+        public void OutShouldAppendStepToGremlinQueryWithSingleCaseSensitiveEqualFilter()
         {
             var node = new NodeReference(123);
             var queryText = node
@@ -87,14 +88,14 @@ namespace Neo4jClient.Test.Gremlin
                     "REL",
                     new List<Filter>
                     {
-                        new Filter { PropertyName = "Foo", Value = "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                     }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).outE[[label:'REL']].inV[['Foo':'Bar']]", queryText);
         }
 
         [Test]
-        public void OutShouldAppendStepToGremlinQueryWithSingleCaseInsensitiveFilter()
+        public void OutShouldAppendStepToGremlinQueryWithSingleCaseInsensitiveEqualFilter()
         {
             var node = new NodeReference(123);
             var queryText = node
@@ -102,7 +103,7 @@ namespace Neo4jClient.Test.Gremlin
                     "REL",
                     new List<Filter>
                     {
-                        new Filter { PropertyName = "Foo", Value = "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                     })
                 .QueryText;
             Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
@@ -119,7 +120,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void InShouldAppendStepToGremlinQueryWithSingleCaseSensitiveFilter()
+        public void InShouldAppendStepToGremlinQueryWithSingleCaseSensitiveEqualFilter()
         {
             var node = new NodeReference(123);
             var queryText = node
@@ -127,14 +128,14 @@ namespace Neo4jClient.Test.Gremlin
                     "REL",
                     new List<Filter>
                     {
-                        new Filter { PropertyName = "Foo", Value = "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal}
                     }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inE[[label:'REL']].outV[['Foo':'Bar']]", queryText);
         }
 
         [Test]
-        public void InShouldAppendStepToGremlinQueryWithSingleCaseInsensitiveFilter()
+        public void InShouldAppendStepToGremlinQueryWithSingleCaseInsensitiveEqualFilter()
         {
             var node = new NodeReference(123);
             var queryText = node
@@ -142,7 +143,7 @@ namespace Neo4jClient.Test.Gremlin
                     "REL",
                     new List<Filter>
                     {
-                        new Filter { PropertyName = "Foo", Value = "Bar" }
+                        new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal }
                     })
                 .QueryText;
             Assert.AreEqual("g.v(123).inE[[label:'REL']].outV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
@@ -157,27 +158,27 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void InVShouldAppendStepToGremlinQueryWithSingleFilter()
+        public void InVShouldAppendStepToGremlinQueryWithSingleEqualFilter()
         {
             var node = new NodeReference(123);
             var queryText = node
                 .InV<object>(new List<Filter>
                 {
-                    new Filter { PropertyName = "Foo", Value = "Bar" }
+                    new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal }
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inV[['Foo':'Bar']]", queryText);
         }
 
         [Test]
-        public void InVShouldAppendStepToGremlinQueryWithTwoFilters()
+        public void InVShouldAppendStepToGremlinQueryWithTwoEqualFilters()
         {
             var node = new NodeReference(123);
             var queryText = node
                 .InV<object>(new List<Filter>
                 {
-                    new Filter { PropertyName = "Foo", Value = "Bar" },
-                    new Filter { PropertyName = "Baz", Value = "Qak" },
+                    new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
+                    new Filter { PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  },
                 }, StringComparison.Ordinal)
                 .QueryText;
             Assert.AreEqual("g.v(123).inV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
@@ -232,12 +233,12 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void ShouldCombineMultiStepQuery()
+        public void ShouldCombineMultiStepEqualQuery()
         {
             var query = NodeReference
                 .RootNode
                 .OutE("E_FOO")
-                .InV<Foo>(new List<Filter> { new Filter { PropertyName = "Foo", Value = "Bar" } }, StringComparison.Ordinal)
+                .InV<Foo>(new List<Filter> { new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal } }, StringComparison.Ordinal)
                 .InE("E_BAR")
                 .InV<Bar>();
 

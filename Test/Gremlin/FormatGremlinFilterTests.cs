@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using NUnit.Framework;
 using Neo4jClient.Gremlin;
 
@@ -17,78 +18,78 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithStringValue()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithStringValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = "Bar" }
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar']]", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithIntValue()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithIntValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = 123 }
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':123]]", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithLongValue()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEquakFilterWithLongValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = (long)123 }
+                new Filter { PropertyName= "Foo", Value = (long)123, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':123]]", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithLongMaxValue()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithLongMaxValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = long.MaxValue }
+                new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':9223372036854775807]]", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithEnumValue()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithEnumValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar }
+                new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar']]", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveFilterWithNullValue()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithNullValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = null }
+                new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':null]]", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveFiltersWithStringValues()
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForMultipleCaseSensititiveEqualFiltersWithStringValues()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = "Bar" },
-                new Filter { PropertyName= "Baz", Value = "Qak" }
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
+                new Filter { PropertyName= "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("[['Foo':'Bar'],['Baz':'Qak']]", filterText);
@@ -98,11 +99,11 @@ namespace Neo4jClient.Test.Gremlin
         [ExpectedException(
             typeof(NotSupportedException),
             ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
-        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseSensitiveFilterOfUnsupportedType()
+        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseSensitiveEqualFilterOfUnsupportedType()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute() },
+                new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute(), ExpressionType = ExpressionType.Equal  },
             };
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
         }
@@ -116,78 +117,78 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithStringValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithStringValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = "Bar" },
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithIntValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithIntValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = 123 },
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.Equal },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithLongValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithLongValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = (long)123 },
+                new Filter { PropertyName= "Foo", Value = (long)123, ExpressionType = ExpressionType.Equal  },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithLongMaxValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithLongMaxValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = long.MaxValue },
+                new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.Equal  },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithEnumValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithEnumValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar },
+                new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForMultipleCaseInsensititiveFiltersWithStringValues()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForMultipleCaseInsensititiveEqualFiltersWithStringValues()
         {
             var filters = new List<Filter>
             {
-                new Filter {PropertyName = "Foo", Value = "Bar"},
-                new Filter {PropertyName = "Baz", Value = "Qak"},
+                new Filter {PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal },
+                new Filter {PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filterText);
         }
 
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveFilterWithNullValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithNullValue()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = null },
+                new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Equal},
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo' == null }", filterText);
@@ -197,11 +198,11 @@ namespace Neo4jClient.Test.Gremlin
         [ExpectedException(
             typeof(NotSupportedException),
             ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
-        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseInsensitiveFilterOfUnsupportedType()
+        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseInsensitiveEqualFilterOfUnsupportedType()
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute() },
+                new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute(), ExpressionType = ExpressionType.Equal  },
             };
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
         }
