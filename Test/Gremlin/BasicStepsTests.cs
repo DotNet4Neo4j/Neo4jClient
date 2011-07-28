@@ -36,7 +36,7 @@ namespace Neo4jClient.Test.Gremlin
                     new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                 }, StringComparison.Ordinal)
                 .QueryText;
-            Assert.AreEqual("g.v(123).outV[['Foo':'Bar']]", queryText);
+            Assert.AreEqual("g.v(123).outV{ it.'Foo'.equals('Bar') }", queryText);
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace Neo4jClient.Test.Gremlin
                     new Filter { PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  },
                 }, StringComparison.Ordinal)
                 .QueryText;
-            Assert.AreEqual("g.v(123).outV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
+            Assert.AreEqual("g.v(123).outV{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", queryText);
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace Neo4jClient.Test.Gremlin
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                     }, StringComparison.Ordinal)
                 .QueryText;
-            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV[['Foo':'Bar']]", queryText);
+            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Foo'.equals('Bar') }", queryText);
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace Neo4jClient.Test.Gremlin
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal}
                     }, StringComparison.Ordinal)
                 .QueryText;
-            Assert.AreEqual("g.v(123).inE[[label:'REL']].outV[['Foo':'Bar']]", queryText);
+            Assert.AreEqual("g.v(123).inE[[label:'REL']].outV{ it.'Foo'.equals('Bar') }", queryText);
         }
 
         [Test]
@@ -167,7 +167,7 @@ namespace Neo4jClient.Test.Gremlin
                     new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal }
                 }, StringComparison.Ordinal)
                 .QueryText;
-            Assert.AreEqual("g.v(123).inV[['Foo':'Bar']]", queryText);
+            Assert.AreEqual("g.v(123).inV{ it.'Foo'.equals('Bar') }", queryText);
         }
 
         [Test]
@@ -181,7 +181,7 @@ namespace Neo4jClient.Test.Gremlin
                     new Filter { PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  },
                 }, StringComparison.Ordinal)
                 .QueryText;
-            Assert.AreEqual("g.v(123).inV[['Foo':'Bar'],['Baz':'Qak']]", queryText);
+            Assert.AreEqual("g.v(123).inV{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", queryText);
         }
 
         [Test]
@@ -242,7 +242,7 @@ namespace Neo4jClient.Test.Gremlin
                 .InE("E_BAR")
                 .InV<Bar>();
 
-            Assert.AreEqual("g.v(0).outE[[label:'E_FOO']].inV[['Foo':'Bar']].inE[[label:'E_BAR']].inV", query.QueryText);
+            Assert.AreEqual("g.v(0).outE[[label:'E_FOO']].inV{ it.'Foo'.equals('Bar') }.inE[[label:'E_BAR']].inV", query.QueryText);
         }
 
         [Test]

@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':'Bar']]", filterText);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filterText);
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':123]]", filterText);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = (long)123, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':123]]", filterText);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':9223372036854775807]]", filterText);
+            Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':'Bar']]", filterText);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filterText);
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':null]]", filterText);
+            Assert.AreEqual("{ it.'Foo' == null }", filterText);
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  }
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("[['Foo':'Bar'],['Baz':'Qak']]", filterText);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", filterText);
         }
 
         [Test]
@@ -194,15 +194,32 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("{ it.'Foo' == null }", filterText);
         }
 
+        [TestCase("Foo", "Bar", "{ !it.'Foo'.equalsIgnoreCase('Bar') }")]
+        [TestCase("Foo", 9223372036854775807, "{ it.'Foo' != 9223372036854775807 }")]
+        [TestCase("Foo", 0L, "{ it.'Foo' != 0 }")]
         [Test]
-        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveNotEqualFilterWithStringValue()
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveNotEqualFilter(string propertyName, object valueToCompare, string expectedValue)
         {
             var filters = new List<Filter>
             {
-                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.NotEqual  },
+                new Filter { PropertyName= propertyName, Value = valueToCompare, ExpressionType = ExpressionType.NotEqual  },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ !it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+            Assert.AreEqual(expectedValue, filterText);
+        }
+
+        [TestCase("Foo", "Bar", "{ !it.'Foo'.equals('Bar') }")]
+        [TestCase("Foo", 9223372036854775807, "{ it.'Foo' != 0 }")]
+        [TestCase("Foo", 0L, "{ it.'Foo' != 0 }")]
+        [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseSensititiveNotEqualFilter(string propertyName, object valueToCompare, string expectedValue)
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= propertyName, Value = valueToCompare, ExpressionType = ExpressionType.NotEqual  },
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual(expectedValue, filterText);
         }
 
         [Test]
