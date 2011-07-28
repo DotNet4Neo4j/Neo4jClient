@@ -62,6 +62,7 @@
     <Compile Include="Gremlin\BasicSteps.cs" />
     <Compile Include="Gremlin\IGremlinNodeQuery.cs" />
     <Compile Include="Gremlin\IGremlinRelationshipQuery.cs" />
+    <Compile Include="Gremlin\TypeFilter.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingSourceNode`TNode.cs" />
     <Compile Include="IRelationshipAllowingTargetNode`TNode.cs" />
