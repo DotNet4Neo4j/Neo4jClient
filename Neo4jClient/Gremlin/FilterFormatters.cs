@@ -23,24 +23,28 @@ namespace Neo4jClient.Gremlin
             if (filters.Any(f => !f.ExpressionType.HasValue))
                 throw new ArgumentException("ExpressionType must not be null", "filters");
 
-            IList<TypeFilter> typeFilterFormats = new List<TypeFilter>();
-            typeFilterFormats.Add(new TypeFilter { Type =  typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
-            typeFilterFormats.Add(new TypeFilter { Type =  typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
-            typeFilterFormats.Add(new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual  });
-            typeFilterFormats.Add(new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual });
+            var typeFilterFormats = new List<TypeFilter>
+            {
+                new TypeFilter { Type = null, FilterFormat = "it.'{0}' == null", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = null, FilterFormat = "it.'{0}' != null", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type =  typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal },
+            };
 
-            var filterSeparator = " && ";
-            var concatenatedFiltersFormat = "{{ {0} }}";
+            const string filterSeparator = " && ";
+            const string concatenatedFiltersFormat = "{{ {0} }}";
 
             switch (comparison)
             {
                 case StringComparison.Ordinal:
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.Equal});
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string),FilterFormat = "!it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.NotEqual  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.NotEqual  });
                     break;
                 case StringComparison.OrdinalIgnoreCase:
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string),FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  });
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string),FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  });
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));
@@ -49,17 +53,15 @@ namespace Neo4jClient.Gremlin
             var expandedFilters =
                 from f in filters
                 let filterValueType = f.Value == null ? null : f.Value.GetType()
-                let supportedType = filterValueType == null || typeFilterFormats.Any(tf=> tf.Type == filterValueType)
-                let expressionType = filterValueType == null ? typeFilterFormats.FirstOrDefault(t => t.ExpressionType == f.ExpressionType).FilterFormat : typeFilterFormats.SingleOrDefault(t => t.Type == filterValueType && t.ExpressionType == f.ExpressionType).FilterFormat
-                let filterFormat = supportedType
-                    ? filterValueType == null ? typeFilterFormats.FirstOrDefault(t => t.ExpressionType == f.ExpressionType).NullFilterExpression : typeFilterFormats.SingleOrDefault(t => t.Type == filterValueType && t.ExpressionType == f.ExpressionType).FilterFormat
-                    : null
+                let typeFilter = typeFilterFormats.SingleOrDefault(tf => tf.Type == filterValueType && tf.ExpressionType == f.ExpressionType)
+                let isFilterSupported = typeFilter != null
+                let filterFormat = isFilterSupported ? typeFilter.FilterFormat : null
                 select new
                 {
                     f.PropertyName,
                     f.Value,
                     f.ExpressionType,
-                    SupportedType = supportedType,
+                    IsFilterSupported = isFilterSupported,
                     ValueType = filterValueType,
                     Format = filterFormat
                 };
@@ -67,12 +69,14 @@ namespace Neo4jClient.Gremlin
             expandedFilters = expandedFilters.ToArray();
 
             var unsupportedFilters = expandedFilters
-                .Where(f => !f.SupportedType)
-                .Select(f => string.Format("{0} of type {1}", f.PropertyName, f.ValueType.FullName))
+                .Where(f => !f.IsFilterSupported)
+                .Select(f => f.ValueType == null
+                    ? string.Format("{0} with null value and expression {1}", f.PropertyName, f.ExpressionType)
+                    : string.Format("{0} of type {1}, with expression {2}", f.PropertyName, f.ValueType.FullName, f.ExpressionType))
                 .ToArray();
             if (unsupportedFilters.Any())
                 throw new NotSupportedException(string.Format(
-                    "One or more of the supplied filters is of an unsupported type. Unsupported filters were: {0}",
+                    "One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: {0}",
                     string.Join(", ", unsupportedFilters)));
 
             var formattedFilters = expandedFilters
