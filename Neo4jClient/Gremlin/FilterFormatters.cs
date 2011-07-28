@@ -20,27 +20,31 @@ namespace Neo4jClient.Gremlin
                 })
                 .ToArray();
 
-            IDictionary<Type, string> typeFilterFormats;
+            if (filters.Any(f => !f.ExpressionType.HasValue))
+                throw new ArgumentException("ExpressionType must not be null", "filters");
+
+            IEnumerable<TypeFilter> typeFilterFormats;
             string nullFilterExpression, filterSeparator, concatenatedFiltersFormat;
+
             switch (comparison)
             {
                 case StringComparison.Ordinal:
-                    typeFilterFormats = new Dictionary<Type, string>
+                    typeFilterFormats = new List<TypeFilter>
                     {
-                        { typeof(string), "['{0}':'{1}']" },
-                        { typeof(int), "['{0}':{1}]" },
-                        { typeof(long), "['{0}':{1}]" },
+                        new TypeFilter {Type = typeof(string), FilterFormat = "['{0}':'{1}']", ExpressionType = ExpressionType.Equal},
+                        new TypeFilter {Type =  typeof(int), FilterFormat = "['{0}':{1}]", ExpressionType = ExpressionType.Equal },
+                        new TypeFilter {Type =  typeof(long), FilterFormat = "['{0}':{1}]", ExpressionType = ExpressionType.Equal },
                     };
                     nullFilterExpression = "['{0}':null]";
                     filterSeparator = ",";
                     concatenatedFiltersFormat = "[{0}]";
                     break;
                 case StringComparison.OrdinalIgnoreCase:
-                    typeFilterFormats = new Dictionary<Type, string>
+                    typeFilterFormats = new List<TypeFilter>
                     {
-                        { typeof(string), "it.'{0}'.equalsIgnoreCase('{1}')" },
-                        { typeof(int), "it.'{0}' == {1}" },
-                        { typeof(long), "it.'{0}' == {1}" },
+                        new TypeFilter { Type = typeof(string),FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  },
+                        new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal  },
+                        new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal  },
                     };
                     nullFilterExpression = "it.'{0}' == null";
                     filterSeparator = " && ";
@@ -53,14 +57,15 @@ namespace Neo4jClient.Gremlin
             var expandedFilters =
                 from f in filters
                 let filterValueType = f.Value == null ? null : f.Value.GetType()
-                let supportedType = filterValueType == null || typeFilterFormats.ContainsKey(filterValueType)
+                let supportedType = filterValueType == null || typeFilterFormats.Any(tf=> tf.Type == filterValueType)
                 let filterFormat = supportedType
-                    ? filterValueType == null ? nullFilterExpression : typeFilterFormats[filterValueType]
+                    ? filterValueType == null ? nullFilterExpression : typeFilterFormats.Single(t => t.Type == filterValueType).FilterFormat
                     : null
                 select new
                 {
                     f.PropertyName,
                     f.Value,
+                    f.ExpressionType,
                     SupportedType = supportedType,
                     ValueType = filterValueType,
                     Format = filterFormat
@@ -101,7 +106,6 @@ namespace Neo4jClient.Gremlin
                 : constantValue;
 
             ((IList) simpleFilters).Add(
-
                 new Filter
                     {
                         PropertyName = key.Name,

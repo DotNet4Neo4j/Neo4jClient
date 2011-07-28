@@ -6,6 +6,6 @@ namespace Neo4jClient.Gremlin
     {
         public string PropertyName { get; set; }
         public object Value { get; set; }
-        public ExpressionType ExpressionType { get; set; }
+        public ExpressionType? ExpressionType { get; set; }
     }
 }
