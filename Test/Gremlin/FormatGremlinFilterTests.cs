@@ -245,6 +245,50 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveGreaterThanFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThan},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' > 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveGreaterThanFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThan},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo' > 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveLessThanFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThan},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' < 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveLessThanFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThan},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo' < 123 }", filterText);
+        }
+
+        [Test]
         [ExpectedException(
             typeof(NotSupportedException),
             ExpectedMessage = "One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo of type System.ThreadStaticAttribute, with expression Equal")]
