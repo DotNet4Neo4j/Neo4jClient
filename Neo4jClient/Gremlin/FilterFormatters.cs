@@ -93,8 +93,6 @@ namespace Neo4jClient.Gremlin
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
                 throw new NotSupportedException("Only binary expressions are supported at this time.");
-            if (!(binaryExpression.NodeType == ExpressionType.Equal || binaryExpression.NodeType == ExpressionType.NotEqual))
-                throw new NotSupportedException("Only equality expressions are supported at this time.");
 
             var key = ParseKeyFromExpression(binaryExpression.Left);
             var constantValue = ParseValueFromExpression(binaryExpression.Right);
