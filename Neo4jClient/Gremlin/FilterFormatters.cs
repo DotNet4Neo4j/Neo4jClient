@@ -45,6 +45,10 @@ namespace Neo4jClient.Gremlin
                         new TypeFilter { Type = typeof(string),FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  },
                         new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal  },
                         new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal  },
+
+                        new TypeFilter { Type = typeof(string),FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  },
+                        new TypeFilter { Type = typeof(int), FilterFormat = "!it.'{0}' == {1}", ExpressionType = ExpressionType.NotEqual  },
+                        new TypeFilter { Type = typeof(long), FilterFormat = "!it.'{0}' == {1}", ExpressionType = ExpressionType.NotEqual  },
                     };
                     nullFilterExpression = "it.'{0}' == null";
                     filterSeparator = " && ";
@@ -59,7 +63,7 @@ namespace Neo4jClient.Gremlin
                 let filterValueType = f.Value == null ? null : f.Value.GetType()
                 let supportedType = filterValueType == null || typeFilterFormats.Any(tf=> tf.Type == filterValueType)
                 let filterFormat = supportedType
-                    ? filterValueType == null ? nullFilterExpression : typeFilterFormats.Single(t => t.Type == filterValueType).FilterFormat
+                    ? filterValueType == null ? nullFilterExpression : typeFilterFormats.Single(t => t.Type == filterValueType && t.ExpressionType == f.ExpressionType).FilterFormat
                     : null
                 select new
                 {

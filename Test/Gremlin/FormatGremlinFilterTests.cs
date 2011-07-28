@@ -195,6 +195,17 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveNotEqualFilterWithStringValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.NotEqual  },
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ !it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+        }
+
+        [Test]
         [ExpectedException(
             typeof(NotSupportedException),
             ExpectedMessage = "One or more of the supplied filters is of an unsupported type. Unsupported filters were: Foo of type System.ThreadStaticAttribute")]
