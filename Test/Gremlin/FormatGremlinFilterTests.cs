@@ -209,7 +209,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [TestCase("Foo", "Bar", "{ !it.'Foo'.equals('Bar') }")]
-        [TestCase("Foo", 9223372036854775807, "{ it.'Foo' != 0 }")]
+        [TestCase("Foo", 9223372036854775807, "{ it.'Foo' != 9223372036854775807 }")]
         [TestCase("Foo", 0L, "{ it.'Foo' != 0 }")]
         [Test]
         public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseSensititiveNotEqualFilter(string propertyName, object valueToCompare, string expectedValue)
