@@ -8,5 +8,21 @@ namespace Neo4jClient.Gremlin
         public ExpressionType ExpressionType { get; set; }
         public Type Type { get; set; }
         public string FilterFormat { get; set; }
+
+        public string NullFilterExpression
+        {
+            get
+            {
+                switch (ExpressionType)
+                {
+                    case ExpressionType.Equal:
+                        return "it.'{0}' == null";
+                    case ExpressionType.NotEqual:
+                        return "it.'{0}' != null";
+                    default:
+                        throw new NotSupportedException(string.Format("Expression Type {0} is not supported when comparing with a null value", ExpressionType));
+                }
+            }
+        }
     }
 }

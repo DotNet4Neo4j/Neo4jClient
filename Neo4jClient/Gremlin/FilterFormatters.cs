@@ -24,16 +24,13 @@ namespace Neo4jClient.Gremlin
                 throw new ArgumentException("ExpressionType must not be null", "filters");
 
             IList<TypeFilter> typeFilterFormats = new List<TypeFilter>();
-            string nullFilterExpression, filterSeparator, concatenatedFiltersFormat;
-
             typeFilterFormats.Add(new TypeFilter { Type =  typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
             typeFilterFormats.Add(new TypeFilter { Type =  typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
             typeFilterFormats.Add(new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual  });
             typeFilterFormats.Add(new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual });
-
-            nullFilterExpression = "it.'{0}' == null";
-            filterSeparator = " && ";
-            concatenatedFiltersFormat = "{{ {0} }}";
+            
+            var filterSeparator = " && ";
+            var concatenatedFiltersFormat = "{{ {0} }}";
 
             switch (comparison)
             {
@@ -53,8 +50,9 @@ namespace Neo4jClient.Gremlin
                 from f in filters
                 let filterValueType = f.Value == null ? null : f.Value.GetType()
                 let supportedType = filterValueType == null || typeFilterFormats.Any(tf=> tf.Type == filterValueType)
+                let expressionType = filterValueType == null ? typeFilterFormats.FirstOrDefault(t => t.ExpressionType == f.ExpressionType).FilterFormat : typeFilterFormats.SingleOrDefault(t => t.Type == filterValueType && t.ExpressionType == f.ExpressionType).FilterFormat
                 let filterFormat = supportedType
-                    ? filterValueType == null ? nullFilterExpression : typeFilterFormats.Single(t => t.Type == filterValueType && t.ExpressionType == f.ExpressionType).FilterFormat
+                    ? filterValueType == null ? typeFilterFormats.FirstOrDefault(t => t.ExpressionType == f.ExpressionType).NullFilterExpression : typeFilterFormats.SingleOrDefault(t => t.Type == filterValueType && t.ExpressionType == f.ExpressionType).FilterFormat
                     : null
                 select new
                 {
