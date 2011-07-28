@@ -28,7 +28,7 @@ namespace Neo4jClient.Gremlin
             typeFilterFormats.Add(new TypeFilter { Type =  typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
             typeFilterFormats.Add(new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual  });
             typeFilterFormats.Add(new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual });
-            
+
             var filterSeparator = " && ";
             var concatenatedFiltersFormat = "{{ {0} }}";
 
