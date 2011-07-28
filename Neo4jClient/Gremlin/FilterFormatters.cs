@@ -23,36 +23,27 @@ namespace Neo4jClient.Gremlin
             if (filters.Any(f => !f.ExpressionType.HasValue))
                 throw new ArgumentException("ExpressionType must not be null", "filters");
 
-            IEnumerable<TypeFilter> typeFilterFormats;
+            IList<TypeFilter> typeFilterFormats = new List<TypeFilter>();
             string nullFilterExpression, filterSeparator, concatenatedFiltersFormat;
+
+            typeFilterFormats.Add(new TypeFilter { Type =  typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
+            typeFilterFormats.Add(new TypeFilter { Type =  typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal });
+            typeFilterFormats.Add(new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual  });
+            typeFilterFormats.Add(new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual });
+
+            nullFilterExpression = "it.'{0}' == null";
+            filterSeparator = " && ";
+            concatenatedFiltersFormat = "{{ {0} }}";
 
             switch (comparison)
             {
                 case StringComparison.Ordinal:
-                    typeFilterFormats = new List<TypeFilter>
-                    {
-                        new TypeFilter {Type = typeof(string), FilterFormat = "['{0}':'{1}']", ExpressionType = ExpressionType.Equal},
-                        new TypeFilter {Type =  typeof(int), FilterFormat = "['{0}':{1}]", ExpressionType = ExpressionType.Equal },
-                        new TypeFilter {Type =  typeof(long), FilterFormat = "['{0}':{1}]", ExpressionType = ExpressionType.Equal },
-                    };
-                    nullFilterExpression = "['{0}':null]";
-                    filterSeparator = ",";
-                    concatenatedFiltersFormat = "[{0}]";
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.Equal});
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string),FilterFormat = "!it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.NotEqual  });
                     break;
                 case StringComparison.OrdinalIgnoreCase:
-                    typeFilterFormats = new List<TypeFilter>
-                    {
-                        new TypeFilter { Type = typeof(string),FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  },
-                        new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal  },
-                        new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal  },
-
-                        new TypeFilter { Type = typeof(string),FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  },
-                        new TypeFilter { Type = typeof(int), FilterFormat = "!it.'{0}' == {1}", ExpressionType = ExpressionType.NotEqual  },
-                        new TypeFilter { Type = typeof(long), FilterFormat = "!it.'{0}' == {1}", ExpressionType = ExpressionType.NotEqual  },
-                    };
-                    nullFilterExpression = "it.'{0}' == null";
-                    filterSeparator = " && ";
-                    concatenatedFiltersFormat = "{{ {0} }}";
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string),FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string),FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  });
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));
