@@ -235,6 +235,19 @@ namespace Neo4jClient.Test.Gremlin
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
         }
 
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "Expression is not supported when comparing with a null value.")]
+        public void FormatGremlinFilterShouldThrowNotSupportedExceptionForExpressionsThatAreNotRegisteredInFilterTypesToCompareNulls()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Divide },
+            };
+            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+        }
+
         enum EnumForTesting
         {
             Bar

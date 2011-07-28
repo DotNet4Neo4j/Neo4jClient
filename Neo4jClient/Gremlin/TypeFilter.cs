@@ -20,7 +20,7 @@ namespace Neo4jClient.Gremlin
                     case ExpressionType.NotEqual:
                         return "it.'{0}' != null";
                     default:
-                        throw new NotSupportedException(string.Format("Expression Type {0} is not supported when comparing with a null value", ExpressionType));
+                        throw new NotSupportedException(string.Format("Expression is not supported when comparing with a null value."));
                 }
             }
         }
