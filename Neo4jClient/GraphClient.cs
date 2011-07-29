@@ -42,7 +42,7 @@ namespace Neo4jClient
                     client.BaseUrl),
                     response.ErrorException);
 
-            if (response.StatusCode != HttpStatusCode.OK)
+           if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
                     "Received a non-200 HTTP response when connecting to the server. The response status was: {0} {1}",
                     (int)response.StatusCode,
