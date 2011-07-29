@@ -31,10 +31,14 @@ namespace Neo4jClient.Gremlin
                 new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual },
                 new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' > {1}", ExpressionType = ExpressionType.GreaterThan},
                 new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' < {1}", ExpressionType = ExpressionType.LessThan},
+                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
+                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
                 new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal },
                 new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual },
                 new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' > {1}", ExpressionType = ExpressionType.GreaterThan},
                 new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' < {1}", ExpressionType = ExpressionType.LessThan},
+                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
+                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
             };
 
             const string filterSeparator = " && ";
@@ -47,12 +51,16 @@ namespace Neo4jClient.Gremlin
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.NotEqual  });
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareTo('{1}') > 0", ExpressionType = ExpressionType.GreaterThan });
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareTo('{1}') < 0", ExpressionType = ExpressionType.LessThan });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareTo('{1}') >= 0", ExpressionType = ExpressionType.GreaterThanOrEqual });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareTo('{1}') <= 0", ExpressionType = ExpressionType.LessThanOrEqual });
                     break;
                 case StringComparison.OrdinalIgnoreCase:
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  });
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  });
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareToIgnoreCase('{1}') > 0", ExpressionType = ExpressionType.GreaterThan });
                         typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareToIgnoreCase('{1}') < 0", ExpressionType = ExpressionType.LessThan });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareToIgnoreCase('{1}') >= 0", ExpressionType = ExpressionType.GreaterThanOrEqual });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.compareToIgnoreCase('{1}') <= 0", ExpressionType = ExpressionType.LessThanOrEqual });
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));

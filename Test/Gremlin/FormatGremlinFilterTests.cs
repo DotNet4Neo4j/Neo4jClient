@@ -333,6 +333,94 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveGreaterThanOrEqualFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' >= 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveGreaterThanOrEqualFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo' >= 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveLessThanOrEqualFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' <= 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveLessThanOrEqualFilterWithIntValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo' <= 123 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveGreaterThanOrEqualFilterWithLongValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.GreaterThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' >= 9223372036854775807 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveGreaterThanOrEqualFilterWithLongValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.GreaterThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo' >= 9223372036854775807 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveLessThanOrEqualFilterWithLongValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.LessThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo' <= 9223372036854775807 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveLessThanOrEqualFilterWithLongValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.LessThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo' <= 9223372036854775807 }", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveGreaterThanFilterWithStringValue()
         {
             var filters = new List<Filter>
@@ -355,6 +443,28 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveGreaterThanOrEqualFilterWithStringValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.GreaterThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo'.compareToIgnoreCase('Bar') >= 0 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveGreaterThanOrEqualFilterWithStringValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.GreaterThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo'.compareTo('Bar') >= 0 }", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveLessThanFilterWithStringValue()
         {
             var filters = new List<Filter>
@@ -374,6 +484,28 @@ namespace Neo4jClient.Test.Gremlin
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
             Assert.AreEqual("{ it.'Foo'.compareTo('Bar') < 0 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseInsensititiveLessThanOrEqualFilterWithStringValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.LessThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo'.compareToIgnoreCase('Bar') <= 0 }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveLessThanOrEqualFilterWithStringValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.LessThanOrEqual},
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo'.compareTo('Bar') <= 0 }", filterText);
         }
 
         [Test]
