@@ -340,7 +340,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.GreaterThan},
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo'.toLowerCase().greaterThan('Bar'.toLowerCase()) }", filterText);
+            Assert.AreEqual("{ it.'Foo'.compareToIgnoreCase('Bar') > 0 }", filterText);
         }
 
         [Test]
@@ -351,7 +351,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.GreaterThan},
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo'.greaterThan('Bar') }", filterText);
+            Assert.AreEqual("{ it.'Foo'.compareTo('Bar') > 0 }", filterText);
         }
 
         [Test]
@@ -362,7 +362,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.LessThan},
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo'.toLowerCase().lessThan('Bar'.toLowerCase()) }", filterText);
+            Assert.AreEqual("{ it.'Foo'.compareToIgnoreCase('Bar') < 0 }", filterText);
         }
 
         [Test]
@@ -373,7 +373,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.LessThan},
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo'.lessThan('Bar') }", filterText);
+            Assert.AreEqual("{ it.'Foo'.compareTo('Bar') < 0 }", filterText);
         }
 
         [Test]
