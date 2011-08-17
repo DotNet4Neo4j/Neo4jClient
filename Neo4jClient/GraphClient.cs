@@ -83,8 +83,7 @@ namespace Neo4jClient
                 })
                 .ToArray();
 
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var request = new RestRequest(RootApiResponse.Node, Method.POST)
             {
@@ -183,8 +182,7 @@ namespace Neo4jClient
 
         public void DeleteRelationship(RelationshipReference reference)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var relationshipEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(relationshipEndpoint, Method.DELETE);
@@ -205,8 +203,7 @@ namespace Neo4jClient
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var nodeEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(nodeEndpoint, Method.GET);
@@ -231,8 +228,7 @@ namespace Neo4jClient
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var node = Get(nodeReference);
             updateCallback(node.Data);
@@ -257,8 +253,7 @@ namespace Neo4jClient
 
         public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             if (mode == DeleteMode.NodeAndRelationships)
             {
@@ -321,8 +316,7 @@ namespace Neo4jClient
 
         public virtual string ExecuteScalarGremlin(string query)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
@@ -342,8 +336,7 @@ namespace Neo4jClient
 
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
@@ -364,8 +357,7 @@ namespace Neo4jClient
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query)
         {
-            if (RootApiResponse == null)
-                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
+            CheckRoot();
 
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
@@ -384,8 +376,16 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
 
+        void CheckRoot()
+        {
+            if (RootApiResponse == null)
+                throw new InvalidOperationException(
+                    "The graph client is not connected to the server. Call the Connect method first.");
+        }
+
         public void CreateIndex(string mame, IndexConfiguration config)
         {
+            CheckRoot();
             throw new NotImplementedException();
         }
     }
