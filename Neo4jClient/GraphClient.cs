@@ -400,9 +400,18 @@ namespace Neo4jClient
                     throw new NotSupportedException(string.Format("Create Index does not support indexfor {0}", indexfor));
             }
 
-            var request = new RestRequest(nodeResource, Method.POST);
-            request.AddParameter("name", indexName );
-            request.AddParameter("config", config);
+            var request = new RestRequest(nodeResource, Method.POST)
+                {
+                    RequestFormat = DataFormat.Json
+                };
+
+            var createIndexApiRequest = new CreateIndexApiRequest
+                {
+                    Name = indexName,
+                    Configuration = config
+                };
+
+            request.AddBody(request.JsonSerializer.Serialize(createIndexApiRequest));
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.OK)
