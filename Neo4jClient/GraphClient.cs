@@ -439,7 +439,7 @@ namespace Neo4jClient
             {
                 var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, update.IndexName, update.Key, update.Value });
                 var request = new RestRequest(nodeIndexAddress, Method.POST) { RequestFormat = DataFormat.Json };
-                request.AddBody(request.JsonSerializer.Serialize(nodeAddress));
+                request.AddBody(request.JsonSerializer.Serialize(string.Join("",client.BaseUrl, nodeAddress)));
 
                 var response = client.Execute(request);
 
