@@ -29,7 +29,7 @@ namespace Neo4jClient
 
         IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query);
 
-        void CreateIndex(string mame, IndexConfiguration config);
+        void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor);
 
     }
 }

@@ -383,10 +383,34 @@ namespace Neo4jClient
                     "The graph client is not connected to the server. Call the Connect method first.");
         }
 
-        public void CreateIndex(string mame, IndexConfiguration config)
+        public void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexfor)
         {
             CheckRoot();
-            throw new NotImplementedException();
+
+            string nodeResource;
+            switch (indexfor)
+            {
+                case IndexFor.Node:
+                    nodeResource = RootApiResponse.NodeIndex;
+                    break;
+                case IndexFor.Relationship:
+                    nodeResource = RootApiResponse.RelationshipIndex;
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("Create Index does not support indexfor {0}", indexfor));
+            }
+
+            var request = new RestRequest(nodeResource, Method.POST);
+            request.AddParameter("name", indexName );
+            request.AddParameter("config", config);
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    indexName,
+                    (int)response.StatusCode,
+                    response.StatusDescription));
         }
     }
 }
