@@ -64,6 +64,7 @@
     <Compile Include="Gremlin\IGremlinRelationshipQuery.cs" />
     <Compile Include="Gremlin\TypeFilter.cs" />
     <Compile Include="IndexConfiguration.cs" />
+    <Compile Include="IndexEntry.cs" />
     <Compile Include="IndexFor.cs" />
     <Compile Include="IndexProvider.cs" />
     <Compile Include="IndexType.cs" />
