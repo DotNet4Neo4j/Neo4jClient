@@ -52,6 +52,7 @@
     <Compile Include="Deserializer\CustomJsonDeSerializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
     <Compile Include="ExtensionsApiResponse.cs" />
+    <Compile Include="GraphClientExtensions.cs" />
     <Compile Include="GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\Back.cs" />
     <Compile Include="Gremlin\FilterFormatters.cs" />
