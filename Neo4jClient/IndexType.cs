@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
-    public internal enum IndexType
+    public enum IndexType
     {
         [JsonProperty("fulltext")]
         FullText,
