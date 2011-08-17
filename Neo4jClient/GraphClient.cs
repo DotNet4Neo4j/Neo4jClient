@@ -405,10 +405,10 @@ namespace Neo4jClient
                     RequestFormat = DataFormat.Json
                 };
 
-            var createIndexApiRequest = new CreateIndexApiRequest
+            var createIndexApiRequest = new
                 {
-                    Name = indexName,
-                    Configuration = config
+                    name = indexName,
+                    config
                 };
 
             request.AddBody(request.JsonSerializer.Serialize(createIndexApiRequest));
