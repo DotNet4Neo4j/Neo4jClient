@@ -24,9 +24,9 @@
     <Lollipop Position="0.2" />
   </Class>
   <Interface Name="Neo4jClient.IGraphClient">
-    <Position X="0.5" Y="0.5" Width="1.5" />
+    <Position X="0.5" Y="0.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AgQQAAABAAAAAABAAAAAAAAAAAEAAEAAIAAAAAAAABQ=</HashCode>
+      <HashCode>AgQQAAABAAAAAABAABAAAAAAAAEAAEAAIAAAAAAAABQ=</HashCode>
       <FileName>IGraphClient.cs</FileName>
     </TypeIdentifier>
   </Interface>

@@ -28,5 +28,8 @@ namespace Neo4jClient
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query);
 
         IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query);
+
+        void CreateIndex(string mame, IndexConfiguration config);
+
     }
 }

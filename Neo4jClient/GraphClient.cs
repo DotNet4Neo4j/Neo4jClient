@@ -383,5 +383,10 @@ namespace Neo4jClient
                 ? Enumerable.Empty<RelationshipInstance>()
                 : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
+
+        public void CreateIndex(string mame, IndexConfiguration config)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
