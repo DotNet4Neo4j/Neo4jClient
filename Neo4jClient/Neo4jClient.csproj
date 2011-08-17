@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmbiguousRelationshipDirectionException.cs" />
+    <Compile Include="CreateIndexApiRequest.cs" />
     <Compile Include="DeleteMode.cs" />
     <Compile Include="Deserializer\CustomJsonDeSerializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
