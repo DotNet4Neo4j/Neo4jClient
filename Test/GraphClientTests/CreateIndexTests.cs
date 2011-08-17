@@ -23,7 +23,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAndIndexOfTypeFullText()
+        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration
@@ -77,7 +77,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAndIndexOfTypeExact()
+        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeExact()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration
@@ -131,7 +131,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAndIndexForRelationship()
+        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexForRelationship()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration
