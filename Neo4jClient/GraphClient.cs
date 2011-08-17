@@ -66,7 +66,35 @@ namespace Neo4jClient
             get { return new RootNode(this); }
         }
 
-        public virtual NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships) where TNode : class
+        public void AddNodeToIndexEntries(NodeReference node, IEnumerable<IndexEntry> indexEntries)
+        {
+            CheckRoot();
+
+            var nodeAddress = string.Join("/", new [] {RootApiResponse.Node, node.Id.ToString()});
+
+            var updates = indexEntries
+                .SelectMany(
+                    i => i.KeyValues,
+                    (i, kv) => new { IndexName = i.Name, kv.Key, kv.Value });
+
+            foreach (var update in updates)
+            {
+                var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, update.IndexName, update.Key, update.Value });
+                var request = new RestRequest(nodeIndexAddress, Method.POST) { RequestFormat = DataFormat.Json };
+                request.AddBody(request.JsonSerializer.Serialize(nodeAddress));
+
+                var response = client.Execute(request);
+
+                if (response.StatusCode != HttpStatusCode.OK)
+                    throw new NotSupportedException(string.Format(
+                        "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                        update.IndexName,
+                        (int) response.StatusCode,
+                        response.StatusDescription));
+            }
+        }
+
+        public virtual NodeReference<TNode> Create<TNode>(TNode node,  IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries ) where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
@@ -128,6 +156,8 @@ namespace Neo4jClient
                     relationship.Relationship.RelationshipTypeKey,
                     relationship.Relationship.Data);
             }
+
+            AddNodeToIndexEntries(nodeReference, indexEntries);
 
             return nodeReference;
         }

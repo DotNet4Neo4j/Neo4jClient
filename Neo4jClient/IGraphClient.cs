@@ -7,7 +7,9 @@ namespace Neo4jClient
     {
         RootNode RootNode { get; }
 
-        NodeReference<TNode> Create<TNode>(TNode node, params IRelationshipAllowingParticipantNode<TNode>[] relationships)
+        void AddNodeToIndexEntries(NodeReference node, IEnumerable<IndexEntry> indexEntries);
+
+        NodeReference<TNode> Create<TNode>(TNode node, IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries)
             where TNode : class;
 
         Node<TNode> Get<TNode>(NodeReference reference);
