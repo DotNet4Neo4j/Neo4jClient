@@ -7,8 +7,6 @@ namespace Neo4jClient
     {
         RootNode RootNode { get; }
 
-        void AddNodeToIndexEntries(NodeReference node, IEnumerable<IndexEntry> indexEntries);
-
         NodeReference<TNode> Create<TNode>(TNode node, IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries)
             where TNode : class;
 
@@ -33,5 +31,6 @@ namespace Neo4jClient
 
         void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor);
 
+        void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries);
     }
 }
