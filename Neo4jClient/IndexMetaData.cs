@@ -6,8 +6,6 @@ namespace Neo4jClient
 
         public string Template { get; set; }
 
-        public string Blueprints { get; set; }
-
         public string Provider { get; set; }
 
         public string Type { get; set; }
