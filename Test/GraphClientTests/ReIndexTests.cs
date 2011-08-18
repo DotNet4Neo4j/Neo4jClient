@@ -29,7 +29,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             //Arrange
             IDictionary<string, object> indexkeyValues = new Dictionary<string, object>();
-            indexkeyValues.Add("FooKey", "the_value%20with%20space");
+            indexkeyValues.Add("FooKey", "the_value with space");
             var indexEntries = new List<IndexEntry>
                 {
                    new IndexEntry

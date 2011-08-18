@@ -438,23 +438,41 @@ namespace Neo4jClient
 
             foreach (var update in updates)
             {
-                var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, update.IndexName, update.Key, update.Value });
-                var request = new RestRequest(nodeIndexAddress, Method.POST)
+                if (update.Value == null)
+                    break;
+
+                string indexValue;
+                if(update.Value is DateTimeOffset)
                 {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-                };
-                request.AddBody(string.Join("",client.BaseUrl, nodeAddress));
+                    indexValue = ((DateTimeOffset) update.Value).Ticks.ToString();
+                }
+                else
+                {
+                    indexValue = update.Value.ToString();
+                }
 
-                var response = client.Execute(request);
-
-                if (response.StatusCode != HttpStatusCode.Created)
-                    throw new NotSupportedException(string.Format(
-                        "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
-                        update.IndexName,
-                        (int)response.StatusCode,
-                        response.StatusDescription));
+                AddNodeToIndex(update.IndexName, update.Key, indexValue, nodeAddress);
             }
+        }
+
+        void AddNodeToIndex(string indexName, string indexKey, string indexValue, string nodeAddress)
+        {
+            var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, indexName, indexKey, indexValue });
+            var request = new RestRequest(nodeIndexAddress, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(string.Join("", client.BaseUrl, nodeAddress));
+
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.Created)
+                throw new NotSupportedException(string.Format(
+                    "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    indexName,
+                    (int)response.StatusCode,
+                    response.StatusDescription));
         }
 
     }
