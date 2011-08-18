@@ -78,6 +78,61 @@ namespace Neo4jClient.Test.GraphClientTests
             // Assert
             Assert.Pass("Method executed successfully.");
         }
+
+        [Test]
+        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeFullTextWithADateTimeOffsetIndexValue()
+        {
+            //Arrange
+            IDictionary<string, object> indexkeyValues = new Dictionary<string, object>();
+            indexkeyValues.Add("FooKey", new DateTimeOffset(1000L,new TimeSpan(0)));
+            var indexEntries = new List<IndexEntry>
+                {
+                   new IndexEntry
+                       {
+                           Name = "my_nodes",
+                           KeyValues = indexkeyValues,
+                       }
+                };
+
+
+            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/1000", Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+            };
+
+            restRequest.AddBody("http://foo/db/data/node/123");
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = RootResponse.Replace('\'', '"')
+                    }
+                },
+                {
+                    restRequest,
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.Created,
+                        ContentType = "application/json",
+                        Content = "Location: http://foo/db/data/index/node/my_nodes/FooKey/1000/123"
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var nodeReference = new NodeReference<TestNode>(123);
+            graphClient.ReIndex(nodeReference, indexEntries);
+
+            // Assert
+            Assert.Pass("Method executed successfully.");
+        }
     }
 
     public class TestNode
