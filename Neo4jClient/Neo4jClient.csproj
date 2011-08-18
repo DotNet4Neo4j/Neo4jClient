@@ -67,6 +67,7 @@
     <Compile Include="IndexConfiguration.cs" />
     <Compile Include="IndexEntry.cs" />
     <Compile Include="IndexFor.cs" />
+    <Compile Include="IndexMetaData.cs" />
     <Compile Include="IndexProvider.cs" />
     <Compile Include="IndexType.cs" />
     <Compile Include="IRelationshipAllowingParticipantNode`TNode.cs" />
