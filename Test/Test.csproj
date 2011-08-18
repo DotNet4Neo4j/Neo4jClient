@@ -65,6 +65,7 @@
     <Compile Include="GraphClientTests\CreateIndexTests.cs" />
     <Compile Include="GraphClientTests\ExecuteGetAllRelationshipsGremlinTests.cs" />
     <Compile Include="GraphClientTests\DeleteRelationshipTests.cs" />
+    <Compile Include="GraphClientTests\QueryNodeIndexTests.cs" />
     <Compile Include="GraphClientTests\ReIndexTests.cs" />
     <Compile Include="GraphClientTests\RootNodeTests.cs" />
     <Compile Include="GraphClientTests\UpdateNodeTests.cs" />
