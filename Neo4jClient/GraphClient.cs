@@ -404,7 +404,7 @@ namespace Neo4jClient
             
             var createIndexApiRequest = new
             {
-                name = indexName,
+                name = indexName.ToLower(),
                 config
             };
 

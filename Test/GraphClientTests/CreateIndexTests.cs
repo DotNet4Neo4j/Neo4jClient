@@ -30,8 +30,8 @@ namespace Neo4jClient.Test.GraphClientTests
             //Arrange
             var indexConfiguration = new IndexConfiguration
                 {
-                    Provider = IndexProvider.Lucene,
-                    Type = IndexType.FullText
+                    Provider = IndexProvider.lucene,
+                    Type = IndexType.fulltext
 
                 };
 
@@ -83,8 +83,8 @@ namespace Neo4jClient.Test.GraphClientTests
             //Arrange
             var indexConfiguration = new IndexConfiguration
             {
-                Provider = IndexProvider.Lucene,
-                Type = IndexType.Exact
+                Provider = IndexProvider.lucene,
+                Type = IndexType.exact
 
             };
 
@@ -136,8 +136,8 @@ namespace Neo4jClient.Test.GraphClientTests
             //Arrange
             var indexConfiguration = new IndexConfiguration
             {
-                Provider = IndexProvider.Lucene,
-                Type = IndexType.Exact
+                Provider = IndexProvider.lucene,
+                Type = IndexType.exact
 
             };
 
@@ -190,8 +190,8 @@ namespace Neo4jClient.Test.GraphClientTests
             //Arrange
             var indexConfiguration = new IndexConfiguration
             {
-                Provider = IndexProvider.Lucene,
-                Type = IndexType.Exact
+                Provider = IndexProvider.lucene,
+                Type = IndexType.exact
 
             };
 
