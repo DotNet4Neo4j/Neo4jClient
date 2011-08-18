@@ -76,7 +76,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.GetIndexes(IndexFor.Node);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.Pass("Success.");
         }
 
         [Test]

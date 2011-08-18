@@ -76,7 +76,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.ReIndex(nodeReference, indexEntries);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.Pass("Success.");
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.ReIndex(nodeReference, indexEntries);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.Pass("Success.");
         }
     }
 

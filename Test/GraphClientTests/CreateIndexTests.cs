@@ -74,7 +74,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Node);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.Pass("Success.");
         }
 
         [Test]
@@ -127,7 +127,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Node);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.Pass("Success.");
         }
 
         [Test]
@@ -180,7 +180,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Relationship);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.Pass("Success.");
         }
 
         [Test]
