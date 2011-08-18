@@ -575,13 +575,25 @@ namespace Neo4jClient
                     response.StatusDescription));
         }
 
-        public IEnumerable<Node<TNode>> QueryNodeIndex<TNode>(string indexName, string query)
+        public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
         {
             CheckRoot();
 
-            var nodeResource = RootApiResponse.NodeIndex;
+            string indexResource;
 
-            var request = new RestRequest(nodeResource + "/" + indexName, Method.GET)
+            switch (indexFor)
+            {
+                case IndexFor.Node:
+                    indexResource = RootApiResponse.NodeIndex;
+                    break;
+                case IndexFor.Relationship:
+                    indexResource = RootApiResponse.RelationshipIndex;
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("QueryIndex does not support indexfor {0}", indexFor));
+            }
+
+            var request = new RestRequest(indexResource + "/" + indexName, Method.GET)
                 {
                     RequestFormat = DataFormat.Json,
                     JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
@@ -589,16 +601,18 @@ namespace Neo4jClient
 
             request.AddParameter("query", query);
 
-            var response = client.Execute<List<Node<TNode>>>(request);
+            var response = client.Execute<List<NodeApiResponse<TNode>>>(request);
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when querying an index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                     indexName,
                     (int) response.StatusCode,
                     response.StatusDescription));
 
-            return response.Data;
+            return response.Data == null
+           ? Enumerable.Empty<Node<TNode>>()
+           : response.Data.Select(r => r.ToNode(this));
         }
 }
 }
