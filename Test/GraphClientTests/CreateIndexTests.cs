@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
+using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -39,13 +41,12 @@ namespace Neo4jClient.Test.GraphClientTests
                 config = indexConfiguration
             };
 
-            var restRequest = new RestRequest
+            var restRequest = new RestRequest("/index/node", Method.POST)
             {
-                Resource = "/index/node",
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
-            restRequest.AddBody(restRequest.JsonSerializer.Serialize(createIndexApiRequest));
+            restRequest.AddBody(createIndexApiRequest);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -93,13 +94,12 @@ namespace Neo4jClient.Test.GraphClientTests
                 config = indexConfiguration
             };
 
-            var restRequest = new RestRequest
+            var restRequest = new RestRequest("/index/node", Method.POST)
             {
-                Resource = "/index/node",
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
-            restRequest.AddBody(restRequest.JsonSerializer.Serialize(createIndexApiRequest));
+            restRequest.AddBody(createIndexApiRequest);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -147,13 +147,12 @@ namespace Neo4jClient.Test.GraphClientTests
                 config = indexConfiguration
             };
 
-            var restRequest = new RestRequest
+            var restRequest = new RestRequest("/index/relationship", Method.POST)
             {
-                Resource = "/index/relationship",
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
-            restRequest.AddBody(restRequest.JsonSerializer.Serialize(createIndexApiRequest));
+            restRequest.AddBody(createIndexApiRequest);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -202,13 +201,12 @@ namespace Neo4jClient.Test.GraphClientTests
                 config = indexConfiguration
             };
 
-            var restRequest = new RestRequest
+            var restRequest = new RestRequest("/index/relationship", Method.POST)
             {
-                Resource = "/index/relationship",
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
-            restRequest.AddBody(restRequest.JsonSerializer.Serialize(createIndexApiRequest));
+            restRequest.AddBody(createIndexApiRequest);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {

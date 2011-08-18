@@ -401,19 +401,20 @@ namespace Neo4jClient
                 default:
                     throw new NotSupportedException(string.Format("Create Index does not support indexfor {0}", indexfor));
             }
+            
+            var createIndexApiRequest = new
+            {
+                name = indexName,
+                config
+            };
 
             var request = new RestRequest(nodeResource, Method.POST)
-                {
-                    RequestFormat = DataFormat.Json
-                };
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(createIndexApiRequest);
 
-            var createIndexApiRequest = new
-                {
-                    name = indexName,
-                    config
-                };
-
-            request.AddBody(request.JsonSerializer.Serialize(createIndexApiRequest));
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.OK)
@@ -438,8 +439,12 @@ namespace Neo4jClient
             foreach (var update in updates)
             {
                 var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, update.IndexName, update.Key, update.Value });
-                var request = new RestRequest(nodeIndexAddress, Method.POST) { RequestFormat = DataFormat.Json };
-                request.AddBody(request.JsonSerializer.Serialize(string.Join("",client.BaseUrl, nodeAddress)));
+                var request = new RestRequest(nodeIndexAddress, Method.POST)
+                {
+                    RequestFormat = DataFormat.Json,
+                    JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                };
+                request.AddBody(string.Join("",client.BaseUrl, nodeAddress));
 
                 var response = client.Execute(request);
 

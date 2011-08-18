@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
+using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -37,13 +39,14 @@ namespace Neo4jClient.Test.GraphClientTests
                        }
                 };
 
-            var restRequest = new RestRequest
+
+            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/the_value%20with%20space", Method.POST)
             {
-                Resource = "/index/node/my_nodes/FooKey/the_value%20with%20space",
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
-            restRequest.AddBody(restRequest.JsonSerializer.Serialize("http://foo/db/data/node/123"));
+
+            restRequest.AddBody("http://foo/db/data/node/123");
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
