@@ -26,9 +26,9 @@ namespace Neo4jClient
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
         {
             JsonSerializerNullValueHandling = NullValueHandling.Ignore;
-            client = new RestClient(rootUri.AbsoluteUri) { HttpFactory = httpFactory };
+            client = new RestClient(rootUri.AbsoluteUri) {HttpFactory = httpFactory};
             client.RemoveHandler("application/json");
-            client.AddHandler("application/json",new CustomJsonDeserializer());
+            client.AddHandler("application/json", new CustomJsonDeserializer());
         }
 
         public virtual void Connect()
@@ -40,12 +40,12 @@ namespace Neo4jClient
                 throw new ApplicationException(string.Format(
                     "Failed to connect to server at {0}. Failure details are described in the inner exception.",
                     client.BaseUrl),
-                    response.ErrorException);
+                                               response.ErrorException);
 
-           if (response.StatusCode != HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
                     "Received a non-200 HTTP response when connecting to the server. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             RootApiResponse = response.Data;
@@ -66,7 +66,10 @@ namespace Neo4jClient
             get { return new RootNode(this); }
         }
 
-        public virtual NodeReference<TNode> Create<TNode>(TNode node,  IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries ) where TNode : class
+        public virtual NodeReference<TNode> Create<TNode>(TNode node,
+                                                          IEnumerable<IRelationshipAllowingParticipantNode<TNode>>
+                                                              relationships, IEnumerable<IndexEntry> indexEntries)
+            where TNode : class
         {
             if (node == null)
                 throw new ArgumentNullException("node");
@@ -77,26 +80,26 @@ namespace Neo4jClient
             var calculatedRelationships = relationships
                 .Cast<Relationship>()
                 .Select(r => new
-                {
-                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof(TNode), r),
-                    Relationship = r
-                })
+                    {
+                        CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof (TNode), r),
+                        Relationship = r
+                    })
                 .ToArray();
 
             CheckRoot();
 
             var request = new RestRequest(RootApiResponse.Node, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
+                {
+                    RequestFormat = DataFormat.Json,
+                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                };
             request.AddBody(node);
             var response = client.Execute(request);
 
             if (response.StatusCode != HttpStatusCode.Created)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             var nodeLocation = response.Headers.GetParameter("Location");
@@ -119,7 +122,8 @@ namespace Neo4jClient
                         break;
                     default:
                         throw new NotSupportedException(string.Format(
-                            "The specified relationship direction is not supported: {0}", relationship.CalculatedDirection));
+                            "The specified relationship direction is not supported: {0}",
+                            relationship.CalculatedDirection));
                 }
 
                 CreateRelationship(
@@ -151,21 +155,22 @@ namespace Neo4jClient
                 relationship.Data);
         }
 
-        void CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey, object data)
+        void CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey,
+                                object data)
         {
             var relationship = new RelationshipTemplate
-            {
-                To = client.BaseUrl + ResolveEndpoint(targetNode),
-                Data = data,
-                Type = relationshipTypeKey
-            };
+                {
+                    To = client.BaseUrl + ResolveEndpoint(targetNode),
+                    Data = data,
+                    Type = relationshipTypeKey
+                };
 
             var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";
             var request = new RestRequest(sourceNodeEndpoint, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
+                {
+                    RequestFormat = DataFormat.Json,
+                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                };
             request.AddBody(relationship);
             var response = client.Execute(request);
 
@@ -178,7 +183,7 @@ namespace Neo4jClient
             if (response.StatusCode != HttpStatusCode.Created)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
         }
 
@@ -193,13 +198,13 @@ namespace Neo4jClient
             if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new ApplicationException(string.Format(
                     "Unable to delete the relationship. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             if (response.StatusCode != HttpStatusCode.NoContent)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
         }
 
@@ -217,7 +222,7 @@ namespace Neo4jClient
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             return response.Data.ToNode(this);
@@ -237,10 +242,10 @@ namespace Neo4jClient
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
+                {
+                    RequestFormat = DataFormat.Json,
+                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                };
             request.AddBody(node.Data);
             var response = client.Execute(request);
 
@@ -248,7 +253,7 @@ namespace Neo4jClient
             {
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
             }
         }
@@ -269,13 +274,13 @@ namespace Neo4jClient
             if (response.StatusCode == HttpStatusCode.Conflict)
                 throw new ApplicationException(string.Format(
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             if (response.StatusCode != HttpStatusCode.NoContent)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
         }
 
@@ -297,7 +302,7 @@ namespace Neo4jClient
             }
         }
 
-        private string ResolveEndpoint(NodeReference node)
+        string ResolveEndpoint(NodeReference node)
         {
             return RootApiResponse.Node + "/" + node.Id;
         }
@@ -330,7 +335,7 @@ namespace Neo4jClient
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
                     query,
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             return response.Content;
@@ -349,12 +354,12 @@ namespace Neo4jClient
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
                     query,
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             return response.Data == null
-                ? Enumerable.Empty<Node<TNode>>()
-                : response.Data.Select(r => r.ToNode(this));
+                       ? Enumerable.Empty<Node<TNode>>()
+                       : response.Data.Select(r => r.ToNode(this));
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query)
@@ -370,12 +375,12 @@ namespace Neo4jClient
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
                     query,
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
 
             return response.Data == null
-                ? Enumerable.Empty<RelationshipInstance>()
-                : response.Data.Select(r => r.ToRelationshipInstance(this));
+                       ? Enumerable.Empty<RelationshipInstance>()
+                       : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
 
         void CheckRoot()
@@ -401,18 +406,18 @@ namespace Neo4jClient
                 default:
                     throw new NotSupportedException(string.Format("Create Index does not support indexfor {0}", indexfor));
             }
-            
+
             var createIndexApiRequest = new
-            {
-                name = indexName.ToLower(),
-                config
-            };
+                {
+                    name = indexName.ToLower(),
+                    config
+                };
 
             var request = new RestRequest(nodeResource, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
+                {
+                    RequestFormat = DataFormat.Json,
+                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                };
             request.AddBody(createIndexApiRequest);
 
             var response = client.Execute(request);
@@ -421,7 +426,7 @@ namespace Neo4jClient
                 throw new NotSupportedException(string.Format(
                     "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                     indexName,
-                    (int)response.StatusCode,
+                    (int) response.StatusCode,
                     response.StatusDescription));
         }
 
@@ -429,22 +434,27 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            var nodeAddress = string.Join("/", new[] { RootApiResponse.Node, node.Id.ToString() });
+            var nodeAddress = string.Join("/", new[] {RootApiResponse.Node, node.Id.ToString()});
 
             var updates = indexEntries
                 .SelectMany(
                     i => i.KeyValues,
-                    (i, kv) => new { IndexName = i.Name, kv.Key, kv.Value });
+                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value});
 
             foreach (var update in updates)
             {
-                var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, update.IndexName, update.Key, update.Value });
+                var nodeIndexAddress = string.Join("/",
+                                                   new[]
+                                                       {
+                                                           RootApiResponse.NodeIndex, update.IndexName, update.Key,
+                                                           update.Value
+                                                       });
                 var request = new RestRequest(nodeIndexAddress, Method.POST)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-                };
-                request.AddBody(string.Join("",client.BaseUrl, nodeAddress));
+                    {
+                        RequestFormat = DataFormat.Json,
+                        JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                    };
+                request.AddBody(string.Join("", client.BaseUrl, nodeAddress));
 
                 var response = client.Execute(request);
 
@@ -452,10 +462,35 @@ namespace Neo4jClient
                     throw new NotSupportedException(string.Format(
                         "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                         update.IndexName,
-                        (int)response.StatusCode,
+                        (int) response.StatusCode,
                         response.StatusDescription));
             }
         }
 
-    }
+        public IEnumerable<Node<TNode>> QueryNodeIndex<TNode>(string indexName, string query)
+        {
+            CheckRoot();
+
+            var nodeResource = RootApiResponse.NodeIndex;
+
+            var request = new RestRequest(nodeResource + "/" + indexName, Method.GET)
+                {
+                    RequestFormat = DataFormat.Json,
+                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                };
+
+            request.AddParameter("query", query);
+
+            var response = client.Execute<List<Node<TNode>>>(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new NotSupportedException(string.Format(
+                    "Received an unexpected HTTP status when querying an index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    indexName,
+                    (int) response.StatusCode,
+                    response.StatusDescription));
+
+            return response.Data;
+        }
+}
 }
