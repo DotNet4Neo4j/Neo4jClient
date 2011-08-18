@@ -62,7 +62,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 {
                     restRequest,
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.OK,
+                        StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
                         Content = "Location: http://foo/db/data/index/node/my_nodes/FooKey/the_value%20with%20space/123"
                     }

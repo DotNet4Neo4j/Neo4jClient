@@ -62,7 +62,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 {
                     restRequest,
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.OK,
+                        StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
                     }
                 }
@@ -115,7 +115,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 {
                     restRequest,
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.OK,
+                        StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
                     }
                 }
@@ -168,7 +168,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 {
                     restRequest,
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.OK,
+                        StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
                     }
                 }
