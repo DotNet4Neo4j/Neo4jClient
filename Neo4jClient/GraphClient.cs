@@ -410,7 +410,7 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing GetIndexes.\r\n\r\n\r\nThe response status was: {0} {1}",
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\n\r\nThe response status was: {0} {1}",
                     (int)response.StatusCode,
                     response.StatusDescription));
 
@@ -486,7 +486,7 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.Created)
                 throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    "Received an unexpected HTTP status when executing the request..\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                     indexName,
                     (int) response.StatusCode,
                     response.StatusDescription));
@@ -522,6 +522,39 @@ namespace Neo4jClient
             }
         }
 
+        public void DeleteIndex(string indexName, IndexFor indexFor)
+        {
+            CheckRoot();
+
+            string indexResource;
+            switch (indexFor)
+            {
+                case IndexFor.Node:
+                    indexResource = RootApiResponse.NodeIndex;
+                    break;
+                case IndexFor.Relationship:
+                    indexResource = RootApiResponse.RelationshipIndex;
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("DeleteIndex does not support indexfor {0}", indexFor));
+            }
+
+            var request = new RestRequest(string.Format("{0}/{1}", indexResource, indexName), Method.DELETE)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+
+            var response = client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.NoContent)
+                throw new NotSupportedException(string.Format(
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    indexName,
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+        }
+
         void AddNodeToIndex(string indexName, string indexKey, string indexValue, string nodeAddress)
         {
             var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, indexName, indexKey, indexValue });
@@ -536,7 +569,7 @@ namespace Neo4jClient
 
             if (response.StatusCode != HttpStatusCode.Created)
                 throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                     indexName,
                     (int)response.StatusCode,
                     response.StatusDescription));

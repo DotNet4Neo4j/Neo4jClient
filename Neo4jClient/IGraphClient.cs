@@ -36,5 +36,7 @@ namespace Neo4jClient
         void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor);
 
         void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries);
+
+        void DeleteIndex(string indexName, IndexFor indexFor);
     }
 }
