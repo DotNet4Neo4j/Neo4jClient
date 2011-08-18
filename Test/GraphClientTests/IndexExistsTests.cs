@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnHttResponse200()
+        public void ShoudlReturnTrueIfIndexIsFound()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node/MyIndex", Method.GET)
@@ -58,10 +58,50 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            graphClient.IndexExists("MyIndex",IndexFor.Node);
+            var response = graphClient.IndexExists("MyIndex",IndexFor.Node);
 
             // Assert
-            Assert.Pass("Method executed successfully.");
+            Assert.IsTrue(response);
+        }
+
+        [Test]
+        public void ShoudlReturnFalseIfIndexNotFound()
+        {
+            //Arrange
+            var restRequest = new RestRequest("/index/node/MyIndex", Method.GET)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+            };
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = RootResponse.Replace('\'', '"')
+                    }
+                },
+                {
+                    restRequest,
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.NotFound,
+                        ContentType = "application/json",
+                        Content = @"[ ]"
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var response = graphClient.IndexExists("MyIndex", IndexFor.Node);
+
+            // Assert
+            Assert.IsFalse(response);
         }
     }
 }
