@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Domain\Product.cs" />
+    <Compile Include="GraphClientTests\GetIndexesTests.cs" />
     <Compile Include="GraphClientTests\CreateIndexTests.cs" />
     <Compile Include="GraphClientTests\ExecuteGetAllRelationshipsGremlinTests.cs" />
     <Compile Include="GraphClientTests\DeleteRelationshipTests.cs" />
