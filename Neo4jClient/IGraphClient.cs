@@ -29,6 +29,10 @@ namespace Neo4jClient
 
         IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query);
 
+        Dictionary<string,IndexMetaData> GetIndexes(IndexFor indexFor);
+
+        bool IndexExists(string indexName, IndexFor indexFor);
+
         void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor);
 
         void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries);

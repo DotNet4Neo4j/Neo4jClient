@@ -378,6 +378,68 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
 
+        public Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor)
+        {
+            CheckRoot();
+
+            string indexResource;
+            switch (indexFor)
+            {
+                case IndexFor.Node:
+                    indexResource = RootApiResponse.NodeIndex;
+                    break;
+                case IndexFor.Relationship:
+                    indexResource = RootApiResponse.RelationshipIndex;
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("GetIndexes does not support indexfor {0}", indexFor));
+            }
+
+            var request = new RestRequest(indexResource, Method.GET)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+
+            var response =  client.Execute<Dictionary<string, IndexMetaData>>(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                throw new NotSupportedException(string.Format(
+                    "Received an unexpected HTTP status when executing GetIndexes.\r\n\r\n\r\nThe response status was: {0} {1}",
+                    (int)response.StatusCode,
+                    response.StatusDescription));
+
+            return response.Data;
+        }
+
+        public bool IndexExists(string indexName, IndexFor indexFor)
+        {
+            CheckRoot();
+
+            string indexResource;
+            switch (indexFor)
+            {
+                case IndexFor.Node:
+                    indexResource = RootApiResponse.NodeIndex;
+                    break;
+                case IndexFor.Relationship:
+                    indexResource = RootApiResponse.RelationshipIndex;
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("IndexExists does not support indexfor {0}", indexFor));
+            }
+
+            var request = new RestRequest(string.Format("{0}/{1}",indexResource, indexName), Method.GET)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+
+            var response = client.Execute<Dictionary<string, IndexMetaData>>(request);
+
+            return response.StatusCode == HttpStatusCode.OK;
+        }
+
         void CheckRoot()
         {
             if (RootApiResponse == null)
@@ -385,12 +447,12 @@ namespace Neo4jClient
                     "The graph client is not connected to the server. Call the Connect method first.");
         }
 
-        public void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexfor)
+        public void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor)
         {
             CheckRoot();
 
             string nodeResource;
-            switch (indexfor)
+            switch (indexFor)
             {
                 case IndexFor.Node:
                     nodeResource = RootApiResponse.NodeIndex;
@@ -399,7 +461,7 @@ namespace Neo4jClient
                     nodeResource = RootApiResponse.RelationshipIndex;
                     break;
                 default:
-                    throw new NotSupportedException(string.Format("Create Index does not support indexfor {0}", indexfor));
+                    throw new NotSupportedException(string.Format("CreateIndex does not support indexfor {0}", indexFor));
             }
             
             var createIndexApiRequest = new
