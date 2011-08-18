@@ -417,7 +417,7 @@ namespace Neo4jClient
 
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.Created)
                 throw new NotSupportedException(string.Format(
                     "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                     indexName,
@@ -448,7 +448,7 @@ namespace Neo4jClient
 
                 var response = client.Execute(request);
 
-                if (response.StatusCode != HttpStatusCode.OK)
+                if (response.StatusCode != HttpStatusCode.Created)
                     throw new NotSupportedException(string.Format(
                         "Received an unexpected HTTP status when executing the create index.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
                         update.IndexName,
