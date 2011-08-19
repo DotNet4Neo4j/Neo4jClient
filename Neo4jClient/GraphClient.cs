@@ -417,7 +417,7 @@ namespace Neo4jClient
             return response.Data;
         }
 
-        public bool IndexExists(string indexName, IndexFor indexFor)
+        public bool CheckIndexExists(string indexName, IndexFor indexFor)
         {
             CheckRoot();
 

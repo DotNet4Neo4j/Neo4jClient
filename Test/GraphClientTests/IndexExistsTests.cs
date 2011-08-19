@@ -58,7 +58,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            var response = graphClient.IndexExists("MyIndex",IndexFor.Node);
+            var response = graphClient.CheckIndexExists("MyIndex",IndexFor.Node);
 
             // Assert
             Assert.IsTrue(response);
@@ -98,7 +98,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            var response = graphClient.IndexExists("MyIndex", IndexFor.Node);
+            var response = graphClient.CheckIndexExists("MyIndex", IndexFor.Node);
 
             // Assert
             Assert.IsFalse(response);
