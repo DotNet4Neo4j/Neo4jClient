@@ -511,7 +511,11 @@ namespace Neo4jClient
                 string indexValue;
                 if(update.Value is DateTimeOffset)
                 {
-                    indexValue = ((DateTimeOffset) update.Value).Ticks.ToString();
+                    indexValue = ((DateTimeOffset) update.Value).UtcTicks.ToString();
+                }
+                else if (update.Value is DateTime)
+                {
+                    indexValue = ((DateTime)update.Value).Ticks.ToString();
                 }
                 else
                 {
