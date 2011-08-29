@@ -5,5 +5,5 @@ obj
 .suo
 _ReSharper*
 TestResults
-.nupkg
+Neo4jClient.*.nupkg
 .docstates
