@@ -4,7 +4,13 @@ using Neo4jClient.Test.Relationships;
 
 namespace Neo4jClient.Test
 {
-    class Class1
+    // This class just documents how the API could be consumed. It was an
+    // initial scratching ground before any of the original signatures,
+    // interfaces, or functionality was put in place. Right now it has no
+    // other requirements than just compiling (so as to assert backwards
+    // compatibility with consumers). It is mainly kept for historical
+    // purposes.
+    class ApiUsageIdeas
     {
         void Foo()
         {

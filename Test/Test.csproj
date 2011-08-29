@@ -87,7 +87,7 @@
     <Compile Include="Relationships\Requires.cs" />
     <Compile Include="Relationships\StoredIn.cs" />
     <Compile Include="Domain\StorageLocation.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="ApiUsageIdeas.cs" />
     <Compile Include="RelationshipReferenceTests.cs" />
     <Compile Include="GraphClientTests\ConnectTests.cs" />
     <Compile Include="GraphClientTests\CreateNodeTests.cs" />
