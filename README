@@ -1,4 +1,6 @@
-Very early days on this project.
+A .NET client for the neo4j REST API.
+
+Supports basic CRUD operations, Gremlin queries via a fluent interface, and some indexing operations.
 
 Grab the latest CI drop straight from:
 
