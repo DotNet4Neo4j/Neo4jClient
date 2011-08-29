@@ -96,6 +96,7 @@
     <Compile Include="Serializer\EnumValueConverter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Indexing.cd" />
     <None Include="Neo4jClient.Edge.nuspec" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
