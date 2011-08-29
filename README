@@ -5,3 +5,5 @@ Supports basic CRUD operations, Gremlin queries via a fluent interface, and some
 Grab the latest CI drop straight from:
 
 http://nuget.org/List/Packages/Neo4jClient.Edge
+
+Licensed under MS-PL. See LICENSE in the root of this repository for full license text.
