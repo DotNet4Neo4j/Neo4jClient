@@ -12,7 +12,7 @@ $PSScriptFilePath = (Get-Item $MyInvocation.MyCommand.Path).FullName
 $SolutionRoot = Split-Path -Path $PSScriptFilePath -Parent
 
 # Build the NuGet package
-$NuSpecPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient\Neo4jClient.Edge.nuspec"
+$NuSpecPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient\Neo4jClient.nuspec"
 & nuget pack $NuSpecPath -OutputDirectory $SolutionRoot -Version $ReleaseVersionNumber
 if (-not $?)
 {
@@ -20,7 +20,7 @@ if (-not $?)
 }
 
 # Upload the NuGet package
-$NuPkgPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient.Edge.$ReleaseVersionNumber.nupkg"
+$NuPkgPath = Join-Path -Path $SolutionRoot -ChildPath "Neo4jClient.$ReleaseVersionNumber.nupkg"
 & nuget push $NuPkgPath
 if (-not $?)
 {
