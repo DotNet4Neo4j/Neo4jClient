@@ -37,7 +37,7 @@ namespace Neo4jClient.Deserializer
                 }
                 else
                 {
-                    JArray json = JArray.Parse(response.Content);
+                    var json = JArray.Parse(response.Content);
                     target = (T)BuildList(objType, json.Root.Children());
                 }
             }
@@ -57,8 +57,8 @@ namespace Neo4jClient.Deserializer
 
         private JToken FindRoot(string content)
         {
-            JObject json = JObject.Parse(content);
-            JToken root = json.Root;
+            var json = JObject.Parse(content);
+            var root = json.Root;
 
             if (RootElement.HasValue())
                 root = json.SelectToken(RootElement);
@@ -141,19 +141,19 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type.IsEnum)
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     var converted = Enum.Parse(type, raw, false);
                     prop.SetValue(x, converted, null);
                 }
                 else if (type == typeof(Uri))
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     var uri = new Uri(raw, UriKind.RelativeOrAbsolute);
                     prop.SetValue(x, uri, null);
                 }
                 else if (type == typeof(string))
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     prop.SetValue(x, raw, null);
                 }
                 else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
@@ -186,7 +186,7 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type == typeof(Guid))
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
                     prop.SetValue(x, guid, null);
                 }
@@ -227,7 +227,7 @@ namespace Neo4jClient.Deserializer
 
         private object CreateAndMap(Type type, JToken element)
         {
-            object instance = null;
+            object instance;
             if (type.IsGenericType)
             {
                 var genericTypeDef = type.GetGenericTypeDefinition();
