@@ -175,7 +175,7 @@ namespace Neo4jClient.Deserializer
                     }
 
                     if (type == typeof(DateTime))
-                        prop.SetValue(x, dt.ToUniversalTime(), null);
+                        prop.SetValue(x, dt.ToUniversalTime().DateTime, null);
                     else if (type == typeof(DateTimeOffset))
                         prop.SetValue(x, dt, null);
                 }
