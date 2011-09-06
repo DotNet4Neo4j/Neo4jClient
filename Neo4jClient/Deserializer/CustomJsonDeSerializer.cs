@@ -158,15 +158,15 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
                 {
-                    DateTime dt;
+                    DateTimeOffset dt;
                     if (DateFormat.HasValue())
                     {
                         var clean = value.AsString();
-                        dt = DateTime.ParseExact(clean, DateFormat, Culture);
+                        dt = DateTimeOffset.ParseExact(clean, DateFormat, Culture);
                     }
                     else if (value.Type == JTokenType.Date)
                     {
-                        dt = value.Value<DateTime>().ToUniversalTime();
+                        dt = value.Value<DateTime>();
                     }
                     else
                     {
@@ -175,9 +175,9 @@ namespace Neo4jClient.Deserializer
                     }
 
                     if (type == typeof(DateTime))
-                        prop.SetValue(x, dt, null);
+                        prop.SetValue(x, dt.ToUniversalTime(), null);
                     else if (type == typeof(DateTimeOffset))
-                        prop.SetValue(x, (DateTimeOffset)dt, null);
+                        prop.SetValue(x, dt, null);
                 }
                 else if (type == typeof(Decimal))
                 {
