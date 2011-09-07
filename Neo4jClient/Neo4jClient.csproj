@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="AmbiguousRelationshipDirectionException.cs" />
     <Compile Include="DeleteMode.cs" />
-    <Compile Include="Deserializer\CustomJsonDeSerializer.cs" />
+    <Compile Include="Deserializer\CustomJsonDeserializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
     <Compile Include="ExtensionsApiResponse.cs" />
     <Compile Include="GraphClientExtensions.cs" />
