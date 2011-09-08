@@ -10,6 +10,9 @@ namespace Neo4jClient.Test.Deserializer
     {
         [Test]
         [TestCase("", null)]
+        [TestCase("rekjre", null)]
+        [TestCase("/Date(abcs)/", null)]
+        [TestCase("/Date(abcs+0000)/", null)]
         [TestCase("/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
         [TestCase("/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
         [TestCase("/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]

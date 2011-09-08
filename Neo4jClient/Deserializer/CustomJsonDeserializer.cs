@@ -15,7 +15,8 @@ namespace Neo4jClient.Deserializer
 {
     public class CustomJsonDeserializer : IDeserializer
     {
-        static readonly Regex DateTypeNameRegex = new Regex(@"(?<=/)Date(?=\(\d+[+-]\d+\)/)");
+        static readonly Regex DateRegex = new Regex(@"/Date\(\d+[+-]\d+\)/");
+        static readonly Regex DateTypeNameRegex = new Regex(@"(?<=(?<quote>['""])/)Date(?=\(.*?\)/\k<quote>)");
 
         public string RootElement { get; set; }
         public string Namespace { get; set; }
@@ -170,16 +171,9 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type == typeof(DateTimeOffset))
                 {
-                    var rawValue = value.AsString();
-                    if (!string.IsNullOrWhiteSpace(rawValue))
-                    {
-                        var text = string.Format("{{\"a\":\"{0}\"}}", rawValue.Replace("NeoDate", "Date"));
-                        var reader = new JsonTextReader(new StringReader(text));
-                        reader.Read(); // JsonToken.StartObject
-                        reader.Read(); // JsonToken.PropertyName
-                        var dateTimeOffset = reader.ReadAsDateTimeOffset();
-                        prop.SetValue(x, dateTimeOffset, null);
-                    }
+                    var dateTimeOffset = ParseDateTimeOffset(value);
+                    if (dateTimeOffset.HasValue)
+                        prop.SetValue(x, dateTimeOffset.Value, null);
                 }
                 else if (type == typeof(Decimal))
                 {
@@ -225,6 +219,24 @@ namespace Neo4jClient.Deserializer
                     prop.SetValue(x, item, null);
                 }
             }
+        }
+
+        static DateTimeOffset? ParseDateTimeOffset(JToken value)
+        {
+            var rawValue = value.AsString();
+
+            if (string.IsNullOrWhiteSpace(rawValue))
+                return null;
+
+            rawValue = rawValue.Replace("NeoDate", "Date");
+            if (!DateRegex.IsMatch(rawValue))
+                return null;
+
+            var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
+            var reader = new JsonTextReader(new StringReader(text));
+            reader.Read(); // JsonToken.StartObject
+            reader.Read(); // JsonToken.PropertyName
+            return reader.ReadAsDateTimeOffset();
         }
 
         private object CreateAndMap(Type type, JToken element)
