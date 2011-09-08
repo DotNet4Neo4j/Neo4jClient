@@ -9,10 +9,11 @@ namespace Neo4jClient.Test.Deserializer
     public class CustomJsonDeserializerTests
     {
         [Test]
-        [TestCase("/Date(1315271562384+0000)/", Result = "2011-09-06 01:12:42 +00:00")]
-        [TestCase("/Date(1315271562384+0200)/", Result = "2011-09-06 03:12:42 +02:00")]
-        [TestCase("/Date(1315271562384+1000)/", Result = "2011-09-06 11:12:42 +10:00")]
-        public string DeserializeShouldPreserveOffsetValues(string input)
+        [TestCase("", null)]
+        [TestCase("/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase("/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
+        [TestCase("/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
+        public void DeserializeShouldPreserveOffsetValues(string input, string expectedResult)
         {
             // Arrange
             var deserializer = new CustomJsonDeserializer();
@@ -22,12 +23,18 @@ namespace Neo4jClient.Test.Deserializer
             var result = deserializer.Deserialize<DateTimeOffsetModel>(response);
 
             // Assert
-            return result.Foo.ToString("yyyy-MM-dd HH:mm:ss zzz");
+            if (expectedResult == null)
+                Assert.IsNull(result.Foo);
+            else
+            {
+                Assert.IsNotNull(result.Foo);
+                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz"));
+            }
         }
 
         public class DateTimeOffsetModel
         {
-            public DateTimeOffset Foo { get; set; }
+            public DateTimeOffset? Foo { get; set; }
         }
     }
 }

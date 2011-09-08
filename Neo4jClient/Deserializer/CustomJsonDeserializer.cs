@@ -170,12 +170,16 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type == typeof(DateTimeOffset))
                 {
-                    var text = string.Format("{{\"a\":\"{0}\"}}", value.AsString().Replace("NeoDate", "Date"));
-                    var reader = new JsonTextReader(new StringReader(text));
-                    reader.Read(); // JsonToken.StartObject
-                    reader.Read(); // JsonToken.PropertyName
-                    var dateTimeOffset = reader.ReadAsDateTimeOffset();
-                    prop.SetValue(x, dateTimeOffset, null);
+                    var rawValue = value.AsString();
+                    if (!string.IsNullOrWhiteSpace(rawValue))
+                    {
+                        var text = string.Format("{{\"a\":\"{0}\"}}", rawValue.Replace("NeoDate", "Date"));
+                        var reader = new JsonTextReader(new StringReader(text));
+                        reader.Read(); // JsonToken.StartObject
+                        reader.Read(); // JsonToken.PropertyName
+                        var dateTimeOffset = reader.ReadAsDateTimeOffset();
+                        prop.SetValue(x, dateTimeOffset, null);
+                    }
                 }
                 else if (type == typeof(Decimal))
                 {
