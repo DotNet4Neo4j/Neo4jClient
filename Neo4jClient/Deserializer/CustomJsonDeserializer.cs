@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Deserializers;
@@ -12,6 +15,8 @@ namespace Neo4jClient.Deserializer
 {
     public class CustomJsonDeserializer : IDeserializer
     {
+        static readonly Regex DateTypeNameRegex = new Regex(@"(?<=/)Date(?=\(\d+[+-]\d+\)/)");
+
         public string RootElement { get; set; }
         public string Namespace { get; set; }
         public string DateFormat { get; set; }
@@ -25,6 +30,9 @@ namespace Neo4jClient.Deserializer
         public T Deserialize<T>(RestResponse response) where T : new()
         {
             var target = new T();
+
+            // Replace all /Date(1234+0200)/ instances with /NeoDate(1234+0200)/
+            response.Content = DateTypeNameRegex.Replace(response.Content, "NeoDate");
 
             if (target is IList)
             {
@@ -156,28 +164,18 @@ namespace Neo4jClient.Deserializer
                     var raw = value.AsString();
                     prop.SetValue(x, raw, null);
                 }
-                else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+                else if (type == typeof(DateTime))
                 {
-                    DateTimeOffset dt;
-                    if (DateFormat.HasValue())
-                    {
-                        var clean = value.AsString();
-                        dt = DateTimeOffset.ParseExact(clean, DateFormat, Culture);
-                    }
-                    else if (value.Type == JTokenType.Date)
-                    {
-                        dt = value.Value<DateTime>();
-                    }
-                    else
-                    {
-                        // try parsing instead
-                        dt = value.AsString().ParseJsonDate(Culture);
-                    }
-
-                    if (type == typeof(DateTime))
-                        prop.SetValue(x, dt.ToUniversalTime().DateTime, null);
-                    else if (type == typeof(DateTimeOffset))
-                        prop.SetValue(x, dt, null);
+                    throw new NotSupportedException("DateTime values are not supported. Use DateTimeOffset instead.");
+                }
+                else if (type == typeof(DateTimeOffset))
+                {
+                    var text = string.Format("{{\"a\":\"{0}\"}}", value.AsString().Replace("NeoDate", "Date"));
+                    var reader = new JsonTextReader(new StringReader(text));
+                    reader.Read(); // JsonToken.StartObject
+                    reader.Read(); // JsonToken.PropertyName
+                    var dateTimeOffset = reader.ReadAsDateTimeOffset();
+                    prop.SetValue(x, dateTimeOffset, null);
                 }
                 else if (type == typeof(Decimal))
                 {
