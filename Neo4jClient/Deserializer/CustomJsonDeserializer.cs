@@ -15,7 +15,7 @@ namespace Neo4jClient.Deserializer
 {
     public class CustomJsonDeserializer : IDeserializer
     {
-        static readonly Regex DateRegex = new Regex(@"/Date\(\d+([+-]\d+)?\)/");
+        static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
         static readonly Regex DateTypeNameRegex = new Regex(@"(?<=(?<quote>['""])/)Date(?=\(.*?\)/\k<quote>)");
 
         public string RootElement { get; set; }
