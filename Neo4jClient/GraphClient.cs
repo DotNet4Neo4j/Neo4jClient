@@ -350,6 +350,13 @@ namespace Neo4jClient
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute<List<NodeApiResponse<TNode>>>(request);
 
+            if (response.ErrorException != null)
+                throw new ApplicationException(string.Format(
+                    "Received an exception when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe exception was: {1} {2}",
+                    query,
+                    response.ErrorMessage,
+                    response.ErrorException));
+
             if (response.StatusCode != HttpStatusCode.OK)
                 throw new ApplicationException(string.Format(
                     "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
