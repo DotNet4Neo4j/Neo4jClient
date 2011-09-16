@@ -5,10 +5,10 @@
     <version>0.0.0.0</version>
     <authors>Tatham Oddie</authors>
     <owners>Tatham Oddie</owners>
-    <licenseUrl>http://hg.readify.net/neo4jclient</licenseUrl>
+    <licenseUrl>http://hg.readify.net/neo4jclient/src/tip/LICENSE</licenseUrl>
     <projectUrl>http://hg.readify.net/neo4jclient</projectUrl>
-    <description>This edge release is just whatever comes straight off our CI server. Neo4jClient is a .NET client for the neo4j REST API. neo4j is an open sourced, Java based transactional graph database that stores data structured in graphs rather than in tables.</description>
-    <tags>neo4j REST</tags>
+    <description>A .NET client for the neo4j REST API. neo4j is an open sourced, Java based transactional graph database. It's pretty awesome.</description>
+    <tags>neo4j REST nosql</tags>
     <dependencies>
       <dependency id="RestSharp" />
     </dependencies>

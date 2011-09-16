@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Deserializers;
@@ -12,6 +15,9 @@ namespace Neo4jClient.Deserializer
 {
     public class CustomJsonDeserializer : IDeserializer
     {
+        static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
+        static readonly Regex DateTypeNameRegex = new Regex(@"(?<=(?<quote>['""])/)Date(?=\(.*?\)/\k<quote>)");
+
         public string RootElement { get; set; }
         public string Namespace { get; set; }
         public string DateFormat { get; set; }
@@ -26,6 +32,9 @@ namespace Neo4jClient.Deserializer
         {
             var target = new T();
 
+            // Replace all /Date(1234+0200)/ instances with /NeoDate(1234+0200)/
+            response.Content = DateTypeNameRegex.Replace(response.Content, "NeoDate");
+
             if (target is IList)
             {
                 var objType = target.GetType();
@@ -37,7 +46,7 @@ namespace Neo4jClient.Deserializer
                 }
                 else
                 {
-                    JArray json = JArray.Parse(response.Content);
+                    var json = JArray.Parse(response.Content);
                     target = (T)BuildList(objType, json.Root.Children());
                 }
             }
@@ -57,8 +66,8 @@ namespace Neo4jClient.Deserializer
 
         private JToken FindRoot(string content)
         {
-            JObject json = JObject.Parse(content);
-            JToken root = json.Root;
+            var json = JObject.Parse(content);
+            var root = json.Root;
 
             if (RootElement.HasValue())
                 root = json.SelectToken(RootElement);
@@ -141,43 +150,30 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type.IsEnum)
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     var converted = Enum.Parse(type, raw, false);
                     prop.SetValue(x, converted, null);
                 }
                 else if (type == typeof(Uri))
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     var uri = new Uri(raw, UriKind.RelativeOrAbsolute);
                     prop.SetValue(x, uri, null);
                 }
                 else if (type == typeof(string))
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     prop.SetValue(x, raw, null);
                 }
-                else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+                else if (type == typeof(DateTime))
                 {
-                    DateTime dt;
-                    if (DateFormat.HasValue())
-                    {
-                        var clean = value.AsString();
-                        dt = DateTime.ParseExact(clean, DateFormat, Culture);
-                    }
-                    else if (value.Type == JTokenType.Date)
-                    {
-                        dt = value.Value<DateTime>().ToUniversalTime();
-                    }
-                    else
-                    {
-                        // try parsing instead
-                        dt = value.AsString().ParseJsonDate(Culture);
-                    }
-
-                    if (type == typeof(DateTime))
-                        prop.SetValue(x, dt, null);
-                    else if (type == typeof(DateTimeOffset))
-                        prop.SetValue(x, (DateTimeOffset)dt, null);
+                    throw new NotSupportedException("DateTime values are not supported. Use DateTimeOffset instead.");
+                }
+                else if (type == typeof(DateTimeOffset))
+                {
+                    var dateTimeOffset = ParseDateTimeOffset(value);
+                    if (dateTimeOffset.HasValue)
+                        prop.SetValue(x, dateTimeOffset.Value, null);
                 }
                 else if (type == typeof(Decimal))
                 {
@@ -186,7 +182,7 @@ namespace Neo4jClient.Deserializer
                 }
                 else if (type == typeof(Guid))
                 {
-                    string raw = value.AsString();
+                    var raw = value.AsString();
                     var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
                     prop.SetValue(x, guid, null);
                 }
@@ -225,9 +221,27 @@ namespace Neo4jClient.Deserializer
             }
         }
 
+        static DateTimeOffset? ParseDateTimeOffset(JToken value)
+        {
+            var rawValue = value.AsString();
+
+            if (string.IsNullOrWhiteSpace(rawValue))
+                return null;
+
+            rawValue = rawValue.Replace("NeoDate", "Date");
+            if (!DateRegex.IsMatch(rawValue))
+                return null;
+
+            var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
+            var reader = new JsonTextReader(new StringReader(text));
+            reader.Read(); // JsonToken.StartObject
+            reader.Read(); // JsonToken.PropertyName
+            return reader.ReadAsDateTimeOffset();
+        }
+
         private object CreateAndMap(Type type, JToken element)
         {
-            object instance = null;
+            object instance;
             if (type.IsGenericType)
             {
                 var genericTypeDef = type.GetGenericTypeDefinition();
