@@ -394,7 +394,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
 
-            var response = client.Execute<Dictionary<string, IndexMetaData>>(request);
+            var response = client.Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
 
