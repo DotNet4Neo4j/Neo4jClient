@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
+        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration
@@ -78,7 +78,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeExact()
+        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeExact()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration
@@ -131,7 +131,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexForRelationship()
+        public void ShouldReturnHttpResponse201WhenCreatingAnIndexForRelationship()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration
@@ -185,7 +185,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
         [Test]
         [ExpectedException(typeof(ApplicationException))]
-        public void ShoudlThrowApplicationExceptionIfHttpCodeIsNot201()
+        public void ShouldThrowApplicationExceptionIfHttpCodeIsNot201()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration

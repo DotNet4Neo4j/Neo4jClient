@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
+        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
         {
             //Arrange
             IDictionary<string, object> indexkeyValues = new Dictionary<string, object>();
@@ -80,7 +80,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnHttpResponse201WhenCreatingAnIndexOfTypeFullTextWithADateTimeOffsetIndexValue()
+        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeFullTextWithADateTimeOffsetIndexValue()
         {
             //Arrange
             IDictionary<string, object> indexkeyValues = new Dictionary<string, object>();

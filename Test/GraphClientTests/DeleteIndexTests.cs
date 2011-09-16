@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlExecuteSilentlyForSuccessDelete()
+        public void ShouldExecuteSilentlyForSuccessDelete()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node/MyIndex", Method.DELETE)

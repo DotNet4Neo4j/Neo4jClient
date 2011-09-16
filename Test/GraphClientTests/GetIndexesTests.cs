@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnHttResponse200()
+        public void ShouldReturnHttResponse200()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node", Method.GET)
@@ -80,7 +80,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnListOfIndexes()
+        public void ShouldReturnListOfIndexes()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node", Method.GET)

@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnHttpResponse200WhenQueryingAnIndex()
+        public void ShouldReturnHttpResponse200WhenQueryingAnIndex()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node/indexName/", Method.GET)

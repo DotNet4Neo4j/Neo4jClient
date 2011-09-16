@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShoudlReturnTrueIfIndexIsFound()
+        public void ShouldReturnTrueIfIndexIsFound()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node/MyIndex", Method.GET)
@@ -65,7 +65,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShoudlReturnFalseIfIndexNotFound()
+        public void ShouldReturnFalseIfIndexNotFound()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node/MyIndex", Method.GET)
