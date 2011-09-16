@@ -156,7 +156,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     new HttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =@""
+                        Content =@"[]"
                     }
                 }
             });
