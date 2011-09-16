@@ -495,6 +495,8 @@ namespace Neo4jClient
         public void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries)
         {
             CheckRoot();
+            if (indexEntries == null)
+                return;
 
             var nodeAddress = string.Join("/", new[] {RootApiResponse.Node, node.Id.ToString()});
 
