@@ -50,7 +50,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     new HttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[ ]"
+                        Content = @"{}"
                     }
                 }
             });
@@ -88,9 +88,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 {
                     restRequest,
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.NotFound,
-                        ContentType = "application/json",
-                        Content = @"[ ]"
+                        StatusCode = HttpStatusCode.NotFound
                     }
                 }
             });

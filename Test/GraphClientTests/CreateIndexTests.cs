@@ -184,8 +184,8 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
-        public void ShoudlThrowNotSupportedExceptionIfHttpCodeIsNot201()
+        [ExpectedException(typeof(ApplicationException))]
+        public void ShoudlThrowApplicationExceptionIfHttpCodeIsNot201()
         {
             //Arrange
             var indexConfiguration = new IndexConfiguration

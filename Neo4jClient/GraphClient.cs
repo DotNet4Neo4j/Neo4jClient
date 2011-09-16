@@ -36,17 +36,7 @@ namespace Neo4jClient
             var request = new RestRequest("", Method.GET);
             var response = client.Execute<RootApiResponse>(request);
 
-            if (response.ResponseStatus != ResponseStatus.Completed)
-                throw new ApplicationException(string.Format(
-                    "Failed to connect to server at {0}. Failure details are described in the inner exception.",
-                    client.BaseUrl),
-                                               response.ErrorException);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new ApplicationException(string.Format(
-                    "Received a non-200 HTTP response when connecting to the server. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
             RootApiResponse = response.Data;
             RootApiResponse.Node = RootApiResponse.Node.Substring(client.BaseUrl.Length);
@@ -96,12 +86,8 @@ namespace Neo4jClient
             request.AddBody(node);
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.Created)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
-
+            ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
+            
             var nodeLocation = response.Headers.GetParameter("Location");
             var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
@@ -174,17 +160,13 @@ namespace Neo4jClient
             request.AddBody(relationship);
             var response = client.Execute(request);
 
+            ValidateExpectedResponseCodes(response, HttpStatusCode.Created, HttpStatusCode.NotFound);
+
             if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new ApplicationException(string.Format(
                     "One of the nodes referenced in the relationship could not be found. Referenced nodes were {0} and {1}.",
                     sourceNode.Id,
                     targetNode.Id));
-
-            if (response.StatusCode != HttpStatusCode.Created)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
         }
 
         public void DeleteRelationship(RelationshipReference reference)
@@ -195,15 +177,11 @@ namespace Neo4jClient
             var request = new RestRequest(relationshipEndpoint, Method.DELETE);
             var response = client.Execute(request);
 
+            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent, HttpStatusCode.NotFound);
+
             if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new ApplicationException(string.Format(
                     "Unable to delete the relationship. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
-
-            if (response.StatusCode != HttpStatusCode.NoContent)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.StatusDescription));
         }
@@ -216,14 +194,10 @@ namespace Neo4jClient
             var request = new RestRequest(nodeEndpoint, Method.GET);
             var response = client.Execute<NodeApiResponse<TNode>>(request);
 
+            ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
+
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return null;
-
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
 
             return response.Data.ToNode(this);
         }
@@ -249,13 +223,7 @@ namespace Neo4jClient
             request.AddBody(node.Data);
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.NoContent)
-            {
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
-            }
+            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
         public virtual void Delete(NodeReference reference, DeleteMode mode)
@@ -271,15 +239,11 @@ namespace Neo4jClient
             var request = new RestRequest(nodeEndpoint, Method.DELETE);
             var response = client.Execute(request);
 
+            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent, HttpStatusCode.Conflict);
+
             if (response.StatusCode == HttpStatusCode.Conflict)
                 throw new ApplicationException(string.Format(
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
-                    (int) response.StatusCode,
-                    response.StatusDescription));
-
-            if (response.StatusCode != HttpStatusCode.NoContent)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.StatusDescription));
         }
@@ -331,12 +295,10 @@ namespace Neo4jClient
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    query,
-                    (int) response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query),
+                HttpStatusCode.OK);
 
             return response.Content;
         }
@@ -350,23 +312,14 @@ namespace Neo4jClient
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute<List<NodeApiResponse<TNode>>>(request);
 
-            if (response.ErrorException != null)
-                throw new ApplicationException(string.Format(
-                    "Received an exception when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe exception was: {1} {2}",
-                    query,
-                    response.ErrorMessage,
-                    response.ErrorException));
-
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    query,
-                    (int) response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query),
+                HttpStatusCode.OK);
 
             return response.Data == null
-                       ? Enumerable.Empty<Node<TNode>>()
-                       : response.Data.Select(r => r.ToNode(this));
+                ? Enumerable.Empty<Node<TNode>>()
+                : response.Data.Select(r => r.ToNode(this));
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query)
@@ -378,16 +331,14 @@ namespace Neo4jClient
             request.AddParameter("script", query, ParameterType.GetOrPost);
             var response = client.Execute<List<RelationshipApiResponse>>(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe query was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    query,
-                    (int) response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query),
+                HttpStatusCode.OK);
 
             return response.Data == null
-                       ? Enumerable.Empty<RelationshipInstance>()
-                       : response.Data.Select(r => r.ToRelationshipInstance(this));
+                ? Enumerable.Empty<RelationshipInstance>()
+                : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
 
         public Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor)
@@ -415,11 +366,7 @@ namespace Neo4jClient
 
             var response =  client.Execute<Dictionary<string, IndexMetaData>>(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\n\r\nThe response status was: {0} {1}",
-                    (int)response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
             return response.Data;
         }
@@ -448,6 +395,8 @@ namespace Neo4jClient
             };
 
             var response = client.Execute<Dictionary<string, IndexMetaData>>(request);
+
+            ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
 
             return response.StatusCode == HttpStatusCode.OK;
         }
@@ -491,12 +440,7 @@ namespace Neo4jClient
 
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.Created)
-                throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the request..\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    indexName,
-                    (int) response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
         }
 
         public void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries)
@@ -559,12 +503,7 @@ namespace Neo4jClient
 
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.NoContent)
-                throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    indexName,
-                    (int)response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
         void AddNodeToIndex(string indexName, string indexKey, string indexValue, string nodeAddress)
@@ -585,12 +524,7 @@ namespace Neo4jClient
 
             var response = client.Execute(request);
 
-            if (response.StatusCode != HttpStatusCode.Created)
-                throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    indexName,
-                    (int)response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
         }
 
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
@@ -621,16 +555,37 @@ namespace Neo4jClient
 
             var response = client.Execute<List<NodeApiResponse<TNode>>>(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-                throw new NotSupportedException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\nThe index name was: {0}\r\n\r\nThe response status was: {1} {2}",
-                    indexName,
-                    (int) response.StatusCode,
-                    response.StatusDescription));
+            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
             return response.Data == null
-           ? Enumerable.Empty<Node<TNode>>()
-           : response.Data.Select(r => r.ToNode(this));
+                ? Enumerable.Empty<Node<TNode>>()
+                : response.Data.Select(r => r.ToNode(this));
         }
-}
+
+        static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)
+        {
+            ValidateExpectedResponseCodes(response, null, allowedStatusCodes);
+        }
+
+        static void ValidateExpectedResponseCodes(RestResponseBase response, string commandDescription, params HttpStatusCode[] allowedStatusCodes)
+        {
+            commandDescription = string.IsNullOrWhiteSpace(commandDescription)
+                ? ""
+                : commandDescription + "\r\n\r\n";
+
+            if (response.ErrorException != null)
+                throw new ApplicationException(string.Format(
+                    "Received an exception when executing the request.\r\n\r\n{0}The exception was: {1} {2}",
+                    commandDescription,
+                    response.ErrorMessage,
+                    response.ErrorException));
+
+            if (!allowedStatusCodes.Contains(response.StatusCode))
+                throw new ApplicationException(string.Format(
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\n{0}The response status was: {1} {2}",
+                    commandDescription,
+                    (int) response.StatusCode,
+                    response.StatusDescription));
+        }
+    }
 }

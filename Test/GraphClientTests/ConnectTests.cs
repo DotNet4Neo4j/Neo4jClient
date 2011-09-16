@@ -10,7 +10,7 @@ namespace Neo4jClient.Test.GraphClientTests
     public class ConnectTests
     {
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received a non-200 HTTP response when connecting to the server. The response status was: 500 Internal Server Error")]
+        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 Internal Server Error")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
