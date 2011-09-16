@@ -494,22 +494,21 @@ namespace Neo4jClient
 
         public void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries)
         {
-            CheckRoot();
             if (indexEntries == null)
-                return;
+                throw new ArgumentNullException("indexEntries");
+
+            CheckRoot();
 
             var nodeAddress = string.Join("/", new[] {RootApiResponse.Node, node.Id.ToString()});
 
             var updates = indexEntries
                 .SelectMany(
                     i => i.KeyValues,
-                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value});
+                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
+                .Where(update => update.Value != null);
 
             foreach (var update in updates)
             {
-                if (update.Value == null)
-                    break;
-
                 string indexValue;
                 if(update.Value is DateTimeOffset)
                 {
