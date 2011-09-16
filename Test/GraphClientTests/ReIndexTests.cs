@@ -133,6 +133,62 @@ namespace Neo4jClient.Test.GraphClientTests
             // Assert
             Assert.Pass("Success.");
         }
+
+        [Test]
+        public void ShouldUrlEncodeQuestionMarkInIndexValue()
+        {
+            //Arrange
+            var indexKeyValues = new Dictionary<string, object>
+            {
+                {"FooKey", "?"}
+            };
+            var indexEntries = new List<IndexEntry>
+            {
+                new IndexEntry
+                {
+                    Name = "my_nodes",
+                    KeyValues = indexKeyValues,
+                }
+            };
+
+            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/%3F", Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+            };
+
+            restRequest.AddBody("http://foo/db/data/node/123");
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = RootResponse.Replace('\'', '"')
+                    }
+                },
+                {
+                    restRequest,
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.Created,
+                        ContentType = "application/json",
+                        Content = "Location: http://foo/db/data/index/node/my_nodes/FooKey/%3F/123"
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var nodeReference = new NodeReference<TestNode>(123);
+            graphClient.ReIndex(nodeReference, indexEntries);
+
+            // Assert
+            Assert.Pass("Success.");
+        }
     }
 
     public class TestNode

@@ -562,7 +562,13 @@ namespace Neo4jClient
 
         void AddNodeToIndex(string indexName, string indexKey, string indexValue, string nodeAddress)
         {
-            var nodeIndexAddress = string.Join("/", new[] { RootApiResponse.NodeIndex, indexName, indexKey, indexValue });
+            var nodeIndexAddress = string.Join("/", new[]
+                {
+                    RootApiResponse.NodeIndex,
+                    Uri.EscapeDataString(indexName),
+                    Uri.EscapeDataString(indexKey),
+                    Uri.EscapeDataString(indexValue)
+                });
             var request = new RestRequest(nodeIndexAddress, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
