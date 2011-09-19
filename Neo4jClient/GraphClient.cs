@@ -519,6 +519,8 @@ namespace Neo4jClient
 
         void AddNodeToIndex(string indexName, string indexKey, string indexValue, string nodeAddress)
         {
+            indexValue = indexValue.Replace('/', '-');
+
             var nodeIndexAddress = string.Join("/", new[]
                 {
                     RootApiResponse.NodeIndex,
