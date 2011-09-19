@@ -482,6 +482,9 @@ namespace Neo4jClient
                     indexValue = update.Value.ToString();
                 }
 
+                if (string.IsNullOrWhiteSpace(indexValue))
+                    continue;
+
                 AddNodeToIndex(update.IndexName, update.Key, indexValue, nodeAddress);
             }
         }
