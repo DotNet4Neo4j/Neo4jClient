@@ -535,7 +535,16 @@ namespace Neo4jClient
 
             var response = CreateClient().Execute(request);
 
-            ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format(
+                    "Adding '{0}'='{1}' to index {2} for {3}",
+                    indexKey,
+                    indexValue,
+                    indexName,
+                    nodeAddress
+                ),
+                HttpStatusCode.Created);
         }
 
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
