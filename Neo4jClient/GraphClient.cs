@@ -538,11 +538,12 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(
                 response,
                 string.Format(
-                    "Adding '{0}'='{1}' to index {2} for {3}",
+                    "Adding '{0}'='{1}' to index {2} for {3} by POSTing to {4}.",
                     indexKey,
                     indexValue,
                     indexName,
-                    nodeAddress
+                    nodeAddress,
+                    nodeIndexAddress
                 ),
                 HttpStatusCode.Created);
         }
