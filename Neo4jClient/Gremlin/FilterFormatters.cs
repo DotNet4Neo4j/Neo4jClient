@@ -106,7 +106,7 @@ namespace Neo4jClient.Gremlin
             var constantValue = ParseValueFromExpression(binaryExpression.Right);
             var convertedValue = key.PropertyType.IsEnum
                 ? Enum.Parse(key.PropertyType, key.PropertyType.GetEnumName(constantValue))
-                : Nullable.GetUnderlyingType(key.PropertyType).IsEnum
+                : Nullable.GetUnderlyingType(key.PropertyType) != null && Nullable.GetUnderlyingType(key.PropertyType).IsEnum
                     ? Enum.Parse(Nullable.GetUnderlyingType(key.PropertyType), Nullable.GetUnderlyingType(key.PropertyType).GetEnumName(constantValue))
                     : constantValue;
 
