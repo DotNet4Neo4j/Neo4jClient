@@ -107,7 +107,7 @@ namespace Neo4jClient.Gremlin
             var convertedValue = key.PropertyType.IsEnum
                 ? Enum.Parse(key.PropertyType, key.PropertyType.GetEnumName(constantValue))
                 : Nullable.GetUnderlyingType(key.PropertyType).IsEnum
-                    ? Enum.Parse(Nullable.GetUnderlyingType(key.PropertyType), Nullable.GetUnderlyingType(key.PropertyType).GetEnumName(constantValue)) 
+                    ? Enum.Parse(Nullable.GetUnderlyingType(key.PropertyType), Nullable.GetUnderlyingType(key.PropertyType).GetEnumName(constantValue))
                     : constantValue;
 
             ((IList) simpleFilters).Add(
