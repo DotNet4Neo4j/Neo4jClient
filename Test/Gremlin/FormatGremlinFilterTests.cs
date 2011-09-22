@@ -73,6 +73,17 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithNullableEnumValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = (EnumForTesting?)EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  }
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filterText);
+        }
+
+        [Test]
         public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleCaseSensititiveEqualFilterWithNullValue()
         {
             var filters = new List<Filter>
@@ -166,6 +177,17 @@ namespace Neo4jClient.Test.Gremlin
             var filters = new List<Filter>
             {
                 new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  },
+            };
+            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIteratorSyntaxForSingleCaseInsensititiveEqualFilterWithNullableEnumValue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = (EnumForTesting?)EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  },
             };
             var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
             Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
