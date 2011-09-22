@@ -110,6 +110,19 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void OutShouldAppendStepToGremlinQueryWithEqualFilterForTextOfEnum()
+        {
+            var node = new NodeReference(123);
+            var queryText = node
+                .Out<TestNodeWithNullableEnum>(
+                    "REL",
+                    x => x.Boo == TestEnum.Bar
+                    )
+                .QueryText;
+            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Boo'.equalsIgnoreCase('Bar') }", queryText);
+        }
+
+        [Test]
         public void InShouldAppendStepToGremlinQueryWithNoFilter()
         {
             var node = new NodeReference(123);
@@ -263,6 +276,13 @@ namespace Neo4jClient.Test.Gremlin
         {
             var node = new NodeReference(123);
             node.GremlinCount();
+        }
+
+        public enum TestEnum { Bar }
+
+        public class TestNodeWithNullableEnum
+        {
+            public TestEnum? Boo { get; set; }
         }
 
         public class Foo
