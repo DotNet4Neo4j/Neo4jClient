@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -293,7 +294,7 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public virtual string ExecuteScalarGremlin(string query)
+        public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters = null)
         {
             CheckRoot();
 
@@ -301,6 +302,8 @@ namespace Neo4jClient
             var request = new RestRequest(nodeResource, Method.POST);
 
             request.AddParameter("script", query, ParameterType.GetOrPost);
+            if (parameters != null)
+                request.AddParameter("params", parameters, ParameterType.GetOrPost);
             var response = CreateClient().Execute(request);
 
             ValidateExpectedResponseCodes(
