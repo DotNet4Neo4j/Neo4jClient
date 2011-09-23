@@ -25,20 +25,20 @@ namespace Neo4jClient.Gremlin
 
             var typeFilterFormats = new List<TypeFilter>
             {
-                new TypeFilter { Type = null, FilterFormat = "it.'{0}' == null", ExpressionType = ExpressionType.Equal },
-                new TypeFilter { Type = null, FilterFormat = "it.'{0}' != null", ExpressionType = ExpressionType.NotEqual },
-                new TypeFilter { Type =  typeof(int), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal },
-                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual },
-                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' > {1}", ExpressionType = ExpressionType.GreaterThan},
-                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' < {1}", ExpressionType = ExpressionType.LessThan},
-                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
-                new TypeFilter { Type = typeof(int), FilterFormat = "it.'{0}' <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
-                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' == {1}", ExpressionType = ExpressionType.Equal },
-                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' != {1}", ExpressionType = ExpressionType.NotEqual },
-                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' > {1}", ExpressionType = ExpressionType.GreaterThan},
-                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' < {1}", ExpressionType = ExpressionType.LessThan},
-                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
-                new TypeFilter { Type = typeof(long), FilterFormat = "it.'{0}' <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
+                new TypeFilter { Type = null, FilterFormat = "it[{0}] == null", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = null, FilterFormat = "it[{0}] != null", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type =  typeof(int), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] != {1}", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] > {1}", ExpressionType = ExpressionType.GreaterThan},
+                new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] < {1}", ExpressionType = ExpressionType.LessThan},
+                new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
+                new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
+                new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] != {1}", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] > {1}", ExpressionType = ExpressionType.GreaterThan},
+                new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] < {1}", ExpressionType = ExpressionType.LessThan},
+                new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
+                new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
             };
 
             const string filterSeparator = " && ";
@@ -47,16 +47,27 @@ namespace Neo4jClient.Gremlin
             switch (comparison)
             {
                 case StringComparison.Ordinal:
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.Equal});
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it.'{0}'.equals('{1}')", ExpressionType = ExpressionType.NotEqual  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it[{0}].equals({1})", ExpressionType = ExpressionType.Equal});
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it[{0}].equals({1})", ExpressionType = ExpressionType.NotEqual  });
                     break;
                 case StringComparison.OrdinalIgnoreCase:
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.Equal  });
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it.'{0}'.equalsIgnoreCase('{1}')", ExpressionType = ExpressionType.NotEqual  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it[{0}].equalsIgnoreCase({1})", ExpressionType = ExpressionType.Equal  });
+                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it[{0}].equalsIgnoreCase({1})", ExpressionType = ExpressionType.NotEqual  });
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));
             }
+
+            var parameters = new Dictionary<string, object>();
+            var nextParameterIndex = queryThatTheFilterWillEventuallyBeAddedTo.QueryParameters.Count;
+            Func<object, string> createParameter = value =>
+                {
+                    if (value == null) return "null";
+                    var paramName = string.Format("p{0}", nextParameterIndex);
+                    parameters.Add(paramName, value);
+                    nextParameterIndex++;
+                    return paramName;
+                };
 
             var expandedFilters =
                 from f in filters
@@ -67,7 +78,8 @@ namespace Neo4jClient.Gremlin
                 select new
                 {
                     f.PropertyName,
-                    f.Value,
+                    PropertyNameParam = createParameter(f.PropertyName),
+                    ValueParam = createParameter(f.Value),
                     f.ExpressionType,
                     IsFilterSupported = isFilterSupported,
                     ValueType = filterValueType,
@@ -88,7 +100,7 @@ namespace Neo4jClient.Gremlin
                     string.Join(", ", unsupportedFilters)));
 
             var formattedFilters = expandedFilters
-                .Select(f => string.Format(f.Format, f.PropertyName, f.Value == null ? null : f.Value.ToString()))
+                .Select(f => string.Format(f.Format, f.PropertyNameParam, f.ValueParam))
                 .ToArray();
             var concatenatedFilters = string.Join(filterSeparator, formattedFilters);
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))
@@ -97,7 +109,7 @@ namespace Neo4jClient.Gremlin
             return new FormattedFilter
             {
                 FilterText = concatenatedFilters,
-                FilterParameters = new Dictionary<string, object>()
+                FilterParameters = parameters
             };
         }
 
