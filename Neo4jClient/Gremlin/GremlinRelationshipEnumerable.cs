@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,11 +10,21 @@ namespace Neo4jClient.Gremlin
     {
         readonly IGraphClient client;
         readonly string queryText;
+        readonly IDictionary<string, object> queryParameters;
 
-        public GremlinRelationshipEnumerable(IGraphClient client, string queryText)
+        public GremlinRelationshipEnumerable(IGremlinQuery query)
+        {
+            client = query.Client;
+            queryText = query.QueryText;
+            queryParameters = query.QueryParameters;
+        }
+
+        [Obsolete]
+        public GremlinRelationshipEnumerable(IGraphClient client, string queryText, IDictionary<string, object> queryParameters)
         {
             this.client = client;
             this.queryText = queryText;
+            this.queryParameters = queryParameters;
         }
 
         IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
@@ -36,6 +47,11 @@ namespace Neo4jClient.Gremlin
         string IGremlinQuery.QueryText
         {
             get { return queryText; }
+        }
+
+        IDictionary<string, object> IGremlinQuery.QueryParameters
+        {
+            get { return queryParameters; }
         }
     }
 }

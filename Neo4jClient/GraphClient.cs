@@ -314,13 +314,15 @@ namespace Neo4jClient
             return response.Content;
         }
 
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query)
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters = null)
         {
             CheckRoot();
 
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
             request.AddParameter("script", query, ParameterType.GetOrPost);
+            if (parameters != null)
+                request.AddParameter("params", parameters, ParameterType.GetOrPost);
             var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
 
             ValidateExpectedResponseCodes(
@@ -333,13 +335,15 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToNode(this));
         }
 
-        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query)
+        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters = null)
         {
             CheckRoot();
 
             var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
             var request = new RestRequest(nodeResource, Method.POST);
             request.AddParameter("script", query, ParameterType.GetOrPost);
+            if (parameters != null)
+                request.AddParameter("params", parameters, ParameterType.GetOrPost);
             var response = CreateClient().Execute<List<RelationshipApiResponse>>(request);
 
             ValidateExpectedResponseCodes(

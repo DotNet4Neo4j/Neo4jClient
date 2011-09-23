@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Neo4jClient.Gremlin;
 
@@ -69,7 +70,12 @@ namespace Neo4jClient
 
         string IGremlinQuery.QueryText
         {
-            get { return string.Format("g.v({0})", Id); }
+            get { return "g.v(p0)"; }
+        }
+
+        IDictionary<string, object> IGremlinQuery.QueryParameters
+        {
+            get { return new Dictionary<string, object> {{"p0", Id}}; }
         }
     }
 }

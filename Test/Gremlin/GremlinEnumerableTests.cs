@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.Gremlin
         public void GetEnumeratorShouldThrowDetachedNodeExceptionWhenClientNotSet()
         {
             // ReSharper disable ReturnValueOfPureMethodIsNotUsed
-            IEnumerable<Node<object>> enumerable = new GremlinNodeEnumerable<object>(null, "abc");
+            IEnumerable<Node<object>> enumerable = new GremlinNodeEnumerable<object>(null, "abc", null);
             enumerable.GetEnumerator();
             // ReSharper restore ReturnValueOfPureMethodIsNotUsed
         }
@@ -35,7 +35,7 @@ namespace Neo4jClient.Test.Gremlin
                 .Returns(expectedResults);
 
             // Act
-            var enumerable = new GremlinNodeEnumerable<object>(client, "abc");
+            var enumerable = new GremlinNodeEnumerable<object>(client, "abc", null);
             var results = enumerable.ToArray();
 
             // Assert

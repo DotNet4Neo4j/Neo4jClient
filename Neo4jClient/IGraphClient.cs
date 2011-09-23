@@ -25,11 +25,11 @@ namespace Neo4jClient
 
         string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters = null);
 
-        IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query);
+        IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters = null);
 
-        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query);
+        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters = null);
 
-        Dictionary<string,IndexMetaData> GetIndexes(IndexFor indexFor);
+        Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor);
 
         bool CheckIndexExists(string indexName, IndexFor indexFor);
 

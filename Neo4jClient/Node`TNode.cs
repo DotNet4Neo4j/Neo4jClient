@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
@@ -41,6 +42,11 @@ namespace Neo4jClient
         string IGremlinQuery.QueryText
         {
             get { return ((IGremlinQuery)reference).QueryText; }
+        }
+
+        IDictionary<string, object> IGremlinQuery.QueryParameters
+        {
+            get { return ((IGremlinQuery) reference).QueryParameters; }
         }
 
         public static bool operator ==(Node<TNode> lhs, Node<TNode> rhs)

@@ -9,9 +9,10 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void BackVWithCountShouldAppendStep()
         {
-            var node = new NodeReference(123);
-            var queryText = node.BackV<object>(2).QueryText;
-            Assert.AreEqual("g.v(123).back(2)", queryText);
+            var query = new NodeReference(123).BackV<object>(2);
+            Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
         }
 
         [Test]
@@ -25,9 +26,10 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void BackEWithCountShouldAppendStep()
         {
-            var node = new NodeReference(123);
-            var queryText = node.BackE(2).QueryText;
-            Assert.AreEqual("g.v(123).back(2)", queryText);
+            var query = new NodeReference(123).BackE(2);
+            Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
         }
 
         [Test]
