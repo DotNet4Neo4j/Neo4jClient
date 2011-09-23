@@ -9,8 +9,8 @@ namespace Neo4jClient.Gremlin
     {
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query)
         {
-            var queryText = string.Format("{0}.outV", query.QueryText);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddBlock("outV");
+            return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -30,8 +30,8 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query)
         {
-            var queryText = string.Format("{0}.inV", query.QueryText);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddBlock("inV");
+            return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters , StringComparison comparison = StringComparison.OrdinalIgnoreCase)
