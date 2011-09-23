@@ -21,9 +21,10 @@ namespace Neo4jClient
         }
 
         [JsonProperty("params")]
-        public IDictionary<string, object> Parameters
+        public string Parameters
         {
-            get { return parameters; }
+            // A nasty hack to workaround https://github.com/neo4j/community/issues/29
+            get { return new RestSharp.Serializers.JsonSerializer().Serialize(parameters); }
         }
     }
 }
