@@ -30,28 +30,32 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void OutVShouldAppendStepToGremlinQueryWithSingleEqualFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .OutV<object>(new List<Filter>
                 {
                     new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
-                }, StringComparison.Ordinal)
-                .QueryText;
-            Assert.AreEqual("g.v(123).outV{ it.'Foo'.equals('Bar') }", queryText);
+                }, StringComparison.Ordinal);
+            Assert.AreEqual("g.v(p0).outV{ it[p1].equals(p2) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p1"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p2"]);
         }
 
         [Test]
         public void OutVShouldAppendStepToGremlinQueryWithTwoEqualFilters()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .OutV<object>(new List<Filter>
                 {
                     new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
                     new Filter { PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  },
-                }, StringComparison.Ordinal)
-                .QueryText;
-            Assert.AreEqual("g.v(123).outV{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", queryText);
+                }, StringComparison.Ordinal);
+            Assert.AreEqual("g.v(p0).outV{ it[p1].equals(p2) && it[p3].equals(p4) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p1"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p2"]);
+            Assert.AreEqual("Baz", query.QueryParameters["p3"]);
+            Assert.AreEqual("Qak", query.QueryParameters["p4"]);
         }
 
         [Test]
@@ -82,44 +86,50 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void OutShouldAppendStepToGremlinQueryWithSingleCaseSensitiveEqualFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .Out<object>(
                     "REL",
                     new List<Filter>
                     {
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
-                    }, StringComparison.Ordinal)
-                .QueryText;
-            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Foo'.equals('Bar') }", queryText);
+                    }, StringComparison.Ordinal);
+            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV{ it[p2].equals(p3) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("REL", query.QueryParameters["p1"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p2"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p3"]);
         }
 
         [Test]
         public void OutShouldAppendStepToGremlinQueryWithSingleCaseInsensitiveEqualFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .Out<object>(
                     "REL",
                     new List<Filter>
                     {
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
-                    })
-                .QueryText;
-            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
+                    });
+            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("REL", query.QueryParameters["p1"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p2"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p3"]);
         }
 
         [Test]
         public void OutShouldAppendStepToGremlinQueryWithEqualFilterForTextOfEnum()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .Out<TestNodeWithNullableEnum>(
                     "REL",
                     x => x.Boo == TestEnum.Bar
-                    )
-                .QueryText;
-            Assert.AreEqual("g.v(123).outE[[label:'REL']].inV{ it.'Boo'.equalsIgnoreCase('Bar') }", queryText);
+                    );
+            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("REL", query.QueryParameters["p1"]);
+            Assert.AreEqual("Boo", query.QueryParameters["p2"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p3"]);
         }
 
         [Test]
@@ -176,28 +186,32 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void InVShouldAppendStepToGremlinQueryWithSingleEqualFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .InV<object>(new List<Filter>
                 {
                     new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal }
-                }, StringComparison.Ordinal)
-                .QueryText;
-            Assert.AreEqual("g.v(123).inV{ it.'Foo'.equals('Bar') }", queryText);
+                }, StringComparison.Ordinal);
+            Assert.AreEqual("g.v(p0).inV{ it[p1].equals(p2) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p1"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p2"]);
         }
 
         [Test]
         public void InVShouldAppendStepToGremlinQueryWithTwoEqualFilters()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .InV<object>(new List<Filter>
                 {
                     new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
                     new Filter { PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  },
-                }, StringComparison.Ordinal)
-                .QueryText;
-            Assert.AreEqual("g.v(123).inV{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", queryText);
+                }, StringComparison.Ordinal);
+            Assert.AreEqual("g.v(p0).inV{ it[p1].equals(p2) && it[p3].equals(p4) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p1"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p2"]);
+            Assert.AreEqual("Baz", query.QueryParameters["p3"]);
+            Assert.AreEqual("Qak", query.QueryParameters["p4"]);
         }
 
         [Test]
@@ -259,7 +273,12 @@ namespace Neo4jClient.Test.Gremlin
                 .InE("E_BAR")
                 .InV<Bar>();
 
-            Assert.AreEqual("g.v(0).outE[[label:'E_FOO']].inV{ it.'Foo'.equals('Bar') }.inE[[label:'E_BAR']].inV", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV{ it[p2].equals(p3) }.inE[[label:p4]].inV", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters["p0"]);
+            Assert.AreEqual("E_FOO", query.QueryParameters["p1"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p2"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p3"]);
+            Assert.AreEqual("E_BAR", query.QueryParameters["p4"]);
         }
 
         [Test]
