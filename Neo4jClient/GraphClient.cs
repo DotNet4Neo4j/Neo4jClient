@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using Neo4jClient.Deserializer;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
@@ -604,19 +605,25 @@ namespace Neo4jClient
                 ? ""
                 : commandDescription + "\r\n\r\n";
 
+            var rawBody = response.RawBytes == null
+                ? string.Empty
+                : string.Format("\r\n\r\nThe raw response body was: {0}", Encoding.UTF8.GetString(response.RawBytes));
+
             if (response.ErrorException != null)
                 throw new ApplicationException(string.Format(
-                    "Received an exception when executing the request.\r\n\r\n{0}The exception was: {1} {2}",
+                    "Received an exception when executing the request.\r\n\r\n{0}The exception was: {1} {2}{3}",
                     commandDescription,
                     response.ErrorMessage,
-                    response.ErrorException));
+                    response.ErrorException,
+                    rawBody));
 
             if (!allowedStatusCodes.Contains(response.StatusCode))
                 throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\n{0}The response status was: {1} {2}",
+                    "Received an unexpected HTTP status when executing the request.\r\n\r\n{0}The response status was: {1} {2}{3}",
                     commandDescription,
                     (int) response.StatusCode,
-                    response.StatusDescription));
+                    response.StatusDescription,
+                    rawBody));
         }
     }
 }
