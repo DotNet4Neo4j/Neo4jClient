@@ -17,12 +17,14 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        public void QueryTextShouldReturnSimpleVectorStep()
+        public void QueryShouldReturnSimpleVectorStep()
         {
             var client = Substitute.For<IGraphClient>();
             var reference = new NodeReference<object>(123, client);
             var node = new Node<object>(new object(), reference);
-            Assert.AreEqual("g.v(123)", ((IGremlinQuery)node).QueryText);
+            var query = (IGremlinQuery)node;
+            Assert.AreEqual("g.v(p0)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
         [Test]
