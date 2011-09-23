@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Neo4jClient.Gremlin
 {
@@ -19,6 +20,19 @@ namespace Neo4jClient.Gremlin
             var textWithParamNames = string.Format(text, paramNames.ToArray());
 
             return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary);
+        }
+
+        public static IGremlinQuery AddFilterBlock(this IGremlinQuery baseQuery, string text, IEnumerable<Filter> filters, StringComparison comparison)
+        {
+            var formattedFilter = FilterFormatters.FormatGremlinFilter(filters, comparison, baseQuery);
+
+            var newQueryText = baseQuery.QueryText + text + formattedFilter.FilterText;
+
+            var newParams = new Dictionary<string, object>(baseQuery.QueryParameters);
+            foreach (var key in formattedFilter.FilterParameters.Keys)
+                newParams.Add(key, formattedFilter.FilterParameters[key]);
+
+            return new GremlinQuery(baseQuery.Client, newQueryText, newParams);
         }
     }
 }

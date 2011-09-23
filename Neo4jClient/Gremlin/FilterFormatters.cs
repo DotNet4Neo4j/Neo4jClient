@@ -9,7 +9,7 @@ namespace Neo4jClient.Gremlin
 {
     internal static class FilterFormatters
     {
-        internal static string FormatGremlinFilter(IEnumerable<Filter> filters, StringComparison comparison)
+        internal static FormattedFilter FormatGremlinFilter(IEnumerable<Filter> filters, StringComparison comparison, IGremlinQuery queryThatTheFilterWillEventuallyBeAddedTo)
         {
             filters = filters
                 .Select(f =>
@@ -93,7 +93,12 @@ namespace Neo4jClient.Gremlin
             var concatenatedFilters = string.Join(filterSeparator, formattedFilters);
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))
                 concatenatedFilters = string.Format(concatenatedFiltersFormat, concatenatedFilters);
-            return concatenatedFilters;
+
+            return new FormattedFilter
+            {
+                FilterText = concatenatedFilters,
+                FilterParameters = new Dictionary<string, object>()
+            };
         }
 
         internal static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, IEnumerable<Filter> simpleFilters)

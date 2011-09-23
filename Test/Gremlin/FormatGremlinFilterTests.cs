@@ -13,8 +13,9 @@ namespace Neo4jClient.Test.Gremlin
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
             var filters = new List<Filter>();
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual(string.Empty, filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual(string.Empty, filter.FilterText);
         }
 
         [Test]
@@ -24,8 +25,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -35,8 +37,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filter.FilterText);
         }
 
         [Test]
@@ -46,8 +49,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = (long)123, ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filter.FilterText);
         }
 
         [Test]
@@ -57,8 +61,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -68,8 +73,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -79,8 +85,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = (EnumForTesting?)EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -90,8 +97,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' == null }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == null }", filter.FilterText);
         }
 
         [Test]
@@ -102,8 +110,9 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
                 new Filter { PropertyName= "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equals('Bar') && it.'Baz'.equals('Qak') }", filter.FilterText);
         }
 
         [Test]
@@ -116,15 +125,17 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute(), ExpressionType = ExpressionType.Equal  },
             };
-            FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
         }
 
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseInsensitiveFilters()
         {
             var filters = new List<Filter>();
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual(string.Empty, filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual(string.Empty, filter.FilterText);
         }
 
         [Test]
@@ -134,8 +145,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -145,8 +157,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.Equal },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filter.FilterText);
         }
 
         [Test]
@@ -156,8 +169,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = (long)123, ExpressionType = ExpressionType.Equal  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' == 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == 123 }", filter.FilterText);
         }
 
         [Test]
@@ -167,8 +181,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.Equal  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -178,8 +193,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -189,8 +205,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = (EnumForTesting?)EnumForTesting.Bar, ExpressionType = ExpressionType.Equal  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -201,8 +218,9 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter {PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal },
                 new Filter {PropertyName = "Baz", Value = "Qak", ExpressionType = ExpressionType.Equal },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo'.equalsIgnoreCase('Bar') && it.'Baz'.equalsIgnoreCase('Qak') }", filter.FilterText);
         }
 
         [Test]
@@ -212,8 +230,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Equal},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' == null }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' == null }", filter.FilterText);
         }
 
         [TestCase("Foo", "Bar", "{ !it.'Foo'.equalsIgnoreCase('Bar') }")]
@@ -226,8 +245,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= propertyName, Value = valueToCompare, ExpressionType = ExpressionType.NotEqual  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual(expectedValue, filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual(expectedValue, filter.FilterText);
         }
 
         [TestCase("Foo", "Bar", "{ !it.'Foo'.equals('Bar') }")]
@@ -240,8 +260,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= propertyName, Value = valueToCompare, ExpressionType = ExpressionType.NotEqual  },
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual(expectedValue, filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual(expectedValue, filter.FilterText);
         }
 
         [Test]
@@ -251,8 +272,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.NotEqual  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ !it.'Foo'.equals('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ !it.'Foo'.equals('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -262,8 +284,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = EnumForTesting.Bar, ExpressionType = ExpressionType.NotEqual  }
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ !it.'Foo'.equalsIgnoreCase('Bar') }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ !it.'Foo'.equalsIgnoreCase('Bar') }", filter.FilterText);
         }
 
         [Test]
@@ -273,8 +296,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' > 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' > 123 }", filter.FilterText);
         }
 
         [Test]
@@ -284,8 +308,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' > 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' > 123 }", filter.FilterText);
         }
 
         [Test]
@@ -295,8 +320,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' < 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' < 123 }", filter.FilterText);
         }
 
         [Test]
@@ -306,8 +332,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' < 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' < 123 }", filter.FilterText);
         }
 
         [Test]
@@ -317,8 +344,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.GreaterThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' > 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' > 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -328,8 +356,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.GreaterThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' > 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' > 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -339,8 +368,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.LessThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' < 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' < 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -350,8 +380,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.LessThan},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' < 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' < 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -361,8 +392,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' >= 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' >= 123 }", filter.FilterText);
         }
 
         [Test]
@@ -372,8 +404,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.GreaterThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' >= 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' >= 123 }", filter.FilterText);
         }
 
         [Test]
@@ -383,8 +416,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' <= 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' <= 123 }", filter.FilterText);
         }
 
         [Test]
@@ -394,8 +428,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = 123, ExpressionType = ExpressionType.LessThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' <= 123 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' <= 123 }", filter.FilterText);
         }
 
         [Test]
@@ -405,8 +440,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.GreaterThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' >= 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' >= 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -416,8 +452,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.GreaterThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' >= 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' >= 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -427,8 +464,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.LessThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
-            Assert.AreEqual("{ it.'Foo' <= 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            Assert.AreEqual("{ it.'Foo' <= 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -438,8 +476,9 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = long.MaxValue, ExpressionType = ExpressionType.LessThanOrEqual},
             };
-            var filterText = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal);
-            Assert.AreEqual("{ it.'Foo' <= 9223372036854775807 }", filterText);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual("{ it.'Foo' <= 9223372036854775807 }", filter.FilterText);
         }
 
         [Test]
@@ -452,7 +491,8 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute(), ExpressionType = ExpressionType.Equal  },
             };
-            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
         }
 
         [Test]
@@ -465,7 +505,8 @@ namespace Neo4jClient.Test.Gremlin
             {
                 new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Divide },
             };
-            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase);
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
         }
 
         enum EnumForTesting

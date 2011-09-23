@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Gremlin
@@ -9,16 +8,14 @@ namespace Neo4jClient.Gremlin
     {
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query)
         {
-            var newQuery = query.AddBlock("outV");
+            var newQuery = query.AddBlock(".outV");
             return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            var filterInstances = filters.ToList();
-            var concatenatedFilters = FilterFormatters.FormatGremlinFilter(filterInstances, comparison);
-            var queryText = string.Format("{0}.outV{1}", query.QueryText, concatenatedFilters);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddFilterBlock(".outV", filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -30,16 +27,14 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query)
         {
-            var newQuery = query.AddBlock("inV");
+            var newQuery = query.AddBlock(".inV");
             return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters , StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            var filterInstances = filters.ToList();
-            var concatenatedFilters = FilterFormatters.FormatGremlinFilter(filterInstances, comparison);
-            var queryText = string.Format("{0}.inV{1}", query.QueryText, concatenatedFilters);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddFilterBlock(".inV", filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
