@@ -169,9 +169,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void InVShouldAppendStepToGremlinQuery()
         {
-            var node = new NodeReference(123);
-            var queryText = node.InV<object>().QueryText;
-            Assert.AreEqual("g.v(123).inV", queryText);
+            var query = new NodeReference(123).InV<object>();
+            Assert.AreEqual("g.v(p0).inV", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
         [Test]
