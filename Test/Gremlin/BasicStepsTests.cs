@@ -126,41 +126,44 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void InShouldAppendStepToGremlinQueryWithNoFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
-                .In<object>("REL")
-                .QueryText;
-            Assert.AreEqual("g.v(123).inE[[label:'REL']].outV", queryText);
+            var query = new NodeReference(123).In<object>("REL");
+            Assert.AreEqual("g.v(p0).inE[[label:p1]].outV", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("REL", query.QueryParameters["p1"]);
         }
 
         [Test]
         public void InShouldAppendStepToGremlinQueryWithSingleCaseSensitiveEqualFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .In<object>(
                     "REL",
                     new List<Filter>
                     {
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal}
-                    }, StringComparison.Ordinal)
-                .QueryText;
-            Assert.AreEqual("g.v(123).inE[[label:'REL']].outV{ it.'Foo'.equals('Bar') }", queryText);
+                    }, StringComparison.Ordinal);
+            Assert.AreEqual("g.v(p0).inE[[label:p1]].outV{ it[p2].equals(p3) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("REL", query.QueryParameters["p1"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p2"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p3"]);
         }
 
         [Test]
         public void InShouldAppendStepToGremlinQueryWithSingleCaseInsensitiveEqualFilter()
         {
-            var node = new NodeReference(123);
-            var queryText = node
+            var query = new NodeReference(123)
                 .In<object>(
                     "REL",
                     new List<Filter>
                     {
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal }
-                    })
-                .QueryText;
-            Assert.AreEqual("g.v(123).inE[[label:'REL']].outV{ it.'Foo'.equalsIgnoreCase('Bar') }", queryText);
+                    });
+            Assert.AreEqual("g.v(p0).inE[[label:p1]].outV{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("REL", query.QueryParameters["p1"]);
+            Assert.AreEqual("Foo", query.QueryParameters["p2"]);
+            Assert.AreEqual("Bar", query.QueryParameters["p3"]);
         }
 
         [Test]
