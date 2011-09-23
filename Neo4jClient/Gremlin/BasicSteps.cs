@@ -109,7 +109,7 @@ namespace Neo4jClient.Gremlin
                 throw new DetachedNodeException();
 
             var queryText = string.Format("{0}.count()", query.QueryText);
-            var scalarResult = query.Client.ExecuteScalarGremlin(queryText);
+            var scalarResult = query.Client.ExecuteScalarGremlin(queryText, query.QueryParameters);
 
             int result;
             if (!int.TryParse(scalarResult, out result))
