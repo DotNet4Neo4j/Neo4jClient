@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +12,14 @@ namespace Neo4jClient.Gremlin
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
 
+        public GremlinRelationshipEnumerable(IGremlinQuery query)
+        {
+            client = query.Client;
+            queryText = query.QueryText;
+            queryParameters = query.QueryParameters;
+        }
+
+        [Obsolete]
         public GremlinRelationshipEnumerable(IGraphClient client, string queryText, IDictionary<string, object> queryParameters)
         {
             this.client = client;
