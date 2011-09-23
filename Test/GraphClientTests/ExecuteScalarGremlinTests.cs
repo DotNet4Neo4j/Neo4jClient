@@ -50,7 +50,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Resource = "/ext/GremlinPlugin/graphdb/execute_script",
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
-                    }.AddParameter("script", gremlinQueryExpected, ParameterType.GetOrPost),
+                    }.AddBody(new GremlinApiQuery(gremlinQueryExpected, null)),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",

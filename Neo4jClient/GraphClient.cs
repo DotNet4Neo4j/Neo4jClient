@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -298,12 +297,12 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
-            var request = new RestRequest(nodeResource, Method.POST);
-
-            request.AddParameter("script", query, ParameterType.GetOrPost);
-            if (parameters != null)
-                request.AddParameter("params", parameters, ParameterType.GetOrPost);
+            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new GremlinApiQuery(query, parameters));
             var response = CreateClient().Execute(request);
 
             ValidateExpectedResponseCodes(
@@ -318,11 +317,12 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
-            var request = new RestRequest(nodeResource, Method.POST);
-            request.AddParameter("script", query, ParameterType.GetOrPost);
-            if (parameters != null)
-                request.AddParameter("params", parameters, ParameterType.GetOrPost);
+            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new GremlinApiQuery(query, parameters));
             var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
 
             ValidateExpectedResponseCodes(
@@ -339,11 +339,12 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            var nodeResource = RootApiResponse.Extensions.GremlinPlugin.ExecuteScript;
-            var request = new RestRequest(nodeResource, Method.POST);
-            request.AddParameter("script", query, ParameterType.GetOrPost);
-            if (parameters != null)
-                request.AddParameter("params", parameters, ParameterType.GetOrPost);
+            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new GremlinApiQuery(query, parameters));
             var response = CreateClient().Execute<List<RelationshipApiResponse>>(request);
 
             ValidateExpectedResponseCodes(
