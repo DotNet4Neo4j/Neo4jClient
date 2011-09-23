@@ -7,13 +7,13 @@ namespace Neo4jClient.Gremlin
         public static IGremlinNodeQuery<TNode> BackV<TNode>(this IGremlinQuery query, int pipeCount)
         {
             var queryText = String.Format("{0}.back({1})", query.QueryText, pipeCount);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
+            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinRelationshipQuery BackE(this IGremlinQuery query, int pipeCount)
         {
             var queryText = String.Format("{0}.back({1})", query.QueryText, pipeCount);
-            return new GremlinRelationshipEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
         }
     }
 }

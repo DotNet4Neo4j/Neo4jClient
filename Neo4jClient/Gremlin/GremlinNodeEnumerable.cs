@@ -9,11 +9,13 @@ namespace Neo4jClient.Gremlin
     {
         readonly IGraphClient client;
         readonly string queryText;
+        readonly IDictionary<string, object> queryParameters;
 
-        public GremlinNodeEnumerable(IGraphClient client, string queryText)
+        public GremlinNodeEnumerable(IGraphClient client, string queryText, IDictionary<string, object> queryParameters)
         {
             this.client = client;
             this.queryText = queryText;
+            this.queryParameters = queryParameters;
         }
 
         IEnumerator<Node<TNode>> IEnumerable<Node<TNode>>.GetEnumerator()
@@ -36,6 +38,11 @@ namespace Neo4jClient.Gremlin
         string IGremlinQuery.QueryText
         {
             get { return queryText; }
+        }
+
+        IDictionary<string, object> IGremlinQuery.QueryParameters
+        {
+            get { return queryParameters; }
         }
     }
 }

@@ -114,8 +114,9 @@ namespace Neo4jClient.Test
         public void GremlinQueryTextShouldReturnSimpleVectorStep()
         {
             var reference = new NodeReference(123);
-            var queryText = ((IGremlinQuery) reference).QueryText;
-            Assert.AreEqual("g.v(123)", queryText);
+            var query = ((IGremlinQuery) reference);
+            Assert.AreEqual("g.v(p0)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
     }
 }

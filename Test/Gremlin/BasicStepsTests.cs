@@ -14,8 +14,9 @@ namespace Neo4jClient.Test.Gremlin
         public void OutVShouldAppendStepToNodeReference()
         {
             var node = new NodeReference(123);
-            var queryText = node.OutV<object>().QueryText;
-            Assert.AreEqual("g.v(123).outV", queryText);
+            var query = node.OutV<object>();
+            Assert.AreEqual("g.v(p0).outV", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
         [Test]

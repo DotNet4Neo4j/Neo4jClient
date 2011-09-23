@@ -10,7 +10,7 @@ namespace Neo4jClient.Gremlin
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.outV", query.QueryText);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
+            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -18,7 +18,7 @@ namespace Neo4jClient.Gremlin
             var filterInstances = filters.ToList();
             var concatenatedFilters = FilterFormatters.FormatGremlinFilter(filterInstances, comparison);
             var queryText = string.Format("{0}.outV{1}", query.QueryText, concatenatedFilters);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
+            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -31,7 +31,7 @@ namespace Neo4jClient.Gremlin
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.inV", query.QueryText);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
+            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters , StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -39,7 +39,7 @@ namespace Neo4jClient.Gremlin
             var filterInstances = filters.ToList();
             var concatenatedFilters = FilterFormatters.FormatGremlinFilter(filterInstances, comparison);
             var queryText = string.Format("{0}.inV{1}", query.QueryText, concatenatedFilters);
-            return new GremlinNodeEnumerable<TNode>(query.Client, queryText);
+            return new GremlinNodeEnumerable<TNode>(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinNodeQuery<TNode> InV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -52,25 +52,25 @@ namespace Neo4jClient.Gremlin
         public static IGremlinRelationshipQuery OutE(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.outE", query.QueryText);
-            return new GremlinRelationshipEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinRelationshipQuery OutE(this IGremlinQuery query, string label)
         {
             var queryText = string.Format("{0}.outE[[label:'{1}']]", query.QueryText, label);
-            return new GremlinRelationshipEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query)
         {
             var queryText = string.Format("{0}.inE", query.QueryText);
-            return new GremlinRelationshipEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query, string label)
         {
             var queryText = string.Format("{0}.inE[[label:'{1}']]", query.QueryText, label);
-            return new GremlinRelationshipEnumerable(query.Client, queryText);
+            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)
