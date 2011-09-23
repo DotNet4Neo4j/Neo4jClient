@@ -233,17 +233,17 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void InEShouldAppendStepToGremlinQuery()
         {
-            var node = new NodeReference(123);
-            var queryText = node.InE().QueryText;
-            Assert.AreEqual("g.v(123).inE", queryText);
+            var query = new NodeReference(123).InE();
+            Assert.AreEqual("g.v(p0).inE", query.QueryText);
         }
 
         [Test]
         public void InEShouldAppendStepToGremlinQueryWithLabel()
         {
-            var node = new NodeReference(123);
-            var queryText = node.InE("FOO").QueryText;
-            Assert.AreEqual("g.v(123).inE[[label:'FOO']]", queryText);
+            var query = new NodeReference(123).InE("FOO");
+            Assert.AreEqual("g.v(p0).inE[[label:p1]]", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("FOO", query.QueryParameters["p1"]);
         }
 
         [Test]

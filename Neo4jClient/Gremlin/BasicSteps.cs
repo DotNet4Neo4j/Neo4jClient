@@ -69,8 +69,8 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query, string label)
         {
-            var queryText = string.Format("{0}.inE[[label:'{1}']]", query.QueryText, label);
-            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddBlock(".inE[[label:{0}]]", label);
+            return new GremlinRelationshipEnumerable(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)
