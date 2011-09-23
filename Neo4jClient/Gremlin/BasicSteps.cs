@@ -51,20 +51,20 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinRelationshipQuery OutE(this IGremlinQuery query)
         {
-            var queryText = string.Format("{0}.outE", query.QueryText);
-            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddBlock(".outE");
+            return new GremlinRelationshipEnumerable(newQuery);
         }
 
         public static IGremlinRelationshipQuery OutE(this IGremlinQuery query, string label)
         {
-            var queryText = string.Format("{0}.outE[[label:'{1}']]", query.QueryText, label);
-            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddBlock(".outE[[label:{0}]]", label);
+            return new GremlinRelationshipEnumerable(newQuery);
         }
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query)
         {
-            var queryText = string.Format("{0}.inE", query.QueryText);
-            return new GremlinRelationshipEnumerable(query.Client, queryText, query.QueryParameters);
+            var newQuery = query.AddBlock(".inE");
+            return new GremlinRelationshipEnumerable(newQuery);
         }
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query, string label)
