@@ -29,7 +29,7 @@ namespace Neo4jClient
 
         IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters = null);
 
-        Dictionary<string,IndexMetaData> GetIndexes(IndexFor indexFor);
+        Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor);
 
         bool CheckIndexExists(string indexName, IndexFor indexFor);
 
