@@ -294,7 +294,7 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters = null)
+        public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
 
@@ -314,7 +314,7 @@ namespace Neo4jClient
             return response.Content;
         }
 
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters = null)
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
 
@@ -336,7 +336,7 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToNode(this));
         }
 
-        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters = null)
+        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
 

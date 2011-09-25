@@ -23,11 +23,11 @@ namespace Neo4jClient
 
         void DeleteRelationship(RelationshipReference reference);
 
-        string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters = null);
+        string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters);
 
-        IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters = null);
+        IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters);
 
-        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters = null);
+        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters);
 
         Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor);
 

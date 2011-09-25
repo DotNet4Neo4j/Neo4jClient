@@ -30,7 +30,7 @@ namespace Neo4jClient.Gremlin
         IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
         {
             if (client == null) throw new DetachedNodeException();
-            var results = client.ExecuteGetAllRelationshipsGremlin(queryText);
+            var results = client.ExecuteGetAllRelationshipsGremlin(queryText, queryParameters);
             return results.GetEnumerator();
         }
 

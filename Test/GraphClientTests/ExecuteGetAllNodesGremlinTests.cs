@@ -15,7 +15,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteGetAllNodesGremlin<object>("");
+            client.ExecuteGetAllNodesGremlin<object>("", null);
         }
 
         public class Foo
@@ -170,7 +170,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<NodeApiResponse<string>>(gremlinQueryExpected)
+                .ExecuteGetAllNodesGremlin<NodeApiResponse<string>>(gremlinQueryExpected, null)
                 .ToList();
 
             //Assert

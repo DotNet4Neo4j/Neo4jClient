@@ -29,13 +29,14 @@ namespace Neo4jClient.Test.Gremlin
                 new Node<object>(new object(), new NodeReference<object>(456)),
                 new Node<object>(new object(), new NodeReference<object>(789))
             };
+            var parameters = new Dictionary<string, object>();
             var client = Substitute.For<IGraphClient>();
             client
-                .ExecuteGetAllNodesGremlin<object>("abc")
+                .ExecuteGetAllNodesGremlin<object>("abc", parameters)
                 .Returns(expectedResults);
 
             // Act
-            var enumerable = new GremlinNodeEnumerable<object>(client, "abc", null);
+            var enumerable = new GremlinNodeEnumerable<object>(client, "abc", parameters);
             var results = enumerable.ToArray();
 
             // Assert

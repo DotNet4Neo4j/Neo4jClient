@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteScalarGremlin("");
+            client.ExecuteScalarGremlin("", null);
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            var node = graphClient.ExecuteScalarGremlin(gremlinQueryExpected);
+            var node = graphClient.ExecuteScalarGremlin(gremlinQueryExpected, null);
 
             //Assert
             Assert.AreEqual(1, int.Parse(node));
