@@ -29,6 +29,11 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
+            var parameters = new Dictionary<string, object>
+                {
+                    {"foo", 123},
+                    {"bar", "baz"}
+                };
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -57,7 +62,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Resource = "/ext/GremlinPlugin/graphdb/execute_script",
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
-                    }.AddBody(new GremlinApiQuery("foo bar query", null)),
+                    }.AddBody(new GremlinApiQuery("foo bar query", parameters)),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -106,7 +111,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             //Act
             var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<Foo>(gremlinQueryExpected)
+                .ExecuteGetAllNodesGremlin<Foo>(gremlinQueryExpected, parameters)
                 .ToList();
 
             //Assert

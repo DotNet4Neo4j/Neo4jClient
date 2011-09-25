@@ -47,18 +47,11 @@ namespace Neo4jClient.Test.GraphClientTests
             }
 
             return matchingRequests
-                .Select(can =>
-                {
-                    var paramList = new List<HttpParameter>();
-                    foreach (var param in can.Key.Parameters)
-                    {
-                        paramList.Add(
-                            new HttpParameter {Name = param.Name, Value = param.Value.ToString()}
-                            );
-                    }
-
-                    return paramList;
-                })
+                .Select(can => can
+                    .Key
+                    .Parameters
+                    .Select(param => new HttpParameter {Name = param.Name, Value = param.Value.ToString()})
+                    .ToList())
                 .SingleOrDefault();
         }
 
