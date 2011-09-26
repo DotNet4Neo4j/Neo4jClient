@@ -12,6 +12,7 @@ namespace Neo4jClient.Test.GraphClientTests
     public class ReIndexTests
     {
         const string RootResponse = @"{
+                          'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',

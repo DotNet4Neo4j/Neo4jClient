@@ -44,6 +44,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
                         Content = @"{
+                          'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
@@ -139,6 +140,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
                         Content = @"{
+                          'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
