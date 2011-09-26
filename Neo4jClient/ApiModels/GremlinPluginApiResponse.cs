@@ -1,4 +1,4 @@
-﻿namespace Neo4jClient
+﻿namespace Neo4jClient.ApiModels
 {
     class GremlinPluginApiResponse
     {

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Neo4jClient
+namespace Neo4jClient.ApiModels
 {
-    internal class GremlinApiQuery
+    class GremlinApiQuery
     {
         readonly string query;
         readonly IDictionary<string, object> parameters;

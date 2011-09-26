@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 
-namespace Neo4jClient
+namespace Neo4jClient.ApiModels
 {
-    internal class NodeApiResponse<TNode>
+    class NodeApiResponse<TNode>
     {
         public string Self { get; set; }
         public TNode Data { get; set; }

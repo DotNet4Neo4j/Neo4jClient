@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Neo4jClient.ApiModels
 {
-    internal class BatchResponse : List<BatchStepResult>
+    class BatchResponse : List<BatchStepResult>
     {
         public BatchStepResult this[BatchStep step]
         {

@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels
 {
-    internal class BatchStepResult
+    class BatchStepResult
     {
         [JsonProperty("id")]
         public int Id { get; set; }

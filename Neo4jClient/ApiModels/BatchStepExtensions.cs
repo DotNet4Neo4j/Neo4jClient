@@ -3,7 +3,7 @@ using RestSharp;
 
 namespace Neo4jClient.ApiModels
 {
-    internal static class BatchStepExtensions
+    static class BatchStepExtensions
     {
         public static BatchStep Add(this IList<BatchStep> list, Method method, string to, object body)
         {

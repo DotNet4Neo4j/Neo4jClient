@@ -5,7 +5,7 @@ using RestSharp;
 namespace Neo4jClient.ApiModels
 {
     [DebuggerDisplay("{Id}: {Method} {To}")]
-    internal class BatchStep
+    class BatchStep
     {
         [JsonIgnore]
         public Method Method { get; set; }

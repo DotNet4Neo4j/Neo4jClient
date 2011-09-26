@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using System.Linq;
+using Neo4jClient.ApiModels;
 using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
