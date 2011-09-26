@@ -581,7 +581,8 @@ namespace Neo4jClient
                 indexValue = value.ToString();
             }
 
-            if (string.IsNullOrWhiteSpace(indexValue))
+            if (string.IsNullOrWhiteSpace(indexValue) ||
+                !indexValue.Any(char.IsLetterOrDigit))
                 return null;
 
             indexValue = indexValue.Replace('/', '-');
