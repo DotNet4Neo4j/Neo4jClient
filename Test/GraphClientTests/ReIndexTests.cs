@@ -141,7 +141,7 @@ namespace Neo4jClient.Test.GraphClientTests
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
             {
-                {"FooKey", "?"}
+                {"FooKey", "foo?bar"}
             };
             var indexEntries = new List<IndexEntry>
             {
@@ -152,7 +152,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 }
             };
 
-            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/%3F", Method.POST)
+            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/foo%3Fbar", Method.POST)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
