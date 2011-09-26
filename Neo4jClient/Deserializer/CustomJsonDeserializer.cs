@@ -292,7 +292,11 @@ namespace Neo4jClient.Deserializer
         private IList BuildList(Type type, JEnumerable<JToken> elements)
         {
             var list = (IList)Activator.CreateInstance(type);
-            var itemType = type.GetGenericArguments()[0];
+            var itemType = type
+                .GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>))
+                .Select(i => i.GetGenericArguments().First())
+                .Single();
 
             foreach (var element in elements)
             {
