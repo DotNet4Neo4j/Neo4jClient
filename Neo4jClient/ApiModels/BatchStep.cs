@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using RestSharp;
 
-namespace Neo4jClient
+namespace Neo4jClient.ApiModels
 {
     [DebuggerDisplay("{Id}: {Method} {To}")]
     internal class BatchStep
