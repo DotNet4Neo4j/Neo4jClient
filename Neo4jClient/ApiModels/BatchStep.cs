@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient
 {
+    [DebuggerDisplay("{Id}: {Method} {To}")]
     internal class BatchStep
     {
         [JsonProperty("method")]
