@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Deserializer;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
@@ -48,6 +49,7 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
             RootApiResponse = response.Data;
+            RootApiResponse.Batch = RootApiResponse.Batch.Substring(rootUri.AbsoluteUri.Length);
             RootApiResponse.Node = RootApiResponse.Node.Substring(rootUri.AbsoluteUri.Length);
             RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(rootUri.AbsoluteUri.Length);
             RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(rootUri.AbsoluteUri.Length);
@@ -65,9 +67,10 @@ namespace Neo4jClient
             get { return new RootNode(this); }
         }
 
-        public virtual NodeReference<TNode> Create<TNode>(TNode node,
-                                                          IEnumerable<IRelationshipAllowingParticipantNode<TNode>>
-                                                              relationships, IEnumerable<IndexEntry> indexEntries)
+        public virtual NodeReference<TNode> Create<TNode>(
+            TNode node,
+            IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships,
+            IEnumerable<IndexEntry> indexEntries)
             where TNode : class
         {
             if (node == null)
@@ -87,24 +90,18 @@ namespace Neo4jClient
 
             CheckRoot();
 
-            var request = new RestRequest(RootApiResponse.Node, Method.POST)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
-                };
-            request.AddBody(node);
-            var response = CreateClient().Execute(request);
+            var batchSteps = new List<BatchStep>();
 
-            ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
-            
-            var nodeLocation = response.Headers.GetParameter("Location");
-            var nodeId = int.Parse(GetLastPathSegment(nodeLocation));
-            var nodeReference = new NodeReference<TNode>(nodeId, this);
+            var createNodeStep = batchSteps.Add(Method.POST, "/node", node);
 
             foreach (var relationship in calculatedRelationships)
             {
-                var participants = new[] {nodeReference, relationship.Relationship.OtherNode};
-                NodeReference sourceNode, targetNode;
+                var participants = new[]
+                {
+                    string.Format("{{{0}}}", createNodeStep.Id),
+                    string.Format("/node/{0}", relationship.Relationship.OtherNode.Id)
+                };
+                string sourceNode, targetNode;
                 switch (relationship.CalculatedDirection)
                 {
                     case RelationshipDirection.Outgoing:
@@ -121,16 +118,39 @@ namespace Neo4jClient
                             relationship.CalculatedDirection));
                 }
 
-                CreateRelationship(
-                    sourceNode,
-                    targetNode,
-                    relationship.Relationship.RelationshipTypeKey,
-                    relationship.Relationship.Data);
+                var relationshipTemplate = new RelationshipTemplate
+                {
+                    To = targetNode,
+                    Data = relationship.Relationship.Data,
+                    Type = relationship.Relationship.RelationshipTypeKey
+                };
+                batchSteps.Add(Method.POST, sourceNode + "/relationships", relationshipTemplate);
             }
+
+            var batchResponse = ExecuteBatch(batchSteps);
+
+            var createResponse = batchResponse[createNodeStep];
+            var nodeId = int.Parse(GetLastPathSegment(createResponse.Location));
+            var nodeReference = new NodeReference<TNode>(nodeId, this);
 
             ReIndex(nodeReference, indexEntries);
 
             return nodeReference;
+        }
+
+        BatchResponse ExecuteBatch(List<BatchStep> batchSteps)
+        {
+            var request = new RestRequest(RootApiResponse.Batch, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(batchSteps);
+            var response = CreateClient().Execute<BatchResponse>(request);
+
+            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
+
+            return response.Data;
         }
 
         public virtual void CreateRelationship<TSourceNode, TRelationship>(

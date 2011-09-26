@@ -48,6 +48,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmbiguousRelationshipDirectionException.cs" />
+    <Compile Include="ApiModels\BatchResponse.cs" />
+    <Compile Include="ApiModels\BatchStep.cs" />
+    <Compile Include="ApiModels\BatchStepExtensions.cs" />
+    <Compile Include="ApiModels\BatchStepResult.cs" />
     <Compile Include="DeleteMode.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
