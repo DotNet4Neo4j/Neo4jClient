@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace Neo4jClient
+namespace Neo4jClient.ApiModels
 {
     internal class RelationshipApiResponse
     {

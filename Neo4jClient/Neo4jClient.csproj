@@ -86,7 +86,7 @@
     <Compile Include="NodeReference`TNode.cs" />
     <Compile Include="RelationshipDirection.cs" />
     <Compile Include="RelationshipEnd.cs" />
-    <Compile Include="RelationshipApiResponse.cs" />
+    <Compile Include="ApiModels\RelationshipApiResponse.cs" />
     <Compile Include="RelationshipInstance.cs" />
     <Compile Include="ApiModels\RelationshipTemplate.cs" />
     <Compile Include="Relationship`TData.cs" />
