@@ -7,8 +7,14 @@ namespace Neo4jClient.ApiModels
     [DebuggerDisplay("{Id}: {Method} {To}")]
     internal class BatchStep
     {
-        [JsonProperty("method")]
+        [JsonIgnore]
         public Method Method { get; set; }
+
+        [JsonProperty("method")]
+        public string MethodAsString
+        {
+            get { return Method.ToString(); }
+        }
 
         [JsonProperty("to")]
         public string To { get; set; }
