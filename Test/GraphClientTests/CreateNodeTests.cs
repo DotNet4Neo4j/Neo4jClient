@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using NUnit.Framework;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Gremlin;
 using RestSharp;
 
@@ -11,6 +12,18 @@ namespace Neo4jClient.Test.GraphClientTests
     [TestFixture]
     public class CreateNodeTests
     {
+        readonly string rootResponse = @"{
+                'batch' : 'http://foo/db/data/batch',
+                'node' : 'http://foo/db/data/node',
+                'node_index' : 'http://foo/db/data/index/node',
+                'relationship_index' : 'http://foo/db/data/index/relationship',
+                'reference_node' : 'http://foo/db/data/node/0',
+                'extensions_info' : 'http://foo/db/data/ext',
+                'extensions'' : {
+                }
+            }"
+            .Replace('\'', '"');
+
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowArgumentNullExceptionForNullNode()
@@ -38,42 +51,48 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [Ignore]
         public void ShouldReturnReferenceToCreatedNode()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+            var batch = new List<BatchStep>();
+            batch.Add(Method.POST, "/node", testNode);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        Content = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
+                    new HttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", Content = rootResponse }
                 },
                 {
                     new RestRequest {
-                        Resource = "/node",
+                        Resource = "/batch",
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
-                    }.AddBody(testNode),
+                    }.AddBody(batch),
                     new HttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        Headers = {
-                            new HttpHeader { Name = "Location", Value ="http://foo/db/data/node/456" }
-                        }
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                          'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
+                          'data' : {
+                            'Foo' : 'foo',
+                            'Bar' : 'bar',
+                            'Baz' : 'baz'
+                          },
+                          'traverse' : 'http://foo/db/data/node/760/traverse/{returnType}',
+                          'all_typed_relationships' : 'http://foo/db/data/node/760/relationships/all/{-list|&|types}',
+                          'self' : 'http://foo/db/data/node/760',
+                          'property' : 'http://foo/db/data/node/760/properties/{key}',
+                          'outgoing_typed_relationships' : 'http://foo/db/data/node/760/relationships/out/{-list|&|types}',
+                          'properties' : 'http://foo/db/data/node/760/properties',
+                          'incoming_relationships' : 'http://foo/db/data/node/760/relationships/in',
+                          'extensions' : {
+                          },
+                          'create_relationship' : 'http://foo/db/data/node/760/relationships',
+                          'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                          'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
+                          'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
+                        },'from':'/node'}]".Replace('\'', '\"')
                     }
                 }
             });
@@ -83,7 +102,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var node = graphClient.Create(testNode);
 
-            Assert.AreEqual(456, node.Id);
+            Assert.AreEqual(760, node.Id);
         }
 
         [Test]
