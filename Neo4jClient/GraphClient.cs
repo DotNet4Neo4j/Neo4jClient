@@ -76,6 +76,9 @@ namespace Neo4jClient
             if (node == null)
                 throw new ArgumentNullException("node");
 
+            relationships = relationships ?? Enumerable.Empty<IRelationshipAllowingParticipantNode<TNode>>();
+            indexEntries = indexEntries ?? Enumerable.Empty<IndexEntry>();
+
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
 
@@ -127,13 +130,21 @@ namespace Neo4jClient
                 batchSteps.Add(Method.POST, sourceNode + "/relationships", relationshipTemplate);
             }
 
+            var indexAddresses = indexEntries
+                .SelectMany(i => i
+                    .KeyValues
+                    .Select(k => BuildIndexAddress(i.Name, k.Key, k.Value)))
+                .Where(a => !string.IsNullOrEmpty(a));
+            foreach (var indexAddress in indexAddresses)
+            {
+                batchSteps.Add(Method.POST, indexAddress, "{0}");
+            }
+
             var batchResponse = ExecuteBatch(batchSteps);
 
             var createResponse = batchResponse[createNodeStep];
             var nodeId = int.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
-
-            ReIndex(nodeReference, indexEntries);
 
             return nodeReference;
         }
@@ -497,24 +508,7 @@ namespace Neo4jClient
 
             foreach (var update in updates)
             {
-                string indexValue;
-                if(update.Value is DateTimeOffset)
-                {
-                    indexValue = ((DateTimeOffset) update.Value).UtcTicks.ToString();
-                }
-                else if (update.Value is DateTime)
-                {
-                    indexValue = ((DateTime)update.Value).Ticks.ToString();
-                }
-                else
-                {
-                    indexValue = update.Value.ToString();
-                }
-
-                if (string.IsNullOrWhiteSpace(indexValue))
-                    continue;
-
-                AddNodeToIndex(update.IndexName, update.Key, indexValue, nodeAddress);
+                AddNodeToIndex(update.IndexName, update.Key, update.Value, nodeAddress);
             }
         }
 
@@ -546,17 +540,9 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
-        void AddNodeToIndex(string indexName, string indexKey, string indexValue, string nodeAddress)
+        void AddNodeToIndex(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
-            indexValue = indexValue.Replace('/', '-');
-
-            var nodeIndexAddress = string.Join("/", new[]
-                {
-                    RootApiResponse.NodeIndex,
-                    Uri.EscapeDataString(indexName),
-                    Uri.EscapeDataString(indexKey),
-                    Uri.EscapeDataString(indexValue)
-                });
+            var nodeIndexAddress = BuildIndexAddress(indexName, indexKey, indexValue);
             var request = new RestRequest(nodeIndexAddress, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
@@ -577,6 +563,36 @@ namespace Neo4jClient
                     nodeIndexAddress
                 ),
                 HttpStatusCode.Created);
+        }
+
+        string BuildIndexAddress(string name, string key, object value)
+        {
+            string indexValue;
+            if (value is DateTimeOffset)
+            {
+                indexValue = ((DateTimeOffset)value).UtcTicks.ToString();
+            }
+            else if (value is DateTime)
+            {
+                indexValue = ((DateTime)value).Ticks.ToString();
+            }
+            else
+            {
+                indexValue = value.ToString();
+            }
+
+            if (string.IsNullOrWhiteSpace(indexValue))
+                return null;
+
+            indexValue = indexValue.Replace('/', '-');
+            var nodeIndexAddress = string.Join("/", new[]
+            {
+                RootApiResponse.NodeIndex,
+                Uri.EscapeDataString(name),
+                Uri.EscapeDataString(key),
+                Uri.EscapeDataString(indexValue)
+            });
+            return nodeIndexAddress;
         }
 
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
