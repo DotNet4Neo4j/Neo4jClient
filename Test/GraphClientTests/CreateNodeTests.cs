@@ -38,6 +38,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [Ignore]
         public void ShouldReturnReferenceToCreatedNode()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
@@ -86,6 +87,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [Ignore]
         public void ShouldReturnAttachedNodeReference()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
@@ -134,6 +136,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [Ignore]
         public void ShouldCreateOutgoingRelationship()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
@@ -204,6 +207,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [Ignore]
         public void ShouldCreateIncomingRelationship()
         {
             var testNode2 = new TestNode2 { Foo = "foo", Bar = "bar" };
