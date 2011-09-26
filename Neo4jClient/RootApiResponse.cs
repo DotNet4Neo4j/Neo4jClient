@@ -2,6 +2,7 @@
 {
     class RootApiResponse
     {
+        public string Batch { get; set; }
         public string Node { get; set; }
         public string NodeIndex { get; set; }
         public string RelationshipIndex { get; set; }
