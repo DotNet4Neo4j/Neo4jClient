@@ -103,6 +103,7 @@
     <Compile Include="Serializer\EnumValueConverter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Diagrams\Batching.cd" />
     <None Include="Diagrams\GraphClientCore.cd" />
     <None Include="Indexing.cd" />
     <None Include="packages.config">
