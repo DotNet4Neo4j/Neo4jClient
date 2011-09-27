@@ -631,6 +631,11 @@ namespace Neo4jClient
                 : response.Data.Select(r => r.ToNode(this));
         }
 
+        public void ShutdownServer()
+        {
+            ExecuteScalarGremlin("g.getRawGraph().shutdown()", null);
+        }
+
         static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)
         {
             ValidateExpectedResponseCodes(response, null, allowedStatusCodes);

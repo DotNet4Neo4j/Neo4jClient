@@ -40,5 +40,7 @@ namespace Neo4jClient
         void DeleteIndex(string indexName, IndexFor indexFor);
 
         IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query );
+
+        void ShutdownServer();
     }
 }
