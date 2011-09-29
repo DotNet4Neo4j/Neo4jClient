@@ -1,0 +1,60 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+namespace Neo4jClient.Gremlin
+{
+    [DebuggerDisplay("{queryText}")]
+    internal class GremlinRelationshipEnumerable<TData>
+        : IGremlinRelationshipQuery<TData>
+        where TData : class, new()
+    {
+        readonly IGraphClient client;
+        readonly string queryText;
+        readonly IDictionary<string, object> queryParameters;
+
+        public GremlinRelationshipEnumerable(IGremlinQuery query)
+        {
+            client = query.Client;
+            queryText = query.QueryText;
+            queryParameters = query.QueryParameters;
+        }
+
+        IEnumerator<RelationshipInstance<TData>> GetEnumeratorInternal()
+        {
+            if (client == null) throw new DetachedNodeException();
+            var results = client.ExecuteGetAllRelationshipsGremlin<TData>(queryText, queryParameters);
+            return results.GetEnumerator();
+        }
+
+        IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
+        {
+            return GetEnumeratorInternal();
+        }
+
+        IEnumerator<RelationshipInstance<TData>> IEnumerable<RelationshipInstance<TData>>.GetEnumerator()
+        {
+            return GetEnumeratorInternal();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumeratorInternal();
+        }
+
+        IGraphClient IGremlinQuery.Client
+        {
+            get { return client; }
+        }
+
+        string IGremlinQuery.QueryText
+        {
+            get { return queryText; }
+        }
+
+        IDictionary<string, object> IGremlinQuery.QueryParameters
+        {
+            get { return queryParameters; }
+        }
+    }
+}

@@ -60,6 +60,8 @@
     <Compile Include="ApiModels\GremlinApiQuery.cs" />
     <Compile Include="ApiModels\GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\Back.cs" />
+    <Compile Include="Gremlin\GremlinRelationshipEnumerable`TData.cs" />
+    <Compile Include="Gremlin\IGremlinRelationshipQuery`TData.cs" />
     <Compile Include="Gremlin\FilterFormatters.cs" />
     <Compile Include="Gremlin\Filter.cs" />
     <Compile Include="Gremlin\FormattedFilter.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="ApiModels\RelationshipApiResponse.cs" />
     <Compile Include="RelationshipInstance.cs" />
     <Compile Include="ApiModels\RelationshipTemplate.cs" />
+    <Compile Include="RelationshipInstance`TData.cs" />
     <Compile Include="Relationship`TData.cs" />
     <Compile Include="Relationship.cs" />
     <Compile Include="RelationshipReference.cs" />
