@@ -19,14 +19,6 @@ namespace Neo4jClient.Gremlin
             queryParameters = query.QueryParameters;
         }
 
-        [Obsolete]
-        public GremlinRelationshipEnumerable(IGraphClient client, string queryText, IDictionary<string, object> queryParameters)
-        {
-            this.client = client;
-            this.queryText = queryText;
-            this.queryParameters = queryParameters;
-        }
-
         IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
         {
             if (client == null) throw new DetachedNodeException();
