@@ -293,7 +293,7 @@ namespace Neo4jClient
             //TODO: Make this a dynamic endpoint resolution
             var relationshipsEndpoint = ResolveEndpoint(reference) + "/relationships/all";
             var request = new RestRequest(relationshipsEndpoint, Method.GET);
-            var response = CreateClient().Execute<List<RelationshipApiResponse>>(request);
+            var response = CreateClient().Execute<List<RelationshipApiResponse<object>>>(request);
 
             var relationshipResources = response
                 .Data
@@ -369,6 +369,12 @@ namespace Neo4jClient
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
         {
+            return ExecuteGetAllRelationshipsGremlin<object>(query, parameters);
+        }
+
+        public virtual IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsGremlin<TData>(string query, IDictionary<string, object> parameters)
+            where TData : class, new()
+        {
             CheckRoot();
 
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
@@ -377,7 +383,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query, parameters));
-            var response = CreateClient().Execute<List<RelationshipApiResponse>>(request);
+            var response = CreateClient().Execute<List<RelationshipApiResponse<TData>>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -385,7 +391,7 @@ namespace Neo4jClient
                 HttpStatusCode.OK);
 
             return response.Data == null
-                ? Enumerable.Empty<RelationshipInstance>()
+                ? Enumerable.Empty<RelationshipInstance<TData>>()
                 : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
 
