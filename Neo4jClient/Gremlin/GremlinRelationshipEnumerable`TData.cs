@@ -27,11 +27,6 @@ namespace Neo4jClient.Gremlin
             return results.GetEnumerator();
         }
 
-        IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
-        {
-            return GetEnumeratorInternal();
-        }
-
         IEnumerator<RelationshipInstance<TData>> IEnumerable<RelationshipInstance<TData>>.GetEnumerator()
         {
             return GetEnumeratorInternal();
