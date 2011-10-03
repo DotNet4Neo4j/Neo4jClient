@@ -1,11 +1,10 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Neo4jClient.Gremlin
 {
-    [DebuggerDisplay("{queryText}")]
+    [DebuggerDisplay("{DebugQueryText}")]
     internal class GremlinRelationshipEnumerable : IGremlinRelationshipQuery
     {
         readonly IGraphClient client;
@@ -17,6 +16,19 @@ namespace Neo4jClient.Gremlin
             client = query.Client;
             queryText = query.QueryText;
             queryParameters = query.QueryParameters;
+        }
+
+        public string DebugQueryText
+        {
+            get
+            {
+                var text = queryText;
+                foreach (var key in queryParameters.Keys)
+                {
+                    text = text.Replace(key, string.Format("'{0}'", queryParameters[key]));
+                }
+                return text;
+            }
         }
 
         IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
