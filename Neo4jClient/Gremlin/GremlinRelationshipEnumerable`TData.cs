@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Neo4jClient.Gremlin
 {
@@ -25,7 +26,7 @@ namespace Neo4jClient.Gremlin
             get
             {
                 var text = queryText;
-                foreach (var key in queryParameters.Keys)
+                foreach (var key in queryParameters.Keys.Reverse())
                 {
                     text = text.Replace(key, string.Format("'{0}'", queryParameters[key]));
                 }

@@ -42,5 +42,32 @@ namespace Neo4jClient.Test.Gremlin
             // Assert
             Assert.AreEqual(expectedResults, results);
         }
+
+        [Test]
+        public void DebugQueryTextShouldReturnExpandedText()
+        {
+            var gremlinQuery = new GremlinQuery(
+                null,
+                "g[p0][p1][p2][p3][p4][p5][p6][p7][p8][p9][p10][p11]",
+                new Dictionary<string, object>
+                {
+                    { "p0", "val00" },
+                    { "p1", "val01" },
+                    { "p2", "val02" },
+                    { "p3", "val03" },
+                    { "p4", "val04" },
+                    { "p5", "val05" },
+                    { "p6", "val06" },
+                    { "p7", "val07" },
+                    { "p8", "val08" },
+                    { "p9", "val09" },
+                    { "p10", "val10" },
+                    { "p11", "val11" },
+                });
+            var enumerable = new GremlinNodeEnumerable<object>(gremlinQuery);
+            Assert.AreEqual(
+                "g['val00']['val01']['val02']['val03']['val04']['val05']['val06']['val07']['val08']['val09']['val10']['val11']",
+                enumerable.DebugQueryText);
+        }
     }
 }
