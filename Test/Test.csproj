@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
+    <Compile Include="GraphClientTests\UpdateRelationshipTests.cs" />
     <Compile Include="GraphClientTests\DeleteIndexTests.cs" />
     <Compile Include="GraphClientTests\IndexExistsTests.cs" />
     <Compile Include="GraphClientTests\GetIndexesTests.cs" />

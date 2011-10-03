@@ -266,6 +266,30 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
+        public void Update<TRelationshipData>(RelationshipReference relationshipReference, Action<TRelationshipData> updateCallback)
+            where TRelationshipData : class, new()
+        {
+            CheckRoot();
+
+            var propertiesEndpoint = ResolveEndpoint(relationshipReference) + "/properties";
+
+            var getRequest = new RestRequest(propertiesEndpoint, Method.GET);
+            var getResponse = CreateClient().Execute<TRelationshipData>(getRequest);
+            ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
+            
+            var payload = getResponse.Data;
+            updateCallback(payload);
+
+            var updateRequest = new RestRequest(propertiesEndpoint, Method.PUT)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            updateRequest.AddBody(payload);
+            var updateResponse = CreateClient().Execute(updateRequest);
+            ValidateExpectedResponseCodes(updateResponse, HttpStatusCode.NoContent);
+        }
+
         public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
             CheckRoot();
