@@ -7,7 +7,7 @@ using Neo4jClient.Gremlin;
 namespace Neo4jClient.Test.Gremlin
 {
     [TestFixture]
-    public class GremlinEnumerableTests
+    public class GremlinNodeEnumerableTests
     {
         [Test]
         [ExpectedException(typeof(DetachedNodeException))]

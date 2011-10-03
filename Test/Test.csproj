@@ -79,7 +79,7 @@
     <Compile Include="Gremlin\BackTests.cs" />
     <Compile Include="Gremlin\BasicStepsTests.cs" />
     <Compile Include="Gremlin\FormatGremlinFilterTests.cs" />
-    <Compile Include="Gremlin\GremlinEnumerableTests.cs">
+    <Compile Include="Gremlin\GremlinNodeEnumerableTests.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Gremlin\TranslateFilterTests.cs" />
