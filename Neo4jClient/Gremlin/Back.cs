@@ -13,5 +13,12 @@
             var newQuery = query.AddBlock(".back({0})", pipeCount);
             return new GremlinRelationshipEnumerable(newQuery);
         }
+
+        public static IGremlinRelationshipQuery<TData> BackE<TData>(this IGremlinQuery query, int pipeCount)
+            where TData : class, new()
+        {
+            var newQuery = query.AddBlock(".back({0})", pipeCount);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
     }
 }
