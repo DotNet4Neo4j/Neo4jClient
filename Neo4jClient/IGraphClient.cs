@@ -16,6 +16,11 @@ namespace Neo4jClient
 
         void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback);
 
+        void Update<TNode>(
+            NodeReference<TNode> nodeReference,
+            Action<TNode> updateCallback,
+            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback);
+
         void Delete(NodeReference reference, DeleteMode mode);
 
         void CreateRelationship<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship)
