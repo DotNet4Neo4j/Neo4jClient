@@ -288,6 +288,30 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
+        public void Update<TRelationshipData>(RelationshipReference relationshipReference, Action<TRelationshipData> updateCallback)
+            where TRelationshipData : class, new()
+        {
+            CheckRoot();
+
+            var propertiesEndpoint = ResolveEndpoint(relationshipReference) + "/properties";
+
+            var getRequest = new RestRequest(propertiesEndpoint, Method.GET);
+            var getResponse = CreateClient().Execute<TRelationshipData>(getRequest);
+            ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
+            
+            var payload = getResponse.Data;
+            updateCallback(payload);
+
+            var updateRequest = new RestRequest(propertiesEndpoint, Method.PUT)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            updateRequest.AddBody(payload);
+            var updateResponse = CreateClient().Execute(updateRequest);
+            ValidateExpectedResponseCodes(updateResponse, HttpStatusCode.NoContent);
+        }
+
         public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
             CheckRoot();
@@ -315,7 +339,7 @@ namespace Neo4jClient
             //TODO: Make this a dynamic endpoint resolution
             var relationshipsEndpoint = ResolveEndpoint(reference) + "/relationships/all";
             var request = new RestRequest(relationshipsEndpoint, Method.GET);
-            var response = CreateClient().Execute<List<RelationshipApiResponse>>(request);
+            var response = CreateClient().Execute<List<RelationshipApiResponse<object>>>(request);
 
             var relationshipResources = response
                 .Data
@@ -391,6 +415,12 @@ namespace Neo4jClient
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
         {
+            return ExecuteGetAllRelationshipsGremlin<object>(query, parameters);
+        }
+
+        public virtual IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsGremlin<TData>(string query, IDictionary<string, object> parameters)
+            where TData : class, new()
+        {
             CheckRoot();
 
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
@@ -399,7 +429,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query, parameters));
-            var response = CreateClient().Execute<List<RelationshipApiResponse>>(request);
+            var response = CreateClient().Execute<List<RelationshipApiResponse<TData>>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -407,7 +437,7 @@ namespace Neo4jClient
                 HttpStatusCode.OK);
 
             return response.Data == null
-                ? Enumerable.Empty<RelationshipInstance>()
+                ? Enumerable.Empty<RelationshipInstance<TData>>()
                 : response.Data.Select(r => r.ToRelationshipInstance(this));
         }
 
@@ -651,6 +681,11 @@ namespace Neo4jClient
             return response.Data == null
                 ? Enumerable.Empty<Node<TNode>>()
                 : response.Data.Select(r => r.ToNode(this));
+        }
+
+        public void ShutdownServer()
+        {
+            ExecuteScalarGremlin("g.getRawGraph().shutdown()", null);
         }
 
         static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)

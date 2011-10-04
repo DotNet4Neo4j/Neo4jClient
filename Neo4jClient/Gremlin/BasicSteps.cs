@@ -56,6 +56,13 @@ namespace Neo4jClient.Gremlin
             return new GremlinRelationshipEnumerable(newQuery);
         }
 
+        public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, string label)
+            where TData : class, new()
+        {
+            var newQuery = query.AddBlock(".outE[[label:{0}]]", label);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query)
         {
             var newQuery = query.AddBlock(".inE");
@@ -66,6 +73,13 @@ namespace Neo4jClient.Gremlin
         {
             var newQuery = query.AddBlock(".inE[[label:{0}]]", label);
             return new GremlinRelationshipEnumerable(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> InE<TData>(this IGremlinQuery query, string label)
+            where TData : class, new()
+        {
+            var newQuery = query.AddBlock(".inE[[label:{0}]]", label);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)

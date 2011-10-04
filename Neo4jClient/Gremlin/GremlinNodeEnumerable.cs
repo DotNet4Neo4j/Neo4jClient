@@ -1,11 +1,11 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Neo4jClient.Gremlin
 {
-    [DebuggerDisplay("{queryText}")]
+    [DebuggerDisplay("{DebugQueryText}")]
     internal class GremlinNodeEnumerable<TNode> : IGremlinNodeQuery<TNode>
     {
         readonly IGraphClient client;
@@ -19,12 +19,17 @@ namespace Neo4jClient.Gremlin
             queryParameters = query.QueryParameters;
         }
 
-        [Obsolete]
-        public GremlinNodeEnumerable(IGraphClient client, string queryText, IDictionary<string, object> queryParameters)
+        public string DebugQueryText
         {
-            this.client = client;
-            this.queryText = queryText;
-            this.queryParameters = queryParameters;
+            get
+            {
+                var text = queryText;
+                foreach (var key in queryParameters.Keys.Reverse())
+                {
+                    text = text.Replace(key, string.Format("'{0}'", queryParameters[key]));
+                }
+                return text;
+            }
         }
 
         IEnumerator<Node<TNode>> IEnumerable<Node<TNode>>.GetEnumerator()

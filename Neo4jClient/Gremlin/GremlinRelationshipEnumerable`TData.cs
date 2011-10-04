@@ -6,7 +6,9 @@ using System.Linq;
 namespace Neo4jClient.Gremlin
 {
     [DebuggerDisplay("{DebugQueryText}")]
-    internal class GremlinRelationshipEnumerable : IGremlinRelationshipQuery
+    internal class GremlinRelationshipEnumerable<TData>
+        : IGremlinRelationshipQuery<TData>
+        where TData : class, new()
     {
         readonly IGraphClient client;
         readonly string queryText;
@@ -32,16 +34,21 @@ namespace Neo4jClient.Gremlin
             }
         }
 
-        IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
+        IEnumerator<RelationshipInstance<TData>> GetEnumeratorInternal()
         {
             if (client == null) throw new DetachedNodeException();
-            var results = client.ExecuteGetAllRelationshipsGremlin(queryText, queryParameters);
+            var results = client.ExecuteGetAllRelationshipsGremlin<TData>(queryText, queryParameters);
             return results.GetEnumerator();
+        }
+
+        IEnumerator<RelationshipInstance<TData>> IEnumerable<RelationshipInstance<TData>>.GetEnumerator()
+        {
+            return GetEnumeratorInternal();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable<RelationshipInstance>)this).GetEnumerator();
+            return GetEnumeratorInternal();
         }
 
         IGraphClient IGremlinQuery.Client

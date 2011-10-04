@@ -2,8 +2,8 @@ A .NET client for the neo4j REST API.
 
 Supports basic CRUD operations, Gremlin queries via a fluent interface, and some indexing operations.
 
-Grab the latest drop straight from:
+Grab the latest drop straight from: http://nuget.org/List/Packages/Neo4jClient
 
-http://nuget.org/List/Packages/Neo4jClient
+View the CI build at: http://teamcity.tath.am/project.html?projectId=project11 (click Login as Guest)
 
 Licensed under MS-PL. See LICENSE in the root of this repository for full license text.
