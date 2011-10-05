@@ -556,9 +556,13 @@ namespace Neo4jClient
                 .SelectMany(
                     i => i.KeyValues,
                     (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
-                .Where(update => update.Value != null);
+                .Where(update => update.Value != null)
+                .ToList();
 
-            //ToDo: Delete node from index
+            foreach(var indexName in updates.Select(u => u.IndexName).Distinct())
+            {
+                DeleteIndexEntries(indexName,node.Id);
+            }
 
             foreach (var update in updates)
             {
@@ -592,6 +596,33 @@ namespace Neo4jClient
             var response = CreateClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
+        }
+
+        void DeleteIndexEntries(string indexName, long nodeId)
+        {
+            var nodeIndexAddress = string.Join("/", new[]
+            {
+                RootApiResponse.NodeIndex,
+                Uri.EscapeDataString(indexName),
+                Uri.EscapeDataString(nodeId.ToString()),
+            });
+            var request = new RestRequest(nodeIndexAddress, Method.DELETE)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+
+            var response = CreateClient().Execute(request);
+
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format(
+                    "Deleting entries from index {0} for node {1} by DELETing to {2}.",
+                    indexName,
+                    nodeId,
+                    nodeIndexAddress
+                ),
+                HttpStatusCode.NoContent);
         }
 
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
