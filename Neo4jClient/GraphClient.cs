@@ -558,9 +558,11 @@ namespace Neo4jClient
                     (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
                 .Where(update => update.Value != null);
 
+            //ToDo: Delete node from index
+
             foreach (var update in updates)
             {
-                AddNodeToIndex(update.IndexName, update.Key, update.Value, nodeAddress);
+                AddIndexEntry(update.IndexName, update.Key, update.Value, nodeAddress);
             }
         }
 
@@ -592,7 +594,7 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
-        void AddNodeToIndex(string indexName, string indexKey, object indexValue, string nodeAddress)
+        void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
             var nodeIndexAddress = BuildIndexAddress(indexName, indexKey, indexValue);
             var request = new RestRequest(nodeIndexAddress, Method.POST)
