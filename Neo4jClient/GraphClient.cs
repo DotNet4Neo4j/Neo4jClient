@@ -556,11 +556,17 @@ namespace Neo4jClient
                 .SelectMany(
                     i => i.KeyValues,
                     (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
-                .Where(update => update.Value != null);
+                .Where(update => update.Value != null)
+                .ToList();
+
+            foreach(var indexName in updates.Select(u => u.IndexName).Distinct())
+            {
+                DeleteIndexEntries(indexName,node.Id);
+            }
 
             foreach (var update in updates)
             {
-                AddNodeToIndex(update.IndexName, update.Key, update.Value, nodeAddress);
+                AddIndexEntry(update.IndexName, update.Key, update.Value, nodeAddress);
             }
         }
 
@@ -592,7 +598,34 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
-        void AddNodeToIndex(string indexName, string indexKey, object indexValue, string nodeAddress)
+        void DeleteIndexEntries(string indexName, long nodeId)
+        {
+            var nodeIndexAddress = string.Join("/", new[]
+            {
+                RootApiResponse.NodeIndex,
+                Uri.EscapeDataString(indexName),
+                Uri.EscapeDataString(nodeId.ToString()),
+            });
+            var request = new RestRequest(nodeIndexAddress, Method.DELETE)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+
+            var response = CreateClient().Execute(request);
+
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format(
+                    "Deleting entries from index {0} for node {1} by DELETing to {2}.",
+                    indexName,
+                    nodeId,
+                    nodeIndexAddress
+                ),
+                HttpStatusCode.NoContent);
+        }
+
+        void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
             var nodeIndexAddress = BuildIndexAddress(indexName, indexKey, indexValue);
             var request = new RestRequest(nodeIndexAddress, Method.POST)

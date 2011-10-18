@@ -148,19 +148,27 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    new RestRequest("/index/node/foo/foo/bar", Method.POST)
-                        {
+                    new RestRequest("/index/node/foo/foo/bar", Method.POST) {
                             RequestFormat = DataFormat.Json,
                             JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
                         }
                         .AddBody("http://foo/db/data/node/456"),
-                    new HttpResponse 
-                        {
+                    new HttpResponse {
                             StatusCode = HttpStatusCode.Created,
                             ContentType = "application/json",
                             Content = "Location: http://foo/db/data/index/node/foo/foo/bar/456"
                         }
-            }
+                },
+                {
+                   new RestRequest("/index/node/foo/456", Method.DELETE) {
+                        RequestFormat = DataFormat.Json,
+                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                        },
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.NoContent,
+                        ContentType = "application/json",
+                    }
+                }
             });
 
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
