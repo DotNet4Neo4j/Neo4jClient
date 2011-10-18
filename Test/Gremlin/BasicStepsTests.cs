@@ -248,6 +248,23 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TypedOutEShouldAppendStepToGremlinQueryWithLabel()
+        {
+            var query = new NodeReference(123).OutE<object>("FOO");
+            Assert.AreEqual("g.v(p0).outE[[label:p1]]", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("FOO", query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void TypedOutEShouldAppendStepToGremlinQueryWithoutLabel()
+        {
+            var query = new NodeReference(123).OutE<object>();
+            Assert.AreEqual("g.v(p0).outE", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void InEShouldAppendStepToGremlinQuery()
         {
             var query = new NodeReference(123).InE();
@@ -261,6 +278,23 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("g.v(p0).inE[[label:p1]]", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("FOO", query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void TypedInEShouldAppendStepToGremlinQueryWithLabel()
+        {
+            var query = new NodeReference(123).InE<object>("FOO");
+            Assert.AreEqual("g.v(p0).inE[[label:p1]]", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("FOO", query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void TypedInEShouldAppendStepToGremlinQueryWithoutLabel()
+        {
+            var query = new NodeReference(123).InE<object>();
+            Assert.AreEqual("g.v(p0).inE", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
         [Test]
