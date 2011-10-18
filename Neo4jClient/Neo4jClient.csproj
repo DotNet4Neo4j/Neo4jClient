@@ -60,6 +60,7 @@
     <Compile Include="ApiModels\GremlinApiQuery.cs" />
     <Compile Include="ApiModels\GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\Back.cs" />
+    <Compile Include="Gremlin\AsStep.cs" />
     <Compile Include="Gremlin\GremlinRelationshipEnumerable`TData.cs" />
     <Compile Include="Gremlin\IGremlinRelationshipQuery`TData.cs" />
     <Compile Include="Gremlin\FilterFormatters.cs" />
