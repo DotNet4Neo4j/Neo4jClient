@@ -628,6 +628,9 @@ namespace Neo4jClient
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
             var nodeIndexAddress = BuildIndexAddress(indexName, indexKey, indexValue);
+            if (nodeIndexAddress == null)
+                return;
+
             var request = new RestRequest(nodeIndexAddress, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
