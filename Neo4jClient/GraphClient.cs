@@ -729,7 +729,9 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, null, allowedStatusCodes);
         }
 
+// ReSharper disable UnusedParameter.Local
         static void ValidateExpectedResponseCodes(RestResponseBase response, string commandDescription, params HttpStatusCode[] allowedStatusCodes)
+// ReSharper restore UnusedParameter.Local
         {
             commandDescription = string.IsNullOrWhiteSpace(commandDescription)
                 ? ""
