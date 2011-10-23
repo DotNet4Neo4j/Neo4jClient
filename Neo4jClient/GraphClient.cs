@@ -604,7 +604,7 @@ namespace Neo4jClient
             {
                 RootApiResponse.NodeIndex,
                 Uri.EscapeDataString(indexName),
-                Uri.EscapeDataString(nodeId.ToString()),
+                Uri.EscapeDataString(nodeId.ToString())
             });
             var request = new RestRequest(nodeIndexAddress, Method.DELETE)
             {
