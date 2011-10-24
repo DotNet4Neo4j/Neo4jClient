@@ -118,14 +118,19 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual(100, loadedQueries[1].QueryParameters["p2"]);
         }
 
-        [Test]
-        public void ShouldEnumerateOverTwoPagesOfResults()
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(10)]
+        public void ShouldEnumerateOverMultiplePagesOfResults(int pageCount)
         {
-            var pages = new Queue<IEnumerable<int>>(new[]
+            var pages = new Queue<IEnumerable<int>>();
+            for (var pageIndex = 0; pageIndex < pageCount; pageIndex++)
             {
-                Enumerable.Range(0, 100),
-                Enumerable.Range(100, 100)
-            });
+                pages.Enqueue(Enumerable.Range(pageIndex * 100, 100));
+            }
 
             var loadedQueries = new List<IGremlinQuery>();
             Func<IGremlinQuery, IEnumerable<int>> loadCallback =
@@ -137,7 +142,7 @@ namespace Neo4jClient.Test.Gremlin
                 new Dictionary<string, object> { { "p0", 0 } });
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
-            for (var i = 0; i < 200; i++)
+            for (var i = 0; i < pageCount * 100; i++)
             {
                 Assert.IsTrue(enumerator.MoveNext());
                 Assert.AreEqual(i, enumerator.Current);
