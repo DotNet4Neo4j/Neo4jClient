@@ -7,7 +7,7 @@ namespace Neo4jClient.Gremlin
 {
     internal class GremlinPagedEnumerator<TResult> : IEnumerator<TResult>
     {
-        readonly Func<string, IDictionary<string, object>, IEnumerable<TResult>> pageLoadCallback;
+        readonly Func<IGremlinQuery, IEnumerable<TResult>> pageLoadCallback;
         readonly IGremlinQuery query;
 
         const int pageSize = 100;
@@ -17,7 +17,7 @@ namespace Neo4jClient.Gremlin
         TResult[] currentPageData;
 
         public GremlinPagedEnumerator(
-            Func<string, IDictionary<string, object>, IEnumerable<TResult>> pageLoadCallback,
+            Func<IGremlinQuery, IEnumerable<TResult>> pageLoadCallback,
             IGremlinQuery query)
         {
             this.pageLoadCallback = pageLoadCallback;
@@ -41,7 +41,7 @@ namespace Neo4jClient.Gremlin
             currentRowIndex = -1;
             var drop = currentPageIndex * pageSize;
             var pageQuery = query.AddBlock(".drop({0}).take({1})", drop, pageSize);
-            currentPageData = pageLoadCallback(pageQuery.QueryText, pageQuery.QueryParameters).ToArray();
+            currentPageData = pageLoadCallback(pageQuery).ToArray();
         }
 
         public void Reset()

@@ -12,9 +12,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void ShouldNotLoadAnythingUntilEnumerated()
         {
-            var loadCount = 0;
-            Func<string, IDictionary<string, object>, IEnumerable<object>> loadCallback =
-                (queryText, queryParams) => { loadCount++; return new object[0]; };
+            var loadedQueries = new List<IGremlinQuery>();
+            Func<IGremlinQuery, IEnumerable<object>> loadCallback =
+                q => { loadedQueries.Add(q); return new object[0]; };
 
             var baseQuery = new GremlinQuery(
                 null,
@@ -23,15 +23,15 @@ namespace Neo4jClient.Test.Gremlin
             
             new GremlinPagedEnumerator<object>(loadCallback, baseQuery);
 
-            Assert.AreEqual(0, loadCount);
+            Assert.AreEqual(0, loadedQueries.Count());
         }
 
         [Test]
         public void ShouldLoadFirstPageOfResultsWithFirstEnumeration()
         {
-            var loadedQueries = new List<string>();
-            Func<string, IDictionary<string, object>, IEnumerable<object>> loadCallback =
-                (queryText, queryParams) => { loadedQueries.Add(queryText); return new object[0]; };
+            var loadedQueries = new List<IGremlinQuery>();
+            Func<IGremlinQuery, IEnumerable<object>> loadCallback =
+                q => { loadedQueries.Add(q); return new object[0]; };
 
             var baseQuery = new GremlinQuery(
                 null,
@@ -41,10 +41,10 @@ namespace Neo4jClient.Test.Gremlin
             var enumerator = new GremlinPagedEnumerator<object>(loadCallback, baseQuery);
             enumerator.MoveNext();
 
-            CollectionAssert.AreEqual(
-                new[] { "g.v(p0).outV.drop(p1).take(p2)" },
-                loadedQueries
-            );
+            Assert.AreEqual(1, loadedQueries.Count());
+            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)", loadedQueries[0].QueryText);
+            Assert.AreEqual(0, loadedQueries[0].QueryParameters["p1"]);
+            Assert.AreEqual(100, loadedQueries[0].QueryParameters["p2"]);
         }
 
         [Test]
@@ -52,9 +52,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var results = Enumerable.Range(0, 100).ToArray();
 
-            var loadedQueries = new List<string>();
-            Func<string, IDictionary<string, object>, IEnumerable<int>> loadCallback =
-                (queryText, queryParams) => { loadedQueries.Add(queryText); return results; };
+            var loadedQueries = new List<IGremlinQuery>();
+            Func<IGremlinQuery, IEnumerable<int>> loadCallback =
+                q => { loadedQueries.Add(q); return results; };
 
             var baseQuery = new GremlinQuery(
                 null,
@@ -74,9 +74,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var results = new int[0];
 
-            var loadedQueries = new List<string>();
-            Func<string, IDictionary<string, object>, IEnumerable<int>> loadCallback =
-                (queryText, queryParams) => { loadedQueries.Add(queryText); return results; };
+            var loadedQueries = new List<IGremlinQuery>();
+            Func<IGremlinQuery, IEnumerable<int>> loadCallback =
+                q => { loadedQueries.Add(q); return results; };
 
             var baseQuery = new GremlinQuery(
                 null,
@@ -92,9 +92,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var results = Enumerable.Range(0, 100).ToArray();
 
-            var loadedQueries = new List<string>();
-            Func<string, IDictionary<string, object>, IEnumerable<int>> loadCallback =
-                (queryText, queryParams) => { loadedQueries.Add(queryText); return results; };
+            var loadedQueries = new List<IGremlinQuery>();
+            Func<IGremlinQuery, IEnumerable<int>> loadCallback =
+                q => { loadedQueries.Add(q); return results; };
 
             var baseQuery = new GremlinQuery(
                 null,
@@ -109,10 +109,13 @@ namespace Neo4jClient.Test.Gremlin
 
             enumerator.MoveNext();
 
-            CollectionAssert.AreEqual(
-                new[] { "g.v(p0).outV.drop(p1).take(p2)", "g.v(p0).outV.drop(p1).take(p2)" },
-                loadedQueries
-            );
+            Assert.AreEqual(2, loadedQueries.Count());
+            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)", loadedQueries[0].QueryText);
+            Assert.AreEqual(0, loadedQueries[0].QueryParameters["p1"]);
+            Assert.AreEqual(100, loadedQueries[0].QueryParameters["p2"]);
+            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)", loadedQueries[1].QueryText);
+            Assert.AreEqual(100, loadedQueries[1].QueryParameters["p1"]);
+            Assert.AreEqual(100, loadedQueries[1].QueryParameters["p2"]);
         }
     }
 }
