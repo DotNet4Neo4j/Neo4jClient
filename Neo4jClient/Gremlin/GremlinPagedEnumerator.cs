@@ -54,7 +54,9 @@ namespace Neo4jClient.Gremlin
 
         public void Reset()
         {
-            throw new NotImplementedException();
+            // MSDN says this method only exists for COM interop and that we
+            // don't need to bother with it otherwise http://l.tath.am/ohpNvS
+            throw new NotSupportedException();
         }
 
         public TResult Current
