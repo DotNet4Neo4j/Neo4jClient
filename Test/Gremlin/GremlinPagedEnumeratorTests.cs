@@ -114,6 +114,31 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void MoveNextShouldReturnFalseAfterLastRecordOnPartialPage()
+        {
+            var pages = new Queue<IEnumerable<int>>(new[]
+            {
+                Enumerable.Range(0, 50),
+            });
+
+            var loadedQueries = new List<IGremlinQuery>();
+            Func<IGremlinQuery, IEnumerable<int>> loadCallback =
+                q => { loadedQueries.Add(q); return pages.Dequeue(); };
+
+            var baseQuery = new GremlinQuery(
+                null,
+                "g.v(p0).outV",
+                new Dictionary<string, object> { { "p0", 0 } });
+
+            var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
+
+            for (var i = 0; i < 50; i++)
+                enumerator.MoveNext();
+
+            Assert.IsFalse(enumerator.MoveNext());
+        }
+
+        [Test]
         public void ShouldLoadSecondPageWhenCallingMoveNextAfterLastRecordOfFirstPage()
         {
             var results = Enumerable.Range(0, 100).ToArray();

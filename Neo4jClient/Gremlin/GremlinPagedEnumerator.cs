@@ -26,11 +26,19 @@ namespace Neo4jClient.Gremlin
 
         public bool MoveNext()
         {
-            if (currentPageIndex == -1 ||
-                currentRowIndex == currentPageData.Count() - 1)
-            {
+            var hasAPageLoaded = currentPageIndex != -1;
+            var curentPageIsPartialPage = currentPageData != null && currentPageData.Count() < pageSize;
+            var currentRecordIsLastOneOnPage = currentPageData != null && currentRowIndex == currentPageData.Count() - 1;
+
+            if (hasAPageLoaded && curentPageIsPartialPage && currentRecordIsLastOneOnPage)
+                return false;
+
+            if (!hasAPageLoaded || currentRecordIsLastOneOnPage)
                 LoadNextPage();
-            }
+
+            if (currentPageData == null)
+                throw new InvalidOperationException("CurrentPageData is null even though we have a page index.");
+
             currentRowIndex++;
             return currentRowIndex < currentPageData.Count();
         }
