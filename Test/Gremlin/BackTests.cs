@@ -7,16 +7,7 @@ namespace Neo4jClient.Test.Gremlin
     public class BackTests
     {
         [Test]
-        public void BackVWithCountShouldAppendStep()
-        {
-            var query = new NodeReference(123).BackV<object>(2);
-            Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
-            Assert.AreEqual(123, query.QueryParameters["p0"]);
-            Assert.AreEqual(2, query.QueryParameters["p1"]);
-        }
-
-        [Test]
-        public void BackVWithLabelShouldAppendStep()
+        public void BackVShouldAppendStep()
         {
             var query = new NodeReference(123).BackV<object>("foo");
             Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
@@ -25,15 +16,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void BackVWithCountShouldReturnTypedNodeEnumerable()
-        {
-            var node = new NodeReference(123);
-            var query = node.BackV<object>(2);
-            Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
-        }
-
-        [Test]
-        public void BackVWithLabelShouldReturnTypedNodeEnumerable()
+        public void BackVShouldReturnTypedNodeEnumerable()
         {
             var node = new NodeReference(123);
             var query = node.BackV<object>("foo");
@@ -41,16 +24,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void BackEWithCountShouldAppendStep()
-        {
-            var query = new NodeReference(123).BackE(2);
-            Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
-            Assert.AreEqual(123, query.QueryParameters["p0"]);
-            Assert.AreEqual(2, query.QueryParameters["p1"]);
-        }
-
-        [Test]
-        public void BackEWithLabelShouldAppendStep()
+        public void BackEShouldAppendStep()
         {
             var query = new NodeReference(123).BackE("foo");
             Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
@@ -59,15 +33,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void BackEWithCountShouldReturnRelationshipEnumerable()
-        {
-            var node = new NodeReference(123);
-            var query = node.BackE(2);
-            Assert.IsInstanceOf<GremlinRelationshipEnumerable>(query);
-        }
-
-        [Test]
-        public void BackEWithLabelShouldReturnRelationshipEnumerable()
+        public void BackEShouldReturnRelationshipEnumerable()
         {
             var node = new NodeReference(123);
             var query = node.BackE("foo");
