@@ -18,8 +18,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void BackVShouldReturnTypedNodeEnumerable()
         {
-            var node = new NodeReference(123);
-            var query = node.BackV<object>("foo");
+            var query = new NodeReference(123).BackV<object>("foo");
             Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
         }
 
@@ -35,9 +34,24 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void BackEShouldReturnRelationshipEnumerable()
         {
-            var node = new NodeReference(123);
-            var query = node.BackE("foo");
+            var query = new NodeReference(123).BackE("foo");
             Assert.IsInstanceOf<GremlinRelationshipEnumerable>(query);
+        }
+
+        [Test]
+        public void BackEWithTDataShouldAppendStep()
+        {
+            var query = new NodeReference(123).BackE<object>("foo");
+            Assert.AreEqual("g.v(p0).back(p1)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("foo", query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void BackEWithTDataShouldReturnRelationshipEnumerable()
+        {
+            var query = new NodeReference(123).BackE<object>("foo");
+            Assert.IsInstanceOf<GremlinRelationshipEnumerable<object>>(query);
         }
     }
 }
