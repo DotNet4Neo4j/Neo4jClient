@@ -118,7 +118,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var pages = new Queue<IEnumerable<int>>(new[]
             {
-                Enumerable.Range(0, 50),
+                Enumerable.Range(0, 50)
             });
 
             var loadedQueries = new List<IGremlinQuery>();
