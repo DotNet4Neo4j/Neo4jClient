@@ -10,7 +10,7 @@ namespace Neo4jClient.Test.Gremlin
         public void GremlinSkipVShouldAppendStep()
         {
             var node = new NodeReference(123);
-            var query = node.OutV<object>().GremlinSkipV<object>(5);
+            var query = node.OutV<object>().GremlinSkip<object>(5);
             Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
             Assert.AreEqual("g.v(p0).outV.drop(p1)._()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
@@ -21,9 +21,9 @@ namespace Neo4jClient.Test.Gremlin
         public void GremlinSkipEShouldAppendStep()
         {
             var node = new NodeReference(123);
-            var query = node.OutV<object>().GremlinSkipE(5);
+            var query = node.OutE().GremlinSkip(5);
             Assert.IsInstanceOf<GremlinRelationshipEnumerable>(query);
-            Assert.AreEqual("g.v(p0).outV.drop(p1)._()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE.drop(p1)._()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
         }
@@ -32,9 +32,9 @@ namespace Neo4jClient.Test.Gremlin
         public void GremlinSkipEWithTDataShouldAppendStep()
         {
             var node = new NodeReference(123);
-            var query = node.OutV<object>().GremlinSkipE<object>(5);
+            var query = node.OutE<object>().GremlinSkip<object>(5);
             Assert.IsInstanceOf<GremlinRelationshipEnumerable<object>>(query);
-            Assert.AreEqual("g.v(p0).outV.drop(p1)._()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE.drop(p1)._()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
         }
@@ -43,7 +43,7 @@ namespace Neo4jClient.Test.Gremlin
         public void GremlinTakeVShouldAppendStep()
         {
             var node = new NodeReference(123);
-            var query = node.OutV<object>().GremlinTakeV<object>(5);
+            var query = node.OutV<object>().GremlinTake<object>(5);
             Assert.IsInstanceOf<GremlinNodeEnumerable<object>>(query);
             Assert.AreEqual("g.v(p0).outV.take(p1)._()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
@@ -54,9 +54,9 @@ namespace Neo4jClient.Test.Gremlin
         public void GremlinTakeEShouldAppendStep()
         {
             var node = new NodeReference(123);
-            var query = node.OutV<object>().GremlinTakeE(5);
+            var query = node.OutE().GremlinTake(5);
             Assert.IsInstanceOf<GremlinRelationshipEnumerable>(query);
-            Assert.AreEqual("g.v(p0).outV.take(p1)._()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE.take(p1)._()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
         }
@@ -65,9 +65,9 @@ namespace Neo4jClient.Test.Gremlin
         public void GremlinTakeEWithTDataShouldAppendStep()
         {
             var node = new NodeReference(123);
-            var query = node.OutV<object>().GremlinTakeE<object>(5);
+            var query = node.OutE<object>().GremlinTake<object>(5);
             Assert.IsInstanceOf<GremlinRelationshipEnumerable<object>>(query);
-            Assert.AreEqual("g.v(p0).outV.take(p1)._()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE.take(p1)._()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
         }
