@@ -411,7 +411,7 @@ namespace Neo4jClient
 
             ValidateExpectedResponseCodes(
                 response,
-                string.Format("The query was: {0}", query),
+                string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
             return response.Data == null
