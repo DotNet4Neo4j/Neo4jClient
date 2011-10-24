@@ -42,7 +42,7 @@ namespace Neo4jClient.Test.Gremlin
             enumerator.MoveNext();
 
             Assert.AreEqual(1, loadedQueries.Count());
-            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)", loadedQueries[0].QueryText);
+            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)._()", loadedQueries[0].QueryText);
             Assert.AreEqual(0, loadedQueries[0].QueryParameters["p1"]);
             Assert.AreEqual(100, loadedQueries[0].QueryParameters["p2"]);
         }
@@ -161,10 +161,10 @@ namespace Neo4jClient.Test.Gremlin
             enumerator.MoveNext();
 
             Assert.AreEqual(2, loadedQueries.Count());
-            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)", loadedQueries[0].QueryText);
+            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)._()", loadedQueries[0].QueryText);
             Assert.AreEqual(0, loadedQueries[0].QueryParameters["p1"]);
             Assert.AreEqual(100, loadedQueries[0].QueryParameters["p2"]);
-            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)", loadedQueries[1].QueryText);
+            Assert.AreEqual("g.v(p0).outV.drop(p1).take(p2)._()", loadedQueries[1].QueryText);
             Assert.AreEqual(100, loadedQueries[1].QueryParameters["p1"]);
             Assert.AreEqual(100, loadedQueries[1].QueryParameters["p2"]);
         }

@@ -48,7 +48,7 @@ namespace Neo4jClient.Gremlin
             currentPageIndex++;
             currentRowIndex = -1;
             var drop = currentPageIndex * PageSize;
-            var pageQuery = query.AddBlock(".drop({0}).take({1})", drop, PageSize);
+            var pageQuery = query.AddBlock(".drop({0}).take({1})._()", drop, PageSize);
             currentPageData = pageLoadCallback(pageQuery).ToArray();
         }
 
