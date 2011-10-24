@@ -9,8 +9,7 @@ namespace Neo4jClient.Gremlin
     {
         readonly Func<IGremlinQuery, IEnumerable<TResult>> pageLoadCallback;
         readonly IGremlinQuery query;
-
-        const int PageSize = 100;
+        readonly int pageSize;
 
         int currentPageIndex = -1;
         int currentRowIndex = -1;
@@ -18,16 +17,18 @@ namespace Neo4jClient.Gremlin
 
         public GremlinPagedEnumerator(
             Func<IGremlinQuery, IEnumerable<TResult>> pageLoadCallback,
-            IGremlinQuery query)
+            IGremlinQuery query,
+            int pageSize = 100)
         {
             this.pageLoadCallback = pageLoadCallback;
             this.query = query;
+            this.pageSize = pageSize;
         }
 
         public bool MoveNext()
         {
             var hasAPageLoaded = currentPageIndex != -1;
-            var curentPageIsPartialPage = currentPageData != null && currentPageData.Count() < PageSize;
+            var curentPageIsPartialPage = currentPageData != null && currentPageData.Count() < pageSize;
             var currentRecordIsLastOneOnPage = currentPageData != null && currentRowIndex == currentPageData.Count() - 1;
 
             if (hasAPageLoaded && curentPageIsPartialPage && currentRecordIsLastOneOnPage)
@@ -47,8 +48,8 @@ namespace Neo4jClient.Gremlin
         {
             currentPageIndex++;
             currentRowIndex = -1;
-            var drop = currentPageIndex * PageSize;
-            var pageQuery = query.AddBlock(".drop({0}).take({1})._()", drop, PageSize);
+            var drop = currentPageIndex * pageSize;
+            var pageQuery = query.AddBlock(".drop({0}).take({1})._()", drop, pageSize);
             currentPageData = pageLoadCallback(pageQuery).ToArray();
         }
 
