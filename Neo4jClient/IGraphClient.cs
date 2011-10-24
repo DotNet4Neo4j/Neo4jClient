@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
@@ -33,6 +34,9 @@ namespace Neo4jClient
 
         string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters);
 
+        IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query);
+
+        [Obsolete("Use overload that takes IGremlinQuery instead.")]
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters);
 
         IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters);

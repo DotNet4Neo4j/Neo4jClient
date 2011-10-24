@@ -32,7 +32,7 @@ namespace Neo4jClient.Test.Gremlin
             var parameters = new Dictionary<string, object>();
             var client = Substitute.For<IGraphClient>();
             client
-                .ExecuteGetAllNodesGremlin<object>("abc", parameters)
+                .ExecuteGetAllNodesGremlin<object>(Arg.Any<IGremlinQuery>())
                 .Returns(expectedResults);
 
             // Act

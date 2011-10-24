@@ -35,8 +35,9 @@ namespace Neo4jClient.Gremlin
         IEnumerator<Node<TNode>> IEnumerable<Node<TNode>>.GetEnumerator()
         {
             if (client == null) throw new DetachedNodeException();
-            var results = client.ExecuteGetAllNodesGremlin<TNode>(queryText, queryParameters);
-            return results.GetEnumerator();
+            return new GremlinPagedEnumerator<Node<TNode>>(
+                client.ExecuteGetAllNodesGremlin<TNode>,
+                new GremlinQuery(client, queryText, queryParameters));
         }
 
         IEnumerator IEnumerable.GetEnumerator()

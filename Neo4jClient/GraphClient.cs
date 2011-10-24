@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Deserializer;
+using Neo4jClient.Gremlin;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 using RestSharp;
@@ -393,6 +394,11 @@ namespace Neo4jClient
 
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
         {
+            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters));
+        }
+
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
+        {
             CheckRoot();
 
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
@@ -400,7 +406,7 @@ namespace Neo4jClient
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
-            request.AddBody(new GremlinApiQuery(query, parameters));
+            request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
             var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
 
             ValidateExpectedResponseCodes(
