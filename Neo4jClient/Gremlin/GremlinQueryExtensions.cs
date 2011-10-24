@@ -15,6 +15,7 @@ namespace Neo4jClient.Gremlin
                 var paramName = string.Format("p{0}", nextParameterIndex);
                 paramNames.Add(paramName);
                 paramsDictionary.Add(paramName, paramValue);
+                nextParameterIndex++;
             }
 
             var textWithParamNames = string.Format(text, paramNames.ToArray());
