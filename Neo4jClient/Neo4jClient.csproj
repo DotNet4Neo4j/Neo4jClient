@@ -61,6 +61,7 @@
     <Compile Include="ApiModels\GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\Back.cs" />
     <Compile Include="Gremlin\AsStep.cs" />
+    <Compile Include="Gremlin\LoopStep.cs" />
     <Compile Include="Gremlin\GremlinPagedEnumerator.cs" />
     <Compile Include="Gremlin\IteratorSteps.cs" />
     <Compile Include="Gremlin\GremlinRelationshipEnumerable`TData.cs" />

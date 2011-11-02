@@ -79,6 +79,7 @@
     <Compile Include="Gremlin\BackTests.cs" />
     <Compile Include="Gremlin\BasicStepsTests.cs" />
     <Compile Include="Gremlin\AsStepTests.cs" />
+    <Compile Include="Gremlin\LoopStepTests.cs" />
     <Compile Include="Gremlin\GremlinPagedEnumeratorTests.cs" />
     <Compile Include="Gremlin\IteratorTests.cs" />
     <Compile Include="Gremlin\FormatGremlinFilterTests.cs" />
