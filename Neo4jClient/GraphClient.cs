@@ -295,6 +295,10 @@ namespace Neo4jClient
             CheckRoot();
 
             var node = Get(nodeReference);
+            var indexEntries = indexEntriesCallback(node.Data).ToArray();
+            if (indexEntries.Any())
+                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+
             updateCallback(node.Data);
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
@@ -306,7 +310,6 @@ namespace Neo4jClient
             request.AddBody(node.Data);
             var response = CreateClient().Execute(request);
 
-            var indexEntries = indexEntriesCallback(node.Data);
             ReIndex(node.Reference, indexEntries);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
