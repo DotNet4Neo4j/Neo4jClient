@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.ApiModels
         [TestCase("1.5.M02", Result = "1.5.0.2", Description = "Retrieved via REST call from running 1.5M02 install")]
         public string Version(string versionString)
         {
-            var response = new RootApiResponse { VersionString = versionString };
+            var response = new RootApiResponse { neo4j_version = versionString };
             return response.Version.ToString();
         }
     }

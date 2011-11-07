@@ -14,19 +14,18 @@ namespace Neo4jClient.ApiModels
         public string ExtensionsInfo { get; set; }
         public ExtensionsApiResponse Extensions { get; set; }
 
-        [JsonProperty("neo4j_version")]
-        public string VersionString { get; set; }
+        public string neo4j_version { get; set; }
 
         [JsonIgnore]
         public Version Version
         {
             get
             {
-                if (string.IsNullOrEmpty(VersionString))
+                if (string.IsNullOrEmpty(neo4j_version))
                     return new Version();
 
                 var numericalVersionString = Regex.Replace(
-                    VersionString,
+                    neo4j_version,
                     @"(?<major>\d*)[.](?<minor>\d*)[.]?M(?<build>\d*).*",
                     "${major}.${minor}.0.${build}");
 
