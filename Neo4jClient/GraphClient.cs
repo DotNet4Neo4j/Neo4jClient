@@ -661,25 +661,8 @@ namespace Neo4jClient
 
         string BuildIndexAddress(string name, string key, object value)
         {
-            string indexValue;
-            if (value is DateTimeOffset)
-            {
-                indexValue = ((DateTimeOffset)value).UtcTicks.ToString();
-            }
-            else if (value is DateTime)
-            {
-                indexValue = ((DateTime)value).Ticks.ToString();
-            }
-            else
-            {
-                indexValue = value.ToString();
-            }
-
-            if (string.IsNullOrWhiteSpace(indexValue) ||
-                !indexValue.Any(char.IsLetterOrDigit))
-                return null;
-
-            indexValue = indexValue.Replace('/', '-');
+            var indexValue = EncodeIndexValue(value);
+            if (string.IsNullOrWhiteSpace(indexValue)) return null;
             var nodeIndexAddress = string.Join("/", new[]
             {
                 RootApiResponse.NodeIndex,
@@ -688,6 +671,29 @@ namespace Neo4jClient
                 Uri.EscapeDataString(indexValue)
             });
             return nodeIndexAddress;
+        }
+
+        static string EncodeIndexValue(object value)
+        {
+            string indexValue;
+            if (value is DateTimeOffset)
+            {
+                indexValue = ((DateTimeOffset) value).UtcTicks.ToString();
+            }
+            else if (value is DateTime)
+            {
+                indexValue = ((DateTime) value).Ticks.ToString();
+            }
+            else
+            {
+                indexValue = value.ToString();
+            }
+
+            if (string.IsNullOrWhiteSpace(indexValue) ||
+                !indexValue.Any(char.IsLetterOrDigit))
+                return string.Empty;
+
+            return indexValue.Replace('/', '-');
         }
 
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
