@@ -11,19 +11,30 @@ namespace Neo4jClient.Test.GraphClientTests
     [TestFixture]
     public class ReIndexTests
     {
-        const string RootResponse = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                            'GremlinPlugin' : {
-                              'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
-                            }
-                          }
-                        }";
+        readonly string rootResponse = @"{
+                'batch' : 'http://foo/db/data/batch',
+                'node' : 'http://foo/db/data/node',
+                'node_index' : 'http://foo/db/data/index/node',
+                'relationship_index' : 'http://foo/db/data/index/relationship',
+                'reference_node' : 'http://foo/db/data/node/0',
+                'neo4j_version' : '1.5.M02',
+                'extensions_info' : 'http://foo/db/data/ext',
+                'extensions'' : {
+                }
+            }"
+            .Replace('\'', '"');
+
+        readonly string pre15M02RootResponse = @"{
+                'batch' : 'http://foo/db/data/batch',
+                'node' : 'http://foo/db/data/node',
+                'node_index' : 'http://foo/db/data/index/node',
+                'relationship_index' : 'http://foo/db/data/index/relationship',
+                'reference_node' : 'http://foo/db/data/node/0',
+                'extensions_info' : 'http://foo/db/data/ext',
+                'extensions'' : {
+                }
+            }"
+            .Replace('\'', '"');
 
         [Test]
         public void ShouldReindexNodeWithIndexEntryContainingSpace()
@@ -49,7 +60,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        Content = rootResponse.Replace('\'', '"')
                     }
                 },
                 {
@@ -111,7 +122,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        Content = rootResponse.Replace('\'', '"')
                     }
                 },
                 {
@@ -174,7 +185,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        Content = rootResponse.Replace('\'', '"')
                     }
                 },
                 {
@@ -237,7 +248,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        Content = rootResponse.Replace('\'', '"')
                     }
                 },
                 {
@@ -273,6 +284,31 @@ namespace Neo4jClient.Test.GraphClientTests
 
             // Assert
             Assert.Pass("Success.");
+        }
+
+        [Test]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void ShouldThrowNotSupportExceptionForPre15M02Database()
+        {
+            //Arrange
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = pre15M02RootResponse.Replace('\'', '"')
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var nodeReference = new NodeReference<TestNode>(123);
+            graphClient.ReIndex(nodeReference, new IndexEntry[0]);
         }
     }
 

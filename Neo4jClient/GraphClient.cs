@@ -577,6 +577,8 @@ namespace Neo4jClient
             if (indexEntries == null)
                 throw new ArgumentNullException("indexEntries");
 
+            AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+
             CheckRoot();
 
             var nodeAddress = string.Join("/", new[] {RootApiResponse.Node, node.Id.ToString()});
