@@ -240,8 +240,8 @@ namespace Neo4jClient.Test.GraphClientTests
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "/index/node/my_index/key/value", "{0}");
-            batch.Add(Method.POST, "/index/node/my_index/key3/value3", "{0}");
+            batch.Add(Method.POST, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
+            batch.Add(Method.POST, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {

@@ -131,14 +131,24 @@ namespace Neo4jClient
                 batchSteps.Add(Method.POST, sourceNode + "/relationships", relationshipTemplate);
             }
 
-            var indexAddresses = indexEntries
+            var entries = indexEntries
                 .SelectMany(i => i
                     .KeyValues
-                    .Select(k => BuildIndexAddress(i.Name, k.Key, k.Value)))
-                .Where(a => !string.IsNullOrEmpty(a));
-            foreach (var indexAddress in indexAddresses)
+                    .Select(kv => new
+                    {
+                        IndexAddress = BuildNodeIndexAddress(i.Name),
+                        kv.Key,
+                        Value = EncodeIndexValue(kv.Value)
+                    })
+                    .Where(e => !string.IsNullOrEmpty(e.Value)));
+            foreach (var indexEntry in entries)
             {
-                batchSteps.Add(Method.POST, indexAddress, "{0}");
+                batchSteps.Add(Method.POST, indexEntry.IndexAddress, new
+                {
+                    key = indexEntry.Key,
+                    value = indexEntry.Value,
+                    uri = "{0}"
+                });
             }
 
             var batchResponse = ExecuteBatch(batchSteps);
@@ -633,16 +643,23 @@ namespace Neo4jClient
 
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
-            var nodeIndexAddress = BuildIndexAddress(indexName, indexKey, indexValue);
-            if (nodeIndexAddress == null)
+            var encodedIndexValue = EncodeIndexValue(indexValue);
+            if (string.IsNullOrWhiteSpace(encodedIndexValue))
                 return;
+
+            var nodeIndexAddress = BuildNodeIndexAddress(indexName);
 
             var request = new RestRequest(nodeIndexAddress, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
-            request.AddBody(string.Join("", rootUri, nodeAddress));
+            request.AddBody(new
+            {
+                key = indexKey,
+                value = encodedIndexValue,
+                uri = string.Join("", rootUri, nodeAddress)
+            });
 
             var response = CreateClient().Execute(request);
 
@@ -659,16 +676,12 @@ namespace Neo4jClient
                 HttpStatusCode.Created);
         }
 
-        string BuildIndexAddress(string name, string key, object value)
+        string BuildNodeIndexAddress(string indexName)
         {
-            var indexValue = EncodeIndexValue(value);
-            if (string.IsNullOrWhiteSpace(indexValue)) return null;
             var nodeIndexAddress = string.Join("/", new[]
             {
                 RootApiResponse.NodeIndex,
-                Uri.EscapeDataString(name),
-                Uri.EscapeDataString(key),
-                Uri.EscapeDataString(indexValue)
+                Uri.EscapeDataString(indexName)
             });
             return nodeIndexAddress;
         }
@@ -693,7 +706,7 @@ namespace Neo4jClient
                 !indexValue.Any(char.IsLetterOrDigit))
                 return string.Empty;
 
-            return indexValue.Replace('/', '-');
+            return indexValue;
         }
 
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)

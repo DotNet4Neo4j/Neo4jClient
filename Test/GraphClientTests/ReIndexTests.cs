@@ -26,28 +26,20 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
+        public void ShouldReindexNodeWithIndexEntryContainingSpace()
         {
             //Arrange
-            IDictionary<string, object> indexkeyValues = new Dictionary<string, object>();
-            indexkeyValues.Add("FooKey", "the_value with space");
             var indexEntries = new List<IndexEntry>
-                {
-                   new IndexEntry
-                       {
-                           Name = "my_nodes",
-                           KeyValues = indexkeyValues,
-                       }
-                };
-
-
-            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/the_value%20with%20space", Method.POST)
             {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                new IndexEntry
+                {
+                    Name = "my_nodes",
+                    KeyValues = new Dictionary<string, object>
+                    {
+                        { "FooKey", "the_value with space" }
+                    },
+                }
             };
-
-            restRequest.AddBody("http://foo/db/data/node/123");
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -61,7 +53,12 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    restRequest,
+                    new RestRequest("/index/node/my_nodes", Method.POST)
+                    {
+                        RequestFormat = DataFormat.Json,
+                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                    }
+                    .AddBody(new { key="FooKey", value="the_value with space", uri="http://foo/db/data/node/123"}),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
@@ -91,28 +88,20 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeFullTextWithADateTimeOffsetIndexValue()
+        public void ShouldReindexNodeWithDateTimeOffsetIndexEntry()
         {
             //Arrange
-            IDictionary<string, object> indexkeyValues = new Dictionary<string, object>();
-            indexkeyValues.Add("FooKey", new DateTimeOffset(1000L,new TimeSpan(0)));
             var indexEntries = new List<IndexEntry>
-                {
-                   new IndexEntry
-                       {
-                           Name = "my_nodes",
-                           KeyValues = indexkeyValues,
-                       }
-                };
-
-
-            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/1000", Method.POST)
             {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                new IndexEntry
+                {
+                    Name = "my_nodes",
+                    KeyValues = new Dictionary<string, object>
+                    {
+                        { "FooKey", new DateTimeOffset(1000, new TimeSpan(0)) }
+                    },
+                }
             };
-
-            restRequest.AddBody("http://foo/db/data/node/123");
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
@@ -126,11 +115,16 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    restRequest,
+                    new RestRequest("/index/node/my_nodes", Method.POST)
+                    {
+                        RequestFormat = DataFormat.Json,
+                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                    }
+                    .AddBody(new { key="FooKey", value="1000", uri="http://foo/db/data/node/123"}),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
-                        Content = "Location: http://foo/db/data/index/node/my_nodes/FooKey/1000/123"
+                        Content = "Location: http://foo/db/data/index/node/my_nodes/FooKey/the_value%20with%20space/123"
                     }
                 },
                 {
@@ -156,7 +150,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShouldUrlEncodeQuestionMarkInIndexValue()
+        public void ShouldAcceptQuestionMarkInIndexValue()
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
@@ -172,14 +166,6 @@ namespace Neo4jClient.Test.GraphClientTests
                 }
             };
 
-            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/foo%3Fbar", Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-            };
-
-            restRequest.AddBody("http://foo/db/data/node/123");
-
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
@@ -192,7 +178,12 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    restRequest,
+                    new RestRequest("/index/node/my_nodes", Method.POST)
+                    {
+                        RequestFormat = DataFormat.Json,
+                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                    }
+                    .AddBody(new { key="FooKey", value="foo?bar", uri="http://foo/db/data/node/123"}),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
@@ -222,7 +213,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void ShouldReplaceSlashInIndexValueWithDash()
+        public void ShouldPreserveSlashInIndexValue()
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
@@ -238,14 +229,6 @@ namespace Neo4jClient.Test.GraphClientTests
                 }
             };
 
-            var restRequest = new RestRequest("/index/node/my_nodes/FooKey/abc-def", Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-            };
-
-            restRequest.AddBody("http://foo/db/data/node/123");
-
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
@@ -258,7 +241,12 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    restRequest,
+                    new RestRequest("/index/node/my_nodes", Method.POST)
+                    {
+                        RequestFormat = DataFormat.Json,
+                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                    }
+                    .AddBody(new { key = "FooKey", value ="abc/def", uri = "http://foo/db/data/node/123"}),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
