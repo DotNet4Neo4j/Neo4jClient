@@ -18,6 +18,19 @@ namespace Neo4jClient.Test.GraphClientTests
                 'node_index' : 'http://foo/db/data/index/node',
                 'relationship_index' : 'http://foo/db/data/index/relationship',
                 'reference_node' : 'http://foo/db/data/node/0',
+                'neo4j_version' : '1.5.M02',
+                'extensions_info' : 'http://foo/db/data/ext',
+                'extensions'' : {
+                }
+            }"
+            .Replace('\'', '"');
+
+        readonly string pre15M02RootResponse = @"{
+                'batch' : 'http://foo/db/data/batch',
+                'node' : 'http://foo/db/data/node',
+                'node_index' : 'http://foo/db/data/index/node',
+                'relationship_index' : 'http://foo/db/data/index/relationship',
+                'reference_node' : 'http://foo/db/data/node/0',
                 'extensions_info' : 'http://foo/db/data/ext',
                 'extensions'' : {
                 }
@@ -48,6 +61,102 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var testNode = new TestNode {Foo = "text is too long", Bar = null, Baz = "123"};
             graphClient.Create(testNode);
+        }
+
+        [Test]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void ShouldThrowNotSupportExceptionForPre15M02Database()
+        {
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = pre15M02RootResponse
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            graphClient.Create(
+                new object(),
+                null,
+                new[]
+                {
+                    new IndexEntry
+                    {
+                        Name = "my_index",
+                        KeyValues = new[]
+                        {
+                            new KeyValuePair<string, object>("key", "value"),
+                            new KeyValuePair<string, object>("key2", ""),
+                            new KeyValuePair<string, object>("key3", "value3")
+                        }
+                    }
+                });
+        }
+
+        [Test]
+        public void ShouldNotThrowANotSupportedExceptionForPre15M02DatabaseWhenThereAreNoIndexEntries()
+        {
+            var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+            var batch = new List<BatchStep>();
+            batch.Add(Method.POST, "/node", testNode);
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = pre15M02RootResponse
+                    }
+                },
+                {
+                    new RestRequest {
+                        Resource = "/batch",
+                        Method = Method.POST,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(batch),
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                          'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
+                          'data' : {
+                            'Foo' : 'foo',
+                            'Bar' : 'bar',
+                            'Baz' : 'baz'
+                          },
+                          'traverse' : 'http://foo/db/data/node/760/traverse/{returnType}',
+                          'all_typed_relationships' : 'http://foo/db/data/node/760/relationships/all/{-list|&|types}',
+                          'self' : 'http://foo/db/data/node/760',
+                          'property' : 'http://foo/db/data/node/760/properties/{key}',
+                          'outgoing_typed_relationships' : 'http://foo/db/data/node/760/relationships/out/{-list|&|types}',
+                          'properties' : 'http://foo/db/data/node/760/properties',
+                          'incoming_relationships' : 'http://foo/db/data/node/760/relationships/in',
+                          'extensions' : {
+                          },
+                          'create_relationship' : 'http://foo/db/data/node/760/relationships',
+                          'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                          'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
+                          'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
+                        },'from':'/node'}]".Replace('\'', '\"')
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            graphClient.Create(testNode, null, null);
         }
 
         [Test]

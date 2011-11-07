@@ -20,6 +20,8 @@ namespace Neo4jClient
         readonly IHttpFactory httpFactory;
         internal RootApiResponse RootApiResponse;
 
+        const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
+
         public NullValueHandling JsonSerializerNullValueHandling { get; set; }
 
         public GraphClient(Uri rootUri)
@@ -78,7 +80,10 @@ namespace Neo4jClient
                 throw new ArgumentNullException("node");
 
             relationships = relationships ?? Enumerable.Empty<IRelationshipAllowingParticipantNode<TNode>>();
-            indexEntries = indexEntries ?? Enumerable.Empty<IndexEntry>();
+            indexEntries = (indexEntries ?? Enumerable.Empty<IndexEntry>()).ToArray();
+
+            if (indexEntries.Any())
+                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
 
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
@@ -158,6 +163,14 @@ namespace Neo4jClient
             var nodeReference = new NodeReference<TNode>(nodeId, this);
 
             return nodeReference;
+        }
+
+// ReSharper disable UnusedParameter.Local
+        void AssertMinimumDatabaseVersion(Version minimumVersion, string message)
+// ReSharper restore UnusedParameter.Local
+        {
+            if (RootApiResponse.Version < minimumVersion)
+                throw new NotSupportedException(message);
         }
 
         BatchResponse ExecuteBatch(List<BatchStep> batchSteps)
