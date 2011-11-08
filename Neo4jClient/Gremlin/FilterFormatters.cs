@@ -106,9 +106,11 @@ namespace Neo4jClient.Gremlin
             if (!string.IsNullOrWhiteSpace(concatenatedFilters))
                 concatenatedFilters = string.Format(concatenatedFiltersFormat, concatenatedFilters);
 
+            var filter = string.IsNullOrWhiteSpace(concatenatedFilters) ? string.Empty : ".filter";
+
             return new FormattedFilter
             {
-                FilterText = concatenatedFilters,
+                FilterText = filter + concatenatedFilters,
                 FilterParameters = parameters
             };
         }
