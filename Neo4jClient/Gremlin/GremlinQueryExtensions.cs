@@ -40,6 +40,7 @@ namespace Neo4jClient.Gremlin
         public static string ToDebugQueryText(this IGremlinQuery query)
         {
             var text = query.QueryText;
+            if (query.QueryParameters == null) return text;
             foreach (var key in query.QueryParameters.Keys.Reverse())
             {
                 text = text.Replace(key, string.Format("'{0}'", query.QueryParameters[key]));
