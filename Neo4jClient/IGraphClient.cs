@@ -56,5 +56,7 @@ namespace Neo4jClient
         IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query );
 
         void ShutdownServer();
+
+        event OperationCompletedEventHandler OperationCompleted;
     }
 }

@@ -767,6 +767,8 @@ namespace Neo4jClient
             ExecuteScalarGremlin("g.getRawGraph().shutdown()", null);
         }
 
+        public event OperationCompletedEventHandler OperationCompleted;
+
         static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)
         {
             ValidateExpectedResponseCodes(response, null, allowedStatusCodes);
