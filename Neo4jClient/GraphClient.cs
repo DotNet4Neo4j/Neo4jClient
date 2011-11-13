@@ -470,6 +470,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
@@ -483,9 +486,19 @@ namespace Neo4jClient
                 string.Format("The query was: {0}", query),
                 HttpStatusCode.OK);
 
-            return response.Data == null
-                ? Enumerable.Empty<RelationshipInstance<TData>>()
-                : response.Data.Select(r => r.ToRelationshipInstance(this));
+            var relationships = response.Data == null
+                ? new RelationshipInstance<TData>[0]
+                : response.Data.Select(r => r.ToRelationshipInstance(this)).ToArray();
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query,
+                ResourcesReturned = relationships.Count(),
+                TimeTaken = stopwatch.Elapsed
+            });
+
+            return relationships;
         }
 
         public Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor)
