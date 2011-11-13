@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -584,7 +585,7 @@ namespace Neo4jClient
 
             CheckRoot();
 
-            var nodeAddress = string.Join("/", new[] {RootApiResponse.Node, node.Id.ToString()});
+            var nodeAddress = string.Join("/", new[] { RootApiResponse.Node, node.Id.ToString(CultureInfo.InvariantCulture) });
 
             var updates = indexEntries
                 .SelectMany(
@@ -638,7 +639,7 @@ namespace Neo4jClient
             {
                 RootApiResponse.NodeIndex,
                 Uri.EscapeDataString(indexName),
-                Uri.EscapeDataString(nodeId.ToString())
+                Uri.EscapeDataString(nodeId.ToString(CultureInfo.InvariantCulture))
             });
             var request = new RestRequest(nodeIndexAddress, Method.DELETE)
             {
@@ -709,11 +710,11 @@ namespace Neo4jClient
             string indexValue;
             if (value is DateTimeOffset)
             {
-                indexValue = ((DateTimeOffset) value).UtcTicks.ToString();
+                indexValue = ((DateTimeOffset) value).UtcTicks.ToString(CultureInfo.InvariantCulture);
             }
             else if (value is DateTime)
             {
-                indexValue = ((DateTime) value).Ticks.ToString();
+                indexValue = ((DateTime)value).Ticks.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
