@@ -385,7 +385,7 @@ namespace Neo4jClient
             return RootApiResponse.Node + "/" + node.Id;
         }
 
-        string ResolveEndpoint(RelationshipReference relationship)
+        static string ResolveEndpoint(RelationshipReference relationship)
         {
             //TODO: Make this a dynamic endpoint resolution
             return "relationship/" + relationship.Id;
