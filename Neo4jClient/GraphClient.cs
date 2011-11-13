@@ -452,7 +452,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = query.QueryText,
+                QueryText = query.ToDebugQueryText(),
                 ResourcesReturned = nodes.Count(),
                 TimeTaken = stopwatch.Elapsed
             });

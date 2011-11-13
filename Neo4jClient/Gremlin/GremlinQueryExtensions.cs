@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Neo4jClient.Gremlin
 {
@@ -34,6 +35,16 @@ namespace Neo4jClient.Gremlin
                 newParams.Add(key, formattedFilter.FilterParameters[key]);
 
             return new GremlinQuery(baseQuery.Client, newQueryText, newParams);
+        }
+
+        public static string ToDebugQueryText(this IGremlinQuery query)
+        {
+            var text = query.QueryText;
+            foreach (var key in query.QueryParameters.Keys.Reverse())
+            {
+                text = text.Replace(key, string.Format("'{0}'", query.QueryParameters[key]));
+            }
+            return text;
         }
     }
 }

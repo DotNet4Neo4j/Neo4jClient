@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Neo4jClient.Gremlin
 {
@@ -21,15 +20,7 @@ namespace Neo4jClient.Gremlin
 
         public string DebugQueryText
         {
-            get
-            {
-                var text = queryText;
-                foreach (var key in queryParameters.Keys.Reverse())
-                {
-                    text = text.Replace(key, string.Format("'{0}'", queryParameters[key]));
-                }
-                return text;
-            }
+            get { return this.ToDebugQueryText(); }
         }
 
         IEnumerator<RelationshipInstance> IEnumerable<RelationshipInstance>.GetEnumerator()
