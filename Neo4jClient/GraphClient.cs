@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -428,6 +429,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
@@ -441,9 +445,19 @@ namespace Neo4jClient
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
-            return response.Data == null
-                ? Enumerable.Empty<Node<TNode>>()
-                : response.Data.Select(r => r.ToNode(this));
+            var nodes = response.Data == null
+                ? new Node<TNode>[0]
+                : response.Data.Select(r => r.ToNode(this)).ToArray();
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.QueryText,
+                ResourcesReturned = nodes.Count(),
+                TimeTaken = stopwatch.Elapsed
+            });
+
+            return nodes;
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
@@ -769,6 +783,13 @@ namespace Neo4jClient
         }
 
         public event OperationCompletedEventHandler OperationCompleted;
+
+        protected void OnOperationCompleted(OperationCompletedEventArgs args)
+        {
+            var eventInstance = OperationCompleted;
+            if (eventInstance != null)
+                eventInstance(this, args);
+        }
 
         static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)
         {
