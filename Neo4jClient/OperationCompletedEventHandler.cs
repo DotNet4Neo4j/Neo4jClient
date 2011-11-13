@@ -2,9 +2,9 @@ using System;
 
 namespace Neo4jClient
 {
-    public delegate void OperationCompletedEventHandler(object sender, EventArgs e);
+    public delegate void OperationCompletedEventHandler(object sender, OperationCompletedEventArgs e);
 
-    public class QueryCompletedEventArgs : EventArgs
+    public class OperationCompletedEventArgs : EventArgs
     {
         public string QueryText { get; set; }
         public int ResourcesReturned { get; set; }
