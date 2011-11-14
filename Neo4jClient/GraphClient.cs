@@ -48,6 +48,9 @@ namespace Neo4jClient
 
         public virtual void Connect()
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var request = new RestRequest("", Method.GET);
             var response = CreateClient().Execute<RootApiResponse>(request);
 
@@ -65,6 +68,14 @@ namespace Neo4jClient
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
                     RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(rootUri.AbsoluteUri.Length);
             }
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = "Connect",
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public virtual RootNode RootNode
@@ -80,6 +91,9 @@ namespace Neo4jClient
         {
             if (node == null)
                 throw new ArgumentNullException("node");
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             relationships = relationships ?? Enumerable.Empty<IRelationshipAllowingParticipantNode<TNode>>();
             indexEntries = (indexEntries ?? Enumerable.Empty<IndexEntry>()).ToArray();
@@ -163,6 +177,14 @@ namespace Neo4jClient
             var createResponse = batchResponse[createNodeStep];
             var nodeId = int.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Create<{0}>", typeof(TNode).Name),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
 
             return nodeReference;
         }
