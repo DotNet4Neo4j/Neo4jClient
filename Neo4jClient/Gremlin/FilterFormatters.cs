@@ -27,7 +27,7 @@ namespace Neo4jClient.Gremlin
             {
                 new TypeFilter { Type = null, FilterFormat = "it[{0}] == null", ExpressionType = ExpressionType.Equal },
                 new TypeFilter { Type = null, FilterFormat = "it[{0}] != null", ExpressionType = ExpressionType.NotEqual },
-                new TypeFilter { Type =  typeof(int), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
                 new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] != {1}", ExpressionType = ExpressionType.NotEqual },
                 new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] > {1}", ExpressionType = ExpressionType.GreaterThan},
                 new TypeFilter { Type = typeof(int), FilterFormat = "it[{0}] < {1}", ExpressionType = ExpressionType.LessThan},
@@ -39,6 +39,8 @@ namespace Neo4jClient.Gremlin
                 new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] < {1}", ExpressionType = ExpressionType.LessThan},
                 new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] >= {1}", ExpressionType = ExpressionType.GreaterThanOrEqual},
                 new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
+                new TypeFilter { Type = typeof(bool), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = typeof(bool), FilterFormat = "it[{0}] != {1}", ExpressionType = ExpressionType.NotEqual },
             };
 
             const string filterSeparator = " && ";

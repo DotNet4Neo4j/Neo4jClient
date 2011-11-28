@@ -633,6 +633,34 @@ namespace Neo4jClient.Test.Gremlin
             FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
         }
 
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleEqualFilterWithBoolValueTrue()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = true, ExpressionType = ExpressionType.Equal},
+            };
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual(".filter{ it[p0] == p1 }", filter.FilterText);
+            Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
+            Assert.AreEqual(true, filter.FilterParameters["p1"]);
+        }
+
+        [Test]
+        public void FormatGremlinFilterShouldReturnIndexerSyntaxForSingleEqualFilterWithBoolValueFalse()
+        {
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = false, ExpressionType = ExpressionType.Equal},
+            };
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual(".filter{ it[p0] == p1 }", filter.FilterText);
+            Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
+            Assert.AreEqual(false, filter.FilterParameters["p1"]);
+        }
+
         enum EnumForTesting
         {
             Bar
