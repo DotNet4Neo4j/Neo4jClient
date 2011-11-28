@@ -140,7 +140,7 @@ namespace Neo4jClient.Gremlin
                     });
         }
 
-        static ExpressionKey ParseKeyFromExpression(Expression expression)
+        internal static ExpressionKey ParseKeyFromExpression(Expression expression)
         {
             var unaryExpression = expression as UnaryExpression;
             if (unaryExpression != null &&
@@ -166,7 +166,7 @@ namespace Neo4jClient.Gremlin
             return lambdaExpression.Compile().DynamicInvoke();
         }
 
-        class ExpressionKey
+        internal class ExpressionKey
         {
             public string Name { get; set; }
             public Type PropertyType { get; set; }
