@@ -9,7 +9,7 @@ namespace Neo4jClient.Gremlin
         public static IEnumerable<TResult> Table<TResult>(
             this IGremlinQuery query)
         {
-            var newQuery = query.AddBlock(".table(new Table())");
+            var newQuery = query.AddBlock(".table(new Table()).cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -19,6 +19,7 @@ namespace Neo4jClient.Gremlin
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -30,6 +31,7 @@ namespace Neo4jClient.Gremlin
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
             newQuery = AddClosure(newQuery, closure2);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -43,6 +45,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure1);
             newQuery = AddClosure(newQuery, closure2);
             newQuery = AddClosure(newQuery, closure3);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -58,6 +61,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure2);
             newQuery = AddClosure(newQuery, closure3);
             newQuery = AddClosure(newQuery, closure4);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -75,6 +79,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure3);
             newQuery = AddClosure(newQuery, closure4);
             newQuery = AddClosure(newQuery, closure5);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -94,6 +99,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure4);
             newQuery = AddClosure(newQuery, closure5);
             newQuery = AddClosure(newQuery, closure6);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -115,6 +121,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure5);
             newQuery = AddClosure(newQuery, closure6);
             newQuery = AddClosure(newQuery, closure7);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -138,6 +145,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure6);
             newQuery = AddClosure(newQuery, closure7);
             newQuery = AddClosure(newQuery, closure8);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -163,6 +171,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure7);
             newQuery = AddClosure(newQuery, closure8);
             newQuery = AddClosure(newQuery, closure9);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 
@@ -190,6 +199,7 @@ namespace Neo4jClient.Gremlin
             newQuery = AddClosure(newQuery, closure8);
             newQuery = AddClosure(newQuery, closure9);
             newQuery = AddClosure(newQuery, closure10);
+            newQuery = newQuery.AddBlock(".cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
         }
 

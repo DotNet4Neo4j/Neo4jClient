@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.Gremlin
             Assert.IsInstanceOf<IGremlinQuery>(query);
 
             var enumerable = (IGremlinQuery)query;
-            Assert.AreEqual("g.v(p0).outV.as(p1).table(new Table())", enumerable.QueryText);
+            Assert.AreEqual("g.v(p0).outV.as(p1).table(new Table()).cap", enumerable.QueryText);
             Assert.AreEqual(123, enumerable.QueryParameters["p0"]);
             Assert.AreEqual("foo", enumerable.QueryParameters["p1"]);
         }
@@ -43,7 +43,7 @@ namespace Neo4jClient.Test.Gremlin
             Assert.IsInstanceOf<IGremlinQuery>(query);
 
             var enumerable = (IGremlinQuery)query;
-            Assert.AreEqual("g.v(p0).outV.as(p1).inV.as(p2).table(new Table()){it[p3]}{it[p4]}", enumerable.QueryText);
+            Assert.AreEqual("g.v(p0).outV.as(p1).inV.as(p2).table(new Table()){it[p3]}{it[p4]}.cap", enumerable.QueryText);
             Assert.AreEqual(123, enumerable.QueryParameters["p0"]);
             Assert.AreEqual("foo", enumerable.QueryParameters["p1"]);
             Assert.AreEqual("bar", enumerable.QueryParameters["p2"]);
