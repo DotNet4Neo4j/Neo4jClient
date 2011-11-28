@@ -34,6 +34,8 @@ namespace Neo4jClient
 
         string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters);
 
+        IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query);
+
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query);
 
         [Obsolete("Use overload that takes IGremlinQuery instead.")]

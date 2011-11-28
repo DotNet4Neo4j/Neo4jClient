@@ -442,6 +442,41 @@ namespace Neo4jClient
             return response.Content;
         }
 
+        public virtual IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query)
+        {
+            CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
+            var response = CreateClient().Execute<List<TResult>>(request);
+
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query.QueryText),
+                HttpStatusCode.OK);
+
+            var results = response.Data == null
+                ? new TResult[0]
+                : response.Data.ToArray();
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.ToDebugQueryText(),
+                ResourcesReturned = results.Count(),
+                TimeTaken = stopwatch.Elapsed
+            });
+
+            return results;
+        }
+
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
         {
             return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters));
