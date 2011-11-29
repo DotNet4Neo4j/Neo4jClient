@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace Neo4jClient.Gremlin
 {
     [DebuggerDisplay("{DebugQueryText}")]
-    internal class GremlinProjectionEnumerable<TResult> : IGremlinQuery, IEnumerable<TResult>
+    internal class GremlinProjectionEnumerable<TResult> : IGremlinQuery, IEnumerable<TResult> where TResult : new()
     {
         readonly IGraphClient client;
         readonly string queryText;

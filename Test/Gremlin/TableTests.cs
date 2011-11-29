@@ -63,6 +63,8 @@ namespace Neo4jClient.Test.Gremlin
 
         public class TableResult
         {
+            public string Foo { get; set; }
+            public string Bar { get; set; }
         }
     }
 }

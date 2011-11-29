@@ -7,7 +7,7 @@ namespace Neo4jClient.Gremlin
     public static class TableStep
     {
         public static IEnumerable<TResult> Table<TResult>(
-            this IGremlinQuery query)
+            this IGremlinQuery query) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table()).cap");
             return new GremlinProjectionEnumerable<TResult>(newQuery);
@@ -15,7 +15,7 @@ namespace Neo4jClient.Gremlin
 
         public static IEnumerable<TResult> Table<TResult, TClosure1>(
             this IGremlinQuery query,
-            Expression<Func<TClosure1, object>> closure1)
+            Expression<Func<TClosure1, object>> closure1) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -26,7 +26,7 @@ namespace Neo4jClient.Gremlin
         public static IEnumerable<TResult> Table<TResult, TClosure1, TClosure2>(
             this IGremlinQuery query,
             Expression<Func<TClosure1, object>> closure1,
-            Expression<Func<TClosure2, object>> closure2)
+            Expression<Func<TClosure2, object>> closure2) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -39,7 +39,7 @@ namespace Neo4jClient.Gremlin
             this IGremlinQuery query,
             Expression<Func<TClosure1, object>> closure1,
             Expression<Func<TClosure2, object>> closure2,
-            Expression<Func<TClosure3, object>> closure3)
+            Expression<Func<TClosure3, object>> closure3) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -54,7 +54,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure1, object>> closure1,
             Expression<Func<TClosure2, object>> closure2,
             Expression<Func<TClosure3, object>> closure3,
-            Expression<Func<TClosure4, object>> closure4)
+            Expression<Func<TClosure4, object>> closure4) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -71,7 +71,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure2, object>> closure2,
             Expression<Func<TClosure3, object>> closure3,
             Expression<Func<TClosure4, object>> closure4,
-            Expression<Func<TClosure5, object>> closure5)
+            Expression<Func<TClosure5, object>> closure5) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -90,7 +90,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure3, object>> closure3,
             Expression<Func<TClosure4, object>> closure4,
             Expression<Func<TClosure5, object>> closure5,
-            Expression<Func<TClosure6, object>> closure6)
+            Expression<Func<TClosure6, object>> closure6) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -111,7 +111,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure4, object>> closure4,
             Expression<Func<TClosure5, object>> closure5,
             Expression<Func<TClosure6, object>> closure6,
-            Expression<Func<TClosure7, object>> closure7)
+            Expression<Func<TClosure7, object>> closure7) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -134,7 +134,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure5, object>> closure5,
             Expression<Func<TClosure6, object>> closure6,
             Expression<Func<TClosure7, object>> closure7,
-            Expression<Func<TClosure8, object>> closure8)
+            Expression<Func<TClosure8, object>> closure8) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -159,7 +159,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure6, object>> closure6,
             Expression<Func<TClosure7, object>> closure7,
             Expression<Func<TClosure8, object>> closure8,
-            Expression<Func<TClosure9, object>> closure9)
+            Expression<Func<TClosure9, object>> closure9) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);
@@ -186,7 +186,7 @@ namespace Neo4jClient.Gremlin
             Expression<Func<TClosure7, object>> closure7,
             Expression<Func<TClosure8, object>> closure8,
             Expression<Func<TClosure9, object>> closure9,
-            Expression<Func<TClosure10, object>> closure10)
+            Expression<Func<TClosure10, object>> closure10) where TResult : new()
         {
             var newQuery = query.AddBlock(".table(new Table())");
             newQuery = AddClosure(newQuery, closure1);

@@ -34,7 +34,7 @@ namespace Neo4jClient
 
         string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters);
 
-        IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query);
+        IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new();
 
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query);
 
