@@ -5,10 +5,10 @@ namespace Neo4jClient.ApiModels
 {
     internal class GremlinTableCapResponse
     {
-        public string[] Columns { get; set; }
-        public string[][] Data { get; set; }
+        public List<string> Columns { get; set; }
+        public List<List<string>> Data { get; set; }
 
-        internal static IEnumerable<TResult> TransferResponseToResult<TResult>(IList<GremlinTableCapResponse[]> response) where TResult : new()
+        internal static IEnumerable<TResult> TransferResponseToResult<TResult>(List<List<GremlinTableCapResponse>> response) where TResult : new()
         {
             var type = typeof(TResult);
             var properties = type.GetProperties();
@@ -21,8 +21,8 @@ namespace Neo4jClient.ApiModels
                 if (gremlinTableCapResponse == null || gremlinTableCapResponse.Columns == null || gremlinTableCapResponse.Data == null)
                     yield break;
 
-                var columns = gremlinTableCapResponse.Columns.ToList();
-                var dataRows = gremlinTableCapResponse.Data.Select(dr => dr).ToArray();
+                var columns = gremlinTableCapResponse.Columns;
+                var dataRows = gremlinTableCapResponse.Data.Select(dr => dr);
 
                 foreach (var t in dataRows)
                 {
@@ -31,7 +31,7 @@ namespace Neo4jClient.ApiModels
                         var prop in
                             properties.Where(p => columns.Any(c => c.ToLowerInvariant() == p.Name.ToLowerInvariant())))
                     {
-                        var columnIndex = columns.IndexOf(prop.Name.ToLowerInvariant());
+                        var columnIndex = columns.IndexOf(prop.Name);
                         if (columnIndex == -1) continue;
                         var columnData = t;
                         prop.SetValue(result, columnData[columnIndex], null);
