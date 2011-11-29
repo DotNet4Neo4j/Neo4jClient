@@ -455,14 +455,14 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateClient().Execute<List<GremlinTableCapResponse[]>>(request);
+            var response = CreateClient().Execute<List<List<GremlinTableCapResponse>>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
-            var responses = response.Data ?? new List<GremlinTableCapResponse[]> { new GremlinTableCapResponse[0] };
+            var responses = response.Data ?? new List<List<GremlinTableCapResponse>> { new List<GremlinTableCapResponse>() };
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
