@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Neo4jClient.ApiModels
@@ -28,21 +29,45 @@ namespace Neo4jClient.ApiModels
                 foreach (var t in dataRows)
                 {
                     var result = new TResult();
-                    foreach (
-                        var prop in
-                            properties.Where(p => columns.Any(c => c.ToLowerInvariant() == p.Name.ToLowerInvariant())))
+                    foreach (var prop in properties.Where(p => columns.Any(c => c.ToLowerInvariant() == p.Name.ToLowerInvariant())))
                     {
                         var columnIndex = columns.IndexOf(prop.Name);
                         if (columnIndex == -1) continue;
                         var columnData = t;
-                        var data = columnData[columnIndex];
+                        var columnCellData = columnData[columnIndex];
                         try
                         {
-                            prop.SetValue(result, data, null);
+                            var validType = prop.PropertyType;
+                            if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+                            {
+                                var nullableConverter = new NullableConverter(prop.PropertyType);
+                                validType = nullableConverter.UnderlyingType;
+                            }
+
+                            if (columnCellData == null || string.IsNullOrEmpty(columnCellData))
+                            {
+                                prop.SetValue(result, null, null);
+                                continue;
+                            }
+
+                            object convertedData;
+                            if (validType.IsEnum)
+                            {
+                                convertedData = Enum.Parse(validType, columnCellData, false);
+                            }
+                            else if (validType == typeof(DateTimeOffset))
+                            {
+                                convertedData = DateTimeOffset.Parse(columnCellData);
+                            }
+                            else
+                            {
+                                convertedData = Convert.ChangeType(columnCellData, validType);
+                            }
+                            prop.SetValue(result, convertedData, null);
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception(string.Format("Could not set property {0} to value {1} for type {2}\n {3}", prop.Name, data,result.GetType().FullName, ex));
+                            throw new Exception(string.Format("Could not set property {0} to value {1} for type {2}\n {3}", prop.Name, columnCellData, result.GetType().FullName, ex));
                         }
                     }
                     yield return result;
