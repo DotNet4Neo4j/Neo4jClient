@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,7 +35,15 @@ namespace Neo4jClient.ApiModels
                         var columnIndex = columns.IndexOf(prop.Name);
                         if (columnIndex == -1) continue;
                         var columnData = t;
-                        prop.SetValue(result, columnData[columnIndex], null);
+                        var data = columnData[columnIndex];
+                        try
+                        {
+                            prop.SetValue(result, data, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception(string.Format("Could not set property {0} to value {1} for type {2}\n {3}", prop.Name, data,result.GetType().FullName, ex));
+                        }
                     }
                     yield return result;
                 }
