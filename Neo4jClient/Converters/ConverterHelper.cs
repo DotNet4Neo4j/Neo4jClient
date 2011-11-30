@@ -39,7 +39,7 @@ namespace Neo4jClient.Converters
                 {
                     var rawValue = value.Replace("NeoDate", "Date");
                     convertedData = DateRegex.IsMatch(rawValue)
-                        ? deserializer.Deserialize<DateHolder>(string.Format(@"{{ date: '{0}' }}", rawValue)).Date 
+                        ? deserializer.Deserialize<DateHolder>(string.Format(@"{{ DateTimeOffset: '{0}'}}", rawValue)).DateTimeOffset
                         : DateTimeOffset.Parse(rawValue);
                 }
                 else
@@ -59,6 +59,6 @@ namespace Neo4jClient.Converters
 
     public class DateHolder
     {
-        public DateTimeOffset Date { get; set; }
+        public DateTimeOffset DateTimeOffset { get; set; }
     }
 }
