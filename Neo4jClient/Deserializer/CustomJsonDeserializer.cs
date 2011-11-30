@@ -28,6 +28,14 @@ namespace Neo4jClient.Deserializer
             Culture = CultureInfo.InvariantCulture;
         }
 
+        public T Deserialize<T>(string content) where T : new()
+        {
+            return Deserialize<T>(new RestResponse
+            {
+                Content = content
+            });
+        }
+
         public T Deserialize<T>(RestResponse response) where T : new()
         {
             var target = new T();

@@ -1,17 +1,24 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using Neo4jClient.Deserializer;
 
 namespace Neo4jClient.Converters
 {
     public static class ConverterHelper
     {
-        public static void ConvertAndSetValue<TResult>(this TResult result, string value, PropertyInfo prop) where TResult : new()
+        static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
+
+        public static void ConvertAndSetValue<TResult>(this TResult result, string value, PropertyInfo prop)
+            where TResult : new()
         {
+            var deserializer = new CustomJsonDeserializer();
             try
             {
                 var validType = prop.PropertyType;
-                if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+                if (prop.PropertyType.IsGenericType &&
+                    prop.PropertyType.GetGenericTypeDefinition().Equals(typeof (Nullable<>)))
                 {
                     var nullableConverter = new NullableConverter(prop.PropertyType);
                     validType = nullableConverter.UnderlyingType;
@@ -28,9 +35,12 @@ namespace Neo4jClient.Converters
                 {
                     convertedData = Enum.Parse(validType, value, false);
                 }
-                else if (validType == typeof(DateTimeOffset))
+                else if (validType == typeof (DateTimeOffset))
                 {
-                    convertedData = DateTimeOffset.Parse(value);
+                    var rawValue = value.Replace("NeoDate", "Date");
+                    convertedData = DateRegex.IsMatch(rawValue)
+                        ? deserializer.Deserialize<DateHolder>(string.Format(@"{{ date: '{0}' }}", rawValue)).Date 
+                        : DateTimeOffset.Parse(rawValue);
                 }
                 else
                 {
@@ -40,9 +50,15 @@ namespace Neo4jClient.Converters
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("Could not set property {0} to value {1} for type {2}\n {3}", prop.Name,
+                throw new Exception(string.Format("Could not set property {0} to value {1} for type {2}\n {3}",
+                                                  prop.Name,
                                                   value, result.GetType().FullName, ex));
             }
         }
+    }
+
+    public class DateHolder
+    {
+        public DateTimeOffset Date { get; set; }
     }
 }

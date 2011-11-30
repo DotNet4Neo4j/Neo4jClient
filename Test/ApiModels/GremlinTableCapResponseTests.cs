@@ -198,6 +198,33 @@ namespace Neo4jClient.Test.ApiModels
         }
 
         [Test]
+        public void VerifyTransferTableCapResponseToResultFromStringWithDateTimeOffsetToDateTimeOffsetUsingNeoDate()
+        {
+            var list = new List<List<GremlinTableCapResponse>>();
+
+            const string date = "/NeoDate(1322007153048+1100)/";
+            list.Add(new List<GremlinTableCapResponse>
+                {
+                    new GremlinTableCapResponse
+                        {
+                            Columns = new List<string>
+                                {
+                                    "DateTimeOffset"
+                                },
+                            Data = new List<List<string>>
+                                {
+                                    new List<string>
+                                        {
+                                            date,
+                                        }
+                                }
+                        }
+                });
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy") == "23 Nov 2011"));
+        }
+
+        [Test]
         public void VerifyTransferTableCapResponseToResultFromStringWithDateTimeOffsetToDateTimeOffset()
         {
             var list = new List<List<GremlinTableCapResponse>>();
