@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
+using Neo4jClient.Converters;
 
 namespace Neo4jClient.ApiModels
 {
@@ -35,44 +37,13 @@ namespace Neo4jClient.ApiModels
                         if (columnIndex == -1) continue;
                         var columnData = t;
                         var columnCellData = columnData[columnIndex];
-                        try
-                        {
-                            var validType = prop.PropertyType;
-                            if (prop.PropertyType.IsGenericType && prop.PropertyType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
-                            {
-                                var nullableConverter = new NullableConverter(prop.PropertyType);
-                                validType = nullableConverter.UnderlyingType;
-                            }
-
-                            if (columnCellData == null || string.IsNullOrEmpty(columnCellData))
-                            {
-                                prop.SetValue(result, null, null);
-                                continue;
-                            }
-
-                            object convertedData;
-                            if (validType.IsEnum)
-                            {
-                                convertedData = Enum.Parse(validType, columnCellData, false);
-                            }
-                            else if (validType == typeof(DateTimeOffset))
-                            {
-                                convertedData = DateTimeOffset.Parse(columnCellData);
-                            }
-                            else
-                            {
-                                convertedData = Convert.ChangeType(columnCellData, validType);
-                            }
-                            prop.SetValue(result, convertedData, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new Exception(string.Format("Could not set property {0} to value {1} for type {2}\n {3}", prop.Name, columnCellData, result.GetType().FullName, ex));
-                        }
+                        result.ConvertAndSetValue(columnCellData, prop);
                     }
                     yield return result;
                 }
             }
         }
+
+        
     }
 }

@@ -53,6 +53,7 @@
     <Compile Include="ApiModels\BatchStepExtensions.cs" />
     <Compile Include="ApiModels\BatchStepResult.cs" />
     <Compile Include="ApiModels\GremlinTableCapResponse.cs" />
+    <Compile Include="Converters\ConverterHelper.cs" />
     <Compile Include="DeleteMode.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
