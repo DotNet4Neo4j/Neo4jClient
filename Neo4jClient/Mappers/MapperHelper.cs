@@ -4,9 +4,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Neo4jClient.Deserializer;
 
-namespace Neo4jClient.Converters
+namespace Neo4jClient.Mappers
 {
-    public static class ConverterHelper
+    public static class MapperHelper
     {
         static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
 
@@ -24,7 +24,7 @@ namespace Neo4jClient.Converters
                     validType = nullableConverter.UnderlyingType;
                 }
 
-                if (value == null || string.IsNullOrEmpty(value))
+                if (value == null || value == "null" || string.IsNullOrEmpty(value))
                 {
                     prop.SetValue(result, null, null);
                     return;

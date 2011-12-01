@@ -171,6 +171,58 @@ namespace Neo4jClient.Test.ApiModels
         }
 
         [Test]
+        public void VerifyTransferTableCapResponseToResultFromStringWithIntNullToNullableInt()
+        {
+            var list = new List<List<GremlinTableCapResponse>>();
+
+            list.Add(new List<GremlinTableCapResponse>
+                {
+                    new GremlinTableCapResponse
+                        {
+                            Columns = new List<string>
+                                {
+                                    "NullableInt"
+                                },
+                            Data = new List<List<string>>
+                                {
+                                    new List<string>
+                                        {
+                                            "",
+                                        }
+                                }
+                        }
+                });
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            Assert.IsTrue(response.Any(r => !r.NullableLong.HasValue));
+        }
+
+        [Test]
+        public void VerifyTransferTableCapResponseToResultFromStringWithLongNullAsStringToNullableLong()
+        {
+            var list = new List<List<GremlinTableCapResponse>>();
+
+            list.Add(new List<GremlinTableCapResponse>
+                {
+                    new GremlinTableCapResponse
+                        {
+                            Columns = new List<string>
+                                {
+                                    "NullableLong"
+                                },
+                            Data = new List<List<string>>
+                                {
+                                    new List<string>
+                                        {
+                                            "null",
+                                        }
+                                }
+                        }
+                });
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            Assert.IsTrue(response.Any(r => !r.NullableLong.HasValue));
+        }
+
+        [Test]
         public void VerifyTransferTableCapResponseToResultFromStringWithDateTimeOffsetToNullableDateTimeOffset()
         {
             var list = new List<List<GremlinTableCapResponse>>();
@@ -285,6 +337,7 @@ namespace Neo4jClient.Test.ApiModels
             public string Bar { get; set; }
             public long Long { get; set; }
             public long? NullableLong { get; set; }
+            public int? NullableInt { get; set; }
             public MyEnum EnumValue { get; set; }
             public MyEnum? EnumValueNullable { get; set; }
             public DateTimeOffset DateTimeOffset { get; set; }

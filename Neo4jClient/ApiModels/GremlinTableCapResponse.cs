@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Neo4jClient.Converters;
+using Neo4jClient.Mappers;
 
 namespace Neo4jClient.ApiModels
 {
