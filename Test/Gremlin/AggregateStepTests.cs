@@ -7,7 +7,7 @@ namespace Neo4jClient.Test.Gremlin
     public class AggregateStepTests
     {
         [Test]
-        public void AggregateVShouldAppendStep()
+        public void AggregateVShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).AggregateV<object>("foo");
             Assert.AreEqual("p2 = [];g.v(p0).aggregate(p1)", query.QueryText);
@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void AggregateEShouldAppendStep()
+        public void AggregateEShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).AggregateE("foo");
             Assert.AreEqual("p2 = [];g.v(p0).aggregate(p1)", query.QueryText);
@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void AggregateEWithTDataShouldAppendStep()
+        public void AggregateEWithTDataShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).AggregateE<object>("foo");
             Assert.AreEqual("p2 = [];g.v(p0).aggregate(p1)", query.QueryText);
