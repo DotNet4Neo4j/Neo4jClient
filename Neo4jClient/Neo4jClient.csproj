@@ -55,6 +55,7 @@
     <Compile Include="ApiModels\GremlinTableCapResponse.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\ExceptStep.cs" />
+    <Compile Include="Gremlin\EmitVariableStep.cs" />
     <Compile Include="Gremlin\RetainStep.cs" />
     <Compile Include="Mappers\MapperHelper.cs" />
     <Compile Include="DeleteMode.cs" />
