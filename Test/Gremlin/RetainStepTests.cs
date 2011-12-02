@@ -10,10 +10,9 @@ namespace Neo4jClient.Test.Gremlin
         public void RetainVShouldAppendStep()
         {
             var query = new NodeReference(123).RetainV<object>("foo");
-            Assert.AreEqual("p2 = [];g.v(p0).retain(p1)", query.QueryText);
+            Assert.AreEqual("g.v(p0).retain(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
-            Assert.AreEqual("foo", query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -27,10 +26,9 @@ namespace Neo4jClient.Test.Gremlin
         public void RetainEShouldAppendStep()
         {
             var query = new NodeReference(123).RetainE("foo");
-            Assert.AreEqual("p2 = [];g.v(p0).retain(p1)", query.QueryText);
+            Assert.AreEqual("g.v(p0).retain(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
-            Assert.AreEqual("foo", query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -44,10 +42,9 @@ namespace Neo4jClient.Test.Gremlin
         public void RetainEWithTDataShouldAppendStep()
         {
             var query = new NodeReference(123).RetainE<object>("foo");
-            Assert.AreEqual("p2 = [];g.v(p0).retain(p1)", query.QueryText);
+            Assert.AreEqual("g.v(p0).retain(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
-            Assert.AreEqual("foo", query.QueryParameters["p2"]);
         }
 
         [Test]
