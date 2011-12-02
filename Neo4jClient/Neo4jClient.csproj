@@ -58,6 +58,7 @@
     <Compile Include="Gremlin\ExceptStep.cs" />
     <Compile Include="Gremlin\ExhaustMergeStep.cs" />
     <Compile Include="Gremlin\FairMergeStep.cs" />
+    <Compile Include="Gremlin\GremlinDistinctStep.cs" />
     <Compile Include="Gremlin\IdentityPipe.cs" />
     <Compile Include="Gremlin\RetainStep.cs" />
     <Compile Include="Mappers\MapperHelper.cs" />
