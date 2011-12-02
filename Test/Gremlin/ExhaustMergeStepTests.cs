@@ -4,7 +4,7 @@ using Neo4jClient.Gremlin;
 namespace Neo4jClient.Test.Gremlin
 {
     [TestFixture]
-    public class ExhaustStepTests
+    public class ExhaustMergeStepTests
     {
         [Test]
         public void ExhaustMergeAppendStepToNodeQuery()

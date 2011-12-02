@@ -7,7 +7,7 @@ namespace Neo4jClient.Test.Gremlin
     public class RetainStepTests
     {
         [Test]
-        public void RetainVShouldAppendStepAndDeclareVariable()
+        public void RetainVShouldAppendStep()
         {
             var query = new NodeReference(123).RetainV<object>("foo");
             Assert.AreEqual("p2 = [];g.v(p0).retain(p1)", query.QueryText);
@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void RetainEShouldAppendStepAndDeclareVariable()
+        public void RetainEShouldAppendStep()
         {
             var query = new NodeReference(123).RetainE("foo");
             Assert.AreEqual("p2 = [];g.v(p0).retain(p1)", query.QueryText);
@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void RetainEWithTDataShouldAppendStepAndDeclareVariable()
+        public void RetainEWithTDataShouldAppendStep()
         {
             var query = new NodeReference(123).RetainE<object>("foo");
             Assert.AreEqual("p2 = [];g.v(p0).retain(p1)", query.QueryText);

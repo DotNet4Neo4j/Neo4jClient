@@ -7,7 +7,7 @@ namespace Neo4jClient.Test.Gremlin
     public class ExceptStepTests
     {
         [Test]
-        public void ExceptVShouldAppendStepAndDeclareVariable()
+        public void ExceptVShouldAppendStep()
         {
             var query = new NodeReference(123).ExceptV<object>("foo");
             Assert.AreEqual("p2 = [];g.v(p0).except(p1)", query.QueryText);
@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void ExceptEShouldAppendStepAndDeclareVariable()
+        public void ExceptEShouldAppendStep()
         {
             var query = new NodeReference(123).ExceptE("foo");
             Assert.AreEqual("p2 = [];g.v(p0).except(p1)", query.QueryText);
@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void ExceptEWithTDataShouldAppendStepAndDeclareVariable()
+        public void ExceptEWithTDataShouldAppendStep()
         {
             var query = new NodeReference(123).ExceptE<object>("foo");
             Assert.AreEqual("p2 = [];g.v(p0).except(p1)", query.QueryText);

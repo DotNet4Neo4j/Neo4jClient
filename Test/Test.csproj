@@ -82,7 +82,7 @@
     <Compile Include="Gremlin\BackTests.cs" />
     <Compile Include="Gremlin\BasicStepsTests.cs" />
     <Compile Include="Gremlin\AsStepTests.cs" />
-    <Compile Include="Gremlin\ExhaustStepTests.cs" />
+    <Compile Include="Gremlin\ExhaustMergeStepTests.cs" />
     <Compile Include="Gremlin\FairMergeStepTests.cs" />
     <Compile Include="Gremlin\CopySplitStepTests.cs" />
     <Compile Include="Gremlin\ExceptStepTests.cs" />
