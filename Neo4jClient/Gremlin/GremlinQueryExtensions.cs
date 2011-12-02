@@ -42,6 +42,34 @@ namespace Neo4jClient.Gremlin
             return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary);
         }
 
+        public static IGremlinQuery AddCopySplitBlock(this IGremlinQuery baseQuery, string text, IGremlinQuery[] queries)
+        {
+            var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
+            var nextParameterIndex = baseQuery.QueryParameters.Count;
+            var paramNames = new List<string>();
+            var inlineQueries = new List<string>();
+
+            foreach (var query in queries)
+            {
+                var modifiedQueryText = query.QueryText;
+                foreach (var param in query.QueryParameters)
+                {
+                    var oldParamKey = param.Key;
+                    var newParamKey = string.Format("p{0}", nextParameterIndex);
+                    paramNames.Add(newParamKey);
+                    paramsDictionary.Add(newParamKey, param.Value);
+                    nextParameterIndex++;
+                    modifiedQueryText = modifiedQueryText.Replace(oldParamKey, newParamKey);
+                }
+                    inlineQueries.Add(modifiedQueryText);
+            }
+
+            var splitBlockQueries = string.Format(text, inlineQueries.ToArray());
+            var textWithParamNames = string.Format(splitBlockQueries, paramNames.ToArray());
+
+            return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary);
+        }
+
         public static IGremlinQuery AddFilterBlock(this IGremlinQuery baseQuery, string text, IEnumerable<Filter> filters, StringComparison comparison)
         {
             var formattedFilter = FilterFormatters.FormatGremlinFilter(filters, comparison, baseQuery);
