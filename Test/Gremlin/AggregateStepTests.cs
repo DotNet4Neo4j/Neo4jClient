@@ -10,10 +10,9 @@ namespace Neo4jClient.Test.Gremlin
         public void AggregateVShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).AggregateV<object>("foo");
-            Assert.AreEqual("p2 = [];g.v(p0).aggregate(p1)", query.QueryText);
+            Assert.AreEqual("foo = [];g.v(p0).aggregate(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
-            Assert.AreEqual("foo", query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -27,10 +26,9 @@ namespace Neo4jClient.Test.Gremlin
         public void AggregateEShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).AggregateE("foo");
-            Assert.AreEqual("p2 = [];g.v(p0).aggregate(p1)", query.QueryText);
+            Assert.AreEqual("foo = [];g.v(p0).aggregate(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
-            Assert.AreEqual("foo", query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -44,10 +42,9 @@ namespace Neo4jClient.Test.Gremlin
         public void AggregateEWithTDataShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).AggregateE<object>("foo");
-            Assert.AreEqual("p2 = [];g.v(p0).aggregate(p1)", query.QueryText);
+            Assert.AreEqual("foo = [];g.v(p0).aggregate(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
-            Assert.AreEqual("foo", query.QueryParameters["p2"]);
         }
 
         [Test]
