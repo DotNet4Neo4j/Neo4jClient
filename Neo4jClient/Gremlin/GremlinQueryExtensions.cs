@@ -24,7 +24,7 @@ namespace Neo4jClient.Gremlin
                 nextParameterIndex++;
             }
 
-            var textWithParamNames = string.Format(text, paramNames.ToArray());
+            string textWithParamNames = parameters.Length > 0 ? string.Format(text, paramNames.ToArray()) : text;
 
             return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary);
         }
