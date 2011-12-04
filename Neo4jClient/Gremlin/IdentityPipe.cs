@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Neo4jClient.Gremlin
 {
-    internal class IdentityPipe : IGremlinQuery
+    public class IdentityPipe : IGremlinQuery
     {
         readonly IDictionary<string, object> queryParameters = new Dictionary<string, object>();
 
