@@ -54,6 +54,7 @@
     <Compile Include="ApiModels\BatchStepResult.cs" />
     <Compile Include="ApiModels\GremlinTableCapResponse.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
+    <Compile Include="Gremlin\StoreStep.cs" />
     <Compile Include="Gremlin\CopySplitStep.cs" />
     <Compile Include="Gremlin\ExceptStep.cs" />
     <Compile Include="Gremlin\ExhaustMergeStep.cs" />
