@@ -37,21 +37,22 @@ namespace Neo4jClient.Gremlin
             var declarations = new List<string>();
             var rootQuery = baseQuery.QueryText;
             var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
-            var nextParameterIndex = baseQuery.QueryParameters.Count;
             var paramNames = new List<string>();
             var inlineQueries = new List<string>();
+            var nextParameterIndex = baseQuery.QueryParameters.Count;
 
             foreach (var query in queries)
             {
                 declarations.AddRange(query.QueryDeclarations);
                 var modifiedQueryText = query.QueryText;
-                foreach (var param in query.QueryParameters)
+                var lastParameterIndex = nextParameterIndex + query.QueryParameters.Count -1;
+                foreach (var param in query.QueryParameters.OrderByDescending(p => p.Key))
                 {
                     var oldParamKey = param.Key;
-                    var newParamKey = string.Format("p{0}", nextParameterIndex);
+                    var newParamKey = string.Format("p{0}", lastParameterIndex);
                     paramNames.Add(newParamKey);
                     paramsDictionary.Add(newParamKey, param.Value);
-                    nextParameterIndex++;
+                    lastParameterIndex--;
                     modifiedQueryText = modifiedQueryText.Replace(oldParamKey, newParamKey);
                 }
 
@@ -62,6 +63,7 @@ namespace Neo4jClient.Gremlin
                 }
 
                 inlineQueries.Add(modifiedQueryText);
+                nextParameterIndex = baseQuery.QueryParameters.Count + paramNames.Count;
             }
 
             var splitBlockQueries = string.Format(text, inlineQueries.ToArray());

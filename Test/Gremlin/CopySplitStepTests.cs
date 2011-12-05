@@ -58,5 +58,23 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("bar", query.QueryParameters["p2"]);
             Assert.AreEqual("baz", query.QueryParameters["p3"]);
         }
+
+        [Test]
+        public void CopySplitVShouldMoveInlineBlockVariablesToTheOuterScopeInFinallyQueryUsingStoreVAndFilters()
+        {
+            var query = new NodeReference(123).CopySplit(new IdentityPipe().Out<Test>("foo", t=> t.Flag == true).StoreV<object>("xyz"), new IdentityPipe().OutE<object>("bar")).OutE("baz");
+            Assert.AreEqual("xyz = [];g.v(p0)._.copySplit(_().outE[[label:p1]].inV.filter{ it[p2] == p3 }.sideEffect{xyz.add(it)}, _().outE[[label:p4]]).outE[[label:p5]]", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("foo", query.QueryParameters["p1"]);
+            Assert.AreEqual("Flag", query.QueryParameters["p2"]);
+            Assert.AreEqual(true, query.QueryParameters["p3"]);
+            Assert.AreEqual("bar", query.QueryParameters["p4"]);
+            Assert.AreEqual("baz", query.QueryParameters["p5"]);
+        }
+
+        public class Test
+        {
+            public bool Flag { get; set; }
+        }
     }
 }
