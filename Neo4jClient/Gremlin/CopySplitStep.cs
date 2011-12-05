@@ -11,8 +11,8 @@ namespace Neo4jClient.Gremlin
                 ((IdentityPipe) query).Client = query.Client;
             }
 
-            var newQuery = baseQuery.AddCopySplitBlock("._.copySplit({0}, {1})", queries);
-            return new GremlinRelationshipEnumerable(newQuery);
+            baseQuery = baseQuery.AddCopySplitBlock("._.copySplit({0}, {1})", queries);
+            return new GremlinRelationshipEnumerable(baseQuery);
         }
     }
 }

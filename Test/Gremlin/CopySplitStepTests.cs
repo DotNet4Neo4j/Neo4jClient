@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.Gremlin
         public void CopySplitVShouldMoveInlineBlockVariablesToTheOuterScopeInFinallyQuery()
         {
             var query = new NodeReference(123).CopySplit(new IdentityPipe().OutE<object>("foo").AggregateV<object>("xyz"), new IdentityPipe().OutE<object>("bar")).OutE("baz");
-            Assert.AreEqual("x=[];g.v(p0)._.copySplit(_().outE[[label:p1]].aggregate(xyz), _().outE[[label:p2]]).outE[[label:p3]]", query.QueryText);
+            Assert.AreEqual("xyz = [];g.v(p0)._.copySplit(_().outE[[label:p1]].aggregate(xyz), _().outE[[label:p2]]).outE[[label:p3]]", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
             Assert.AreEqual("bar", query.QueryParameters["p2"]);

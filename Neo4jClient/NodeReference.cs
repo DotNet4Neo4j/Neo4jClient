@@ -77,5 +77,10 @@ namespace Neo4jClient
         {
             get { return new Dictionary<string, object> {{"p0", Id}}; }
         }
+
+        IList<string> IGremlinQuery.QueryDeclarations
+        {
+            get { return new List<string>(); }
+        }
     }
 }

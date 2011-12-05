@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.Gremlin
         public void GetEnumeratorShouldThrowDetachedNodeExceptionWhenClientNotSet()
         {
             // ReSharper disable ReturnValueOfPureMethodIsNotUsed
-            IEnumerable<Node<object>> enumerable = new GremlinNodeEnumerable<object>(new GremlinQuery(null, "abc", null));
+            IEnumerable<Node<object>> enumerable = new GremlinNodeEnumerable<object>(new GremlinQuery(null, "abc", null, null));
             enumerable.GetEnumerator();
             // ReSharper restore ReturnValueOfPureMethodIsNotUsed
         }
@@ -36,7 +36,7 @@ namespace Neo4jClient.Test.Gremlin
                 .Returns(expectedResults);
 
             // Act
-            var enumerable = new GremlinNodeEnumerable<object>(new GremlinQuery(client, "abc", parameters));
+            var enumerable = new GremlinNodeEnumerable<object>(new GremlinQuery(client, "abc", parameters, null));
             var results = enumerable.ToArray();
 
             // Assert
@@ -63,7 +63,8 @@ namespace Neo4jClient.Test.Gremlin
                     { "p9", "val09" },
                     { "p10", "val10" },
                     { "p11", "val11" },
-                });
+                },
+                null);
             var enumerable = new GremlinNodeEnumerable<object>(gremlinQuery);
             Assert.AreEqual(
                 "g['val00']['val01']['val02']['val03']['val04']['val05']['val06']['val07']['val08']['val09']['val10']['val11']",

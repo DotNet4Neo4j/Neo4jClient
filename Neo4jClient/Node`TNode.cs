@@ -49,6 +49,11 @@ namespace Neo4jClient
             get { return ((IGremlinQuery) reference).QueryParameters; }
         }
 
+        IList<string> IGremlinQuery.QueryDeclarations
+        {
+            get { return ((IGremlinQuery)reference).QueryDeclarations; }
+        }
+
         public static bool operator ==(Node<TNode> lhs, Node<TNode> rhs)
         {
             if (ReferenceEquals(lhs, null) && ReferenceEquals(rhs, null))

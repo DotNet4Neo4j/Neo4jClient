@@ -5,14 +5,16 @@ namespace Neo4jClient.Gremlin
         public static IGremlinNodeQuery<TNode> AggregateV<TNode>(this IGremlinQuery query, string variable)
         {
             var newQuery = query.AddBlock(string.Format(".aggregate({0})", variable));
-            newQuery = newQuery.PrepentVariableToBlock(string.Format("{0} = [];", variable));
+            newQuery.QueryDeclarations.Add(string.Format("{0} = [];", variable));
+            newQuery = newQuery.PrependVariablesToBlock(newQuery);
             return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinRelationshipQuery AggregateE(this IGremlinQuery query, string variable)
         {
             var newQuery = query.AddBlock(string.Format(".aggregate({0})", variable));
-            newQuery = newQuery.PrepentVariableToBlock(string.Format("{0} = [];", variable));
+            newQuery.QueryDeclarations.Add(string.Format("{0} = [];", variable));
+            newQuery = newQuery.PrependVariablesToBlock(newQuery);
             return new GremlinRelationshipEnumerable(newQuery);
         }
 
@@ -20,7 +22,8 @@ namespace Neo4jClient.Gremlin
              where TData : class, new()
         {
             var newQuery = query.AddBlock(string.Format(".aggregate({0})", variable));
-            newQuery = newQuery.PrepentVariableToBlock(string.Format("{0} = [];", variable));
+            newQuery.QueryDeclarations.Add(string.Format("{0} = [];", variable));
+            newQuery = newQuery.PrependVariablesToBlock(newQuery);
             return new GremlinRelationshipEnumerable<TData>(newQuery);
         }
     }

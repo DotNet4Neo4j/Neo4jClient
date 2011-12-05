@@ -19,7 +19,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
             
             new GremlinPagedEnumerator<object>(loadCallback, baseQuery);
 
@@ -36,7 +37,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<object>(loadCallback, baseQuery);
             enumerator.MoveNext();
@@ -59,7 +61,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
             for (var i = 0; i < 100; i++)
@@ -81,7 +84,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
             Assert.IsFalse(enumerator.MoveNext());
@@ -103,7 +107,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
 
@@ -128,7 +133,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
 
@@ -150,7 +156,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
             for (var i = 0; i < 100; i++)
@@ -190,7 +197,8 @@ namespace Neo4jClient.Test.Gremlin
             var baseQuery = new GremlinQuery(
                 null,
                 "g.v(p0).outV",
-                new Dictionary<string, object> { { "p0", 0 } });
+                new Dictionary<string, object> { { "p0", 0 } },
+                null);
 
             var enumerator = new GremlinPagedEnumerator<int>(loadCallback, baseQuery);
             for (var i = 0; i < pageCount * 100; i++)

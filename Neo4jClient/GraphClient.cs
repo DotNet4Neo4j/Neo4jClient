@@ -479,7 +479,12 @@ namespace Neo4jClient
 
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
         {
-            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters));
+            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, new List<string>()));
+        }
+
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations )
+        {
+            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, declarations));
         }
 
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)

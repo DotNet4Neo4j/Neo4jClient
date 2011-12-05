@@ -10,12 +10,14 @@ namespace Neo4jClient.Gremlin
         readonly IGraphClient client;
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
+        readonly IList<string> queryDeclarations;
 
         public GremlinNodeEnumerable(IGremlinQuery query)
         {
             client = query.Client;
             queryText = query.QueryText;
             queryParameters = query.QueryParameters;
+            queryDeclarations = query.QueryDeclarations;
         }
 
         public string DebugQueryText
@@ -28,7 +30,7 @@ namespace Neo4jClient.Gremlin
             if (client == null) throw new DetachedNodeException();
             return new GremlinPagedEnumerator<Node<TNode>>(
                 client.ExecuteGetAllNodesGremlin<TNode>,
-                new GremlinQuery(client, queryText, queryParameters));
+                new GremlinQuery(client, queryText, queryParameters, queryDeclarations));
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -49,6 +51,11 @@ namespace Neo4jClient.Gremlin
         IDictionary<string, object> IGremlinQuery.QueryParameters
         {
             get { return queryParameters; }
+        }
+
+        IList<string> IGremlinQuery.QueryDeclarations
+        {
+            get { return queryDeclarations; }
         }
     }
 }

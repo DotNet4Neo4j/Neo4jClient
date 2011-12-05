@@ -6,9 +6,10 @@ namespace Neo4jClient.Gremlin
 {
     static class GremlinQueryExtensions
     {
-        public static IGremlinQuery PrepentVariableToBlock(this IGremlinQuery baseQuery, string variable)
+        public static IGremlinQuery PrependVariablesToBlock(this IGremlinQuery baseQuery, IGremlinQuery query)
         {
-            return new GremlinQuery(baseQuery.Client, variable + baseQuery.QueryText, baseQuery.QueryParameters);
+            var declarations = query.QueryDeclarations.Aggregate(string.Empty, (current, declaration) => current + declaration);
+            return new GremlinQuery(baseQuery.Client, declarations + baseQuery.QueryText, baseQuery.QueryParameters, query.QueryDeclarations);
         }
 
         public static IGremlinQuery AddBlock(this IGremlinQuery baseQuery, string text, params object[] parameters)
@@ -24,13 +25,15 @@ namespace Neo4jClient.Gremlin
                 nextParameterIndex++;
             }
 
-            string textWithParamNames = parameters.Length > 0 ? string.Format(text, paramNames.ToArray()) : text;
+            var textWithParamNames = parameters.Length > 0 ? string.Format(text, paramNames.ToArray()) : text;
 
-            return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary);
+            return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary,baseQuery.QueryDeclarations);
         }
 
         public static IGremlinQuery AddCopySplitBlock(this IGremlinQuery baseQuery, string text, IGremlinQuery[] queries)
         {
+            var declarations = new List<string>();
+            var rootQuery = baseQuery.QueryText;
             var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
             var nextParameterIndex = baseQuery.QueryParameters.Count;
             var paramNames = new List<string>();
@@ -38,6 +41,7 @@ namespace Neo4jClient.Gremlin
 
             foreach (var query in queries)
             {
+                declarations.AddRange(query.QueryDeclarations);
                 var modifiedQueryText = query.QueryText;
                 foreach (var param in query.QueryParameters)
                 {
@@ -48,13 +52,21 @@ namespace Neo4jClient.Gremlin
                     nextParameterIndex++;
                     modifiedQueryText = modifiedQueryText.Replace(oldParamKey, newParamKey);
                 }
-                    inlineQueries.Add(modifiedQueryText);
+
+                foreach (var declareStatement in query.QueryDeclarations)
+                {
+                    rootQuery = declareStatement + baseQuery.QueryText;
+                    modifiedQueryText = modifiedQueryText.Replace(declareStatement, string.Empty);
+                }
+
+                inlineQueries.Add(modifiedQueryText);
             }
 
             var splitBlockQueries = string.Format(text, inlineQueries.ToArray());
             var textWithParamNames = string.Format(splitBlockQueries, paramNames.ToArray());
 
-            return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary);
+
+            return new GremlinQuery(baseQuery.Client, rootQuery + textWithParamNames, paramsDictionary, declarations);
         }
 
         public static IGremlinQuery AddFilterBlock(this IGremlinQuery baseQuery, string text, IEnumerable<Filter> filters, StringComparison comparison)
@@ -67,7 +79,7 @@ namespace Neo4jClient.Gremlin
             foreach (var key in formattedFilter.FilterParameters.Keys)
                 newParams.Add(key, formattedFilter.FilterParameters[key]);
 
-            return new GremlinQuery(baseQuery.Client, newQueryText, newParams);
+            return new GremlinQuery(baseQuery.Client, newQueryText, newParams, baseQuery.QueryDeclarations);
         }
 
         public static string ToDebugQueryText(this IGremlinQuery query)

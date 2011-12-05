@@ -5,14 +5,16 @@ using System.Diagnostics;
 namespace Neo4jClient.Gremlin
 {
     [DebuggerDisplay("{DebugQueryText}")]
-    internal class GremlinProjectionEnumerable<TResult> : IGremlinQuery, IEnumerable<TResult> where TResult : new()
+    internal class GremlinProjectionEnumerable<TResult> :IGremlinQuery, IEnumerable<TResult> where TResult : new()
     {
         readonly IGraphClient client;
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
+        readonly IList<string> queryDeclarations;
 
         public GremlinProjectionEnumerable(IGremlinQuery query)
         {
+            queryDeclarations = query.QueryDeclarations;
             client = query.Client;
             queryText = query.QueryText;
             queryParameters = query.QueryParameters;
@@ -26,7 +28,7 @@ namespace Neo4jClient.Gremlin
         IEnumerator<TResult> IEnumerable<TResult>.GetEnumerator()
         {
             if (client == null) throw new DetachedNodeException();
-            return client.ExecuteGetAllProjectionsGremlin<TResult>(new GremlinQuery(client, queryText, queryParameters))
+            return client.ExecuteGetAllProjectionsGremlin<TResult>(new GremlinQuery(client, queryText, queryParameters, queryDeclarations))
                 .GetEnumerator();
         }
 
@@ -48,6 +50,11 @@ namespace Neo4jClient.Gremlin
         IDictionary<string, object> IGremlinQuery.QueryParameters
         {
             get { return queryParameters; }
+        }
+
+        IList<string> IGremlinQuery.QueryDeclarations
+        {
+            get { return queryDeclarations; }
         }
     }
 }

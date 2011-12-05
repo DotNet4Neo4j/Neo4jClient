@@ -10,12 +10,14 @@ namespace Neo4jClient.Gremlin
         readonly IGraphClient client;
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
+        readonly IList<string> queryDeclaration;
 
         public GremlinRelationshipEnumerable(IGremlinQuery query)
         {
             client = query.Client;
             queryText = query.QueryText;
             queryParameters = query.QueryParameters;
+            queryDeclaration = query.QueryDeclarations;
         }
 
         public string DebugQueryText
@@ -48,6 +50,11 @@ namespace Neo4jClient.Gremlin
         IDictionary<string, object> IGremlinQuery.QueryParameters
         {
             get { return queryParameters; }
+        }
+
+        IList<string> IGremlinQuery.QueryDeclarations
+        {
+            get { return queryDeclaration; }
         }
     }
 }
