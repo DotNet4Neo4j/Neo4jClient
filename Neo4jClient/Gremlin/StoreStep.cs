@@ -8,13 +8,12 @@ namespace Neo4jClient.Gremlin
             var newQuery = query.AddBlock(string.Format(".sideEffect{{{0}.add(it)}}", variable));
             newQuery.QueryDeclarations.Add(string.Format("{0} = [];", variable));
             newQuery = newQuery.PrependVariablesToBlock(newQuery);
-
             return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinRelationshipQuery StoreE(this IGremlinQuery query, string variable)
         {
-            var newQuery = query.AddBlock(string.Format(".sideEffect{0}{1}.add(it){2}", "{", variable, "}"));
+            var newQuery = query.AddBlock(string.Format(".sideEffect{{{0}.add(it)}}", variable));
             newQuery.QueryDeclarations.Add(string.Format("{0} = [];", variable));
             newQuery = newQuery.PrependVariablesToBlock(newQuery);
 
@@ -24,7 +23,7 @@ namespace Neo4jClient.Gremlin
         public static IGremlinRelationshipQuery<TData> StoreE<TData>(this IGremlinQuery query, string variable)
              where TData : class, new()
         {
-            var newQuery = query.AddBlock(string.Format(".sideEffect{0}{1}.add(it){2}", "{", variable, "}"));
+            var newQuery = query.AddBlock(string.Format(".sideEffect{{{0}.add(it)}}", variable));
             newQuery.QueryDeclarations.Add(string.Format("{0} = [];", variable));
             newQuery = newQuery.PrependVariablesToBlock(newQuery);
             return new GremlinRelationshipEnumerable<TData>(newQuery);

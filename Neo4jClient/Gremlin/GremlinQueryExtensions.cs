@@ -25,7 +25,9 @@ namespace Neo4jClient.Gremlin
                 nextParameterIndex++;
             }
 
-            var textWithParamNames = parameters.Length > 0 ? string.Format(text, paramNames.ToArray()) : text;
+            var textWithParamNames = parameters.Any()
+                ? string.Format(text, paramNames.ToArray())
+                : text;
 
             return new GremlinQuery(baseQuery.Client, baseQuery.QueryText + textWithParamNames, paramsDictionary,baseQuery.QueryDeclarations);
         }
@@ -63,10 +65,8 @@ namespace Neo4jClient.Gremlin
             }
 
             var splitBlockQueries = string.Format(text, inlineQueries.ToArray());
-            var textWithParamNames = string.Format(splitBlockQueries, paramNames.ToArray());
 
-
-            return new GremlinQuery(baseQuery.Client, rootQuery + textWithParamNames, paramsDictionary, declarations);
+            return new GremlinQuery(baseQuery.Client, rootQuery + splitBlockQueries, paramsDictionary, declarations);
         }
 
         public static IGremlinQuery AddFilterBlock(this IGremlinQuery baseQuery, string text, IEnumerable<Filter> filters, StringComparison comparison)
