@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Neo4jClient.Gremlin
 {
     static class GremlinQueryExtensions
     {
+        static readonly Regex ParameterReferenceRegex = new Regex(@"(?<=\W)p\d+(?!\w)");
+
         public static IGremlinQuery PrependVariablesToBlock(this IGremlinQuery baseQuery, IGremlinQuery query)
         {
             var declarations = query.QueryDeclarations.Aggregate(string.Empty, (current, declaration) => current + declaration);
@@ -43,18 +46,25 @@ namespace Neo4jClient.Gremlin
 
             foreach (var query in queries)
             {
+                var nextParamaterIndex2 = nextParameterIndex;
+                var query2 = query;
+
                 declarations.AddRange(query.QueryDeclarations);
-                var modifiedQueryText = query.QueryText;
-                var lastParameterIndex = nextParameterIndex + query.QueryParameters.Count -1;
-                foreach (var param in query.QueryParameters.OrderByDescending(p => p.Key))
-                {
-                    var oldParamKey = param.Key;
-                    var newParamKey = string.Format("p{0}", lastParameterIndex);
-                    paramNames.Add(newParamKey);
-                    paramsDictionary.Add(newParamKey, param.Value);
-                    lastParameterIndex--;
-                    modifiedQueryText = modifiedQueryText.Replace(oldParamKey, newParamKey);
-                }
+                var modifiedQueryText = ParameterReferenceRegex.Replace(
+                    query.QueryText,
+                    m =>
+                    {
+                        var parameterIndex = nextParamaterIndex2;
+                        nextParamaterIndex2++;
+
+                        var oldParamKey = m.Value;
+                        var newParamKey = string.Format("p{0}", parameterIndex);
+
+                        paramNames.Add(newParamKey);
+                        paramsDictionary.Add(newParamKey, query2.QueryParameters[oldParamKey]);
+
+                        return newParamKey;
+                    });
 
                 foreach (var declareStatement in query.QueryDeclarations)
                 {
@@ -63,7 +73,8 @@ namespace Neo4jClient.Gremlin
                 }
 
                 inlineQueries.Add(modifiedQueryText);
-                nextParameterIndex = baseQuery.QueryParameters.Count + paramNames.Count;
+
+                nextParameterIndex = nextParamaterIndex2;
             }
 
             var splitBlockQueries = string.Format(text, inlineQueries.ToArray());
