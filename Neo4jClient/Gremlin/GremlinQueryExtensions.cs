@@ -82,6 +82,11 @@ namespace Neo4jClient.Gremlin
             return new GremlinQuery(baseQuery.Client, rootQuery + splitBlockQueries, paramsDictionary, declarations);
         }
 
+        public static IGremlinQuery AddIfThenElseBlock(this IGremlinQuery baseQuery, string ifthenelse, IGremlinQuery ifExpression, IGremlinQuery ifThen, IGremlinQuery ifElse)
+        {
+            throw new NotImplementedException();
+        }
+
         public static IGremlinQuery AddFilterBlock(this IGremlinQuery baseQuery, string text, IEnumerable<Filter> filters, StringComparison comparison)
         {
             var formattedFilter = FilterFormatters.FormatGremlinFilter(filters, comparison, baseQuery);

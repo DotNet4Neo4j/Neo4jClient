@@ -55,6 +55,9 @@
     <Compile Include="ApiModels\GremlinTableCapResponse.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\GremlinIterator.cs" />
+    <Compile Include="Gremlin\IfThenElseStep.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Gremlin\StoreStep.cs" />
     <Compile Include="Gremlin\CopySplitStep.cs" />
     <Compile Include="Gremlin\ExceptStep.cs" />
