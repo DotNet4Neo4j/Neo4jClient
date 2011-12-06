@@ -11,7 +11,9 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinQuery PrependVariablesToBlock(this IGremlinQuery baseQuery, IGremlinQuery query)
         {
-            var declarations = query.QueryDeclarations.Aggregate(string.Empty, (current, declaration) => current + declaration);
+            var declarations = query
+                .QueryDeclarations
+                .Aggregate(string.Empty, (current, declaration) => !baseQuery.QueryText.Contains(declaration) ? declaration + current : current);
             return new GremlinQuery(baseQuery.Client, declarations + baseQuery.QueryText, baseQuery.QueryParameters, query.QueryDeclarations);
         }
 
@@ -39,42 +41,15 @@ namespace Neo4jClient.Gremlin
         {
             var declarations = new List<string>();
             var rootQuery = baseQuery.QueryText;
-            var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
-            var paramNames = new List<string>();
             var inlineQueries = new List<string>();
+
+            var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
             var nextParameterIndex = baseQuery.QueryParameters.Count;
 
             foreach (var query in queries)
             {
-                var nextParamaterIndex2 = nextParameterIndex;
-                var query2 = query;
-
-                declarations.AddRange(query.QueryDeclarations);
-                var modifiedQueryText = ParameterReferenceRegex.Replace(
-                    query.QueryText,
-                    m =>
-                    {
-                        var parameterIndex = nextParamaterIndex2;
-                        nextParamaterIndex2++;
-
-                        var oldParamKey = m.Value;
-                        var newParamKey = string.Format("p{0}", parameterIndex);
-
-                        paramNames.Add(newParamKey);
-                        paramsDictionary.Add(newParamKey, query2.QueryParameters[oldParamKey]);
-
-                        return newParamKey;
-                    });
-
-                foreach (var declareStatement in query.QueryDeclarations)
-                {
-                    rootQuery = declareStatement + baseQuery.QueryText;
-                    modifiedQueryText = modifiedQueryText.Replace(declareStatement, string.Empty);
-                }
-
+                var modifiedQueryText = RebuildParametersAndDeclarations(baseQuery, query, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
                 inlineQueries.Add(modifiedQueryText);
-
-                nextParameterIndex = nextParamaterIndex2;
             }
 
             var splitBlockQueries = string.Format(text, inlineQueries.ToArray());
@@ -84,6 +59,12 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinQuery AddIfThenElseBlock(this IGremlinQuery baseQuery, string ifThenElseText, IGremlinQuery ifExpression, IGremlinQuery ifThen, IGremlinQuery ifElse)
         {
+            var declarations = new List<string>();
+            var rootQuery = baseQuery.QueryText;
+            var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
+            var nextParameterIndex = baseQuery.QueryParameters.Count;
+
+            var modifiedQueryText = RebuildParametersAndDeclarations(baseQuery,ifExpression, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
             var newQueryText = string.Format(ifThenElseText, ifExpression.QueryText, ifThen.QueryText, ifElse.QueryText);
 
             return new GremlinQuery(baseQuery.Client, newQueryText, baseQuery.QueryParameters, baseQuery.QueryDeclarations);
@@ -111,6 +92,38 @@ namespace Neo4jClient.Gremlin
                 text = text.Replace(key, string.Format("'{0}'", query.QueryParameters[key]));
             }
             return text;
+        }
+
+        static string RebuildParametersAndDeclarations(IGremlinQuery baseQuery,IGremlinQuery query, Dictionary<string, object> paramsDictionary, 
+            List<string> declarations, ref int nextParamaterIndex, ref string rootQuery)
+        {
+            var updatedIndex = nextParamaterIndex;
+            var paramNames = new List<string>();
+            declarations.AddRange(query.QueryDeclarations);
+            var modifiedQueryText = ParameterReferenceRegex.Replace(
+                query.QueryText,
+                m =>
+                {
+                    var parameterIndex = updatedIndex;
+                    updatedIndex++;
+
+                    var oldParamKey = m.Value;
+                    var newParamKey = string.Format("p{0}", parameterIndex);
+
+                    paramNames.Add(newParamKey);
+                    paramsDictionary.Add(newParamKey, query.QueryParameters[oldParamKey]);
+
+                    return newParamKey;
+                });
+
+            nextParamaterIndex = updatedIndex;
+
+            foreach (var declareStatement in query.QueryDeclarations)
+            {
+                rootQuery = declareStatement + baseQuery.QueryText;
+                modifiedQueryText = modifiedQueryText.Replace(declareStatement, string.Empty);
+            }
+            return modifiedQueryText;
         }
     }
 }

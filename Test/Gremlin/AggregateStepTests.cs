@@ -45,6 +45,14 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void AggregateEWithTDataShouldAppendStepAndDeclareVariables()
+        {
+            var query = new NodeReference(123).AggregateE<object>("foo").AggregateE<object>("bar");
+            Assert.AreEqual("bar = [];foo = [];g.v(p0).aggregate(foo).aggregate(bar)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void AggregateEWithTDataShouldReturnRelationshipEnumerable()
         {
             var query = new NodeReference(123).AggregateE<object>("foo");
