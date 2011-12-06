@@ -64,8 +64,11 @@ namespace Neo4jClient.Gremlin
             var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
             var nextParameterIndex = baseQuery.QueryParameters.Count;
 
-            var modifiedQueryText = RebuildParametersAndDeclarations(baseQuery,ifExpression, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
-            var newQueryText = string.Format(ifThenElseText, ifExpression.QueryText, ifThen.QueryText, ifElse.QueryText);
+            var modifiedQueryTextifExpression = RebuildParametersAndDeclarations(baseQuery, ifExpression, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+            var modifiedQueryTextifThen = RebuildParametersAndDeclarations(baseQuery, ifThen, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+            var modifiedQueryTextifElse = RebuildParametersAndDeclarations(baseQuery, ifElse, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+
+            var newQueryText = string.Format(ifThenElseText, modifiedQueryTextifExpression, modifiedQueryTextifThen, modifiedQueryTextifElse);
 
             return new GremlinQuery(baseQuery.Client, newQueryText, baseQuery.QueryParameters, baseQuery.QueryDeclarations);
         }
