@@ -48,7 +48,7 @@ namespace Neo4jClient.Gremlin
 
             foreach (var query in queries)
             {
-                var modifiedQueryText = RebuildParametersAndDeclarations(baseQuery, query, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+                var modifiedQueryText = RebuildParametersAndDeclarations(query, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
                 inlineQueries.Add(modifiedQueryText);
             }
 
@@ -64,9 +64,9 @@ namespace Neo4jClient.Gremlin
             var paramsDictionary = new Dictionary<string, object>(baseQuery.QueryParameters);
             var nextParameterIndex = baseQuery.QueryParameters.Count;
 
-            var modifiedQueryTextifExpression = RebuildParametersAndDeclarations(baseQuery, ifExpression, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
-            var modifiedQueryTextifThen = RebuildParametersAndDeclarations(baseQuery, ifThen, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
-            var modifiedQueryTextifElse = RebuildParametersAndDeclarations(baseQuery, ifElse, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+            var modifiedQueryTextifExpression = RebuildParametersAndDeclarations(ifExpression, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+            var modifiedQueryTextifThen = RebuildParametersAndDeclarations(ifThen, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
+            var modifiedQueryTextifElse = RebuildParametersAndDeclarations(ifElse, paramsDictionary, declarations, ref nextParameterIndex, ref rootQuery);
 
             var newQueryText = string.Format(ifThenElseText, modifiedQueryTextifExpression, modifiedQueryTextifThen, modifiedQueryTextifElse);
 
@@ -97,7 +97,7 @@ namespace Neo4jClient.Gremlin
             return text;
         }
 
-        static string RebuildParametersAndDeclarations(IGremlinQuery baseQuery,IGremlinQuery query, Dictionary<string, object> paramsDictionary, 
+        static string RebuildParametersAndDeclarations(IGremlinQuery query, Dictionary<string, object> paramsDictionary,
             List<string> declarations, ref int nextParamaterIndex, ref string rootQuery)
         {
             var updatedIndex = nextParamaterIndex;
@@ -124,7 +124,7 @@ namespace Neo4jClient.Gremlin
 
             foreach (var declareStatement in query.QueryDeclarations)
             {
-                rootQuery = declareStatement + baseQuery.QueryText;
+                rootQuery = declareStatement + rootQuery;
                 modifiedQueryText = modifiedQueryText.Replace(declareStatement, string.Empty);
             }
             return modifiedQueryText;
