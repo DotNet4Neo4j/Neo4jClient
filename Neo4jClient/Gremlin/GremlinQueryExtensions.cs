@@ -70,7 +70,7 @@ namespace Neo4jClient.Gremlin
 
             var newQueryText = string.Format(ifThenElseText, modifiedQueryTextifExpression, modifiedQueryTextifThen, modifiedQueryTextifElse);
 
-            return new GremlinQuery(baseQuery.Client, newQueryText, baseQuery.QueryParameters, baseQuery.QueryDeclarations);
+            return new GremlinQuery(baseQuery.Client, rootQuery + newQueryText, baseQuery.QueryParameters, baseQuery.QueryDeclarations);
         }
 
         public static IGremlinQuery AddFilterBlock(this IGremlinQuery baseQuery, string text, IEnumerable<Filter> filters, StringComparison comparison)
@@ -102,6 +102,7 @@ namespace Neo4jClient.Gremlin
         {
             var updatedIndex = nextParamaterIndex;
             var paramNames = new List<string>();
+
             declarations.AddRange(query.QueryDeclarations);
             var modifiedQueryText = ParameterReferenceRegex.Replace(
                 query.QueryText,
