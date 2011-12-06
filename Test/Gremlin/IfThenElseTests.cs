@@ -43,6 +43,40 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("bar", query.QueryParameters["p6"]);
         }
 
+        [Test]
+        public void IfThenElseVShouldAppendStepsWithThenQueryAndElseQueryWithParametersAndDeclarations()
+        {
+            var query = new NodeReference(123).IfThenElse(
+                new GremlinIterator().OutV<Test>(t => t.Flag == true).GremlinHasNext(),
+                new IdentityPipe().AggregateV<object>("x").OutV<Test>(t => t.Name == "foo"),
+                new IdentityPipe().InV<Test>(t => t.Name == "bar"));
+            Assert.AreEqual("x = [];g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{_().aggregate(x).outV.filter{ it[p3].equalsIgnoreCase(p4) }}{_().inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("Flag", query.QueryParameters["p1"]);
+            Assert.AreEqual(true, query.QueryParameters["p2"]);
+            Assert.AreEqual("Name", query.QueryParameters["p3"]);
+            Assert.AreEqual("foo", query.QueryParameters["p4"]);
+            Assert.AreEqual("Name", query.QueryParameters["p5"]);
+            Assert.AreEqual("bar", query.QueryParameters["p6"]);
+        }
+
+        [Test]
+        public void IfThenElseVShouldAppendStepsWithThenQueryAndElseQueryWithParametersAndMultipleDeclarations()
+        {
+            var query = new NodeReference(123).IfThenElse(
+                new GremlinIterator().OutV<Test>(t => t.Flag == true).GremlinHasNext(),
+                new IdentityPipe().AggregateV<object>("x").OutV<Test>(t => t.Name == "foo"),
+                new IdentityPipe().AggregateV<object>("y").InV<Test>(t => t.Name == "bar"));
+            Assert.AreEqual("y = [];x = [];g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{_().aggregate(x).outV.filter{ it[p3].equalsIgnoreCase(p4) }}{_().aggregate(y).inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual("Flag", query.QueryParameters["p1"]);
+            Assert.AreEqual(true, query.QueryParameters["p2"]);
+            Assert.AreEqual("Name", query.QueryParameters["p3"]);
+            Assert.AreEqual("foo", query.QueryParameters["p4"]);
+            Assert.AreEqual("Name", query.QueryParameters["p5"]);
+            Assert.AreEqual("bar", query.QueryParameters["p6"]);
+        }
+
         public class Test
         {
             public bool Flag { get; set; }
