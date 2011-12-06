@@ -82,6 +82,7 @@
     <Compile Include="Gremlin\BackTests.cs" />
     <Compile Include="Gremlin\BasicStepsTests.cs" />
     <Compile Include="Gremlin\AsStepTests.cs" />
+    <Compile Include="Gremlin\IfThenElseTests.cs" />
     <Compile Include="Gremlin\GremlinHasNextStepTests.cs" />
     <Compile Include="Gremlin\StoreStepTests.cs" />
     <Compile Include="Gremlin\GremlinDistinctStepTests.cs" />
