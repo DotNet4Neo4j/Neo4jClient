@@ -60,6 +60,8 @@
     <Compile Include="Gremlin\IfThenElseStep.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Gremlin\PrintLineStatement.cs" />
+    <Compile Include="Gremlin\Statement.cs" />
     <Compile Include="Gremlin\StoreStep.cs" />
     <Compile Include="Gremlin\CopySplitStep.cs" />
     <Compile Include="Gremlin\ExceptStep.cs" />

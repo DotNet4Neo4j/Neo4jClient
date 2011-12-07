@@ -85,6 +85,7 @@
     <Compile Include="Gremlin\EmitPropertyStepTests.cs" />
     <Compile Include="Gremlin\IfThenElseTests.cs" />
     <Compile Include="Gremlin\GremlinHasNextStepTests.cs" />
+    <Compile Include="Gremlin\PrintLineStatementTests.cs" />
     <Compile Include="Gremlin\StoreStepTests.cs" />
     <Compile Include="Gremlin\GremlinDistinctStepTests.cs" />
     <Compile Include="Gremlin\ExhaustMergeStepTests.cs" />
