@@ -2,6 +2,12 @@
 {
     public static class AsStep
     {
+        public static IGremlinNodeQuery<TNode> As<TNode>(this IGremlinQuery query, string label)
+        {
+            var newQuery = query.AddBlock(".as({0})", label);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
+        }
+
         public static IGremlinNodeQuery<TNode> As<TNode>(this IGremlinNodeQuery<TNode> query, string label)
         {
             var newQuery = query.AddBlock(".as({0})", label);
