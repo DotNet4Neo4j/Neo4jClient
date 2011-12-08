@@ -21,9 +21,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).IfThenElse(
                 new GremlinIterator().OutV<object>().GremlinHasNext(),
-                new IdentityPipe().OutV<object>(),
-                new IdentityPipe().InV<object>());
-            Assert.AreEqual("g.v(p0).ifThenElse{it.outV.hasNext()}{_().outV}{_().inV}", query.QueryText);
+                new GremlinIterator().OutV<object>(),
+                new GremlinIterator().InV<object>());
+            Assert.AreEqual("g.v(p0).ifThenElse{it.outV.hasNext()}{it.outV}{it.inV}", query.QueryText);
         }
 
         [Test]
@@ -31,9 +31,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).IfThenElse(
                 new GremlinIterator().OutV<Test>(t => t.Flag == true).GremlinHasNext(),
-                new IdentityPipe().OutV<Test>(t => t.Name == "foo"),
-                new IdentityPipe().InV<Test>(t => t.Name == "bar"));
-            Assert.AreEqual("g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{_().outV.filter{ it[p3].equalsIgnoreCase(p4) }}{_().inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
+                new GremlinIterator().OutV<Test>(t => t.Name == "foo"),
+                new GremlinIterator().InV<Test>(t => t.Name == "bar"));
+            Assert.AreEqual("g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{it.outV.filter{ it[p3].equalsIgnoreCase(p4) }}{it.inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("Flag", query.QueryParameters["p1"]);
             Assert.AreEqual(true, query.QueryParameters["p2"]);
@@ -48,9 +48,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).IfThenElse(
                 new GremlinIterator().OutV<Test>(t => t.Flag == true).GremlinHasNext(),
-                new IdentityPipe().AggregateV<object>("x").OutV<Test>(t => t.Name == "foo"),
-                new IdentityPipe().InV<Test>(t => t.Name == "bar"));
-            Assert.AreEqual("x = [];g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{_().aggregate(x).outV.filter{ it[p3].equalsIgnoreCase(p4) }}{_().inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
+                new GremlinIterator().AggregateV<object>("x").OutV<Test>(t => t.Name == "foo"),
+                new GremlinIterator().InV<Test>(t => t.Name == "bar"));
+            Assert.AreEqual("x = [];g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{it.aggregate(x).outV.filter{ it[p3].equalsIgnoreCase(p4) }}{it.inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("Flag", query.QueryParameters["p1"]);
             Assert.AreEqual(true, query.QueryParameters["p2"]);
@@ -65,9 +65,9 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).IfThenElse(
                 new GremlinIterator().OutV<Test>(t => t.Flag == true).GremlinHasNext(),
-                new IdentityPipe().AggregateV<object>("x").OutV<Test>(t => t.Name == "foo"),
-                new IdentityPipe().AggregateV<object>("y").InV<Test>(t => t.Name == "bar"));
-            Assert.AreEqual("y = [];x = [];g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{_().aggregate(x).outV.filter{ it[p3].equalsIgnoreCase(p4) }}{_().aggregate(y).inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
+                new GremlinIterator().AggregateV<object>("x").OutV<Test>(t => t.Name == "foo"),
+                new GremlinIterator().AggregateV<object>("y").InV<Test>(t => t.Name == "bar"));
+            Assert.AreEqual("y = [];x = [];g.v(p0).ifThenElse{it.outV.filter{ it[p1] == p2 }.hasNext()}{it.aggregate(x).outV.filter{ it[p3].equalsIgnoreCase(p4) }}{it.aggregate(y).inV.filter{ it[p5].equalsIgnoreCase(p6) }}", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("Flag", query.QueryParameters["p1"]);
             Assert.AreEqual(true, query.QueryParameters["p2"]);
