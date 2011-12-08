@@ -78,7 +78,7 @@ namespace Neo4jClient.Test.Gremlin
         public void OutShouldAppendStepToGremlinQueryWithNoFilter()
         {
             var query = new NodeReference(123).Out<object>("REL");
-            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV", query.QueryText);
+            Assert.AreEqual("g.v(p0).out(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("REL", query.QueryParameters["p1"]);
         }
@@ -93,7 +93,7 @@ namespace Neo4jClient.Test.Gremlin
                     {
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                     }, StringComparison.Ordinal);
-            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV.filter{ it[p2].equals(p3) }", query.QueryText);
+            Assert.AreEqual("g.v(p0).out(p1).filter{ it[p2].equals(p3) }", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("REL", query.QueryParameters["p1"]);
             Assert.AreEqual("Foo", query.QueryParameters["p2"]);
@@ -110,7 +110,7 @@ namespace Neo4jClient.Test.Gremlin
                     {
                         new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal  }
                     });
-            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV.filter{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
+            Assert.AreEqual("g.v(p0).out(p1).filter{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("REL", query.QueryParameters["p1"]);
             Assert.AreEqual("Foo", query.QueryParameters["p2"]);
@@ -125,7 +125,7 @@ namespace Neo4jClient.Test.Gremlin
                     "REL",
                     x => x.Boo == TestEnum.Bar
                     );
-            Assert.AreEqual("g.v(p0).outE[[label:p1]].inV.filter{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
+            Assert.AreEqual("g.v(p0).out(p1).filter{ it[p2].equalsIgnoreCase(p3) }", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("REL", query.QueryParameters["p1"]);
             Assert.AreEqual("Boo", query.QueryParameters["p2"]);
@@ -136,7 +136,7 @@ namespace Neo4jClient.Test.Gremlin
         public void InShouldAppendStepToGremlinQueryWithNoFilter()
         {
             var query = new NodeReference(123).In<object>("REL");
-            Assert.AreEqual("g.v(p0).inE[[label:p1]].outV", query.QueryText);
+            Assert.AreEqual("g.v(p0).in(p1)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("REL", query.QueryParameters["p1"]);
         }

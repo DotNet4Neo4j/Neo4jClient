@@ -205,10 +205,6 @@ namespace Neo4jClient.Gremlin
 
         static IGremlinQuery AddClosure<TIn>(IGremlinQuery newQuery, Expression<Func<TIn, object>> closure)
         {
-            if (closure.Body.Type == typeof(String))
-            {
-                return newQuery.AddBlock("{{it[{0}]}}", closure.Name);
-            }
             var expressionKey = FilterFormatters.ParseKeyFromExpression(closure.Body);
             return newQuery.AddBlock("{{it[{0}]}}", expressionKey.Name);
         }

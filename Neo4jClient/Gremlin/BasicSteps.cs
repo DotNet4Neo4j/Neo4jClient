@@ -82,6 +82,12 @@ namespace Neo4jClient.Gremlin
             return new GremlinRelationshipEnumerable(newQuery);
         }
 
+        public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label)
+        {
+            var newQuery = query.AddBlock(".in({0})", label);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
+        }
+
         public static IGremlinRelationshipQuery<TData> InE<TData>(this IGremlinQuery query)
             where TData : class, new()
         {
@@ -98,22 +104,24 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)
         {
-            return query.OutE(label).InV<TNode>();
+            var newQuery = query.AddBlock(".out({0})", label);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            return query.OutE(label).InV<TNode>(filters, comparison);
+            var newQuery = query.AddBlock(".out({0})", label);
+            var filterQuery = newQuery.AddFilterBlock(string.Empty, filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(filterQuery);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            return query.OutE(label).InV(filter, comparison);
-        }
-
-        public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label)
-        {
-            return query.InE(label).OutV<TNode>();
+            var newQuery = query.AddBlock(".out({0})", label);
+            var simpleFilters = new List<Filter>();
+            FilterFormatters.TranslateFilter(filter, simpleFilters);
+            var filterQuery = newQuery.AddFilterBlock(string.Empty, simpleFilters, comparison);
+            return new GremlinNodeEnumerable<TNode>(filterQuery);
         }
 
         public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
@@ -123,7 +131,11 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            return query.InE(label).OutV(filter, comparison);
+            var newQuery = query.AddBlock(".in({0})", label);
+            var simpleFilters = new List<Filter>();
+            FilterFormatters.TranslateFilter(filter, simpleFilters);
+            var filterQuery = newQuery.AddFilterBlock(string.Empty, simpleFilters, comparison);
+            return new GremlinNodeEnumerable<TNode>(filterQuery);
         }
 
         public static int GremlinCount(this IGremlinQuery query)
