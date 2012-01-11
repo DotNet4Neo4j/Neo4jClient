@@ -52,7 +52,14 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinRelationshipQuery OutE(this IGremlinQuery query, string label)
         {
-            var newQuery = query.AddBlock(".out({0})", label);
+            var filter = new Filter
+            {
+                ExpressionType = ExpressionType.Equal,
+                PropertyName = "label",
+                Value = label
+            };
+
+            var newQuery = query.AddFilterBlock(".outE", new[] { filter }, StringComparison.Ordinal);
             return new GremlinRelationshipEnumerable(newQuery);
         }
 
@@ -66,7 +73,14 @@ namespace Neo4jClient.Gremlin
         public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, string label)
             where TData : class, new()
         {
-            var newQuery = query.AddBlock(".out({0})", label);
+            var filter = new Filter
+            {
+                ExpressionType = ExpressionType.Equal,
+                PropertyName = "label",
+                Value = label
+            };
+
+            var newQuery = query.AddFilterBlock(".outE", new[] { filter }, StringComparison.Ordinal);
             return new GremlinRelationshipEnumerable<TData>(newQuery);
         }
 
@@ -78,7 +92,14 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query, string label)
         {
-            var newQuery = query.AddBlock(".in({0})", label);
+            var filter = new Filter
+                {
+                    ExpressionType = ExpressionType.Equal,
+                    PropertyName = "label",
+                    Value = label
+                };
+
+            var newQuery = query.AddFilterBlock(".inE", new[] { filter }, StringComparison.Ordinal);
             return new GremlinRelationshipEnumerable(newQuery);
         }
 
@@ -98,7 +119,14 @@ namespace Neo4jClient.Gremlin
         public static IGremlinRelationshipQuery<TData> InE<TData>(this IGremlinQuery query, string label)
             where TData : class, new()
         {
-            var newQuery = query.AddBlock(".in({0})", label);
+            var filter = new Filter
+            {
+                ExpressionType = ExpressionType.Equal,
+                PropertyName = "label",
+                Value = label
+            };
+
+            var newQuery = query.AddFilterBlock(".inE", new[] { filter }, StringComparison.Ordinal);
             return new GremlinRelationshipEnumerable<TData>(newQuery);
         }
 
@@ -126,7 +154,9 @@ namespace Neo4jClient.Gremlin
 
         public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            return query.InE(label).OutV<TNode>(filters, comparison);
+            var newQuery = query.AddBlock(".in({0})", label);
+            var filterQuery = newQuery.AddFilterBlock(string.Empty, filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(filterQuery);
         }
 
         public static IGremlinNodeQuery<TNode> In<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
