@@ -11,7 +11,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).OutV<object>().GremlinDistinct();
             Assert.IsInstanceOf<IGremlinNodeQuery<object>>(query);
-            Assert.AreEqual("g.v(p0).outV.uniqueObject()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outV.dedup()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).OutE().GremlinDistinct();
             Assert.IsInstanceOf<IGremlinRelationshipQuery>(query);
-            Assert.AreEqual("g.v(p0).outE.uniqueObject()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE.dedup()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
@@ -29,7 +29,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).OutE<object>().GremlinDistinct();
             Assert.IsInstanceOf<IGremlinRelationshipQuery<object>>(query);
-            Assert.AreEqual("g.v(p0).outE.uniqueObject()", query.QueryText);
+            Assert.AreEqual("g.v(p0).outE.dedup()", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
     }
