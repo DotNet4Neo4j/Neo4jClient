@@ -10,7 +10,7 @@ namespace Neo4jClient.Test.Gremlin
         public void StoreVShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).StoreV<object>("foo");
-            Assert.AreEqual("foo = [];g.v(p0).sideEffect{foo.add(it)}", query.QueryText);
+            Assert.AreEqual("foo = [];g.v(p0).store(foo)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.Gremlin
         public void StoreEShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).StoreE("foo");
-            Assert.AreEqual("foo = [];g.v(p0).sideEffect{foo.add(it)}", query.QueryText);
+            Assert.AreEqual("foo = [];g.v(p0).store(foo)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
@@ -40,7 +40,7 @@ namespace Neo4jClient.Test.Gremlin
         public void StoreEWithTDataShouldAppendStepAndDeclareVariable()
         {
             var query = new NodeReference(123).StoreE<object>("foo");
-            Assert.AreEqual("foo = [];g.v(p0).sideEffect{foo.add(it)}", query.QueryText);
+            Assert.AreEqual("foo = [];g.v(p0).store(foo)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 

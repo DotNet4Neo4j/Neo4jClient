@@ -59,7 +59,7 @@ namespace Neo4jClient.Test.Gremlin
         public void CopySplitVShouldMoveInlineBlockVariablesToTheOuterScopeInFinallyQueryUsingStoreV()
         {
             var query = new NodeReference(123).CopySplitE(new IdentityPipe().Out<object>("foo").StoreV<object>("xyz"), new IdentityPipe().Out<object>("bar")).Out<object>("baz");
-            Assert.AreEqual("xyz = [];g.v(p0)._.copySplit(_().out(p1).sideEffect{xyz.add(it)}, _().out(p2)).out(p3)", query.QueryText);
+            Assert.AreEqual("xyz = [];g.v(p0)._.copySplit(_().out(p1).store(xyz), _().out(p2)).out(p3)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
             Assert.AreEqual("bar", query.QueryParameters["p2"]);
@@ -70,7 +70,7 @@ namespace Neo4jClient.Test.Gremlin
         public void CopySplitVShouldMoveInlineBlockVariablesToTheOuterScopeInFinallyQueryUsingStoreVAndFilters()
         {
             var query = new NodeReference(123).CopySplitE(new IdentityPipe().Out<Test>("foo", t=> t.Flag == true).StoreV<object>("xyz"), new IdentityPipe().Out<Test>("bar")).Out<Test>("baz", t=> t.Flag == true );
-            Assert.AreEqual("xyz = [];g.v(p0)._.copySplit(_().out(p1).filter{ it[p2] == p3 }.sideEffect{xyz.add(it)}, _().out(p4)).out(p5).filter{ it[p6] == p7 }", query.QueryText);
+            Assert.AreEqual("xyz = [];g.v(p0)._.copySplit(_().out(p1).filter{ it[p2] == p3 }.store(xyz), _().out(p4)).out(p5).filter{ it[p6] == p7 }", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
             Assert.AreEqual("Flag", query.QueryParameters["p2"]);
@@ -85,7 +85,7 @@ namespace Neo4jClient.Test.Gremlin
         public void CopySplitVShouldMoveInlineBlockVariablesToTheOuterScopeInFinallyQueryUsingStoreVAndFiltersMultipleVariables()
         {
             var query = new NodeReference(123).CopySplitE(new IdentityPipe().Out<Test>("foo", t => t.Flag == true).StoreV<object>("xyz"), new IdentityPipe().Out<Test>("bar")).Out<Test>("baz", t => t.Flag == true).AggregateE("sad");
-            Assert.AreEqual("sad = [];xyz = [];g.v(p0)._.copySplit(_().out(p1).filter{ it[p2] == p3 }.sideEffect{xyz.add(it)}, _().out(p4)).out(p5).filter{ it[p6] == p7 }.aggregate(sad)", query.QueryText);
+            Assert.AreEqual("sad = [];xyz = [];g.v(p0)._.copySplit(_().out(p1).filter{ it[p2] == p3 }.store(xyz), _().out(p4)).out(p5).filter{ it[p6] == p7 }.aggregate(sad)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual("foo", query.QueryParameters["p1"]);
             Assert.AreEqual("Flag", query.QueryParameters["p2"]);
@@ -112,7 +112,7 @@ namespace Neo4jClient.Test.Gremlin
                         .Out<Test>("REL6", a => a.Text == "text 2")
                 );
             Assert.AreEqual(
-                "ReferralWithCentres = [];g.v(p0)._.copySplit(_().out(p1).filter{ it[p2].equalsIgnoreCase(p3) }.in(p4).out(p5).in(p6).in(p7).filter{ it[p8] == p9 }.sideEffect{ReferralWithCentres.add(it)}, _().out(p10).filter{ it[p11].equalsIgnoreCase(p12) })",
+                "ReferralWithCentres = [];g.v(p0)._.copySplit(_().out(p1).filter{ it[p2].equalsIgnoreCase(p3) }.in(p4).out(p5).in(p6).in(p7).filter{ it[p8] == p9 }.store(ReferralWithCentres), _().out(p10).filter{ it[p11].equalsIgnoreCase(p12) })",
                 query.QueryText);
         }
 
