@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient.Test.Gremlin
@@ -49,6 +51,36 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("bar", enumerable.QueryParameters["p2"]);
             Assert.AreEqual("SomeText", enumerable.QueryParameters["p3"]);
             Assert.AreEqual("SomeNumber", enumerable.QueryParameters["p4"]);
+        }
+
+        [Test]
+        public void TableCapShouldTransferResponseToResult()
+        {
+            // Arrange
+            var responses = new List<List<GremlinTableCapResponse>>
+                {
+                    new List<GremlinTableCapResponse>
+                        {
+                            new GremlinTableCapResponse
+                                {
+                                    Columns = new List<string>
+                                        {
+                                            "Foo"
+                                        },
+                                    Data = new List<List<string>>
+                                        {
+                                            new List<string>
+                                                {"data"}
+                                        }
+                                }
+                        }
+                };
+
+            // Act
+            var result = GremlinTableCapResponse.TransferResponseToResult<TableResult>(responses).ToArray();
+
+            // Assert
+            Assert.AreEqual("data", result.First().Foo);
         }
 
         public class Foo
