@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Deserializer;
 using RestSharp;
 
@@ -40,6 +42,29 @@ namespace Neo4jClient.Test.Deserializer
         public class DateTimeOffsetModel
         {
             public DateTimeOffset? Foo { get; set; }
+        }
+
+        [Test]
+        public void DeserializeShouldConvertTableCapResponseToGremlinTableCapResponse()
+        {
+            // Arrange
+            var deserializer = new CustomJsonDeserializer();
+            var response = new RestResponse
+            {
+                Content = @"{
+                              ""columns"" : [ ""ColumnA"" ],
+                              ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
+                            }"
+            };
+
+            // Act
+            var result = deserializer.Deserialize<GremlinTableCapResponse>(response);
+            var data = result.Data.SelectMany(d => d).ToArray();
+
+            // Assert
+            Assert.IsTrue(result.Columns.Any(c => c == "ColumnA"));
+            Assert.IsTrue(data.Any(d => d == "DataA"));
+            Assert.IsTrue(data.Any(d => d == "DataB"));
         }
     }
 }
