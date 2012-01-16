@@ -90,21 +90,22 @@ namespace Neo4jClient.Deserializer
                 .GetProperties()
                 .Where(p => p.CanWrite)
                 .Select(p =>
+                {
+                    var attributes = (JsonPropertyAttribute[]) p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
+                    return new
                     {
-                        var attributes = (JsonPropertyAttribute[])p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
-                        return new
-                        {
-                            Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
-                            Property = p
-                        };
-                    })
-                .ToList();
+                        Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
+                        Property = p
+                    };
+                })
+                .ToDictionary(p => p.Name, p => p.Property);
 
-            foreach (var prop in props)
+            foreach (var propertyName in props.Keys)
             {
-                var type = prop.Property.PropertyType;
+                var prop = props[propertyName];
+                var type = prop.PropertyType;
 
-                var name = prop.Name;
+                var name = propertyName;
                 var value = json[name];
                 var actualName = name;
 
@@ -124,24 +125,24 @@ namespace Neo4jClient.Deserializer
                     // no primitives can contain quotes so we can safely remove them
                     // allows converting a json value like {"index": "1"} to an int
                     var tmpVal = value.AsString().Replace("\"", string.Empty);
-                    prop.Property.SetValue(x, tmpVal.ChangeType(type), null);
+                    prop.SetValue(x, tmpVal.ChangeType(type), null);
                 }
                 else if (type.IsEnum)
                 {
                     var raw = value.AsString();
                     var converted = Enum.Parse(type, raw, false);
-                    prop.Property.SetValue(x, converted, null);
+                    prop.SetValue(x, converted, null);
                 }
                 else if (type == typeof(Uri))
                 {
                     var raw = value.AsString();
                     var uri = new Uri(raw, UriKind.RelativeOrAbsolute);
-                    prop.Property.SetValue(x, uri, null);
+                    prop.SetValue(x, uri, null);
                 }
                 else if (type == typeof(string))
                 {
                     var raw = value.AsString();
-                    prop.Property.SetValue(x, raw, null);
+                    prop.SetValue(x, raw, null);
                 }
                 else if (type == typeof(DateTime))
                 {
@@ -151,18 +152,18 @@ namespace Neo4jClient.Deserializer
                 {
                     var dateTimeOffset = ParseDateTimeOffset(value);
                     if (dateTimeOffset.HasValue)
-                        prop.Property.SetValue(x, dateTimeOffset.Value, null);
+                        prop.SetValue(x, dateTimeOffset.Value, null);
                 }
                 else if (type == typeof(Decimal))
                 {
                     var dec = Decimal.Parse(value.AsString(), Culture);
-                    prop.Property.SetValue(x, dec, null);
+                    prop.SetValue(x, dec, null);
                 }
                 else if (type == typeof(Guid))
                 {
                     var raw = value.AsString();
                     var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
-                    prop.Property.SetValue(x, guid, null);
+                    prop.SetValue(x, guid, null);
                 }
                 else if (type.IsGenericType)
                 {
@@ -170,7 +171,7 @@ namespace Neo4jClient.Deserializer
                     if (genericTypeDef == typeof(List<>))
                     {
                         var list = BuildList(type, value.Children());
-                        prop.Property.SetValue(x, list, null);
+                        prop.SetValue(x, list, null);
                     }
                     else if (genericTypeDef == typeof(Dictionary<,>))
                     {
@@ -180,21 +181,21 @@ namespace Neo4jClient.Deserializer
                         if (keyType == typeof(string))
                         {
                             var dict = BuildDictionary(type, value.Children());
-                            prop.Property.SetValue(x, dict, null);
+                            prop.SetValue(x, dict, null);
                         }
                     }
                     else
                     {
                         // nested property classes
                         var item = CreateAndMap(type, json[actualName]);
-                        prop.Property.SetValue(x, item, null);
+                        prop.SetValue(x, item, null);
                     }
                 }
                 else
                 {
                     // nested property classes
                     var item = CreateAndMap(type, json[actualName]);
-                    prop.Property.SetValue(x, item, null);
+                    prop.SetValue(x, item, null);
                 }
             }
         }
