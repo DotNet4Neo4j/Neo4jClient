@@ -128,8 +128,8 @@ namespace Neo4jClient.Test.GraphClientTests
                         Content =@"[ {
                           'start' : 'http://127.0.0.1:5118/db/data/node/123',
                           'data' : {
-                            'foo': 'Foo',
-                            'bar': 'Bar'
+                            'Foo': 'Foo',
+                            'Bar': 'Bar'
                           },
                           'self' : 'http://127.0.0.1:5118/db/data/relationship/456',
                           'property' : 'http://127.0.0.1:5118/db/data/relationship/456/properties/{key}',

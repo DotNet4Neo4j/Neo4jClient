@@ -1,12 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels
 {
     class NodeApiResponse<TNode>
     {
+        [JsonProperty("self")]
         public string Self { get; set; }
+
+        [JsonProperty("data")]
         public TNode Data { get; set; }
 
         public Node<TNode> ToNode(IGraphClient client)

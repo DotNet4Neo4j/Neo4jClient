@@ -86,57 +86,27 @@ namespace Neo4jClient.Deserializer
         private void Map(object x, JToken json)
         {
             var objType = x.GetType();
-            var props = objType.GetProperties().Where(p => p.CanWrite).ToList();
+            var props = objType
+                .GetProperties()
+                .Where(p => p.CanWrite)
+                .Select(p =>
+                    {
+                        var attributes = (JsonPropertyAttribute[])p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
+                        return new
+                        {
+                            Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
+                            Property = p
+                        };
+                    })
+                .ToList();
 
             foreach (var prop in props)
             {
-                var type = prop.PropertyType;
+                var type = prop.Property.PropertyType;
 
                 var name = prop.Name;
                 var value = json[name];
                 var actualName = name;
-
-                if (value == null)
-                {
-                    // try camel cased name
-                    actualName = name.ToCamelCase(Culture);
-                    value = json[actualName];
-                }
-
-                if (value == null)
-                {
-                    // try lower cased name
-                    actualName = name.ToLower();
-                    value = json[actualName];
-                }
-
-                if (value == null)
-                {
-                    // try name with underscores
-                    actualName = name.AddUnderscores();
-                    value = json[actualName];
-                }
-
-                if (value == null)
-                {
-                    // try name with underscores with lower case
-                    actualName = name.AddUnderscores().ToLower();
-                    value = json[actualName];
-                }
-
-                if (value == null)
-                {
-                    // try name with dashes
-                    actualName = name.AddDashes();
-                    value = json[actualName];
-                }
-
-                if (value == null)
-                {
-                    // try name with dashes with lower case
-                    actualName = name.AddDashes().ToLower();
-                    value = json[actualName];
-                }
 
                 if (value == null || value.Type == JTokenType.Null)
                 {
@@ -154,24 +124,24 @@ namespace Neo4jClient.Deserializer
                     // no primitives can contain quotes so we can safely remove them
                     // allows converting a json value like {"index": "1"} to an int
                     var tmpVal = value.AsString().Replace("\"", string.Empty);
-                    prop.SetValue(x, tmpVal.ChangeType(type), null);
+                    prop.Property.SetValue(x, tmpVal.ChangeType(type), null);
                 }
                 else if (type.IsEnum)
                 {
                     var raw = value.AsString();
                     var converted = Enum.Parse(type, raw, false);
-                    prop.SetValue(x, converted, null);
+                    prop.Property.SetValue(x, converted, null);
                 }
                 else if (type == typeof(Uri))
                 {
                     var raw = value.AsString();
                     var uri = new Uri(raw, UriKind.RelativeOrAbsolute);
-                    prop.SetValue(x, uri, null);
+                    prop.Property.SetValue(x, uri, null);
                 }
                 else if (type == typeof(string))
                 {
                     var raw = value.AsString();
-                    prop.SetValue(x, raw, null);
+                    prop.Property.SetValue(x, raw, null);
                 }
                 else if (type == typeof(DateTime))
                 {
@@ -181,18 +151,18 @@ namespace Neo4jClient.Deserializer
                 {
                     var dateTimeOffset = ParseDateTimeOffset(value);
                     if (dateTimeOffset.HasValue)
-                        prop.SetValue(x, dateTimeOffset.Value, null);
+                        prop.Property.SetValue(x, dateTimeOffset.Value, null);
                 }
                 else if (type == typeof(Decimal))
                 {
                     var dec = Decimal.Parse(value.AsString(), Culture);
-                    prop.SetValue(x, dec, null);
+                    prop.Property.SetValue(x, dec, null);
                 }
                 else if (type == typeof(Guid))
                 {
                     var raw = value.AsString();
                     var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
-                    prop.SetValue(x, guid, null);
+                    prop.Property.SetValue(x, guid, null);
                 }
                 else if (type.IsGenericType)
                 {
@@ -200,7 +170,7 @@ namespace Neo4jClient.Deserializer
                     if (genericTypeDef == typeof(List<>))
                     {
                         var list = BuildList(type, value.Children());
-                        prop.SetValue(x, list, null);
+                        prop.Property.SetValue(x, list, null);
                     }
                     else if (genericTypeDef == typeof(Dictionary<,>))
                     {
@@ -210,21 +180,21 @@ namespace Neo4jClient.Deserializer
                         if (keyType == typeof(string))
                         {
                             var dict = BuildDictionary(type, value.Children());
-                            prop.SetValue(x, dict, null);
+                            prop.Property.SetValue(x, dict, null);
                         }
                     }
                     else
                     {
                         // nested property classes
                         var item = CreateAndMap(type, json[actualName]);
-                        prop.SetValue(x, item, null);
+                        prop.Property.SetValue(x, item, null);
                     }
                 }
                 else
                 {
                     // nested property classes
                     var item = CreateAndMap(type, json[actualName]);
-                    prop.SetValue(x, item, null);
+                    prop.Property.SetValue(x, item, null);
                 }
             }
         }

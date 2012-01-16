@@ -6,12 +6,25 @@ namespace Neo4jClient.ApiModels
 {
     class RootApiResponse
     {
+        [JsonProperty("batch")]
         public string Batch { get; set; }
+
+        [JsonProperty("node")]
         public string Node { get; set; }
+
+        [JsonProperty("node_index")]
         public string NodeIndex { get; set; }
+
+        [JsonProperty("relationship_index")]
         public string RelationshipIndex { get; set; }
+
+        [JsonProperty("reference_node")]
         public string ReferenceNode { get; set; }
+
+        [JsonProperty("extensions_info")]
         public string ExtensionsInfo { get; set; }
+
+        [JsonProperty("extensions")]
         public ExtensionsApiResponse Extensions { get; set; }
 
         public string neo4j_version { get; set; }

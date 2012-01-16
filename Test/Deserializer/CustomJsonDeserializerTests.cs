@@ -22,7 +22,7 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var deserializer = new CustomJsonDeserializer();
-            var response = new RestResponse {Content = string.Format("{{'foo':'{0}'}}", input)};
+            var response = new RestResponse {Content = string.Format("{{'Foo':'{0}'}}", input)};
 
             // Act
             var result = deserializer.Deserialize<DateTimeOffsetModel>(response);
