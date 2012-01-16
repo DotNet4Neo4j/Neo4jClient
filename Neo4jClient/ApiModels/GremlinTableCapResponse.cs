@@ -1,12 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Neo4jClient.Mappers;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels
 {
     internal class GremlinTableCapResponse
     {
+        [JsonProperty("columns")]
         public List<string> Columns { get; set; }
+
+        [JsonProperty("data")]
         public List<List<string>> Data { get; set; }
 
         internal static IEnumerable<TResult> TransferResponseToResult<TResult>(List<List<GremlinTableCapResponse>> response) where TResult : new()
