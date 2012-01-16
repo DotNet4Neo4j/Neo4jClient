@@ -13,7 +13,7 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("data")]
         public List<List<string>> Data { get; set; }
 
-        internal static IEnumerable<TResult> TransferResponseToResult<TResult>(List<List<GremlinTableCapResponse>> response) where TResult : new()
+        public static IEnumerable<TResult> TransferResponseToResult<TResult>(List<List<GremlinTableCapResponse>> response) where TResult : new()
         {
             var type = typeof(TResult);
             var properties = type.GetProperties();
