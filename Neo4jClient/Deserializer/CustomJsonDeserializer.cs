@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -86,19 +87,7 @@ namespace Neo4jClient.Deserializer
         private void Map(object x, JToken json)
         {
             var objType = x.GetType();
-            var props = objType
-                .GetProperties()
-                .Where(p => p.CanWrite)
-                .Select(p =>
-                {
-                    var attributes = (JsonPropertyAttribute[]) p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
-                    return new
-                    {
-                        Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
-                        Property = p
-                    };
-                })
-                .ToDictionary(p => p.Name, p => p.Property);
+            var props = GetPropertiesForType(objType);
 
             foreach (var propertyName in props.Keys)
             {
@@ -198,6 +187,36 @@ namespace Neo4jClient.Deserializer
                     prop.SetValue(x, item, null);
                 }
             }
+        }
+
+        static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+        static readonly object PropertyInfoCacheLock = new object();
+        static Dictionary<string, PropertyInfo> GetPropertiesForType(Type objType)
+        {
+            Dictionary<string, PropertyInfo> result;
+            if (PropertyInfoCache.TryGetValue(objType, out result))
+                return result;
+
+            lock (PropertyInfoCacheLock)
+            {
+                if (PropertyInfoCache.TryGetValue(objType, out result))
+                    return result;
+
+                result = objType
+                    .GetProperties()
+                    .Where(p => p.CanWrite)
+                    .Select(p =>
+                    {
+                        var attributes = (JsonPropertyAttribute[]) p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
+                        return new
+                        {
+                            Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
+                            Property = p
+                        };
+                    })
+                    .ToDictionary(p => p.Name, p => p.Property);
+            }
+            return result;
         }
 
         static DateTimeOffset? ParseDateTimeOffset(JToken value)
