@@ -299,6 +299,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var node = Get(nodeReference);
             updateCallback(node.Data);
 
@@ -312,11 +315,22 @@ namespace Neo4jClient
             var response = CreateClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback)
         {
             CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             var node = Get(nodeReference);
             var indexEntries = indexEntriesCallback(node.Data).ToArray();
@@ -337,6 +351,14 @@ namespace Neo4jClient
             ReIndex(node.Reference, indexEntries);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public void Update<TRelationshipData>(RelationshipReference relationshipReference, Action<TRelationshipData> updateCallback)
@@ -344,12 +366,15 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var propertiesEndpoint = ResolveEndpoint(relationshipReference) + "/properties";
 
             var getRequest = new RestRequest(propertiesEndpoint, Method.GET);
             var getResponse = CreateClient().Execute<TRelationshipData>(getRequest);
             ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
-            
+
             var payload = getResponse.Data;
             updateCallback(payload);
 
@@ -361,6 +386,14 @@ namespace Neo4jClient
             updateRequest.AddBody(payload);
             var updateResponse = CreateClient().Execute(updateRequest);
             ValidateExpectedResponseCodes(updateResponse, HttpStatusCode.NoContent);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TRelationshipData).Name, relationshipReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public virtual void Delete(NodeReference reference, DeleteMode mode)
