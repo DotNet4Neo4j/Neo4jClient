@@ -308,6 +308,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var node = Get(nodeReference);
             updateCallback(node.Data);
 
@@ -321,11 +324,22 @@ namespace Neo4jClient
             var response = CreateClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback)
         {
             CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             var node = Get(nodeReference);
             var indexEntries = indexEntriesCallback(node.Data).ToArray();
@@ -346,6 +360,14 @@ namespace Neo4jClient
             ReIndex(node.Reference, indexEntries);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public void Update<TRelationshipData>(RelationshipReference relationshipReference, Action<TRelationshipData> updateCallback)
@@ -353,12 +375,15 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var propertiesEndpoint = ResolveEndpoint(relationshipReference) + "/properties";
 
             var getRequest = new RestRequest(propertiesEndpoint, Method.GET);
             var getResponse = CreateClient().Execute<TRelationshipData>(getRequest);
             ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
-            
+
             var payload = getResponse.Data;
             updateCallback(payload);
 
@@ -370,11 +395,22 @@ namespace Neo4jClient
             updateRequest.AddBody(payload);
             var updateResponse = CreateClient().Execute(updateRequest);
             ValidateExpectedResponseCodes(updateResponse, HttpStatusCode.NoContent);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TRelationshipData).Name, relationshipReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public virtual void Delete(NodeReference reference, DeleteMode mode)
         {
             CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             if (mode == DeleteMode.NodeAndRelationships)
             {
@@ -392,6 +428,14 @@ namespace Neo4jClient
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.StatusDescription));
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = "Delete " + reference.Id,
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         void DeleteAllRelationships(NodeReference reference)
@@ -435,6 +479,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
@@ -447,6 +494,14 @@ namespace Neo4jClient
                 response,
                 string.Format("The query was: {0}", query),
                 HttpStatusCode.OK);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query,
+                ResourcesReturned = 1,
+                TimeTaken = stopwatch.Elapsed
+            });
 
             return response.Content;
         }
