@@ -426,6 +426,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
@@ -438,6 +441,14 @@ namespace Neo4jClient
                 response,
                 string.Format("The query was: {0}", query),
                 HttpStatusCode.OK);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query,
+                ResourcesReturned = 1,
+                TimeTaken = stopwatch.Elapsed
+            });
 
             return response.Content;
         }
