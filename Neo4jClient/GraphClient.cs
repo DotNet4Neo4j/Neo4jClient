@@ -29,6 +29,15 @@ namespace Neo4jClient
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
         {
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.UseNagleAlgorithm = false;
+        }
+
+        public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm)
+            : this(rootUri, new Http())
+        {
+            ServicePointManager.Expect100Continue = expect100Continue;
+            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
 
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
