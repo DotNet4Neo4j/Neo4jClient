@@ -367,6 +367,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             if (mode == DeleteMode.NodeAndRelationships)
             {
                 DeleteAllRelationships(reference);
@@ -383,6 +386,14 @@ namespace Neo4jClient
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.StatusDescription));
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = "Delete " + reference.Id,
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         void DeleteAllRelationships(NodeReference reference)
