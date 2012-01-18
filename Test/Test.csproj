@@ -67,6 +67,7 @@
     <Compile Include="Domain\Product.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteGetAllNodesCypherTests.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteGetAllRelationshipsCypherTests.cs" />
+    <Compile Include="GraphClientTests\Cypher\ExecuteScalarCypherTests.cs" />
     <Compile Include="GraphClientTests\UpdateRelationshipTests.cs" />
     <Compile Include="GraphClientTests\DeleteIndexTests.cs" />
     <Compile Include="GraphClientTests\IndexExistsTests.cs" />
