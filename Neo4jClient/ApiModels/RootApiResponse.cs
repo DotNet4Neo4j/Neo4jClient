@@ -9,6 +9,9 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("cypher")]
         public string Cypher { get; set; }
 
+        [JsonProperty("batch")]
+        public string Batch { get; set; }
+
         [JsonProperty("node")]
         public string Node { get; set; }
 

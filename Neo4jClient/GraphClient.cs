@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using Neo4jClient.ApiModels;
+using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serializer;
@@ -76,6 +77,12 @@ namespace Neo4jClient
             {
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
                     RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(rootUri.AbsoluteUri.Length);
+            }
+
+            if (RootApiResponse.Cypher != null)
+            {
+                RootApiResponse.Cypher =
+                    RootApiResponse.Cypher.Substring(rootUri.AbsoluteUri.Length);
             }
 
             stopwatch.Stop();
@@ -541,30 +548,25 @@ namespace Neo4jClient
             return results;
         }
 
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(string query, IDictionary<string, object> parameters)
         {
-            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, new List<string>()));
+            return ExecuteGetAllNodesCypher<TNode>(new CypherQuery(this, query, parameters, new List<string>()));
         }
 
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations )
-        {
-            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, declarations));
-        }
-
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(ICypherQuery query)
         {
             CheckRoot();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
+            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
-            request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
+            request.AddBody(new CypherApiQuery(query.QueryText, query.QueryParameters));
+            var response = CreateClient().Execute<CypherNodeApiResponse<TNode>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -572,8 +574,13 @@ namespace Neo4jClient
                 HttpStatusCode.OK);
 
             var nodes = response.Data == null
-                ? new Node<TNode>[0]
-                : response.Data.Select(r => r.ToNode(this)).ToArray();
+                        ? new Node<TNode>[0]
+                        : response
+                        .Data
+                        .Data
+                        .SelectMany(d => d)
+                        .Select(dataItem => dataItem.ToNode(this))
+                        .ToArray();
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -584,6 +591,11 @@ namespace Neo4jClient
             });
 
             return nodes;
+        }
+
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations)
+        {
+            return ExecuteGetAllNodesCypher<TNode>(new CypherQuery(this, query, parameters, declarations));
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
@@ -625,6 +637,51 @@ namespace Neo4jClient
             });
 
             return relationships;
+        }
+
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
+        {
+            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, new List<string>()));
+        }
+
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations)
+        {
+            return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, declarations));
+        }
+
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
+        {
+            CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
+            var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
+
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query.QueryText),
+                HttpStatusCode.OK);
+
+            var nodes = response.Data == null
+                ? new Node<TNode>[0]
+                : response.Data.Select(r => r.ToNode(this)).ToArray();
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.ToDebugQueryText(),
+                ResourcesReturned = nodes.Count(),
+                TimeTaken = stopwatch.Elapsed
+            });
+
+            return nodes;
         }
 
         public Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor)
