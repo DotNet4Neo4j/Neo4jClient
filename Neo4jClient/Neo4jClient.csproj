@@ -55,7 +55,7 @@
     <Compile Include="ApiModels\Cypher\CypherRelationshipApiResponse.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\Cypher\CypherNodeApiResponse.cs" />
-    <Compile Include="ApiModels\GremlinTableCapResponse.cs" />
+    <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />
     <Compile Include="Cypher\CypherQueryExtensions.cs" />
     <Compile Include="Cypher\ICypherQuery.cs" />
@@ -82,8 +82,8 @@
     <Compile Include="DetachedNodeException.cs" />
     <Compile Include="ApiModels\ExtensionsApiResponse.cs" />
     <Compile Include="GraphClientExtensions.cs" />
-    <Compile Include="ApiModels\GremlinApiQuery.cs" />
-    <Compile Include="ApiModels\GremlinPluginApiResponse.cs" />
+    <Compile Include="ApiModels\Gremlin\GremlinApiQuery.cs" />
+    <Compile Include="ApiModels\Gremlin\GremlinPluginApiResponse.cs" />
     <Compile Include="Gremlin\Back.cs" />
     <Compile Include="Gremlin\AsStep.cs" />
     <Compile Include="Gremlin\GremlinProjectionEnumerable.cs" />
