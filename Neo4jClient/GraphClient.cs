@@ -484,6 +484,14 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
+        public  ICypherQuery Cypher
+        {
+            get
+            {
+                return new CypherQuery(this,"", new Dictionary<string, object>(), new List<string>());
+            }
+        }
+
         public virtual string ExecuteScalarCypher(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
