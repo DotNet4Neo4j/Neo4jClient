@@ -15,7 +15,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
     }
 
     [TestFixture]
-    public class GetAllNodesCypherTests
+    public class ExecuteGetAllNodesCypherTests
     {
         [Test]
         public void ShouldReturnIEnumerableOfObjects()
