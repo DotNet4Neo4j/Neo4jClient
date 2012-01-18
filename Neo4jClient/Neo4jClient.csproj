@@ -58,7 +58,11 @@
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\CypherNodeEnumerable.cs" />
     <Compile Include="Cypher\CypherPagedEnumerator.cs" />
+    <Compile Include="Cypher\CypherRelationshipEnumerable.cs" />
+    <Compile Include="Cypher\CypherRelationshipEnumerable`TData.cs" />
     <Compile Include="Cypher\ICypherNodeQuery.cs" />
+    <Compile Include="Cypher\ICypherRelationshipQuery.cs" />
+    <Compile Include="Cypher\ICypherRelationshipQuery`TData.cs" />
     <Compile Include="Cypher\StartStep.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />
     <Compile Include="Cypher\CypherQueryExtensions.cs" />

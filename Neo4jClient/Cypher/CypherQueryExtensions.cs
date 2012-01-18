@@ -14,7 +14,7 @@ namespace Neo4jClient.Cypher
             return new CypherQuery(baseQuery.Client, declarations + baseQuery.QueryText, baseQuery.QueryParameters, query.QueryDeclarations);
         }
 
-        public static ICypherQuery AddStartNodeById(this ICypherQuery baseQuery, string text, params int[] parameters)
+        public static ICypherQuery BuildStartById(this ICypherQuery baseQuery, string text, params int[] parameters)
         {
             var paramsDictionary = new Dictionary<string, object>();
             var nextParameterIndex = 0;
