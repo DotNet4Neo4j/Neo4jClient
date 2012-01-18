@@ -122,5 +122,67 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual("123", nodes.ElementAt(1).Data.Bar);
             Assert.AreEqual("456", nodes.ElementAt(1).Data.Baz);
         }
+
+        [Test]
+        public void ShouldReturnEmptyEnumerableForNullResult()
+        {
+            //Arrange
+            const string cypherExpectedQuery = "start myNode=node({foo}) return myNode";
+            var parameters = new Dictionary<string, object>
+                {
+                    {"foo", 123}
+                };
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "/", Method = Method.GET },
+                    new HttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content = @"{
+                          'cypher' : 'http://foo/db/data/cypher',
+                          'batch' : 'http://foo/db/data/batch',
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions' : {
+                            'GremlinPlugin' : {
+                              'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+                            }
+                          }
+                        }".Replace('\'', '"')
+                    }
+                },
+                {
+                    new RestRequest {
+                        Resource = "/cypher",
+                        Method = Method.POST,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(new CypherApiQuery("start myNode=node({foo}) return myNode", parameters)),
+                    new HttpResponse {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        Content =@"{
+                                      'data' : [],
+                                      'columns' : ['r']
+                                    }".Replace('\'','"')
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var nodes = graphClient
+                .ExecuteGetAllNodesCypher<Foo>(cypherExpectedQuery, parameters)
+                .ToList();
+
+            //Assert
+            Assert.AreEqual(0, nodes.Count());
+        }
     }
 }
