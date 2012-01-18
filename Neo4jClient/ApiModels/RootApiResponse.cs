@@ -6,8 +6,8 @@ namespace Neo4jClient.ApiModels
 {
     class RootApiResponse
     {
-        [JsonProperty("batch")]
-        public string Batch { get; set; }
+        [JsonProperty("cypher")]
+        public string Cypher { get; set; }
 
         [JsonProperty("node")]
         public string Node { get; set; }
