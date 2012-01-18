@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.ApiModels
+namespace Neo4jClient.ApiModels.Cypher
 {
     class CypherNodeApiResponse<TNode>
     {
