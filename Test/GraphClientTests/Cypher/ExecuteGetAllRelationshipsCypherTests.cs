@@ -12,6 +12,14 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
     public class ExecuteGetAllRelationshipsCypherTests
     {
         [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void ShouldThrowInvalidOperationExceptionIfNotConnected()
+        {
+            var client = new GraphClient(new Uri("http://foo"));
+            client.ExecuteGetAllRelationshipsCypher("", null);
+        }
+
+        [Test]
         public void ShouldReturnListOfRelationshipInstances()
         {
             //Arrange
