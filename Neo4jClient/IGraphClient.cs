@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
@@ -35,6 +36,15 @@ namespace Neo4jClient
         string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters);
 
         IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new();
+
+        IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(ICypherQuery query);
+
+        [Obsolete("Use overload that takes ICypherQuery instead.")]
+        IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(string query, IDictionary<string, object> parameters);
+
+        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsCypher(string query, IDictionary<string, object> parameters);
+
+        IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsCypher<TData>(string query, IDictionary<string, object> parameters) where TData : class, new();
 
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query);
 
