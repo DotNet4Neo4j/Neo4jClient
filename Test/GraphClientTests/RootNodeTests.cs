@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -21,6 +22,22 @@ namespace Neo4jClient.Test.GraphClientTests
             var client = new GraphClient(new Uri("http://foo"), null);
             var rootNode = client.RootNode;
             Assert.AreEqual(client, ((IGremlinQuery)rootNode).Client);
+        }
+
+        [Test]
+        public void RootNodeShouldHaveGremlinQuery()
+        {
+            var client = new GraphClient(new Uri("http://foo"), null);
+            var rootNode = client.RootNode;
+            Assert.AreEqual("g.v(p0)", ((IGremlinQuery)rootNode).QueryText);
+        }
+
+        [Test]
+        public void RootNodeShouldHaveCypherQuery()
+        {
+            var client = new GraphClient(new Uri("http://foo"), null);
+            var rootNode = client.RootNode;
+            Assert.AreEqual("start rootNode=node({p0}) return rootNode", ((ICypherQuery)rootNode).QueryText);
         }
     }
 }
