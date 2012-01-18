@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using NUnit.Framework;
-using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using RestSharp;
 
