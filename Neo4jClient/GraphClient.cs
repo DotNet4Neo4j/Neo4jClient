@@ -483,6 +483,37 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
+        public virtual string ExecuteScalarCypher(string query, IDictionary<string, object> parameters)
+        {
+            CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new CypherApiQuery(query, parameters));
+            var response = CreateClient().Execute(request);
+
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query),
+                HttpStatusCode.OK);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query,
+                ResourcesReturned = 1,
+                TimeTaken = stopwatch.Elapsed
+            });
+
+            return response.Content;
+        }
+
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
