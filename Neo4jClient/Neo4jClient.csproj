@@ -56,6 +56,7 @@
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\Cypher\CypherNodeApiResponse.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Cypher\BoundPoint.cs" />
     <Compile Include="Cypher\CypherNodeEnumerable.cs" />
     <Compile Include="Cypher\CypherPagedEnumerator.cs" />
     <Compile Include="Cypher\CypherRelationshipEnumerable.cs" />
