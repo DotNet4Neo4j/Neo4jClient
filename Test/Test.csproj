@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="ApiModels\RootApiResponseTests.cs" />
+    <Compile Include="Cypher\StartStepTests.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteGetAllNodesCypherTests.cs" />
@@ -132,9 +133,7 @@
       <Name>Neo4jClient</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Cypher\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
