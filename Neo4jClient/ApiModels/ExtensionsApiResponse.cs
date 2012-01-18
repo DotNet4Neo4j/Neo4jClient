@@ -1,4 +1,6 @@
-﻿namespace Neo4jClient.ApiModels
+﻿using Neo4jClient.ApiModels.Gremlin;
+
+namespace Neo4jClient.ApiModels
 {
     class ExtensionsApiResponse
     {

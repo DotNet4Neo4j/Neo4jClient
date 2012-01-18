@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Neo4jClient.ApiModels
+namespace Neo4jClient.ApiModels.Gremlin
 {
     class GremlinPluginApiResponse
     {

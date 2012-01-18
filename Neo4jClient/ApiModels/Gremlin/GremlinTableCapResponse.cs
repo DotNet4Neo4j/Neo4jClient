@@ -3,7 +3,7 @@ using System.Linq;
 using Neo4jClient.Mappers;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.ApiModels
+namespace Neo4jClient.ApiModels.Gremlin
 {
     internal class GremlinTableCapResponse
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using System.Linq;
+using Neo4jClient.ApiModels.Gremlin;
 
 namespace Neo4jClient.Test.ApiModels
 {

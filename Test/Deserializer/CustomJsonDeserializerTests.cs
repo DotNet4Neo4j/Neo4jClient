@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
+using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Deserializer;
 using RestSharp;
 
