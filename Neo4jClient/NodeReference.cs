@@ -91,7 +91,7 @@ namespace Neo4jClient
 
         string ICypherQuery.QueryText
         {
-            get { return "start rootNode=node({p0}) return rootNode"; }
+            get { return "start thisNode=node({p0})"; }
         }
 
         IDictionary<string, object> ICypherQuery.QueryParameters

@@ -37,7 +37,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var client = new GraphClient(new Uri("http://foo"), null);
             var rootNode = client.RootNode;
-            Assert.AreEqual("start rootNode=node({p0}) return rootNode", ((ICypherQuery)rootNode).QueryText);
+            Assert.AreEqual("start thisNode=node({p0})", ((ICypherQuery)rootNode).QueryText);
         }
     }
 }
