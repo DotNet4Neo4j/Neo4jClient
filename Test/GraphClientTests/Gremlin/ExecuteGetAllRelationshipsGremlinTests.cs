@@ -6,7 +6,7 @@ using System.Linq;
 using Neo4jClient.ApiModels;
 using RestSharp;
 
-namespace Neo4jClient.Test.GraphClientTests
+namespace Neo4jClient.Test.GraphClientTests.Gremlin
 {
     [TestFixture]
     public class ExecuteGetAllRelationshipsGremlinTests
