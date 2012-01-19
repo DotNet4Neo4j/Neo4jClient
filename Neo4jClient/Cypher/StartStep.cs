@@ -5,6 +5,11 @@ namespace Neo4jClient.Cypher
 {
     public static class StartStep
     {
+        public static ICypherQuery Start(this ICypherQuery query)
+        {
+            return query;
+        }
+
         public static ICypherQuery Start(this ICypherQuery query, string declaration, BoundPoint boundPoint, int[] ids)
         {
             var startText = string.Format("start {0}=", declaration);
