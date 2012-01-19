@@ -8,6 +8,16 @@ namespace Neo4jClient.Test.Cypher
     public class StartStepTests
     {
         [Test]
+        public void StartShouldBeInNodeReference()
+        {
+            var node = new NodeReference<object>(200);
+            var query = node.Start();
+            Assert.AreEqual("start thisNode=node({p0})", query.QueryText);
+            Assert.AreEqual(200, query.QueryParameters["p0"]);
+
+        }
+
+        [Test]
         public void StartShouldCreateStepToNodeQuery()
         {
             var client = new GraphClient(new Uri("http://foo/db/data"));
