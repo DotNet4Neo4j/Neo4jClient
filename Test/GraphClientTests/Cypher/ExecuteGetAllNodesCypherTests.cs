@@ -106,7 +106,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         public void MultipleStartPointsContainingOneNodeEachInTwoColumnsShouldReturnIEnumerableOfObjectsInTwoColumns()
         {
             //Arrange
-            const string cypherExpectedQuery = "start myNode=node({foo}, {bar}) return myNode";
+            const string cypherExpectedQuery = "start myNodeA=node({foo}), myNodeB=({bar}) return myNodeA,myNodeB";
             var parameters = new Dictionary<string, object>
                 {
                     {"foo", 123}
@@ -141,7 +141,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                         Resource = "/cypher",
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
-                    }.AddBody(new CypherApiQuery("start myNode=node({foo}, {bar}) return myNode", parameters)),
+                    }.AddBody(new CypherApiQuery("start myNodeA=node({foo}), myNodeB=({bar}) return myNodeA,myNodeB", parameters)),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -212,7 +212,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         public void StartWithTwoNodesInOneColumnShouldReturnIEnumerableOfObjectsInOneColumn()
         {
             //Arrange
-            const string cypherExpectedQuery = "start myNodeA=node({foo}), myNodeB=({bar}) return myNodeA,myNodeB";
+            const string cypherExpectedQuery = "start myNode=node({foo}, {bar}) return myNode";
             var parameters = new Dictionary<string, object>
                 {
                     {"foo", 123}
@@ -247,7 +247,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                         Resource = "/cypher",
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
-                    }.AddBody(new CypherApiQuery("start myNodeA=node({foo}), myNodeB=({bar}) return myNodeA,myNodeB", parameters)),
+                    }.AddBody(new CypherApiQuery("start myNode=node({foo}, {bar}) return myNode", parameters)),
                     new HttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
