@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels
 {
-    public class NodeApiResponse<TNode>
+    internal class NodeApiResponse<TNode>
     {
         [JsonProperty("self")]
         public string Self { get; set; }
