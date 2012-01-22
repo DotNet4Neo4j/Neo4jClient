@@ -171,15 +171,15 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual(3, cypherResult.Columns.Count());
             Assert.AreEqual(1, cypherResult.Data.Count());
 
-            Assert.AreEqual(0, cypherResult.Data.FirstOrDefault().FirstOrDefault().Column1.ToNode(null).Reference.Id);
-            Assert.AreEqual("1", cypherResult.Data.FirstOrDefault().FirstOrDefault().Column1.Data.Bar);
-            Assert.AreEqual("11", cypherResult.Data.FirstOrDefault().FirstOrDefault().Column1.Data.Baz);
+            Assert.AreEqual(0, cypherResult.Data.First().First().Column1.ToNode(null).Reference.Id);
+            Assert.AreEqual("1", cypherResult.Data.First().First().Column1.Data.Bar);
+            Assert.AreEqual("11", cypherResult.Data.First().First().Column1.Data.Baz);
 
-            Assert.AreEqual(6, cypherResult.Data.FirstOrDefault().FirstOrDefault().Column2.ToRelationshipInstance(null).Reference.Id);
-            Assert.AreEqual("2", cypherResult.Data.FirstOrDefault().FirstOrDefault().Column2.Data.Bar);
-            Assert.AreEqual("22", cypherResult.Data.FirstOrDefault().FirstOrDefault().Column2.Data.Baz);
+            Assert.AreEqual(6, cypherResult.Data.First().First().Column2.ToRelationshipInstance(null).Reference.Id);
+            Assert.AreEqual("2", cypherResult.Data.First().First().Column2.Data.Bar);
+            Assert.AreEqual("22", cypherResult.Data.First().First().Column2.Data.Baz);
 
-            Assert.AreEqual("mystring",cypherResult.Data.FirstOrDefault().FirstOrDefault().Column3);
+            Assert.AreEqual("mystring",cypherResult.Data.First().First().Column3);
 
         }
     }
