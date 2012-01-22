@@ -23,30 +23,5 @@ namespace Neo4jClient.ApiModels.Cypher
 
         [JsonProperty("data")]
         public List<List<DataRow<TCol1, TCol2, TCol3>>> Data { get; set; }
-
-        public static IEnumerable<TResult> TransferResponseToResult<TResult, TColumn1, TColumn2, TColumn3>(CypherApiTableResponse<TColumn1, TColumn2, TColumn3> response) where TResult : new()
-        {
-            var type = typeof(TResult);
-            var properties = type.GetProperties();
-
-            if (response != null)
-            {
-
-                if (response.Columns == null || response.Data == null)
-                    yield break;
-
-                var columns = response.Columns;
-                var dataRows = response.Data;
-
-                var result = new TResult();
-                    foreach (var prop in properties.Where(p => columns.Any(c => c.ToLowerInvariant() == p.Name.ToLowerInvariant())))
-                    {
-                        var columnIndex = columns.IndexOf(prop.Name.ToLowerInvariant()); //ToDo ensure cypher columns are always lower case when parsed in CypherQuery
-                        if (columnIndex == -1) continue;
-                        prop.SetValue(result, dataRows, null);
-                    }
-                    yield return result;
-            }
-        }
     }
 }

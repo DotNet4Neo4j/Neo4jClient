@@ -19,17 +19,6 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             public string Baz { get; set; }
         }
 
-        public class CyhperResultSet
-        {
-            public List<List<NodeApiResponse<Foo>>> X { get; set; }
-            public List<List<RelationshipApiResponse<Foo>>> Y { get; set; }
-        }
-
-        public class CyhperResultSetDataRow
-        {
-            public List<Tuple<NodeApiResponse<Foo>,RelationshipApiResponse<Foo>>> DataRow { get; set; }
-        }
-
         [Test]
         public void StartShouldReturnCypherTableResults()
         {
