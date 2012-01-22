@@ -52,9 +52,7 @@
     <Compile Include="ApiModels\BatchStep.cs" />
     <Compile Include="ApiModels\BatchStepExtensions.cs" />
     <Compile Include="ApiModels\BatchStepResult.cs" />
-    <Compile Include="ApiModels\Cypher\CypherRelationshipApiResponse.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
-    <Compile Include="ApiModels\Cypher\CypherNodeApiResponse.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiTableResponse.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\BoundPoint.cs" />
