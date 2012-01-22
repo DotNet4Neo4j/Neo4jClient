@@ -37,16 +37,10 @@ namespace Neo4jClient
 
         string ExecuteScalarCypher(string query, IDictionary<string, object> parameters);
 
+        TResult ExecuteGetCypherResults<TResult>(ICypherQuery query)
+            where TResult : new();
+
         IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new();
-
-        IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(ICypherQuery query);
-
-        [Obsolete("Use overload that takes ICypherQuery instead.")]
-        IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(string query, IDictionary<string, object> parameters);
-
-        IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsCypher(string query, IDictionary<string, object> parameters);
-
-        IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsCypher<TData>(string query, IDictionary<string, object> parameters) where TData : class, new();
 
         IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query);
 

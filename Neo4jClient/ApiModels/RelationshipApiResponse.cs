@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels
 {
-    internal class RelationshipApiResponse<TData>
+    public class RelationshipApiResponse<TData>
         where TData : class, new()
     {
         [JsonProperty("self")]

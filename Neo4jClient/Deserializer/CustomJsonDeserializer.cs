@@ -202,21 +202,22 @@ namespace Neo4jClient.Deserializer
                 if (PropertyInfoCache.TryGetValue(objType, out result))
                     return result;
 
-                result = objType
+                var properties = objType
                     .GetProperties()
                     .Where(p => p.CanWrite)
                     .Select(p =>
-                    {
-                        var attributes = (JsonPropertyAttribute[]) p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
-                        return new
                         {
-                            Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
-                            Property = p
-                        };
-                    })
-                    .ToDictionary(p => p.Name, p => p.Property);
+                            var attributes =
+                                (JsonPropertyAttribute[]) p.GetCustomAttributes(typeof (JsonPropertyAttribute), true);
+                            return new
+                                {
+                                    Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
+                                    Property = p
+                                };
+                        });
+
+                return properties.ToDictionary(p => p.Name, p => p.Property);
             }
-            return result;
         }
 
         static DateTimeOffset? ParseDateTimeOffset(JToken value)
