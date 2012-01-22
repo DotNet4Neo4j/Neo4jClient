@@ -589,12 +589,8 @@ namespace Neo4jClient
             return results;
         }
 
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(string query, IDictionary<string, object> parameters)
-        {
-            return ExecuteGetAllNodesCypher<TNode>(new CypherQuery(this, query, parameters, new List<string>()));
-        }
-
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(ICypherQuery query)
+        public virtual TResult ExecuteGetCypherResults<TResult>(ICypherQuery query)
+            where TResult : new()
         {
             CheckRoot();
 
@@ -607,81 +603,24 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new CypherApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateClient().Execute<CypherNodeApiResponse<TNode>>(request);
+            var response = CreateClient().Execute<TResult>(request);
 
             ValidateExpectedResponseCodes(
                 response,
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
-            var nodes = response.Data == null
-                        ? new Node<TNode>[0]
-                        : response
-                        .Data
-                        .Data
-                        .SelectMany(d => d)
-                        .Select(dataItem => dataItem.ToNode(this))
-                        .ToArray();
+            var result = response.Data;
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
                 QueryText = query.ToDebugQueryText(),
-                ResourcesReturned = nodes.Count(),
+                //ResourcesReturned = result.Data.Count(),
                 TimeTaken = stopwatch.Elapsed
             });
 
-            return nodes;
-        }
-
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesCypher<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations)
-        {
-            return ExecuteGetAllNodesCypher<TNode>(new CypherQuery(this, query, parameters, declarations));
-        }
-
-        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsCypher(string query, IDictionary<string, object> parameters)
-        {
-            return ExecuteGetAllRelationshipsCypher<object>(query, parameters);
-        }
-
-        public virtual IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsCypher<TData>(string query, IDictionary<string, object> parameters)
-    where TData : class, new()
-        {
-            CheckRoot();
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
-            request.AddBody(new CypherApiQuery(query, parameters));
-            var response = CreateClient().Execute<CypherRelationshipApiResponse<TData>>(request);
-
-            ValidateExpectedResponseCodes(
-                response,
-                string.Format("The query was: {0}", query),
-                HttpStatusCode.OK);
-
-            var relationships = response.Data == null
-                ? new RelationshipInstance<TData>[0]
-                : response
-                .Data
-                .Data
-                .SelectMany(r => r)
-                .Select(r => r.ToRelationshipInstance(this)).ToArray();
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query,
-                ResourcesReturned = relationships.Count(),
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return relationships;
+            return result;
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
