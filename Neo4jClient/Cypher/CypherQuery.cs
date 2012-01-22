@@ -14,7 +14,7 @@ namespace Neo4jClient.Cypher
             this.client = client;
             this.queryText = queryText;
             this.queryParameters = queryParameters;
-            this.queryDeclarations = declarations;
+            queryDeclarations = declarations;
         }
 
         public IGraphClient Client

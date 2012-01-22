@@ -77,82 +77,82 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                         "application/json",
                                 Content =
                         @"{'data' : [
-                                        [
-                                        {
-                                        'column1': {
-                                                    'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
-                                                    'data' : {
-                                                        'Bar' : '1',
-                                                        'Baz' : '11'
-                                                    },
-                                                    'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
-                                                    'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
-                                                    'self' : 'http://foo/db/data/node/0',
-                                                    'property' : 'http://foo/db/data/node/0/properties/{key}',
-                                                    'properties' : 'http://foo/db/data/node/0/properties',
-                                                    'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
-                                                    'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
-                                                    'extensions' : {
-                                                    },
-                                                    'create_relationship' : 'http://foo/db/data/node/0/relationships',
-                                                    'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
-                                                    'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
-                                                    'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
-                                                  },
-                                        'column2': {
-                                                    'start' : 'http://foo/db/data/node/2',
-                                                    'data' : {
-                                                        'Bar' : '2',
-                                                        'Baz' : '22'
-                                                    },
-                                                    'property' : 'http://foo/db/data/relationship/6/properties/{key}',
-                                                    'self' : 'http://foo/db/data/relationship/6',
-                                                    'properties' : 'http://foo/db/data/relationship/6/properties',
-                                                    'type' : 'HAS_LANGUAGE',
-                                                    'extensions' : {
-                                                    },
-                                                    'end' : 'http://foo/db/data/node/7'
-                                                  } ,
-                                         'column3': 'mystring'
-                                        },
-                                        {
-                                        'column1': {
-                                                    'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
-                                                    'data' : {
-                                                        'Bar' : '1',
-                                                        'Baz' : '11'
-                                                    },
-                                                    'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
-                                                    'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
-                                                    'self' : 'http://foo/db/data/node/0',
-                                                    'property' : 'http://foo/db/data/node/0/properties/{key}',
-                                                    'properties' : 'http://foo/db/data/node/0/properties',
-                                                    'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
-                                                    'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
-                                                    'extensions' : {
-                                                    },
-                                                    'create_relationship' : 'http://foo/db/data/node/0/relationships',
-                                                    'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
-                                                    'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
-                                                    'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
-                                                  },
-                                        'column2': {
-                                                    'start' : 'http://foo/db/data/node/2',
-                                                    'data' : {
-                                                        'Bar' : '2',
-                                                        'Baz' : '22'
-                                                    },
-                                                    'property' : 'http://foo/db/data/relationship/6/properties/{key}',
-                                                    'self' : 'http://foo/db/data/relationship/6',
-                                                    'properties' : 'http://foo/db/data/relationship/6/properties',
-                                                    'type' : 'HAS_LANGUAGE',
-                                                    'extensions' : {
-                                                    },
-                                                    'end' : 'http://foo/db/data/node/7'
-                                                  },
-                                        'column3': 'mystring'
-                                        }
-                                        ]
+                        [
+                        {
+                        'column1': {
+                                    'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                                    'data' : {
+                                        'Bar' : '1',
+                                        'Baz' : '11'
+                                    },
+                                    'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                                    'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                                    'self' : 'http://foo/db/data/node/0',
+                                    'property' : 'http://foo/db/data/node/0/properties/{key}',
+                                    'properties' : 'http://foo/db/data/node/0/properties',
+                                    'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                                    'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                                    'extensions' : {
+                                    },
+                                    'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                                    'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                                    'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                                    'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                                    },
+                        'column2': {
+                                    'start' : 'http://foo/db/data/node/2',
+                                    'data' : {
+                                        'Bar' : '2',
+                                        'Baz' : '22'
+                                    },
+                                    'property' : 'http://foo/db/data/relationship/6/properties/{key}',
+                                    'self' : 'http://foo/db/data/relationship/6',
+                                    'properties' : 'http://foo/db/data/relationship/6/properties',
+                                    'type' : 'HAS_LANGUAGE',
+                                    'extensions' : {
+                                    },
+                                    'end' : 'http://foo/db/data/node/7'
+                                    } ,
+                            'column3': 'mystring'
+                        },
+                        {
+                        'column1': {
+                                    'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                                    'data' : {
+                                        'Bar' : '1',
+                                        'Baz' : '11'
+                                    },
+                                    'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                                    'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                                    'self' : 'http://foo/db/data/node/0',
+                                    'property' : 'http://foo/db/data/node/0/properties/{key}',
+                                    'properties' : 'http://foo/db/data/node/0/properties',
+                                    'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                                    'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                                    'extensions' : {
+                                    },
+                                    'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                                    'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                                    'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                                    'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                                    },
+                        'column2': {
+                                    'start' : 'http://foo/db/data/node/2',
+                                    'data' : {
+                                        'Bar' : '2',
+                                        'Baz' : '22'
+                                    },
+                                    'property' : 'http://foo/db/data/relationship/6/properties/{key}',
+                                    'self' : 'http://foo/db/data/relationship/6',
+                                    'properties' : 'http://foo/db/data/relationship/6/properties',
+                                    'type' : 'HAS_LANGUAGE',
+                                    'extensions' : {
+                                    },
+                                    'end' : 'http://foo/db/data/node/7'
+                                    },
+                        'column3': 'mystring'
+                        }
+                        ]
                                     ],
                           'columns' : [ 'Column1FriendlyName', 'Column2FriendlyName', 'Column3FirendlyName' ]}".Replace('\'', '"')
                             }
