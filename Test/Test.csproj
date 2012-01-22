@@ -66,8 +66,7 @@
     <Compile Include="Cypher\StartStepTests.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
-    <Compile Include="GraphClientTests\Cypher\ExecuteGetAllNodesCypherTests.cs" />
-    <Compile Include="GraphClientTests\Cypher\ExecuteGetAllRelationshipsCypherTests.cs" />
+    <Compile Include="GraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteScalarCypherTests.cs" />
     <Compile Include="GraphClientTests\UpdateRelationshipTests.cs" />
     <Compile Include="GraphClientTests\DeleteIndexTests.cs" />
