@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="ApiModels\RootApiResponseTests.cs" />
+    <Compile Include="Cypher\ReturnStepTests.cs" />
     <Compile Include="Cypher\StartStepTests.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
