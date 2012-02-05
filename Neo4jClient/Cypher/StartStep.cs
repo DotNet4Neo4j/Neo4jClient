@@ -10,20 +10,7 @@ namespace Neo4jClient.Cypher
             return query;
         }
 
-        public static ICypherQuery Start(this ICypherQuery query, string declaration, BoundPoint boundPoint, int[] ids)
-        {
-            var startText = string.Format("start {0}=", declaration);
-            var parameters = new string[ids.Length];
-            for (var i = 0; i < ids.Length; i++)
-            {
-                parameters[i] = string.Format("p{0}", i);
-            }
-
-            var newQuery = query.BuildStartById(string.Format("{0}{1}({2})", startText, boundPoint.ToString().ToLower(), String.Join(",", parameters)), ids);
-            return newQuery;
-        }
-
-        public static ICypherQuery Start(this ICypherQuery query, string declaration, NodeReference<object>[] nodeReferences)
+        public static ICypherQuery Start(this ICypherQuery query, string declaration, params NodeReference[] nodeReferences)
         {
             var startText = string.Format("start {0}=", declaration);
             var parameters = new string[nodeReferences.Length];
@@ -36,7 +23,7 @@ namespace Neo4jClient.Cypher
             return newQuery;
         }
 
-        public static ICypherQuery Start(this ICypherQuery query, string declaration, RelationshipReference[] relationships)
+        public static ICypherQuery Start(this ICypherQuery query, string declaration, params RelationshipReference[] relationships)
         {
             var startText = string.Format("start {0}=", declaration);
             var parameters = new string[relationships.Length];
