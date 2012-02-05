@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
 
             //Arrange
-            const string cypherExpectedQuery = "start myNode=node({foo}) return myNode";
+            var cypherExpectedQuery = @"{'query': 'start x  = node({foo}) match x -[r]-> n return  x, type(r), n.Name?, n.UniqueId? limit 3','params': {'foo':0}},".Replace('\'', '"');
             var parameters = new Dictionary<string, object>
                 {
                     {"foo", 123}
@@ -76,85 +76,67 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                                 ContentType =
                         "application/json",
                                 Content =
-                        @"{'data' : [
-                        [
-                        {
-                        'column1': {
-                                    'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
-                                    'data' : {
-                                        'Bar' : '1',
-                                        'Baz' : '11'
-                                    },
-                                    'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
-                                    'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
-                                    'self' : 'http://foo/db/data/node/0',
-                                    'property' : 'http://foo/db/data/node/0/properties/{key}',
-                                    'properties' : 'http://foo/db/data/node/0/properties',
-                                    'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
-                                    'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
-                                    'extensions' : {
-                                    },
-                                    'create_relationship' : 'http://foo/db/data/node/0/relationships',
-                                    'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
-                                    'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
-                                    'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
-                                    },
-                        'column2': {
-                                    'start' : 'http://foo/db/data/node/2',
-                                    'data' : {
-                                        'Bar' : '2',
-                                        'Baz' : '22'
-                                    },
-                                    'property' : 'http://foo/db/data/relationship/6/properties/{key}',
-                                    'self' : 'http://foo/db/data/relationship/6',
-                                    'properties' : 'http://foo/db/data/relationship/6/properties',
-                                    'type' : 'HAS_LANGUAGE',
-                                    'extensions' : {
-                                    },
-                                    'end' : 'http://foo/db/data/node/7'
-                                    } ,
-                            'column3': 'mystring'
-                        },
-                        {
-                        'column1': {
-                                    'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
-                                    'data' : {
-                                        'Bar' : '1',
-                                        'Baz' : '11'
-                                    },
-                                    'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
-                                    'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
-                                    'self' : 'http://foo/db/data/node/0',
-                                    'property' : 'http://foo/db/data/node/0/properties/{key}',
-                                    'properties' : 'http://foo/db/data/node/0/properties',
-                                    'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
-                                    'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
-                                    'extensions' : {
-                                    },
-                                    'create_relationship' : 'http://foo/db/data/node/0/relationships',
-                                    'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
-                                    'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
-                                    'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
-                                    },
-                        'column2': {
-                                    'start' : 'http://foo/db/data/node/2',
-                                    'data' : {
-                                        'Bar' : '2',
-                                        'Baz' : '22'
-                                    },
-                                    'property' : 'http://foo/db/data/relationship/6/properties/{key}',
-                                    'self' : 'http://foo/db/data/relationship/6',
-                                    'properties' : 'http://foo/db/data/relationship/6/properties',
-                                    'type' : 'HAS_LANGUAGE',
-                                    'extensions' : {
-                                    },
-                                    'end' : 'http://foo/db/data/node/7'
-                                    },
-                        'column3': 'mystring'
-                        }
-                        ]
-                                    ],
-                          'columns' : [ 'Column1FriendlyName', 'Column2FriendlyName', 'Column3FirendlyName' ]}".Replace('\'', '"')
+                        @"{
+                            'data' : [ [ {
+                            'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                            'data' : {
+                                'Bar' : 'bar',
+                                'Baz' : 'baz'
+                            },
+                            'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                            'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                            'property' : 'http://foo/db/data/node/0/properties/{key}',
+                            'self' : 'http://foo/db/data/node/0',
+                            'properties' : 'http://foo/db/data/node/0/properties',
+                            'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                            'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                            'extensions' : {
+                            },
+                            'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                            'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                            'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                            'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                            }, 'HOSTS', 'foo', 44321 ], [ {
+                            'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                            'data' : {
+                                'Bar' : 'bar',
+                                'Baz' : 'baz'
+                            },
+                            'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                            'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                            'property' : 'http://foo/db/data/node/0/properties/{key}',
+                            'self' : 'http://foo/db/data/node/0',
+                            'properties' : 'http://foo/db/data/node/0/properties',
+                            'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                            'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                            'extensions' : {
+                            },
+                            'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                            'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                            'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                            'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                            }, 'HOSTS', 'bar', 44311 ], [ {
+                            'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                            'data' : {
+                                'Bar' : 'bar',
+                                'Baz' : 'baz'
+                            },
+                            'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                            'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                            'property' : 'http://foo/db/data/node/0/properties/{key}',
+                            'self' : 'http://foo/db/data/node/0',
+                            'properties' : 'http://foo/db/data/node/0/properties',
+                            'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                            'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                            'extensions' : {
+                            },
+                            'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                            'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                            'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                            'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                            }, 'HOSTS', 'baz', 42586 ] ],
+                            'columns' : [ 'x', 'TYPE(r)', 'n.Name', 'n.UniqueId' ]
+                        }".Replace('\'', '"')
                             }
                         }
                 });
@@ -168,18 +150,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 );
 
             //Assert
-            Assert.AreEqual(3, cypherResult.Columns.Count());
-            Assert.AreEqual(1, cypherResult.Data.Count());
-
-            Assert.AreEqual(0, cypherResult.Data.First().First().Column1.ToNode(null).Reference.Id);
-            Assert.AreEqual("1", cypherResult.Data.First().First().Column1.Data.Bar);
-            Assert.AreEqual("11", cypherResult.Data.First().First().Column1.Data.Baz);
-
-            Assert.AreEqual(6, cypherResult.Data.First().First().Column2.ToRelationshipInstance(null).Reference.Id);
-            Assert.AreEqual("2", cypherResult.Data.First().First().Column2.Data.Bar);
-            Assert.AreEqual("22", cypherResult.Data.First().First().Column2.Data.Baz);
-
-            Assert.AreEqual("mystring",cypherResult.Data.First().First().Column3);
+            Assert.AreEqual(4, cypherResult.Columns.Count());
+            //ToDo Fill in additional asserts
 
         }
     }

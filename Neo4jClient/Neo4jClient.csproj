@@ -57,6 +57,7 @@
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\BoundPoint.cs" />
+    <Compile Include="Cypher\ReturnStep.cs" />
     <Compile Include="Cypher\StartStep.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />
     <Compile Include="Cypher\CypherQueryExtensions.cs" />
