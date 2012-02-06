@@ -53,9 +53,10 @@
     <Compile Include="ApiModels\BatchStepExtensions.cs" />
     <Compile Include="ApiModels\BatchStepResult.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
-    <Compile Include="ApiModels\Cypher\CypherApiTableResponse.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Deserializer\CommonDeserializerMethods.cs" />
+    <Compile Include="Deserializer\CypherJsonDeserializer.cs" />
     <Compile Include="Cypher\CypherFluentQuery.cs" />
     <Compile Include="Cypher\CypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\CypherQueryBuilder.cs" />

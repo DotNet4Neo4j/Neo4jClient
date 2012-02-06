@@ -490,37 +490,6 @@ namespace Neo4jClient
             get { return cypher ?? (cypher = new CypherFluentQuery(this)); }
         }
 
-        public virtual string ExecuteScalarCypher(string query, IDictionary<string, object> parameters)
-        {
-            CheckRoot();
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
-            request.AddBody(new CypherApiQuery(query, parameters));
-            var response = CreateClient().Execute(request);
-
-            ValidateExpectedResponseCodes(
-                response,
-                string.Format("The query was: {0}", query),
-                HttpStatusCode.OK);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query,
-                ResourcesReturned = 1,
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return response.Content;
-        }
-
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
@@ -592,35 +561,36 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            //var stopwatch = new Stopwatch();
-            //stopwatch.Start();
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            //var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
-            //{
-            //    RequestFormat = DataFormat.Json,
-            //    JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            //};
-            //request.AddBody(new CypherApiQuery(query.QueryText, query.QueryParameters));
-            //var response = CreateClient().Execute<TResult>(request);
+            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            };
+            request.AddBody(new CypherApiQuery(query));
+            var response = CreateClient().Execute(request);
 
-            //ValidateExpectedResponseCodes(
-            //    response,
-            //    string.Format("The query was: {0}", query.QueryText),
-            //    HttpStatusCode.OK);
+            ValidateExpectedResponseCodes(
+                response,
+                string.Format("The query was: {0}", query.QueryText),
+                HttpStatusCode.OK);
 
-            //var result = response.Data;
+            var deserializer = new CypherJsonDeserializer<TResult>();
+            var results = deserializer
+                .Deserialize(response)
+                .ToList();
 
-            //stopwatch.Stop();
-            //OnOperationCompleted(new OperationCompletedEventArgs
-            //{
-            //    QueryText = query.ToDebugQueryText(),
-            //    //ResourcesReturned = result.Data.Count(),
-            //    TimeTaken = stopwatch.Elapsed
-            //});
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.QueryText,
+                ResourcesReturned = results.Count(),
+                TimeTaken = stopwatch.Elapsed
+            });
 
-            //return result;
-
-            throw new NotImplementedException();
+            return results;
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)

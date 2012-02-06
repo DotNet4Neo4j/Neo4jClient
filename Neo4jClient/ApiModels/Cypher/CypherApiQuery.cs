@@ -1,29 +1,30 @@
 using System.Collections.Generic;
+using Neo4jClient.Cypher;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels.Cypher
 {
     class CypherApiQuery
     {
-        readonly string query;
-        readonly IDictionary<string, object> parameters;
+        readonly string queryText;
+        readonly IDictionary<string, object> queryParameters;
 
-        public CypherApiQuery(string query, IDictionary<string, object> parameters)
+        public CypherApiQuery(ICypherQuery query)
         {
-            this.query = query;
-            this.parameters = parameters ?? new Dictionary<string, object>();
+            queryText = query.QueryText;
+            queryParameters = query.QueryParameters ?? new Dictionary<string, object>();
         }
 
         [JsonProperty("query")]
         public string Query
         {
-            get { return query; }
+            get { return queryText; }
         }
 
         [JsonProperty("params")]
         public IDictionary<string, object> Parameters
         {
-            get { return parameters; }
+            get { return queryParameters; }
         }
     }
 }
