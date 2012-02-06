@@ -61,6 +61,7 @@
     <Compile Include="Cypher\CypherStartBit.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />
     <Compile Include="Cypher\ICypherFluentQuery.cs" />
+    <Compile Include="Cypher\ICypherFluentQueryMatched.cs" />
     <Compile Include="Cypher\ICypherFluentQueryPreStart.cs" />
     <Compile Include="Cypher\ICypherFluentQueryReturned.cs" />
     <Compile Include="Cypher\ICypherFluentQueryStarted.cs" />

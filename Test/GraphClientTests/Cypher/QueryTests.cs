@@ -70,5 +70,25 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual(2, query.QueryParameters["p4"]);
             Assert.AreEqual(3, query.QueryParameters["p5"]);
         }
+
+        [Test]
+        public void MatchRelatedNodes()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-match.html#match-related-nodes
+            // START n=node(3)
+            // MATCH (n)--(x)
+            // RETURN x
+
+            var client = new GraphClient(fakeEndpoint);
+            var query = client
+                .Cypher
+                .Start("n", (NodeReference)3)
+                .Match("(n)--(x)")
+                .Return("x")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0})\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+        }
     }
 }

@@ -6,7 +6,8 @@ namespace Neo4jClient.Cypher
     public class CypherFluentQuery :
         ICypherFluentQueryPreStart,
         ICypherFluentQueryStarted,
-        ICypherFluentQueryReturned
+        ICypherFluentQueryReturned,
+        ICypherFluentQueryMatched
     {
         readonly CypherQueryBuilder builder;
 
@@ -39,7 +40,13 @@ namespace Neo4jClient.Cypher
             return this;
         }
 
-        ICypherFluentQueryReturned ICypherFluentQueryStarted.Return(params string[] identities)
+        public ICypherFluentQueryMatched Match(string matchText)
+        {
+            builder.MatchText = matchText;
+            return this;
+        }
+
+        public ICypherFluentQueryReturned Return(params string[] identities)
         {
             builder.ReturnIdentites = identities;
             return this;
