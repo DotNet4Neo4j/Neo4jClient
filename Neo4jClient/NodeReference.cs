@@ -7,7 +7,7 @@ using Neo4jClient.Gremlin;
 namespace Neo4jClient
 {
     [DebuggerDisplay("Node {id}")]
-    public class NodeReference : IGremlinQuery, ICypherQuery
+    public class NodeReference : IGremlinQuery
     {
         public static readonly RootNode RootNode = new RootNode();
 
@@ -80,26 +80,6 @@ namespace Neo4jClient
         }
 
         IList<string> IGremlinQuery.QueryDeclarations
-        {
-            get { return new List<string>(); }
-        }
-
-        IGraphClient ICypherQuery.Client
-        {
-            get { return client; }
-        }
-
-        string ICypherQuery.QueryText
-        {
-            get { return "start thisNode=node({p0})"; }
-        }
-
-        IDictionary<string, object> ICypherQuery.QueryParameters
-        {
-            get { return new Dictionary<string, object> { { "p0", Id }}; }
-        }
-
-        IList<string> ICypherQuery.QueryDeclarations
         {
             get { return new List<string>(); }
         }

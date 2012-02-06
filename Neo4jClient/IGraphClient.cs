@@ -66,5 +66,7 @@ namespace Neo4jClient
         void ShutdownServer();
 
         event OperationCompletedEventHandler OperationCompleted;
+
+        CypherQueryBuilder Cypher { get; }
     }
 }

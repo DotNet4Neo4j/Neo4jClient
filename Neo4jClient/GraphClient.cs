@@ -484,12 +484,10 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public  ICypherQuery Cypher
+        CypherQueryBuilder cypher;
+        public CypherQueryBuilder Cypher
         {
-            get
-            {
-                return new CypherQuery(this,"", new Dictionary<string, object>(), new List<string>());
-            }
+            get { return cypher ?? (cypher = new CypherQueryBuilder()); }
         }
 
         public virtual string ExecuteScalarCypher(string query, IDictionary<string, object> parameters)
@@ -594,33 +592,34 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            //var stopwatch = new Stopwatch();
+            //stopwatch.Start();
 
-            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
-            request.AddBody(new CypherApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateClient().Execute<TResult>(request);
+            //var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
+            //{
+            //    RequestFormat = DataFormat.Json,
+            //    JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+            //};
+            //request.AddBody(new CypherApiQuery(query.QueryText, query.QueryParameters));
+            //var response = CreateClient().Execute<TResult>(request);
 
-            ValidateExpectedResponseCodes(
-                response,
-                string.Format("The query was: {0}", query.QueryText),
-                HttpStatusCode.OK);
+            //ValidateExpectedResponseCodes(
+            //    response,
+            //    string.Format("The query was: {0}", query.QueryText),
+            //    HttpStatusCode.OK);
 
-            var result = response.Data;
+            //var result = response.Data;
 
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query.ToDebugQueryText(),
-                //ResourcesReturned = result.Data.Count(),
-                TimeTaken = stopwatch.Elapsed
-            });
+            //stopwatch.Stop();
+            //OnOperationCompleted(new OperationCompletedEventArgs
+            //{
+            //    QueryText = query.ToDebugQueryText(),
+            //    //ResourcesReturned = result.Data.Count(),
+            //    TimeTaken = stopwatch.Elapsed
+            //});
 
-            return result;
+            //return result;
+            throw new NotImplementedException();
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
