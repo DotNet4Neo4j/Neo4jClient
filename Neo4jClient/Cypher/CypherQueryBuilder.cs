@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Neo4jClient.Cypher
@@ -8,8 +10,9 @@ namespace Neo4jClient.Cypher
     {
         readonly IList<CypherStartBit> startBits = new List<CypherStartBit>();
 
+        string returnText;
+
         public string MatchText { get; set; }
-        public string[] ReturnIdentites { get; set; }
         public int? Limit { get; set; }
 
         public void AddStartBit(string identity, params NodeReference[] nodeReferences)
@@ -20,6 +23,17 @@ namespace Neo4jClient.Cypher
         public void AddStartBit(string identity, params RelationshipReference[] relationshipReferences)
         {
             startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
+        }
+
+        public void SetReturn(string[] identities)
+        {
+            returnText = string.Join(", ", identities);
+        }
+
+        public void SetReturn<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            returnText = CypherReturnExpressionBuilder.BuildText(expression);
         }
 
         public ICypherQuery ToQuery()
@@ -69,9 +83,9 @@ namespace Neo4jClient.Cypher
 
         void WriteReturnClause(StringBuilder target)
         {
-            if (ReturnIdentites == null) return;
+            if (returnText == null) return;
             target.Append("\r\nRETURN ");
-            target.Append(string.Join(", ", ReturnIdentites));
+            target.Append(returnText);
         }
 
         void WriteLimitClause(StringBuilder target, IDictionary<string, object> paramsDictionary)

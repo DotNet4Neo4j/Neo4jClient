@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
 {
@@ -48,7 +50,14 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryReturned Return(params string[] identities)
         {
-            builder.ReturnIdentites = identities;
+            builder.SetReturn(identities);
+            return this;
+        }
+
+        public ICypherFluentQueryReturned Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            builder.SetReturn(expression);
             return this;
         }
 

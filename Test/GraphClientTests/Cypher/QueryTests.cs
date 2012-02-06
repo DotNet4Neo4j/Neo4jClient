@@ -90,5 +90,36 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual("START n=node({p0})\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
         }
+
+        [Test]
+        public void ReturnProperty()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-return-property
+            // START n=node(1)
+            // RETURN n.FirstName
+
+            var client = new GraphClient(fakeEndpoint);
+            var query = client
+                .Cypher
+                .Start("n", (NodeReference)1)
+                .Return(n => new ReturnPropertyQueryResult
+                {
+                    ClientName = n.As<FooNode>().FirstName
+                })
+                .Query;
+
+            Assert.AreEqual("START n=node({p0})\r\nRETURN n.FirstName", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+        }
+
+        public class FooNode
+        {
+            public string FirstName { get; set; }
+        }
+
+        public class ReturnPropertyQueryResult
+        {
+            public string ClientName { get; set; }
+        }
     }
 }

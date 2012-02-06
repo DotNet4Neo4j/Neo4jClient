@@ -1,3 +1,6 @@
+using System;
+using System.Linq.Expressions;
+
 namespace Neo4jClient.Cypher
 {
     public interface ICypherFluentQueryStarted : ICypherFluentQuery
@@ -6,5 +9,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryStarted AddStartPoint(string identity, params RelationshipReference[] relationshipReferences);
         ICypherFluentQueryMatched Match(string matchText);
         ICypherFluentQueryReturned Return(params string[] identities);
+        ICypherFluentQueryReturned Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new();
     }
 }
