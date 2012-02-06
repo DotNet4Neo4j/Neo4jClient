@@ -12,11 +12,10 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void StartShouldBeInNodeReference()
         {
-            var node = new NodeReference<object>(200);
+            var node = new NodeReference(200);
             var query = node.Start();
             Assert.AreEqual("start thisNode=node({p0})", query.QueryText);
             Assert.AreEqual(200, query.QueryParameters["p0"]);
-
         }
 
         [Test]
