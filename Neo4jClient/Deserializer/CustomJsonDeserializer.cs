@@ -40,23 +40,23 @@ namespace Neo4jClient.Deserializer
                 if (RootElement.HasValue())
                 {
                     var root = FindRoot(response.Content);
-                    target = (T)CommonDeserializerMethods.BuildList(objType, root.Children(), Culture);
+                    target = (T)CommonDeserializerMethods.BuildList(objType, root.Children(), Culture, new TypeMapping[0]);
                 }
                 else
                 {
                     var json = JArray.Parse(response.Content);
-                    target = (T)CommonDeserializerMethods.BuildList(objType, json.Root.Children(), Culture);
+                    target = (T)CommonDeserializerMethods.BuildList(objType, json.Root.Children(), Culture, new TypeMapping[0]);
                 }
             }
             else if (target is IDictionary)
             {
                 var root = FindRoot(response.Content);
-                target = (T)CommonDeserializerMethods.BuildDictionary(target.GetType(), root.Children(), Culture);
+                target = (T)CommonDeserializerMethods.BuildDictionary(target.GetType(), root.Children(), Culture, new TypeMapping[0]);
             }
             else
             {
                 var root = FindRoot(response.Content);
-                CommonDeserializerMethods.Map(target, root, Culture);
+                CommonDeserializerMethods.Map(target, root, Culture, new TypeMapping[0]);
             }
 
             return target;

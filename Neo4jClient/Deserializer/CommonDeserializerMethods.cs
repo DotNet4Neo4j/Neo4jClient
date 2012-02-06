@@ -41,7 +41,12 @@ namespace Neo4jClient.Deserializer
             return reader.ReadAsDateTimeOffset();
         }
 
-        public static void SetPropertyValue(object targetObject, PropertyInfo propertyInfo, JToken value, CultureInfo culture)
+        public static void SetPropertyValue(
+            object targetObject,
+            PropertyInfo propertyInfo,
+            JToken value,
+            CultureInfo culture,
+            IEnumerable<TypeMapping> typeMappings)
         {
             if (value == null || value.Type == JTokenType.Null)
                 return;
@@ -53,6 +58,8 @@ namespace Neo4jClient.Deserializer
             {
                 propertyType = propertyType.GetGenericArguments()[0];
             }
+
+            var genericTypeDef = propertyType.IsGenericType ? propertyType.GetGenericTypeDefinition() : null;
 
             if (propertyType.IsPrimitive)
             {
@@ -99,41 +106,43 @@ namespace Neo4jClient.Deserializer
                 var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
                 propertyInfo.SetValue(targetObject, guid, null);
             }
-            else if (propertyType.IsGenericType)
+            else if (genericTypeDef == typeof(List<>))
             {
-                var genericTypeDef = propertyType.GetGenericTypeDefinition();
-                if (genericTypeDef == typeof(List<>))
-                {
-                    var list = BuildList(propertyType, value.Children(), culture);
-                    propertyInfo.SetValue(targetObject, list, null);
-                }
-                else if (genericTypeDef == typeof(Dictionary<,>))
-                {
-                    var keyType = propertyType.GetGenericArguments()[0];
+                var list = BuildList(propertyType, value.Children(), culture, typeMappings);
+                propertyInfo.SetValue(targetObject, list, null);
+            }
+            else if (genericTypeDef == typeof(Dictionary<,>))
+            {
+                var keyType = propertyType.GetGenericArguments()[0];
 
-                    // only supports Dict<string, T>()
-                    if (keyType == typeof(string))
-                    {
-                        var dict = BuildDictionary(propertyType, value.Children(), culture);
-                        propertyInfo.SetValue(targetObject, dict, null);
-                    }
-                }
-                else
+                // only supports Dict<string, T>()
+                if (keyType == typeof(string))
                 {
-                    // nested property classes
-                    var item = CreateAndMap(propertyType, value, culture);
-                    propertyInfo.SetValue(targetObject, item, null);
+                    var dict = BuildDictionary(propertyType, value.Children(), culture, typeMappings);
+                    propertyInfo.SetValue(targetObject, dict, null);
                 }
             }
             else
             {
-                // nested property classes
-                var item = CreateAndMap(propertyType, value, culture);
+                // nested objects
+                object item;
+                var mapping = typeMappings.SingleOrDefault(m => propertyType == m.PropertyTypeToTriggerMapping || genericTypeDef == m.PropertyTypeToTriggerMapping);
+                if (mapping != null)
+                {
+                    var newType = mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(propertyType);
+                    var rawItem = CreateAndMap(newType, value, culture, typeMappings);
+                    item = mapping.MutationCallback(rawItem);
+                }
+                else
+                {
+                    item = CreateAndMap(propertyType, value, culture, typeMappings);
+                }
+
                 propertyInfo.SetValue(targetObject, item, null);
             }
         }
 
-        static object CreateAndMap(Type type, JToken element, CultureInfo culture)
+        static object CreateAndMap(Type type, JToken element, CultureInfo culture, IEnumerable<TypeMapping> typeMappings)
         {
             object instance;
             if (type.IsGenericType)
@@ -141,11 +150,11 @@ namespace Neo4jClient.Deserializer
                 var genericTypeDef = type.GetGenericTypeDefinition();
                 if (genericTypeDef == typeof(Dictionary<,>))
                 {
-                    instance = BuildDictionary(type, element.Children(), culture);
+                    instance = BuildDictionary(type, element.Children(), culture, typeMappings);
                 }
                 else if (genericTypeDef == typeof(List<>))
                 {
-                    instance = BuildList(type, element.Children(), culture);
+                    instance = BuildList(type, element.Children(), culture, typeMappings);
                 }
                 else if (type == typeof(string))
                 {
@@ -154,7 +163,7 @@ namespace Neo4jClient.Deserializer
                 else
                 {
                     instance = Activator.CreateInstance(type);
-                    Map(instance, element, culture);
+                    Map(instance, element, culture, typeMappings);
                 }
             }
             else if (type == typeof(string))
@@ -164,12 +173,12 @@ namespace Neo4jClient.Deserializer
             else
             {
                 instance = Activator.CreateInstance(type);
-                Map(instance, element, culture);
+                Map(instance, element, culture, typeMappings);
             }
             return instance;
         }
 
-        public static void Map(object targetObject, JToken parentJsonToken, CultureInfo culture)
+        public static void Map(object targetObject, JToken parentJsonToken, CultureInfo culture, IEnumerable<TypeMapping> typeMappings)
         {
             var objType = targetObject.GetType();
             var props = GetPropertiesForType(objType);
@@ -178,25 +187,25 @@ namespace Neo4jClient.Deserializer
             {
                 var propertyInfo = props[propertyName];
                 var jsonToken = parentJsonToken[propertyName];
-                SetPropertyValue(targetObject, propertyInfo, jsonToken, culture);
+                SetPropertyValue(targetObject, propertyInfo, jsonToken, culture, typeMappings);
             }
         }
 
-        public static IDictionary BuildDictionary(Type type, JEnumerable<JToken> elements, CultureInfo culture)
+        public static IDictionary BuildDictionary(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings)
         {
             var dict = (IDictionary)Activator.CreateInstance(type);
             var valueType = type.GetGenericArguments()[1];
             foreach (JProperty child in elements)
             {
                 var key = child.Name;
-                var item = CreateAndMap(valueType, child.Value, culture);
+                var item = CreateAndMap(valueType, child.Value, culture, typeMappings);
                 dict.Add(key, item);
             }
 
             return dict;
         }
 
-        public static IList BuildList(Type type, JEnumerable<JToken> elements, CultureInfo culture)
+        public static IList BuildList(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings)
         {
             var list = (IList)Activator.CreateInstance(type);
             var itemType = type
@@ -221,7 +230,7 @@ namespace Neo4jClient.Deserializer
                 }
                 else
                 {
-                    var item = CreateAndMap(itemType, element, culture);
+                    var item = CreateAndMap(itemType, element, culture, typeMappings);
                     list.Add(item);
                 }
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Neo4jClient.ApiModels;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Extensions;
@@ -12,10 +13,12 @@ namespace Neo4jClient.Deserializer
     public class CypherJsonDeserializer<TResult>
         where TResult : new()
     {
+        readonly IGraphClient client;
         public CultureInfo Culture { get; set; }
 
-        public CypherJsonDeserializer()
+        public CypherJsonDeserializer(IGraphClient client)
         {
+            this.client = client;
             Culture = CultureInfo.InvariantCulture;
         }
 
@@ -46,14 +49,32 @@ namespace Neo4jClient.Deserializer
                     "response");
             }
 
+            var jsonTypeMappings = new[]
+            {
+                new TypeMapping
+                {
+                    PropertyTypeToTriggerMapping = typeof(Node<>),
+                    DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                    {
+                        var nodeType = t.GetGenericArguments();
+                        return typeof (NodeApiResponse<>).MakeGenericType(nodeType);
+                    },
+                    MutationCallback = n => n.GetType().GetMethod("ToNode").Invoke(n, new object[] { client })
+                }
+            };
+
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
-            var results = rows.Select(row => ReadRow(row, propertiesDictionary, columnNames));
+            var results = rows.Select(row => ReadRow(row, propertiesDictionary, columnNames, jsonTypeMappings));
 
             return results;
         }
 
-        TResult ReadRow(JToken row, Dictionary<string, PropertyInfo> propertiesDictionary, string[] columnNames)
+        TResult ReadRow(
+            JToken row,
+            IDictionary<string, PropertyInfo> propertiesDictionary,
+            string[] columnNames,
+            IEnumerable<TypeMapping> jsonTypeMappings)
         {
             var result = new TResult();
 
@@ -62,7 +83,7 @@ namespace Neo4jClient.Deserializer
             {
                 var columnName = columnNames[cellIndex];
                 var property = propertiesDictionary[columnName];
-                CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture);
+                CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings);
                 cellIndex++;
             }
 
