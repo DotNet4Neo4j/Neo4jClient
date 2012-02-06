@@ -57,7 +57,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             public int Age { get; set; }
             public string Name { get; set; }
-            public int? NumberOfCats { get; set; }
+            public int NumberOfCats { get; set; }
         }
 
         public class ReturnPropertyQueryResult

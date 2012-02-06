@@ -23,27 +23,35 @@ namespace Neo4jClient.Cypher
                 if (binding.BindingType != MemberBindingType.Assignment)
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
-                var memberAssigment = (MemberAssignment)binding;
-                var memberExpression = (MemberExpression)memberAssigment.Expression;
+                var memberAssignment = (MemberAssignment)binding;
+                var memberExpression = (MemberExpression)UnwrapImplicitCasts(memberAssignment.Expression);
                 var methodCallExpression = (MethodCallExpression)memberExpression.Expression;
                 var targetObject = (ParameterExpression)methodCallExpression.Object;
 
                 if (targetObject == null)
                     throw new InvalidOperationException("Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-                var memberName = memberExpression.Member.Name;
-                var declaringType = memberExpression.Member.DeclaringType;
-                if (declaringType == null)
-                    throw new InvalidOperationException("Somehow declaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
-
-                var isNullable = IsMemberNullable(memberName, declaringType);
+                var bindingDeclaringType = binding.Member.DeclaringType;
+                if (bindingDeclaringType == null)
+                    throw new InvalidOperationException("Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+                var bindingMemberName = binding.Member.Name;
+                var isNullable = IsMemberNullable(bindingMemberName, bindingDeclaringType);
 
                 var optionalIndicator = isNullable ? "?" : "";
 
-                return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberName, optionalIndicator, binding.Member.Name);
+                return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberExpression.Member.Name, optionalIndicator, bindingMemberName);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
+        }
+
+        static Expression UnwrapImplicitCasts(Expression expression)
+        {
+            if (expression is UnaryExpression)
+            {
+                expression = ((UnaryExpression) expression).Operand;
+            }
+            return expression;
         }
 
         static bool IsMemberNullable(string memberName, Type declaringType)
