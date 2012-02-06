@@ -13,22 +13,40 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var text = CypherReturnExpressionBuilder.BuildText(n => new ReturnPropertyQueryResult
+            var text = CypherReturnExpressionBuilder.BuildText(a => new ReturnPropertyQueryResult
             {
-                SomethingTotallyDifferent = n.As<FooNode>().Age
+                SomethingTotallyDifferent = a.As<Foo>().Age
             });
 
-            Assert.AreEqual("n.Age AS SomethingTotallyDifferent", text);
+            Assert.AreEqual("a.Age AS SomethingTotallyDifferent", text);
         }
 
-        public class FooNode
+        [Test]
+        public void ReturnMultipleProperties()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
+            // START a=node(1)
+            // RETURN a.Age AS SomethingTotallyDifferent, a.Name as FirstName
+
+            var text = CypherReturnExpressionBuilder.BuildText(a => new ReturnPropertyQueryResult
+            {
+                SomethingTotallyDifferent = a.As<Foo>().Age,
+                FirstName = a.As<Foo>().Name
+            });
+
+            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", text);
+        }
+
+        public class Foo
         {
             public int Age { get; set; }
+            public string Name { get; set; }
         }
 
         public class ReturnPropertyQueryResult
         {
             public int SomethingTotallyDifferent { get; set; }
+            public string FirstName { get; set; }
         }
     }
 }
