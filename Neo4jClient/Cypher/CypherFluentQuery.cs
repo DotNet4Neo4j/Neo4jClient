@@ -5,7 +5,8 @@ namespace Neo4jClient.Cypher
     [DebuggerDisplay("{Query.QueryText}")]
     public class CypherFluentQuery :
         ICypherFluentQueryPreStart,
-        ICypherFluentQueryStarted
+        ICypherFluentQueryStarted,
+        ICypherFluentQueryReturned
     {
         readonly CypherQueryBuilder builder;
 
@@ -38,9 +39,15 @@ namespace Neo4jClient.Cypher
             return this;
         }
 
-        ICypherFluentQuery ICypherFluentQueryStarted.Return(params string[] identities)
+        ICypherFluentQueryReturned ICypherFluentQueryStarted.Return(params string[] identities)
         {
             builder.ReturnIdentites = identities;
+            return this;
+        }
+
+        public ICypherFluentQueryReturned Limit(int? limit)
+        {
+            builder.Limit = limit;
             return this;
         }
 

@@ -8,6 +8,7 @@ namespace Neo4jClient.Cypher
     {
         readonly IList<CypherStartBit> startBits = new List<CypherStartBit>();
         public string[] ReturnIdentites { get; set; }
+        public int? Limit { get; set; }
 
         public void AddStartBit(string identity, params NodeReference[] nodeReferences)
         {
@@ -26,6 +27,7 @@ namespace Neo4jClient.Cypher
 
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteReturnClause(queryTextBuilder);
+            WriteLimitClause(queryTextBuilder, queryParameters);
 
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters);
         }
@@ -37,7 +39,7 @@ namespace Neo4jClient.Cypher
             return "{" + paramName + "}";
         }
 
-        void WriteStartClause(StringBuilder target, Dictionary<string, object> paramsDictionary)
+        void WriteStartClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
             target.Append("START ");
 
@@ -61,6 +63,12 @@ namespace Neo4jClient.Cypher
             if (ReturnIdentites == null) return;
             target.Append("\r\nRETURN ");
             target.Append(string.Join(", ", ReturnIdentites));
+        }
+
+        void WriteLimitClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
+        {
+            if (Limit == null) return;
+            target.AppendFormat("\r\nLIMIT {0}", CreateParameter(paramsDictionary, Limit));
         }
     }
 }

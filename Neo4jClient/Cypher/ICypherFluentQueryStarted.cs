@@ -4,6 +4,6 @@ namespace Neo4jClient.Cypher
     {
         ICypherFluentQueryStarted AddStartPoint(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQueryStarted AddStartPoint(string identity, params RelationshipReference[] relationshipReferences);
-        ICypherFluentQuery Return(params string[] identities);
+        ICypherFluentQueryReturned Return(params string[] identities);
     }
 }
