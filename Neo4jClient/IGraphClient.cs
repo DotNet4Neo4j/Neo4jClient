@@ -67,6 +67,6 @@ namespace Neo4jClient
 
         event OperationCompletedEventHandler OperationCompleted;
 
-        CypherQueryBuilder Cypher { get; }
+        ICypherFluentQueryPreStart Cypher { get; }
     }
 }

@@ -7,6 +7,7 @@ namespace Neo4jClient.Cypher
     public class CypherQueryBuilder
     {
         readonly IList<CypherStartBit> startBits = new List<CypherStartBit>();
+        public string[] ReturnIdentites { get; set; }
 
         public void AddStartBit(string identity, params NodeReference[] nodeReferences)
         {
@@ -24,6 +25,7 @@ namespace Neo4jClient.Cypher
             var queryParameters = new Dictionary<string, object>();
 
             WriteStartClause(queryTextBuilder, queryParameters);
+            WriteReturnClause(queryTextBuilder);
 
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters);
         }
@@ -52,6 +54,13 @@ namespace Neo4jClient.Cypher
             });
 
             target.Append(string.Join(", ", formattedStartBits));
+        }
+
+        void WriteReturnClause(StringBuilder target)
+        {
+            if (ReturnIdentites == null) return;
+            target.Append("\r\nRETURN ");
+            target.Append(string.Join(", ", ReturnIdentites));
         }
     }
 }

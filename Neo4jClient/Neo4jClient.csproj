@@ -56,9 +56,13 @@
     <Compile Include="ApiModels\Cypher\CypherApiTableResponse.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Cypher\CypherFluentQuery.cs" />
     <Compile Include="Cypher\CypherQueryBuilder.cs" />
     <Compile Include="Cypher\CypherStartBit.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />
+    <Compile Include="Cypher\ICypherFluentQuery.cs" />
+    <Compile Include="Cypher\ICypherFluentQueryPreStart.cs" />
+    <Compile Include="Cypher\ICypherFluentQueryStarted.cs" />
     <Compile Include="Cypher\ICypherQuery.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\EmitPropertyStep.cs" />

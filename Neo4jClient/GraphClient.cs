@@ -484,10 +484,10 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        CypherQueryBuilder cypher;
-        public CypherQueryBuilder Cypher
+        ICypherFluentQueryPreStart cypher;
+        public ICypherFluentQueryPreStart Cypher
         {
-            get { return cypher ?? (cypher = new CypherQueryBuilder()); }
+            get { return cypher ?? (cypher = new CypherFluentQuery(this)); }
         }
 
         public virtual string ExecuteScalarCypher(string query, IDictionary<string, object> parameters)
