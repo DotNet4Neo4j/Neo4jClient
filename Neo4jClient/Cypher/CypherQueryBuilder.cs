@@ -32,10 +32,11 @@ namespace Neo4jClient.Cypher
             returnDistinct = distinct;
         }
 
-        public void SetReturn<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+        public void SetReturn<TResult>(Expression<Func<ICypherResultItem, TResult>> expression, bool distinct)
             where TResult : new()
         {
             returnText = CypherReturnExpressionBuilder.BuildText(expression);
+            returnDistinct = distinct;
         }
 
         public ICypherQuery ToQuery()

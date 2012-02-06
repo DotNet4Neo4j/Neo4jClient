@@ -63,7 +63,14 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQueryReturned Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
             where TResult : new()
         {
-            builder.SetReturn(expression);
+            builder.SetReturn(expression, false);
+            return this;
+        }
+
+        public ICypherFluentQueryReturned ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            builder.SetReturn(expression, true);
             return this;
         }
 

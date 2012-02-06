@@ -12,5 +12,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryReturned ReturnDistinct(params string[] identities);
         ICypherFluentQueryReturned Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
             where TResult : new();
+        ICypherFluentQueryReturned ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new();
     }
 }
