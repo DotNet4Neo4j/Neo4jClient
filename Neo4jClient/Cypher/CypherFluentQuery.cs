@@ -50,7 +50,13 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryReturned Return(params string[] identities)
         {
-            builder.SetReturn(identities);
+            builder.SetReturn(identities, false);
+            return this;
+        }
+
+        public ICypherFluentQueryReturned ReturnDistinct(params string[] identities)
+        {
+            builder.SetReturn(identities, true);
             return this;
         }
 

@@ -11,6 +11,7 @@ namespace Neo4jClient.Cypher
         readonly IList<CypherStartBit> startBits = new List<CypherStartBit>();
 
         string returnText;
+        bool returnDistinct;
 
         public string MatchText { get; set; }
         public int? Limit { get; set; }
@@ -25,9 +26,10 @@ namespace Neo4jClient.Cypher
             startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
         }
 
-        public void SetReturn(string[] identities)
+        public void SetReturn(string[] identities, bool distinct)
         {
             returnText = string.Join(", ", identities);
+            returnDistinct = distinct;
         }
 
         public void SetReturn<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
@@ -85,6 +87,7 @@ namespace Neo4jClient.Cypher
         {
             if (returnText == null) return;
             target.Append("\r\nRETURN ");
+            if (returnDistinct) target.Append("distinct ");
             target.Append(returnText);
         }
 

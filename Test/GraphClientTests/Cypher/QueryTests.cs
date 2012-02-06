@@ -112,6 +112,26 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual(1, query.QueryParameters["p0"]);
         }
 
+        [Test]
+        public void ReturnUniqueResults()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-unique-results
+            // START a=node(1)
+            // MATCH (a)-->(b)
+            // RETURN distinct b
+
+            var client = new GraphClient(fakeEndpoint);
+            var query = client
+                .Cypher
+                .Start("a", (NodeReference)1)
+                .Match("(a)-->(b)")
+                .ReturnDistinct("b")
+                .Query;
+
+            Assert.AreEqual("START a=node({p0})\r\nMATCH (a)-->(b)\r\nRETURN distinct b", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+        }
+
         public class FooNode
         {
             public int Age { get; set; }
