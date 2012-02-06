@@ -19,7 +19,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             var query = client
                 .Cypher
                 .Start("n", (NodeReference) 1)
-                .Return("n")
+                .Return<object>("n")
                 .Query;
 
             Assert.AreEqual("START n=node({p0})\r\nRETURN n", query.QueryText);
@@ -38,10 +38,9 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 .Cypher
                 .Start("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)2)
-                .Return("a", "b")
                 .Query;
 
-            Assert.AreEqual("START a=node({p0}), b=node({p1})\r\nRETURN a, b", query.QueryText);
+            Assert.AreEqual("START a=node({p0}), b=node({p1})", query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
             Assert.AreEqual(2, query.QueryParameters["p1"]);
         }
@@ -58,7 +57,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             var query = client
                 .Cypher
                 .Start("n", (NodeReference)3, (NodeReference)4, (NodeReference)5, (NodeReference)1, (NodeReference)2)
-                .Return("n")
+                .Return<object>("n")
                 .Limit(3)
                 .Query;
 
@@ -84,7 +83,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 .Cypher
                 .Start("n", (NodeReference)3)
                 .Match("(n)--(x)")
-                .Return("x")
+                .Return<object>("x")
                 .Query;
 
             Assert.AreEqual("START n=node({p0})\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
@@ -125,7 +124,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 .Cypher
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
-                .ReturnDistinct("b")
+                .ReturnDistinct<object>("b")
                 .Query;
 
             Assert.AreEqual("START a=node({p0})\r\nMATCH (a)-->(b)\r\nRETURN distinct b", query.QueryText);

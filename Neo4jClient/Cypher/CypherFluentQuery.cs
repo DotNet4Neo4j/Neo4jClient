@@ -8,81 +8,83 @@ namespace Neo4jClient.Cypher
     public class CypherFluentQuery :
         ICypherFluentQueryPreStart,
         ICypherFluentQueryStarted,
-        ICypherFluentQueryReturned,
         ICypherFluentQueryMatched
     {
-        readonly CypherQueryBuilder builder;
+        protected readonly IGraphClient Client;
+        protected readonly CypherQueryBuilder Builder;
 
         public CypherFluentQuery(IGraphClient client)
+            : this(client, new CypherQueryBuilder())
         {
-            builder = new CypherQueryBuilder();
+        }
+
+        protected CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
+        {
+            Client = client;
+            Builder = builder;
         }
 
         public ICypherFluentQueryStarted Start(string identity, params NodeReference[] nodeReferences)
         {
-            builder.AddStartBit(identity, nodeReferences);
+            Builder.AddStartBit(identity, nodeReferences);
             return this;
         }
 
         public ICypherFluentQueryStarted Start(string identity, params RelationshipReference[] relationshipReferences)
         {
-            builder.AddStartBit(identity, relationshipReferences);
+            Builder.AddStartBit(identity, relationshipReferences);
             return this;
         }
 
         public ICypherFluentQueryStarted AddStartPoint(string identity, params NodeReference[] nodeReferences)
         {
-            builder.AddStartBit(identity, nodeReferences);
+            Builder.AddStartBit(identity, nodeReferences);
             return this;
         }
 
         public ICypherFluentQueryStarted AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
         {
-            builder.AddStartBit(identity, relationshipReferences);
+            Builder.AddStartBit(identity, relationshipReferences);
             return this;
         }
 
         public ICypherFluentQueryMatched Match(string matchText)
         {
-            builder.MatchText = matchText;
+            Builder.MatchText = matchText;
             return this;
         }
 
-        public ICypherFluentQueryReturned Return(params string[] identities)
-        {
-            builder.SetReturn(identities, false);
-            return this;
-        }
-
-        public ICypherFluentQueryReturned ReturnDistinct(params string[] identities)
-        {
-            builder.SetReturn(identities, true);
-            return this;
-        }
-
-        public ICypherFluentQueryReturned Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+        public ICypherFluentQueryReturned<TResult> Return<TResult>(string identity)
             where TResult : new()
         {
-            builder.SetReturn(expression, false);
-            return this;
+            Builder.SetReturn(identity, false);
+            return new CypherFluentQuery<TResult>(Client, Builder);
         }
 
-        public ICypherFluentQueryReturned ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(string identity)
             where TResult : new()
         {
-            builder.SetReturn(expression, true);
-            return this;
+            Builder.SetReturn(identity, true);
+            return new CypherFluentQuery<TResult>(Client, Builder);
         }
 
-        public ICypherFluentQueryReturned Limit(int? limit)
+        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new()
         {
-            builder.Limit = limit;
-            return this;
+            Builder.SetReturn(expression, false);
+            return new CypherFluentQuery<TResult>(Client, Builder);
+        }
+
+        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            Builder.SetReturn(expression, true);
+            return new CypherFluentQuery<TResult>(Client, Builder);
         }
 
         public ICypherQuery Query
         {
-            get { return builder.ToQuery(); }
+            get { return Builder.ToQuery(); }
         }
     }
 }

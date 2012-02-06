@@ -57,6 +57,7 @@
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\CypherFluentQuery.cs" />
+    <Compile Include="Cypher\CypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\CypherQueryBuilder.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilder.cs" />
     <Compile Include="Cypher\CypherStartBit.cs" />

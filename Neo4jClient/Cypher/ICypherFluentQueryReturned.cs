@@ -1,7 +1,10 @@
+using System.Collections.Generic;
+
 namespace Neo4jClient.Cypher
 {
-    public interface ICypherFluentQueryReturned : ICypherFluentQuery
+    public interface ICypherFluentQueryReturned<out TResult> : ICypherFluentQuery
     {
-        ICypherFluentQueryReturned Limit(int? limit);
+        ICypherFluentQueryReturned<TResult> Limit(int? limit);
+        IEnumerable<TResult> Results { get; }
     }
 }

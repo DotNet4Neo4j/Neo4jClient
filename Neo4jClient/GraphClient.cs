@@ -587,10 +587,12 @@ namespace Neo4jClient
             return results;
         }
 
-        public virtual TResult ExecuteGetCypherResults<TResult>(ICypherQuery query)
+        public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(ICypherQuery query)
             where TResult : new()
         {
-            CheckRoot();
+            return Enumerable.Empty<TResult>();
+
+            //CheckRoot();
 
             //var stopwatch = new Stopwatch();
             //stopwatch.Start();
@@ -619,7 +621,6 @@ namespace Neo4jClient
             //});
 
             //return result;
-            throw new NotImplementedException();
         }
 
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)

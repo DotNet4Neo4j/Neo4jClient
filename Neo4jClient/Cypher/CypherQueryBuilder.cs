@@ -26,9 +26,9 @@ namespace Neo4jClient.Cypher
             startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
         }
 
-        public void SetReturn(string[] identities, bool distinct)
+        public void SetReturn(string identity, bool distinct)
         {
-            returnText = string.Join(", ", identities);
+            returnText = identity;
             returnDistinct = distinct;
         }
 
