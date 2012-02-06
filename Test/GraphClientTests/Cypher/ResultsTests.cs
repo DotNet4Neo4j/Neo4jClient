@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using NSubstitute;
 using NUnit.Framework;
+using Neo4jClient.Cypher;
 
 namespace Neo4jClient.Test.GraphClientTests.Cypher
 {
@@ -16,9 +19,14 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var client = new GraphClient(fakeEndpoint);
-            var results = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+
+            client
+                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<ICypherQuery>())
+                .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
                 .Start("a", (NodeReference)1)
                 .Return(a => new ReturnPropertyQueryResult
                 {
