@@ -9,26 +9,26 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         [Test]
         public void ReturnProperty()
         {
-            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-return-property
-            // START n=node(1)
-            // RETURN n.FirstName
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
+            // START a=node(1)
+            // RETURN a.Age AS SomethingTotallyDifferent
 
             var text = CypherReturnExpressionBuilder.BuildText(n => new ReturnPropertyQueryResult
             {
-                ClientName = n.As<FooNode>().FirstName
+                SomethingTotallyDifferent = n.As<FooNode>().Age
             });
 
-            Assert.AreEqual("n.FirstName", text);
+            Assert.AreEqual("n.Age AS SomethingTotallyDifferent", text);
         }
 
         public class FooNode
         {
-            public string FirstName { get; set; }
+            public int Age { get; set; }
         }
 
         public class ReturnPropertyQueryResult
         {
-            public string ClientName { get; set; }
+            public int SomethingTotallyDifferent { get; set; }
         }
     }
 }

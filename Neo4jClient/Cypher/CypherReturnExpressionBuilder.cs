@@ -31,10 +31,7 @@ namespace Neo4jClient.Cypher
                 if (targetObject == null)
                     throw new InvalidOperationException("Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-                // TODO: Store this for ordering later
-                //binding.Member.Name
-
-                return targetObject.Name + "." + memberExpression.Member.Name;
+                return string.Format("{0}.{1} AS {2}", targetObject.Name, memberExpression.Member.Name, binding.Member.Name);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
