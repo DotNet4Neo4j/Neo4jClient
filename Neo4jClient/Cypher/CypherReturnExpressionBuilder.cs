@@ -31,10 +31,35 @@ namespace Neo4jClient.Cypher
                 if (targetObject == null)
                     throw new InvalidOperationException("Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-                return string.Format("{0}.{1} AS {2}", targetObject.Name, memberExpression.Member.Name, binding.Member.Name);
+                var memberName = memberExpression.Member.Name;
+                var declaringType = memberExpression.Member.DeclaringType;
+                if (declaringType == null)
+                    throw new InvalidOperationException("Somehow declaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+
+                var isNullable = IsMemberNullable(memberName, declaringType);
+
+                var optionalIndicator = isNullable ? "?" : "";
+
+                return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberName, optionalIndicator, binding.Member.Name);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
+        }
+
+        static bool IsMemberNullable(string memberName, Type declaringType)
+        {
+            var propertyInfo = declaringType.GetProperty(memberName);
+            var fieldInfo = declaringType.GetField(memberName);
+            Type memberType = null;
+            if (propertyInfo != null)
+                memberType = propertyInfo.PropertyType;
+            else if (fieldInfo != null)
+                memberType = fieldInfo.FieldType;
+            var isNullable =
+                memberType != null &&
+                memberType.IsGenericType &&
+                memberType.GetGenericTypeDefinition() == typeof (Nullable<>);
+            return isNullable;
         }
     }
 }
