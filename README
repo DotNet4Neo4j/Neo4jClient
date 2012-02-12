@@ -1,6 +1,6 @@
 A .NET client for the neo4j REST API.
 
-Supports basic CRUD operations, Gremlin queries via a fluent interface, and some indexing operations.
+Supports basic CRUD operations, Gremlin and Cypher queries via a fluent interface, and some indexing operations.
 
 Grab the latest drop straight from: http://nuget.org/List/Packages/Neo4jClient
 
