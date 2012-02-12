@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Neo4jClient.Cypher;
 
-namespace Neo4jClient.Test.GraphClientTests.Cypher
+namespace Neo4jClient.Test.Cypher
 {
     [TestFixture]
     public class CypherReturnExpressionBuilderTests

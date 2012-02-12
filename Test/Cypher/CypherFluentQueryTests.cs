@@ -1,13 +1,13 @@
 ﻿using System;
+using NSubstitute;
 using NUnit.Framework;
+using Neo4jClient.Cypher;
 
-namespace Neo4jClient.Test.GraphClientTests.Cypher
+namespace Neo4jClient.Test.Cypher
 {
     [TestFixture]
-    public class QueryTests
+    public class CypherFluentQueryTests
     {
-        readonly Uri fakeEndpoint = new Uri("http://test.example.com/foo");
-
         [Test]
         public void StartAndReturnNodeById()
         {
@@ -15,9 +15,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // START n=node(1)
             // RETURN n
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference) 1)
                 .Return<object>("n")
                 .Query;
@@ -33,9 +32,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // START a=node(1), b=node(2)
             // RETURN a,b
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)2)
                 .Query;
@@ -53,9 +51,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // RETURN n
             // LIMIT 3
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)4, (NodeReference)5, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
                 .Limit(3)
@@ -78,9 +75,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // MATCH (n)--(x)
             // RETURN x
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Match("(n)--(x)")
                 .Return<object>("x")
@@ -97,9 +93,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Return(a => new ReturnPropertyQueryResult
                 {
@@ -119,9 +114,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // MATCH (a)-->(b)
             // RETURN distinct b
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
                 .ReturnDistinct<object>("b")
@@ -139,9 +133,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             // MATCH (a)-->(b)
             // RETURN distinct b
 
-            var client = new GraphClient(fakeEndpoint);
-            var query = client
-                .Cypher
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
                 .ReturnDistinct(b => new FooNode
