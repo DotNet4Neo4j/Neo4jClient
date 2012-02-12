@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
@@ -10,8 +9,6 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
     [TestFixture]
     public class ResultsTests
     {
-        readonly Uri fakeEndpoint = new Uri("http://test.example.com/foo");
-
         [Test]
         public void ReturnColumnAlias()
         {
