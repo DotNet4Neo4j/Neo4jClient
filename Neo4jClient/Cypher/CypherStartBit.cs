@@ -4,20 +4,20 @@ namespace Neo4jClient.Cypher
 {
     internal class CypherStartBit
     {
-        readonly string identity;
+        readonly string identifier;
         readonly string lookupType;
         readonly IEnumerable<int> lookupIds;
 
-        public CypherStartBit(string identity, string lookupType, IEnumerable<int> lookupIds)
+        public CypherStartBit(string identifier, string lookupType, IEnumerable<int> lookupIds)
         {
-            this.identity = identity;
+            this.identifier = identifier;
             this.lookupType = lookupType;
             this.lookupIds = lookupIds;
         }
 
-        public string Identity
+        public string Identifier
         {
-            get { return identity; }
+            get { return identifier; }
         }
 
         public string LookupType

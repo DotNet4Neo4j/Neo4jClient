@@ -104,7 +104,7 @@ namespace Neo4jClient.Cypher
 
                 var lookupContent = string.Join(", ", lookupIdParameterNames);
 
-                return string.Format("{0}={1}({2})", bit.Identity, bit.LookupType, lookupContent);
+                return string.Format("{0}={1}({2})", bit.Identifier, bit.LookupType, lookupContent);
             });
 
             target.Append(string.Join(", ", formattedStartBits));
