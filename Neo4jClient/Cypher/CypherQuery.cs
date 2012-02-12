@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Neo4jClient.Cypher
 {
+    [DebuggerDisplay("{DebugQueryText}")]
     public class CypherQuery : ICypherQuery
     {
         readonly string queryText;
@@ -21,6 +24,19 @@ namespace Neo4jClient.Cypher
         public string QueryText
         {
             get { return queryText; }
+        }
+
+        protected string DebugQueryText
+        {
+            get
+            {
+                var text = queryParameters
+                    .Keys
+                    .Aggregate(queryText, (current, paramName)
+                        => current.Replace("{" + paramName + "}", queryParameters[paramName].ToString()));
+
+                return text;
+            }
         }
     }
 }

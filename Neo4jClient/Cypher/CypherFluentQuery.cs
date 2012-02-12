@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
 {
-    [DebuggerDisplay("{Query.QueryText}")]
     public class CypherFluentQuery :
         ICypherFluentQueryPreStart,
         ICypherFluentQueryStarted,
