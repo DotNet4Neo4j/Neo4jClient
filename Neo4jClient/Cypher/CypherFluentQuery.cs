@@ -83,7 +83,7 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherQuery Query
+        public CypherQuery Query
         {
             get { return Builder.ToQuery(); }
         }

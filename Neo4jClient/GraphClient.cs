@@ -556,7 +556,7 @@ namespace Neo4jClient
             return results;
         }
 
-        public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(ICypherQuery query)
+        public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
             where TResult : new()
         {
             CheckRoot();

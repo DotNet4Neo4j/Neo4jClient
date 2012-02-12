@@ -69,7 +69,6 @@
     <Compile Include="Cypher\ICypherFluentQueryReturnable.cs" />
     <Compile Include="Cypher\ICypherFluentQueryReturned.cs" />
     <Compile Include="Cypher\ICypherFluentQueryStarted.cs" />
-    <Compile Include="Cypher\ICypherQuery.cs" />
     <Compile Include="Cypher\ICypherResultItem.cs" />
     <Compile Include="Deserializer\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />

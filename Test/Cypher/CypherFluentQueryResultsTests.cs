@@ -19,7 +19,7 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IGraphClient>();
 
             client
-                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<ICypherQuery>())
+                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
                 .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
 
             var cypher = new CypherFluentQuery(client);

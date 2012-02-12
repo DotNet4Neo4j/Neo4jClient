@@ -9,7 +9,7 @@ namespace Neo4jClient.ApiModels.Cypher
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
 
-        public CypherApiQuery(ICypherQuery query)
+        public CypherApiQuery(CypherQuery query)
         {
             queryText = query.QueryText;
             queryParameters = query.QueryParameters ?? new Dictionary<string, object>();

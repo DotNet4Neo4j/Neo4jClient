@@ -5,7 +5,7 @@ using System.Linq;
 namespace Neo4jClient.Cypher
 {
     [DebuggerDisplay("{DebugQueryText}")]
-    public class CypherQuery : ICypherQuery
+    public class CypherQuery
     {
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;

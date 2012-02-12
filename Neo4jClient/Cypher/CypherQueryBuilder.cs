@@ -70,7 +70,7 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
-        public ICypherQuery ToQuery()
+        public CypherQuery ToQuery()
         {
             var queryTextBuilder = new StringBuilder();
             var queryParameters = new Dictionary<string, object>();
