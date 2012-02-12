@@ -33,7 +33,8 @@ namespace Neo4jClient.Cypher
                 var text = queryParameters
                     .Keys
                     .Aggregate(queryText, (current, paramName)
-                        => current.Replace("{" + paramName + "}", queryParameters[paramName].ToString()));
+                        => current.Replace("{" + paramName + "}", queryParameters[paramName].ToString()))
+                    .Replace("\r\n", "   ");
 
                 return text;
             }
