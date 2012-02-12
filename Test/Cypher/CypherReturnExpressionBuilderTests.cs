@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Linq.Expressions;
+using NUnit.Framework;
 using Neo4jClient.Cypher;
 
 namespace Neo4jClient.Test.Cypher
@@ -13,10 +15,13 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var text = CypherReturnExpressionBuilder.BuildText(a => new ReturnPropertyQueryResult
-            {
-                SomethingTotallyDifferent = a.As<Foo>().Age
-            });
+            Expression<Func<ICypherResultItem, ReturnPropertyQueryResult>> expression =
+                a => new ReturnPropertyQueryResult
+                {
+                    SomethingTotallyDifferent = a.As<Foo>().Age
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
 
             Assert.AreEqual("a.Age AS SomethingTotallyDifferent", text);
         }
@@ -28,11 +33,14 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent, a.Name as FirstName
 
-            var text = CypherReturnExpressionBuilder.BuildText(a => new ReturnPropertyQueryResult
-            {
-                SomethingTotallyDifferent = a.As<Foo>().Age,
-                FirstName = a.As<Foo>().Name
-            });
+            Expression<Func<ICypherResultItem, ReturnPropertyQueryResult>> expression =
+                a => new ReturnPropertyQueryResult
+                {
+                    SomethingTotallyDifferent = a.As<Foo>().Age,
+                    FirstName = a.As<Foo>().Name
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
 
             Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", text);
         }
@@ -45,11 +53,14 @@ namespace Neo4jClient.Test.Cypher
             // MATCH john-[:friend]->()-[:friend]->fof
             // RETURN john.Age, fof.Name
 
-            var text = CypherReturnExpressionBuilder.BuildText((john, fof) => new ReturnPropertyQueryResult
-            {
-                SomethingTotallyDifferent = john.As<Foo>().Age,
-                FirstName = fof.As<Foo>().Name
-            });
+            Expression<Func<ICypherResultItem, ICypherResultItem, ReturnPropertyQueryResult>> expression =
+                (john, fof) => new ReturnPropertyQueryResult
+                {
+                    SomethingTotallyDifferent = john.As<Foo>().Age,
+                    FirstName = fof.As<Foo>().Name
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
 
             Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name AS FirstName", text);
         }
@@ -61,11 +72,14 @@ namespace Neo4jClient.Test.Cypher
             // START n=node(1)
             // RETURN n.Age AS Age, n.NumberOfCats? AS NumberOfCats
 
-            var text = CypherReturnExpressionBuilder.BuildText(n => new OptionalPropertiesQueryResult
-            {
-                Age = n.As<Foo>().Age,
-                NumberOfCats = n.As<Foo>().NumberOfCats
-            });
+            Expression<Func<ICypherResultItem, OptionalPropertiesQueryResult>> expression =
+                n => new OptionalPropertiesQueryResult
+                {
+                    Age = n.As<Foo>().Age,
+                    NumberOfCats = n.As<Foo>().NumberOfCats
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
 
             Assert.AreEqual("n.Age AS Age, n.NumberOfCats? AS NumberOfCats", text);
         }
