@@ -38,6 +38,23 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         }
 
         [Test]
+        public void ReturnMultiplePropertiesFromMultipleColumns()
+        {
+            // http://docs.neo4j.org/chunked/milestone/cypher-query-lang.html
+            // START john=node(1)
+            // MATCH john-[:friend]->()-[:friend]->fof
+            // RETURN john.Age, fof.Name
+
+            var text = CypherReturnExpressionBuilder.BuildText((john, fof) => new ReturnPropertyQueryResult
+            {
+                SomethingTotallyDifferent = john.As<Foo>().Age,
+                FirstName = fof.As<Foo>().Name
+            });
+
+            Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name AS FirstName", text);
+        }
+
+        [Test]
         public void NullablePropertiesShouldBeQueriedAsCypherOptionalProperties()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-optional-properties

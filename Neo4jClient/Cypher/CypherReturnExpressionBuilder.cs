@@ -6,8 +6,7 @@ namespace Neo4jClient.Cypher
 {
     public class CypherReturnExpressionBuilder
     {
-        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
-            where TResult : new()
+        static string BuildText(LambdaExpression expression)
         {
             if (expression.Body.NodeType != ExpressionType.MemberInit)
                 throw new ArgumentException("The expression must be constructed as an object initialized. For example: n => new MyResultType { Foo = n.Bar }", "expression");
@@ -68,6 +67,102 @@ namespace Neo4jClient.Cypher
                 memberType.IsGenericType &&
                 memberType.GetGenericTypeDefinition() == typeof (Nullable<>);
             return isNullable;
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
+        }
+
+        public static string BuildText<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
+            where TResult : new()
+        {
+            return BuildText((LambdaExpression)expression);
         }
     }
 }
