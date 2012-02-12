@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Neo4jClient.Cypher
 {
+    [DebuggerDisplay("{Query.DebugQueryText}")]
     public class CypherFluentQuery<TResult> :
         CypherFluentQuery,
         ICypherFluentQueryReturned<TResult>
