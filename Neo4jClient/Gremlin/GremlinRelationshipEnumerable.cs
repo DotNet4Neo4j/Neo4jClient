@@ -37,7 +37,7 @@ namespace Neo4jClient.Gremlin
             return ((IEnumerable<RelationshipInstance>)this).GetEnumerator();
         }
 
-        IGraphClient IGremlinQuery.Client
+        IGraphClient IAttachedReference.Client
         {
             get { return client; }
         }

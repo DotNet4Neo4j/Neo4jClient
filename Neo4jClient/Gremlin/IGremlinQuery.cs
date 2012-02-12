@@ -2,9 +2,8 @@
 
 namespace Neo4jClient.Gremlin
 {
-    public interface IGremlinQuery
+    public interface IGremlinQuery : IAttachedReference
     {
-        IGraphClient Client { get; }
         string QueryText { get;}
         IDictionary<string, object> QueryParameters { get; }
         IList<string> QueryDeclarations { get; }

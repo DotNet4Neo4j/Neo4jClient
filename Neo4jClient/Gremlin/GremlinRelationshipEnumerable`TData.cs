@@ -53,7 +53,7 @@ namespace Neo4jClient.Gremlin
             return GetEnumeratorInternal();
         }
 
-        IGraphClient IGremlinQuery.Client
+        IGraphClient IAttachedReference.Client
         {
             get { return client; }
         }

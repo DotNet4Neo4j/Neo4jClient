@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
-    public class Node<TNode> : IGremlinQuery
+    public class Node<TNode> : IGremlinQuery, IAttachedReference
     {
         readonly TNode data;
         readonly NodeReference<TNode> reference;
@@ -34,9 +35,17 @@ namespace Neo4jClient
             get { return data; }
         }
 
-        IGraphClient IGremlinQuery.Client
+        public ICypherFluentQueryStarted StartCypher(string identity)
         {
-            get { return ((IGremlinQuery)reference).Client; }
+            var client = ((IAttachedReference) this).Client;
+            var query = new CypherFluentQuery(client)
+                .AddStartPoint(identity, Reference);
+            return query;
+        }
+
+        IGraphClient IAttachedReference.Client
+        {
+            get { return ((IAttachedReference)reference).Client; }
         }
 
         string IGremlinQuery.QueryText

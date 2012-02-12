@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
     [DebuggerDisplay("Node {id}")]
-    public class NodeReference : IGremlinQuery
+    public class NodeReference : IGremlinQuery, IAttachedReference
     {
         public static readonly RootNode RootNode = new RootNode();
 
@@ -64,7 +63,7 @@ namespace Neo4jClient
             return id;
         }
 
-        IGraphClient IGremlinQuery.Client
+        IGraphClient IAttachedReference.Client
         {
             get { return client; }
         }
