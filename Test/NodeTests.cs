@@ -17,7 +17,7 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        public void QueryShouldReturnSimpleVectorStep()
+        public void GremlinQueryShouldReturnSimpleVectorStep()
         {
             var client = Substitute.For<IGraphClient>();
             var reference = new NodeReference<object>(123, client);
@@ -25,6 +25,27 @@ namespace Neo4jClient.Test
             var query = (IGremlinQuery)node;
             Assert.AreEqual("g.v(p0)", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void CypherQueryShouldIncludeNodeAsStartBit()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var reference = new NodeReference<object>(123, client);
+            var node = new Node<object>(new object(), reference);
+            var query = node.StartCypher("foo").Query;
+            Assert.AreEqual("START foo=node({p0})", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void CypherQueryShouldPreserveClientReference()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var reference = new NodeReference<object>(123, client);
+            var node = new Node<object>(new object(), reference);
+            var queryBuilder = (IAttachedReference)node.StartCypher("foo");
+            Assert.AreEqual(client, queryBuilder.Client);
         }
 
         [Test]

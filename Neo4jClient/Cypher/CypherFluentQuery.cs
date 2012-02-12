@@ -6,7 +6,8 @@ namespace Neo4jClient.Cypher
     public class CypherFluentQuery :
         ICypherFluentQueryPreStart,
         ICypherFluentQueryStarted,
-        ICypherFluentQueryMatched
+        ICypherFluentQueryMatched,
+        IAttachedReference
     {
         protected readonly IGraphClient Client;
         protected readonly CypherQueryBuilder Builder;
@@ -83,6 +84,11 @@ namespace Neo4jClient.Cypher
         public ICypherQuery Query
         {
             get { return Builder.ToQuery(); }
+        }
+
+        IGraphClient IAttachedReference.Client
+        {
+            get { return Client; }
         }
     }
 }
