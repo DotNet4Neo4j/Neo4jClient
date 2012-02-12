@@ -13,8 +13,8 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryReturned<TResult> Limit(int? limit)
         {
-            Builder.Limit = limit;
-            return this;
+            var newBuilder = Builder.SetLimit(limit);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public IEnumerable<TResult> Results

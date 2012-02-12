@@ -26,60 +26,60 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryStarted Start(string identity, params NodeReference[] nodeReferences)
         {
-            Builder.AddStartBit(identity, nodeReferences);
-            return this;
+            var newBuilder = Builder.AddStartBit(identity, nodeReferences);
+            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQueryStarted Start(string identity, params RelationshipReference[] relationshipReferences)
         {
-            Builder.AddStartBit(identity, relationshipReferences);
-            return this;
+            var newBuilder = Builder.AddStartBit(identity, relationshipReferences);
+            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQueryStarted AddStartPoint(string identity, params NodeReference[] nodeReferences)
         {
-            Builder.AddStartBit(identity, nodeReferences);
-            return this;
+            var newBuilder = Builder.AddStartBit(identity, nodeReferences);
+            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQueryStarted AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
         {
-            Builder.AddStartBit(identity, relationshipReferences);
-            return this;
+            var newBuilder = Builder.AddStartBit(identity, relationshipReferences);
+            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQueryMatched Match(string matchText)
         {
-            Builder.MatchText = matchText;
-            return this;
+            var newBuilder = Builder.SetMatchText(matchText);
+            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQueryReturned<TResult> Return<TResult>(string identity)
             where TResult : new()
         {
-            Builder.SetReturn(identity, false);
-            return new CypherFluentQuery<TResult>(Client, Builder);
+            var newBuilder = Builder.SetReturn(identity, false);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(string identity)
             where TResult : new()
         {
-            Builder.SetReturn(identity, true);
-            return new CypherFluentQuery<TResult>(Client, Builder);
+            var newBuilder = Builder.SetReturn(identity, true);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
             where TResult : new()
         {
-            Builder.SetReturn(expression, false);
-            return new CypherFluentQuery<TResult>(Client, Builder);
+            var newBuilder = Builder.SetReturn(expression, false);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
             where TResult : new()
         {
-            Builder.SetReturn(expression, true);
-            return new CypherFluentQuery<TResult>(Client, Builder);
+            var newBuilder = Builder.SetReturn(expression, true);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherQuery Query

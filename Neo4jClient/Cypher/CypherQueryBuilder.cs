@@ -8,35 +8,67 @@ namespace Neo4jClient.Cypher
 {
     public class CypherQueryBuilder
     {
-        readonly IList<CypherStartBit> startBits = new List<CypherStartBit>();
-
+        IList<CypherStartBit> startBits = new List<CypherStartBit>();
+        string matchText;
         string returnText;
         bool returnDistinct;
+        int? limit;
 
-        public string MatchText { get; set; }
-        public int? Limit { get; set; }
-
-        public void AddStartBit(string identity, params NodeReference[] nodeReferences)
+        CypherQueryBuilder Clone()
         {
-            startBits.Add(new CypherStartBit(identity, "node", nodeReferences.Select(r => r.Id).ToArray()));
+            return new CypherQueryBuilder
+            {
+                matchText = matchText,
+                returnText = returnText,
+                returnDistinct = returnDistinct,
+                limit = limit,
+                startBits = startBits
+            };
         }
 
-        public void AddStartBit(string identity, params RelationshipReference[] relationshipReferences)
+        public CypherQueryBuilder AddStartBit(string identity, params NodeReference[] nodeReferences)
         {
-            startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
+            var newBuilder = Clone();
+            newBuilder.startBits.Add(new CypherStartBit(identity, "node", nodeReferences.Select(r => r.Id).ToArray()));
+            return newBuilder;
         }
 
-        public void SetReturn(string identity, bool distinct)
+        public CypherQueryBuilder AddStartBit(string identity, params RelationshipReference[] relationshipReferences)
         {
-            returnText = identity;
-            returnDistinct = distinct;
+            var newBuilder = Clone();
+            newBuilder.startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
+            return newBuilder;
         }
 
-        public void SetReturn<TResult>(Expression<Func<ICypherResultItem, TResult>> expression, bool distinct)
+        public CypherQueryBuilder SetMatchText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.matchText = text;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetReturn(string identity, bool distinct)
+        {
+            var newBuilder = Clone();
+            newBuilder.returnText = identity;
+            newBuilder.returnDistinct = distinct;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetReturn<TResult>(Expression<Func<ICypherResultItem, TResult>> expression, bool distinct)
             where TResult : new()
         {
-            returnText = CypherReturnExpressionBuilder.BuildText(expression);
-            returnDistinct = distinct;
+            var newBuilder = Clone();
+            newBuilder.returnText = CypherReturnExpressionBuilder.BuildText(expression);
+            newBuilder.returnDistinct = distinct;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetLimit(int? count)
+        {
+            var newBuilder = Clone();
+            newBuilder.limit = count;
+            return newBuilder;
         }
 
         public ICypherQuery ToQuery()
@@ -80,8 +112,8 @@ namespace Neo4jClient.Cypher
 
         void WriteMatchClause(StringBuilder target)
         {
-            if (MatchText == null) return;
-            target.AppendFormat("\r\nMATCH {0}", MatchText);
+            if (matchText == null) return;
+            target.AppendFormat("\r\nMATCH {0}", matchText);
         }
 
         void WriteReturnClause(StringBuilder target)
@@ -94,8 +126,8 @@ namespace Neo4jClient.Cypher
 
         void WriteLimitClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
-            if (Limit == null) return;
-            target.AppendFormat("\r\nLIMIT {0}", CreateParameter(paramsDictionary, Limit));
+            if (limit == null) return;
+            target.AppendFormat("\r\nLIMIT {0}", CreateParameter(paramsDictionary, limit));
         }
     }
 }
