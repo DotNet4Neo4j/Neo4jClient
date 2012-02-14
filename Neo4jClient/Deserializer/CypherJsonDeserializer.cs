@@ -60,6 +60,16 @@ namespace Neo4jClient.Deserializer
                         return typeof (NodeApiResponse<>).MakeGenericType(nodeType);
                     },
                     MutationCallback = n => n.GetType().GetMethod("ToNode").Invoke(n, new object[] { client })
+                },
+                new TypeMapping
+                {
+                    PropertyTypeToTriggerMapping = typeof(RelationshipInstance<>),
+                    DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                    {
+                        var relationshipType = t.GetGenericArguments();
+                        return typeof (RelationshipApiResponse<>).MakeGenericType(relationshipType);
+                    },
+                    MutationCallback = n => n.GetType().GetMethod("ToRelationshipInstance").Invoke(n, new object[] { client })
                 }
             };
 
