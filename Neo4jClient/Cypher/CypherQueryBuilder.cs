@@ -73,7 +73,7 @@ namespace Neo4jClient.Cypher
         public CypherQueryBuilder SetOrderBy(OrderByType orderByType, params string[] properties)
         {
             var newBuilder = Clone();
-            newBuilder.orderBy = string.Join(" ", properties);
+            newBuilder.orderBy = string.Join(", ", properties);
 
             if (orderByType == OrderByType.Descending)
                 newBuilder.orderBy += " DESC";
