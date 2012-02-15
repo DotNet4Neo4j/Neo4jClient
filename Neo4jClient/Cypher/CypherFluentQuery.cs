@@ -1,14 +1,13 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq.Expressions;
+﻿using System.Diagnostics;
 
 namespace Neo4jClient.Cypher
 {
     [DebuggerDisplay("{Query.DebugQueryText}")]
-    public class CypherFluentQuery :
+    public partial class CypherFluentQuery :
         ICypherFluentQueryPreStart,
         ICypherFluentQueryStarted,
         ICypherFluentQueryMatched,
+        ICypherFluentQueryWhere,
         IAttachedReference
     {
         protected readonly IGraphClient Client;
@@ -55,34 +54,6 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(string identity)
-            where TResult : new()
-        {
-            var newBuilder = Builder.SetReturn(identity, false);
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(string identity)
-            where TResult : new()
-        {
-            var newBuilder = Builder.SetReturn(identity, true);
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
-        }
-
-        ICypherFluentQueryReturned<TResult> Return<TResult>(LambdaExpression expression)
-            where TResult : new()
-        {
-            var newBuilder = Builder.SetReturn(expression, false);
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
-        }
-
-        ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
-            where TResult : new()
-        {
-            var newBuilder = Builder.SetReturn(expression, true);
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
-        }
-
         public CypherQuery Query
         {
             get { return Builder.ToQuery(); }
@@ -91,204 +62,6 @@ namespace Neo4jClient.Cypher
         IGraphClient IAttachedReference.Client
         {
             get { return Client; }
-        }
-
-
-
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return Return<TResult>((LambdaExpression)expression);
-        }
-
-
-
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
-        }
-
-        public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
-            where TResult : new()
-        {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
         }
     }
 }

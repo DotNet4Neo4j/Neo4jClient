@@ -55,6 +55,10 @@
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Cypher\CypherFluentQuery`Return.cs" />
+    <Compile Include="Cypher\CypherFluentQuery`Where.cs" />
+    <Compile Include="Cypher\CypherWhereExpressionBuilder.cs" />
+    <Compile Include="Cypher\ICypherFluentQueryWhere.cs" />
     <Compile Include="Cypher\OrderByType.cs" />
     <Compile Include="Deserializer\CommonDeserializerMethods.cs" />
     <Compile Include="Deserializer\CypherJsonDeserializer.cs" />

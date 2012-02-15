@@ -313,9 +313,30 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(1, query.QueryParameters["p0"]);
         }
 
+        [Test]
+        public void WhereBooleanOperations()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
+            // START n=node(3, 1)
+            // WHERE (n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias")
+            // RETURN n
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooNode>(n => (n.Age < 30 && n.Name == "Tobias") || n.Name != "Tobias")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (((n.Age < 30) AND (n.Name = 'Tobias')) OR (n.Name != 'Tobias'))\r\nRETURN n".Replace("'","\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+        }
+
         public class FooNode
         {
             public int Age { get; set; }
+            public string Name { get; set; }
         }
 
         public class ReturnPropertyQueryResult
