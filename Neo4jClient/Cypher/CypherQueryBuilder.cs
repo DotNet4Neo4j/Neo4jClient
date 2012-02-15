@@ -9,6 +9,7 @@ namespace Neo4jClient.Cypher
     {
         IList<CypherStartBit> startBits = new List<CypherStartBit>();
         string matchText;
+        string whereText;
         string returnText;
         bool returnDistinct;
         int? limit;
@@ -44,6 +45,13 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.matchText = text;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetWhere(LambdaExpression expression)
+        {
+            var newBuilder = Clone();
+            newBuilder.whereText = CypherWhereExpressionBuilder.BuildText(expression);
             return newBuilder;
         }
 
@@ -88,6 +96,7 @@ namespace Neo4jClient.Cypher
 
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
+            WriteWhereClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteLimitClause(queryTextBuilder, queryParameters);
             WriteOrderByClause(queryTextBuilder, queryParameters);
@@ -125,6 +134,13 @@ namespace Neo4jClient.Cypher
         {
             if (matchText == null) return;
             target.AppendFormat("\r\nMATCH {0}", matchText);
+        }
+
+        void WriteWhereClause(StringBuilder target)
+        {
+            if (returnText == null) return;
+            target.Append("\r\nWHERE ");
+            target.Append(whereText);
         }
 
         void WriteReturnClause(StringBuilder target)
