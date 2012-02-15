@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -13,6 +12,7 @@ namespace Neo4jClient.Cypher
         string returnText;
         bool returnDistinct;
         int? limit;
+        string orderBy;
 
         CypherQueryBuilder Clone()
         {
@@ -70,6 +70,17 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        public CypherQueryBuilder SetOrderBy(OrderByType orderByType, params string[] properties)
+        {
+            var newBuilder = Clone();
+            newBuilder.orderBy = string.Join(" ", properties);
+
+            if (orderByType == OrderByType.Descending)
+                newBuilder.orderBy += " DESC";
+
+            return newBuilder;
+        }
+
         public CypherQuery ToQuery()
         {
             var queryTextBuilder = new StringBuilder();
@@ -79,6 +90,7 @@ namespace Neo4jClient.Cypher
             WriteMatchClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteLimitClause(queryTextBuilder, queryParameters);
+            WriteOrderByClause(queryTextBuilder, queryParameters);
 
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters);
         }
@@ -127,6 +139,12 @@ namespace Neo4jClient.Cypher
         {
             if (limit == null) return;
             target.AppendFormat("\r\nLIMIT {0}", CreateParameter(paramsDictionary, limit));
+        }
+
+        void WriteOrderByClause(StringBuilder target, IDictionary<string, object> paramsDictionary )
+        {
+            if (string.IsNullOrEmpty(orderBy)) return;
+            target.AppendFormat("\r\nORDER BY {0}", CreateParameter(paramsDictionary, orderBy));
         }
     }
 }

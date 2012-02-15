@@ -68,6 +68,50 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void OrderNodesByProperty()
+        {
+            // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-order-nodes-by-property
+            // START n=node(3,1,2)
+            // RETURN n
+            // ORDER BY n.name
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference) 3, (NodeReference) 2, (NodeReference) 1)
+                .Return<object>("n")
+                .OrderBy("n.name")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual("n.name", query.QueryParameters["p3"]);
+        }
+
+        [Test]
+        public void OrderNodesByPropertyDescending()
+        {
+            // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-order-nodes-by-property
+            // START n=node(3,1,2)
+            // RETURN n
+            // ORDER BY n.name
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)2, (NodeReference)1)
+                .Return<object>("n")
+                .OrderByDescending("n.name")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual("n.name DESC", query.QueryParameters["p3"]);
+        }
+
+        [Test]
         public void MatchRelatedNodes()
         {
             // http://docs.neo4j.org/chunked/1.6/query-match.html#match-related-nodes

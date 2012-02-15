@@ -55,6 +55,7 @@
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Cypher\OrderByType.cs" />
     <Compile Include="Deserializer\CommonDeserializerMethods.cs" />
     <Compile Include="Deserializer\CypherJsonDeserializer.cs" />
     <Compile Include="Cypher\CypherFluentQuery.cs" />
