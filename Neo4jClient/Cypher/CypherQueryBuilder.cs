@@ -98,6 +98,8 @@ namespace Neo4jClient.Cypher
 
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
+
+            //ToDo incorporate parameters into Where Clause
             WriteWhereClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteLimitClause(queryTextBuilder, queryParameters);

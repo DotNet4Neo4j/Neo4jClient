@@ -1,5 +1,4 @@
-﻿using System;
-using NSubstitute;
+﻿using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 
@@ -272,7 +271,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START a=node({p0})\r\nWHERE (n.age < 30 and n.name = 'Tobias') or not(n.name = 'Tobias')\r\nRETURN n".Replace("'","\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (((n.Age < 30) AND (n.Name = 'Tobias')) OR (n.Name != 'Tobias'))\r\nRETURN n".Replace("'","\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
         }
