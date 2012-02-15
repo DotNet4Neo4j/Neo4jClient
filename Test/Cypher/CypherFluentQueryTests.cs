@@ -94,6 +94,36 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnMiddleTwo()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-skip.html#skip-return-middle-two
+            // START n=node(3, 4, 5, 1, 2) 
+            // RETURN n 
+            // ORDER BY n.name 
+            // SKIP 1
+            // LIMIT 2
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)4, (NodeReference)5, (NodeReference)1, (NodeReference)2)
+                .Return<object>("n")
+                .OrderBy("n.name")
+                .Skip(1)
+                .Limit(2)
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2}, {p3}, {p4})\r\nRETURN n\r\nORDER BY {p5}\r\nSKIP {p6}\r\nLIMIT {p7}", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(4, query.QueryParameters["p1"]);
+            Assert.AreEqual(5, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p3"]);
+            Assert.AreEqual(2, query.QueryParameters["p4"]);
+            Assert.AreEqual("n.name", query.QueryParameters["p5"]);
+            Assert.AreEqual(1, query.QueryParameters["p6"]);
+            Assert.AreEqual(2, query.QueryParameters["p7"]);
+        }
+
+        [Test]
         public void OrderNodesByNull()
         {
             // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-ordering-null
