@@ -99,15 +99,15 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 3, (NodeReference) 2, (NodeReference) 1)
+                .Start("n", (NodeReference) 3, (NodeReference) 1, (NodeReference) 2)
                 .Return<object>("n")
                 .OrderBy("n.name")
                 .Query;
 
             Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(2, query.QueryParameters["p1"]);
-            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
             Assert.AreEqual("n.name", query.QueryParameters["p3"]);
         }
 
@@ -121,15 +121,15 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3, (NodeReference)2, (NodeReference)1)
+                .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
                 .OrderBy("n.age", "n.name")
                 .Query;
 
             Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(2, query.QueryParameters["p1"]);
-            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
             Assert.AreEqual("n.age, n.name", query.QueryParameters["p3"]);
         }
 
@@ -143,15 +143,15 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3, (NodeReference)2, (NodeReference)1)
+                .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
                 .OrderByDescending("n.name")
                 .Query;
 
             Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(2, query.QueryParameters["p1"]);
-            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
             Assert.AreEqual("n.name DESC", query.QueryParameters["p3"]);
         }
 
@@ -165,15 +165,15 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3, (NodeReference)2, (NodeReference)1)
+                .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
                 .OrderByDescending("n.age", "n.name")
                 .Query;
 
             Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(2, query.QueryParameters["p1"]);
-            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
             Assert.AreEqual("n.age, n.name DESC", query.QueryParameters["p3"]);
         }
 
