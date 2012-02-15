@@ -20,10 +20,12 @@ namespace Neo4jClient.Cypher
             return new CypherQueryBuilder
             {
                 matchText = matchText,
+                whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
                 limit = limit,
-                startBits = startBits
+                startBits = startBits,
+                orderBy = orderBy
             };
         }
 
@@ -138,7 +140,7 @@ namespace Neo4jClient.Cypher
 
         void WriteWhereClause(StringBuilder target)
         {
-            if (returnText == null) return;
+            if (whereText == null) return;
             target.Append("\r\nWHERE ");
             target.Append(whereText);
         }
