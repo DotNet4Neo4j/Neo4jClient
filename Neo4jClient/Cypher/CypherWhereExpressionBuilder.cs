@@ -9,8 +9,8 @@ namespace Neo4jClient.Cypher
         public static string BuildText(LambdaExpression expression)
         {
             var binaryExpression = (BinaryExpression)expression.Body;
+            //ToDo Rather walk the expression tree and build the syntax for Cypher with Parameters.
             var expressionText = binaryExpression.ToString();
-
             expressionText = expressionText.Replace(ExpressionType.AndAlso.ToString(), "AND");
             expressionText = expressionText.Replace(ExpressionType.OrElse.ToString(), "OR");
             expressionText = expressionText.Replace(ExpressionType.Not.ToString(), "!");
