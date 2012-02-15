@@ -68,6 +68,28 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void OrderNodesByNull()
+        {
+            // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-ordering-null
+            // START n=node(3,1,2)
+            // RETURN n.length?, n
+            // ORDER BY n.length?
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
+                .Return<object>("n.length?, n")
+                .OrderBy("n.length?")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n.length?, n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
+            Assert.AreEqual("n.length?", query.QueryParameters["p3"]);
+        }
+
+        [Test]
         public void OrderNodesByProperty()
         {
             // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-order-nodes-by-property
