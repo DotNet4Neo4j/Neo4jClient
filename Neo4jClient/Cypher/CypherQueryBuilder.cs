@@ -12,6 +12,7 @@ namespace Neo4jClient.Cypher
         string returnText;
         bool returnDistinct;
         int? limit;
+        int? skip;
         string orderBy;
 
         CypherQueryBuilder Clone()
@@ -22,7 +23,9 @@ namespace Neo4jClient.Cypher
                 returnText = returnText,
                 returnDistinct = returnDistinct,
                 limit = limit,
-                startBits = startBits
+                skip = skip,
+                startBits = startBits,
+                orderBy = orderBy
             };
         }
 
@@ -70,6 +73,13 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        public CypherQueryBuilder SetSkip(int? count)
+        {
+            var newBuilder = Clone();
+            newBuilder.skip = count;
+            return newBuilder;
+        }
+
         public CypherQueryBuilder SetOrderBy(OrderByType orderByType, params string[] properties)
         {
             var newBuilder = Clone();
@@ -89,8 +99,9 @@ namespace Neo4jClient.Cypher
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
-            WriteLimitClause(queryTextBuilder, queryParameters);
             WriteOrderByClause(queryTextBuilder, queryParameters);
+            WriteSkipClause(queryTextBuilder, queryParameters);
+            WriteLimitClause(queryTextBuilder, queryParameters);
 
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters);
         }
@@ -139,6 +150,12 @@ namespace Neo4jClient.Cypher
         {
             if (limit == null) return;
             target.AppendFormat("\r\nLIMIT {0}", CreateParameter(paramsDictionary, limit));
+        }
+
+        void WriteSkipClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
+        {
+            if (skip == null) return;
+            target.AppendFormat("\r\nSKIP {0}", CreateParameter(paramsDictionary, skip));
         }
 
         void WriteOrderByClause(StringBuilder target, IDictionary<string, object> paramsDictionary )

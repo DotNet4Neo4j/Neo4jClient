@@ -19,6 +19,12 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
+        public ICypherFluentQueryReturned<TResult> Skip(int? skip)
+        {
+            var newBuilder = Builder.SetSkip(skip);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
+        }
+
         public ICypherFluentQueryReturned<TResult> OrderBy(params string[] properties)
         {
             var newBuilder = Builder.SetOrderBy(OrderByType.Ascending, properties);
