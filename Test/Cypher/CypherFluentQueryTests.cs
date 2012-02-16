@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using NSubstitute;
+﻿using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 
