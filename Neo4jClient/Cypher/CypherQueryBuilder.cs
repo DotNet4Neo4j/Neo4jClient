@@ -110,7 +110,7 @@ namespace Neo4jClient.Cypher
             //ToDo incorporate parameters into Where Clause
             WriteWhereClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
-            WriteOrderByClause(queryTextBuilder, queryParameters);
+            WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
             WriteLimitClause(queryTextBuilder, queryParameters);
 
@@ -176,10 +176,10 @@ namespace Neo4jClient.Cypher
             target.AppendFormat("\r\nSKIP {0}", CreateParameter(paramsDictionary, skip));
         }
 
-        void WriteOrderByClause(StringBuilder target, IDictionary<string, object> paramsDictionary )
+        void WriteOrderByClause(StringBuilder target )
         {
             if (string.IsNullOrEmpty(orderBy)) return;
-            target.AppendFormat("\r\nORDER BY {0}", CreateParameter(paramsDictionary, orderBy));
+            target.AppendFormat("\r\nORDER BY {0}",  orderBy);
         }
     }
 }

@@ -83,14 +83,13 @@ namespace Neo4jClient.Test.Cypher
                 .Skip(3)
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2}, {p3}, {p4})\r\nRETURN n\r\nORDER BY {p5}\r\nSKIP {p6}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2}, {p3}, {p4})\r\nRETURN n\r\nORDER BY n.name\r\nSKIP {p5}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(4, query.QueryParameters["p1"]);
             Assert.AreEqual(5, query.QueryParameters["p2"]);
             Assert.AreEqual(1, query.QueryParameters["p3"]);
             Assert.AreEqual(2, query.QueryParameters["p4"]);
-            Assert.AreEqual("n.name", query.QueryParameters["p5"]);
-            Assert.AreEqual(3, query.QueryParameters["p6"]);
+            Assert.AreEqual(3, query.QueryParameters["p5"]);
         }
 
         [Test]
@@ -112,15 +111,14 @@ namespace Neo4jClient.Test.Cypher
                 .Limit(2)
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2}, {p3}, {p4})\r\nRETURN n\r\nORDER BY {p5}\r\nSKIP {p6}\r\nLIMIT {p7}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2}, {p3}, {p4})\r\nRETURN n\r\nORDER BY n.name\r\nSKIP {p5}\r\nLIMIT {p6}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(4, query.QueryParameters["p1"]);
             Assert.AreEqual(5, query.QueryParameters["p2"]);
             Assert.AreEqual(1, query.QueryParameters["p3"]);
             Assert.AreEqual(2, query.QueryParameters["p4"]);
-            Assert.AreEqual("n.name", query.QueryParameters["p5"]);
-            Assert.AreEqual(1, query.QueryParameters["p6"]);
-            Assert.AreEqual(2, query.QueryParameters["p7"]);
+            Assert.AreEqual(1, query.QueryParameters["p5"]);
+            Assert.AreEqual(2, query.QueryParameters["p6"]);
         }
 
         [Test]
@@ -138,11 +136,10 @@ namespace Neo4jClient.Test.Cypher
                 .OrderBy("n.length?")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n.length?, n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n.length?, n\r\nORDER BY n.length?", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(2, query.QueryParameters["p2"]);
-            Assert.AreEqual("n.length?", query.QueryParameters["p3"]);
         }
 
         [Test]
@@ -160,11 +157,10 @@ namespace Neo4jClient.Test.Cypher
                 .OrderBy("n.name")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY n.name", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(2, query.QueryParameters["p2"]);
-            Assert.AreEqual("n.name", query.QueryParameters["p3"]);
         }
 
         [Test]
@@ -182,11 +178,10 @@ namespace Neo4jClient.Test.Cypher
                 .OrderBy("n.age", "n.name")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY n.age, n.name", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(2, query.QueryParameters["p2"]);
-            Assert.AreEqual("n.age, n.name", query.QueryParameters["p3"]);
         }
 
         [Test]
@@ -204,11 +199,10 @@ namespace Neo4jClient.Test.Cypher
                 .OrderByDescending("n.name")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY n.name DESC", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(2, query.QueryParameters["p2"]);
-            Assert.AreEqual("n.name DESC", query.QueryParameters["p3"]);
         }
 
         [Test]
@@ -226,11 +220,10 @@ namespace Neo4jClient.Test.Cypher
                 .OrderByDescending("n.age", "n.name")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY {p3}", query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1}, {p2})\r\nRETURN n\r\nORDER BY n.age, n.name DESC", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(2, query.QueryParameters["p2"]);
-            Assert.AreEqual("n.age, n.name DESC", query.QueryParameters["p3"]);
         }
 
         [Test]
