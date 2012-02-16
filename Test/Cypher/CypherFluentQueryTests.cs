@@ -352,6 +352,27 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void WhereFilterOnNodeNullableProperty()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-node-property
+            // START n=node(3, 1)
+            // WHERE n.age < 30
+            // RETURN n
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => n.Id < 30)
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Id? < {p2})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(30, query.QueryParameters["p2"]);
+        }
+
+        [Test]
         public void WhereFilterOnMultipleNodesProperties()
         {
             var client = Substitute.For<IGraphClient>();
@@ -392,6 +413,7 @@ namespace Neo4jClient.Test.Cypher
         public class FooData
         {
             public int Age { get; set; }
+            public int? Id { get; set; }
             public string Name { get; set; }
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
@@ -69,7 +70,16 @@ namespace Neo4jClient.Cypher
             if (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Parameter)
             {
                 var parameter = ((ParameterExpression)node.Expression);
-                TextOutput.Append(string.Format("{0}.{1}", parameter.Name, node.Member.Name));
+
+                var nullIdentifier = string.Empty;
+
+                var propertyParent = node.Member.ReflectedType;
+                var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
+
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    nullIdentifier = "?";
+
+                TextOutput.Append(string.Format("{0}.{1}{2}", parameter.Name, node.Member.Name, nullIdentifier));
             }
             else
             {
