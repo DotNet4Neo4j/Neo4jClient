@@ -352,9 +352,29 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void WhereFilterPropertyExists()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-property-exists
+            // START n=node(3, 1)
+            // WHERE n.Belt
+            // RETURN n
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => n.Name != null)
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name)\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+        }
+
+        [Test]
         public void WhereFilterCompareIfPropertyExists()
         {
-            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-node-property
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-compare-if-property-exists
             // START n=node(3, 1)
             // WHERE n.Belt? = 'white'
             // RETURN n

@@ -60,6 +60,14 @@ namespace Neo4jClient.Cypher
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
+            const string op = " != ";
+            var text = TextOutput.ToString();
+            if (node.Value == null && text.EndsWith(op))
+            {
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(op, StringComparison.Ordinal), op.Length);
+                return node;
+            }
+
             var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, node.Value);
             TextOutput.Append(nextParameterName);
             return node;
