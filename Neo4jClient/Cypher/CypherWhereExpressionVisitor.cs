@@ -7,6 +7,7 @@ namespace Neo4jClient.Cypher
 {
     public class CypherWhereExpressionVisitor :  ExpressionVisitor
     {
+        const string NotEqual = " != ";
         readonly IDictionary<string, object> paramsDictionary;
         public StringBuilder TextOutput { get; private set; }
         public CypherWhereExpressionVisitor(IDictionary<string, object> paramsDictionary)
@@ -48,7 +49,7 @@ namespace Neo4jClient.Cypher
                     TextOutput.Append(" > ");
                     break;
                 case ExpressionType.NotEqual:
-                    TextOutput.Append(" != ");
+                    TextOutput.Append(NotEqual);
                     break;
             }
  
@@ -60,11 +61,10 @@ namespace Neo4jClient.Cypher
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            const string op = " != ";
             var text = TextOutput.ToString();
-            if (node.Value == null && text.EndsWith(op))
+            if (node.Value == null && text.EndsWith(NotEqual))
             {
-                TextOutput.Remove(TextOutput.ToString().LastIndexOf(op, StringComparison.Ordinal), op.Length);
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(NotEqual, StringComparison.Ordinal), NotEqual.Length);
                 return node;
             }
 
