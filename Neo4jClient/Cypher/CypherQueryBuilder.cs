@@ -7,9 +7,9 @@ namespace Neo4jClient.Cypher
 {
     public class CypherQueryBuilder
     {
+        IDictionary<string, object> queryParameters = new Dictionary<string, object>();
         IList<CypherStartBit> startBits = new List<CypherStartBit>();
         string matchText;
-        LambdaExpression whereExpression; 
         string whereText;
         string returnText;
         bool returnDistinct;
@@ -21,8 +21,8 @@ namespace Neo4jClient.Cypher
         {
             return new CypherQueryBuilder
             {
+                queryParameters = queryParameters,
                 matchText = matchText,
-                whereExpression = whereExpression,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -57,14 +57,28 @@ namespace Neo4jClient.Cypher
         public CypherQueryBuilder SetWhere(string text)
         {
             var newBuilder = Clone();
-            newBuilder.whereText = text;
+            newBuilder.whereText += string.Format("({0})", text);
             return newBuilder;
         }
 
         public CypherQueryBuilder SetWhere(LambdaExpression expression)
         {
             var newBuilder = Clone();
-            newBuilder.whereExpression = expression;
+            newBuilder.whereText += whereText = CypherWhereExpressionBuilder.BuildText(expression, queryParameters);
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetAnd()
+        {
+            var newBuilder = Clone();
+            newBuilder.whereText += " AND ";
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetOr()
+        {
+            var newBuilder = Clone();
+            newBuilder.whereText += " OR ";
             return newBuilder;
         }
 
@@ -112,11 +126,9 @@ namespace Neo4jClient.Cypher
         public CypherQuery ToQuery()
         {
             var queryTextBuilder = new StringBuilder();
-            var queryParameters = new Dictionary<string, object>();
-
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
-            WriteWhereClause(queryTextBuilder, queryParameters);
+            WriteWhereClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
@@ -157,16 +169,12 @@ namespace Neo4jClient.Cypher
             target.AppendFormat("\r\nMATCH {0}", matchText);
         }
 
-        void WriteWhereClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
+        void WriteWhereClause(StringBuilder target)
         {
-            if (whereText == null && whereExpression == null)
+            if (whereText == null)
                 return;
 
             target.Append("\r\nWHERE ");
-
-            if(string.IsNullOrEmpty(whereText))
-            whereText = CypherWhereExpressionBuilder.BuildText(whereExpression, paramsDictionary);
-
             target.Append(whereText);
         }
 

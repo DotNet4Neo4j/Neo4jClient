@@ -5,7 +5,9 @@ namespace Neo4jClient.Cypher
 {
     public interface ICypherFluentQueryWhere : ICypherFluentQuery, ICypherFluentQueryReturnable
     {
-        ICypherFluentQueryWhere Where(string expression);
+        ICypherFluentQueryWhere And();
+        ICypherFluentQueryWhere Or();
+        ICypherFluentQueryWhere Where(string text);
         ICypherFluentQueryWhere Where<T1>(Expression<Func<T1, bool>> expression);
         ICypherFluentQueryWhere Where<T1, T2>(Expression<Func<T1, T2, bool>> expression);
         ICypherFluentQueryWhere Where<T1, T2, T3>(Expression<Func<T1, T2, T3, bool>> expression);

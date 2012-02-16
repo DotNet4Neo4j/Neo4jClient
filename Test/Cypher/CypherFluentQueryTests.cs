@@ -321,12 +321,12 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (((n.Age < {p2}) AND (n.Name = {p3})) OR (n.Name != {p4}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(1, query.QueryParameters["p1"]);
-            Assert.AreEqual(30, query.QueryParameters["p2"]);
-            Assert.AreEqual("Tobias", query.QueryParameters["p3"]);
-            Assert.AreEqual("Tobias", query.QueryParameters["p4"]);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name = {p1})) OR (n.Name != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p3"]);
+            Assert.AreEqual(1, query.QueryParameters["p4"]);
+            Assert.AreEqual(30, query.QueryParameters["p0"]);
+            Assert.AreEqual("Tobias", query.QueryParameters["p1"]);
+            Assert.AreEqual("Tobias", query.QueryParameters["p2"]);
         }
 
 
@@ -345,10 +345,10 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Age < {p2})\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(1, query.QueryParameters["p1"]);
-            Assert.AreEqual(30, query.QueryParameters["p2"]);
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Age < {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(30, query.QueryParameters["p0"]);
         }
 
         [Test]
@@ -386,10 +386,10 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Id? < {p2})\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(1, query.QueryParameters["p1"]);
-            Assert.AreEqual(30, query.QueryParameters["p2"]);
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Id? < {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(30, query.QueryParameters["p0"]);
         }
 
         [Test]
@@ -410,11 +410,11 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("b")
                 .Query;
 
-            Assert.AreEqual("START a=node({p0}), b=node({p1}, {p2})\r\nMATCH a<-[r?]-b\r\nWHERE ((r.Name is null) AND (r.Id? = {p3}))\r\nRETURN b".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(1, query.QueryParameters["p0"]);
-            Assert.AreEqual(3, query.QueryParameters["p1"]);
-            Assert.AreEqual(2, query.QueryParameters["p2"]);
-            Assert.AreEqual(100, query.QueryParameters["p3"]);
+            Assert.AreEqual("START a=node({p1}), b=node({p2}, {p3})\r\nMATCH a<-[r?]-b\r\nWHERE ((r.Name is null) AND (r.Id? = {p0}))\r\nRETURN b".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(3, query.QueryParameters["p2"]);
+            Assert.AreEqual(2, query.QueryParameters["p3"]);
+            Assert.AreEqual(100, query.QueryParameters["p0"]);
         }
 
         [Test]
@@ -427,11 +427,11 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE ((n1.Age < {p2}) AND (n2.Key = {p3}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(1, query.QueryParameters["p1"]);
-            Assert.AreEqual(30, query.QueryParameters["p2"]);
-            Assert.AreEqual(11, query.QueryParameters["p3"]);
+            Assert.AreEqual("START n=node({p2}, {p3})\r\nWHERE ((n1.Age < {p0}) AND (n2.Key = {p1}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p3"]);
+            Assert.AreEqual(30, query.QueryParameters["p0"]);
+            Assert.AreEqual(11, query.QueryParameters["p1"]);
         }
 
         [Test]
@@ -451,8 +451,62 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0})\r\nMATCH (n)-[r]->()\r\nWHERE type(r) = 'HOSTS'\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0})\r\nMATCH (n)-[r]->()\r\nWHERE (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void MultipleWhereStatementsWithAnd()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => n.Name != null)
+                .And()
+                .Where("type(r) = \"HOSTS\"")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name) AND (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void MultipleWhereStatementsWithOr()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => n.Name != null)
+                .Or()
+                .Where("type(r) = \"HOSTS\"")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name) OR (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void MultipleWhereStatementsWithOrAnd()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => n.Name != null)
+                .Or()
+                .Where("type(r) = \"HOSTS\"")
+                .And()
+                .Where<FooData>(n => n.Id == 10)
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Name) OR (type(r) = 'HOSTS') AND (n.Id? = {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+            Assert.AreEqual(10, query.QueryParameters["p0"]);
         }
 
         public class FooData
