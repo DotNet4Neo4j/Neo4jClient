@@ -933,6 +933,7 @@ namespace Neo4jClient
             return indexValue;
         }
 
+        //ToDo Check status of https://github.com/neo4j/community/issues/249 for limiting query result sets
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
         {
             CheckRoot();
