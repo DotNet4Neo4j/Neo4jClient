@@ -11,6 +11,12 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
+        public ICypherFluentQueryWhere Where(string text)
+        {
+            var newBuilder = Builder.SetWhere(text);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
         public ICypherFluentQueryWhere Where<T1>(Expression<Func<T1, bool>> expression)
         {
             return Where((LambdaExpression)expression);

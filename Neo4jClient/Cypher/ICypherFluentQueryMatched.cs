@@ -1,6 +1,6 @@
 namespace Neo4jClient.Cypher
 {
-    public interface ICypherFluentQueryMatched : ICypherFluentQuery, ICypherFluentQueryReturnable
+    public interface ICypherFluentQueryMatched :  ICypherFluentQueryWhere
     {
     }
 }

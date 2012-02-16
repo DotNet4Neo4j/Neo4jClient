@@ -54,6 +54,13 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        public CypherQueryBuilder SetWhere(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.whereText = text;
+            return newBuilder;
+        }
+
         public CypherQueryBuilder SetWhere(LambdaExpression expression)
         {
             var newBuilder = Clone();
@@ -152,9 +159,14 @@ namespace Neo4jClient.Cypher
 
         void WriteWhereClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
-            if (whereExpression == null) return;
+            if (whereText == null && whereExpression == null)
+                return;
+
             target.Append("\r\nWHERE ");
+
+            if(string.IsNullOrEmpty(whereText))
             whereText = CypherWhereExpressionBuilder.BuildText(whereExpression, paramsDictionary);
+
             target.Append(whereText);
         }
 

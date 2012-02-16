@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Text.RegularExpressions;
+using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 
@@ -257,7 +258,7 @@ namespace Neo4jClient.Test.Cypher
                 .Start("a", (NodeReference)1)
                 .Return(a => new ReturnPropertyQueryResult
                 {
-                    SomethingTotallyDifferent = a.As<FooNode>().Age
+                    SomethingTotallyDifferent = a.As<FooData>().Age
                 })
                 .Query;
 
@@ -296,9 +297,9 @@ namespace Neo4jClient.Test.Cypher
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
-                .ReturnDistinct(b => new FooNode
+                .ReturnDistinct(b => new FooData
                 {
-                    Age = b.As<FooNode>().Age
+                    Age = b.As<FooData>().Age
                 })
                 .Query;
 
@@ -317,7 +318,7 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where<FooNode>(n => (n.Age < 30 && n.Name == "Tobias") || n.Name != "Tobias")
+                .Where<FooData>(n => (n.Age < 30 && n.Name == "Tobias") || n.Name != "Tobias")
                 .Return<object>("n")
                 .Query;
 
@@ -341,7 +342,7 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where<FooNode>(n => n.Age < 30 )
+                .Where<FooData>(n => n.Age < 30 )
                 .Return<object>("n")
                 .Query;
 
@@ -351,7 +352,49 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(30, query.QueryParameters["p2"]);
         }
 
-        public class FooNode
+        [Test]
+        public void WhereFilterOnRelationshipType()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html
+            // START n=node(3)
+            // MATCH (n)-[r]->()
+            // WHERE type(r) = "HOSTS"
+            // RETURN r
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3)
+                .Match("(n)-[r]->()")
+                .Where("type(r) = \"HOSTS\"")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0})\r\nMATCH (n)-[r]->()\r\nWHERE type(r) = 'HOSTS'\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+        }
+
+        //[Test]
+        //public void WhereRegularExpression()
+        //{
+        //    // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-node-property
+        //    // START n=node(3, 1)
+        //    // WHERE n.name =~ /Tob.*/
+        //    // RETURN n
+
+        //    var client = Substitute.For<IGraphClient>();
+        //    var query = new CypherFluentQuery(client)
+        //        .Start("n", (NodeReference)3, (NodeReference)1)
+        //        .Where<FooNode>(n => n.Name.Regex("/Tob.*/"))
+        //        .Return<object>("n")
+        //        .Query;
+
+        //    Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Age < {p2})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+        //    Assert.AreEqual(3, query.QueryParameters["p0"]);
+        //    Assert.AreEqual(1, query.QueryParameters["p1"]);
+        //    Assert.AreEqual(30, query.QueryParameters["p2"]);
+        //}
+
+        public class FooData
         {
             public int Age { get; set; }
             public string Name { get; set; }
