@@ -9,6 +9,7 @@ namespace Neo4jClient.Cypher
     {
         IList<CypherStartBit> startBits = new List<CypherStartBit>();
         string matchText;
+        LambdaExpression whereExpression; 
         string whereText;
         string returnText;
         bool returnDistinct;
@@ -21,6 +22,7 @@ namespace Neo4jClient.Cypher
             return new CypherQueryBuilder
             {
                 matchText = matchText,
+                whereExpression = whereExpression,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -55,7 +57,7 @@ namespace Neo4jClient.Cypher
         public CypherQueryBuilder SetWhere(LambdaExpression expression)
         {
             var newBuilder = Clone();
-            newBuilder.whereText = CypherWhereExpressionBuilder.BuildText(expression);
+            newBuilder.whereExpression = expression;
             return newBuilder;
         }
 
@@ -107,8 +109,7 @@ namespace Neo4jClient.Cypher
 
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
-            //ToDo incorporate parameters into Where Clause
-            WriteWhereClause(queryTextBuilder);
+            WriteWhereClause(queryTextBuilder, queryParameters);
             WriteReturnClause(queryTextBuilder);
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
@@ -117,7 +118,7 @@ namespace Neo4jClient.Cypher
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters);
         }
 
-        static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
+        public static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
         {
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
@@ -149,10 +150,11 @@ namespace Neo4jClient.Cypher
             target.AppendFormat("\r\nMATCH {0}", matchText);
         }
 
-        void WriteWhereClause(StringBuilder target)
+        void WriteWhereClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
-            if (whereText == null) return;
+            if (whereExpression == null) return;
             target.Append("\r\nWHERE ");
+            whereText = CypherWhereExpressionBuilder.BuildText(whereExpression, paramsDictionary);
             target.Append(whereText);
         }
 

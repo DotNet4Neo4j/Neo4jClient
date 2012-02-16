@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -5,9 +6,11 @@ namespace Neo4jClient.Cypher
 {
     public class CypherWhereExpressionVisitor :  ExpressionVisitor
     {
+        readonly IDictionary<string, object> paramsDictionary;
         public StringBuilder TextOutput { get; private set; }
-        public CypherWhereExpressionVisitor()
+        public CypherWhereExpressionVisitor(IDictionary<string, object> paramsDictionary)
         {
+            this.paramsDictionary = paramsDictionary ?? new Dictionary<string, object>();
             TextOutput = new StringBuilder();
         }
 
@@ -56,11 +59,8 @@ namespace Neo4jClient.Cypher
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            if(node.Value is string)
-                TextOutput.Append(string.Format("\"{0}\"",node.Value));
-            else
-                TextOutput.Append(node.Value);
-
+            var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, node.Value);
+            TextOutput.Append(nextParameterName);
             return node;
         }
 
