@@ -8,6 +8,7 @@ namespace Neo4jClient.Cypher
     public class CypherWhereExpressionVisitor :  ExpressionVisitor
     {
         const string NotEqual = " != ";
+        const string Equal = " = ";
         readonly IDictionary<string, object> paramsDictionary;
         public StringBuilder TextOutput { get; private set; }
         public CypherWhereExpressionVisitor(IDictionary<string, object> paramsDictionary)
@@ -40,7 +41,7 @@ namespace Neo4jClient.Cypher
                     TextOutput.Append(" < ");
                     break;
                 case ExpressionType.Equal:
-                    TextOutput.Append(" = ");
+                    TextOutput.Append(Equal);
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     TextOutput.Append(" >= ");
@@ -65,6 +66,13 @@ namespace Neo4jClient.Cypher
             if (node.Value == null && text.EndsWith(NotEqual))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(NotEqual, StringComparison.Ordinal), NotEqual.Length);
+                return node;
+            }
+
+            if (node.Value == null && text.EndsWith(Equal))
+            {
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
+                TextOutput.Append(" is null");
                 return node;
             }
 

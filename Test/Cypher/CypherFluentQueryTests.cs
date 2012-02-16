@@ -393,6 +393,31 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void WhereFilterOnNullValues()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-null-values
+            // START a=node(1), b=node(3, 2)
+            // MATCH a<-[r?]-b
+            // WHERE r is null
+            // RETURN b
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .AddStartPoint("b", (NodeReference)3, (NodeReference)2)
+                .Match("a<-[r?]-b")
+                .Where<FooData>(r => r.Name == null && r.Id == 100)
+                .Return<object>("b")
+                .Query;
+
+            Assert.AreEqual("START a=node({p0}), b=node({p1}, {p2})\r\nMATCH a<-[r?]-b\r\nWHERE ((r.Name is null) AND (r.Id? = {p3}))\r\nRETURN b".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
+            Assert.AreEqual(100, query.QueryParameters["p3"]);
+        }
+
+        [Test]
         public void WhereFilterOnMultipleNodesProperties()
         {
             var client = Substitute.For<IGraphClient>();
