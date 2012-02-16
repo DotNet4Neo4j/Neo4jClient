@@ -16,7 +16,7 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 1)
+                .Start("n", (NodeReference)1)
                 .Return<object>("n")
                 .Query;
 
@@ -152,7 +152,7 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 3, (NodeReference) 1, (NodeReference) 2)
+                .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
                 .OrderBy("n.name")
                 .Query;
@@ -321,12 +321,34 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (((n.Age < {p2}) AND (n.Name = {p3})) OR (n.Name != {p4}))\r\nRETURN n".Replace("'","\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (((n.Age < {p2}) AND (n.Name = {p3})) OR (n.Name != {p4}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(30, query.QueryParameters["p2"]);
             Assert.AreEqual("Tobias", query.QueryParameters["p3"]);
             Assert.AreEqual("Tobias", query.QueryParameters["p4"]);
+        }
+
+
+        [Test]
+        public void WhereFilterOnNodeProperty()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-node-property
+            // START n=node(3, 1)
+            // WHERE n.age < 30
+            // RETURN n
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooNode>(n => n.Age < 30 )
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Age < {p2})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(30, query.QueryParameters["p2"]);
         }
 
         public class FooNode
