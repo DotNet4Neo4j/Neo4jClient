@@ -353,6 +353,23 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void WhereFilterOnMultipleNodesProperties()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData, BarData>((n1, n2) => n1.Age < 30 && n2.Key == 11)
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE ((n1.Age < {p2}) AND (n2.Key = {p3}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual(30, query.QueryParameters["p2"]);
+            Assert.AreEqual(11, query.QueryParameters["p3"]);
+        }
+
+        [Test]
         public void WhereFilterOnRelationshipType()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html
@@ -373,31 +390,16 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(3, query.QueryParameters["p0"]);
         }
 
-        //[Test]
-        //public void WhereRegularExpression()
-        //{
-        //    // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-node-property
-        //    // START n=node(3, 1)
-        //    // WHERE n.name =~ /Tob.*/
-        //    // RETURN n
-
-        //    var client = Substitute.For<IGraphClient>();
-        //    var query = new CypherFluentQuery(client)
-        //        .Start("n", (NodeReference)3, (NodeReference)1)
-        //        .Where<FooNode>(n => n.Name.Regex("/Tob.*/"))
-        //        .Return<object>("n")
-        //        .Query;
-
-        //    Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Age < {p2})\r\nRETURN n".Replace("'", "\""), query.QueryText);
-        //    Assert.AreEqual(3, query.QueryParameters["p0"]);
-        //    Assert.AreEqual(1, query.QueryParameters["p1"]);
-        //    Assert.AreEqual(30, query.QueryParameters["p2"]);
-        //}
-
         public class FooData
         {
             public int Age { get; set; }
             public string Name { get; set; }
+        }
+
+        public class BarData
+        {
+            public int Key { get; set; }
+            public string Value { get; set; }
         }
 
         public class ReturnPropertyQueryResult
