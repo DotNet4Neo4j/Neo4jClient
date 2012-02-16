@@ -352,11 +352,11 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void WhereFilterOnNodeNullableProperty()
+        public void WhereFilterCompareIfPropertyExists()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-node-property
             // START n=node(3, 1)
-            // WHERE n.age < 30
+            // WHERE n.Belt? = 'white'
             // RETURN n
 
             var client = Substitute.For<IGraphClient>();
