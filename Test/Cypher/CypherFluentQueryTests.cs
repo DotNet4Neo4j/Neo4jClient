@@ -522,13 +522,33 @@ namespace Neo4jClient.Test.Cypher
                 .Start("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)3,(NodeReference)2)
                 .Where("a<--b")
-                .Return<object>("n")
+                .Return<object>("b")
                 .Query;
 
-            Assert.AreEqual("START a=node({p0}), b=node({p1}, {p2})\r\nWHERE (a<--b)\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START a=node({p0}), b=node({p1}, {p2})\r\nWHERE (a<--b)\r\nRETURN b".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
             Assert.AreEqual(3, query.QueryParameters["p1"]);
             Assert.AreEqual(2, query.QueryParameters["p2"]);
+        }
+
+        [Test]
+        public void WhereFilterRegularExpressions()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-regular-expressions
+            // START n=node(3, 1)
+            // WHERE n.name =~ /Tob.*/
+            // RETURN n
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where("n.Name =~ /Tob.*/")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name =~ /Tob.*/)\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(1, query.QueryParameters["p1"]);
         }
 
         public class FooData
