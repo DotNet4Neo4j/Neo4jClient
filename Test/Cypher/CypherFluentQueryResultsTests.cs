@@ -34,6 +34,29 @@ namespace Neo4jClient.Test.Cypher
             Assert.IsInstanceOf<IEnumerable<ReturnPropertyQueryResult>>(results);
         }
 
+        [Test]
+        public void ExecutingQueryMultipleTimesShouldResetParamters()
+        {
+            var client = Substitute.For<IGraphClient>();
+
+            client
+                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
+                .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
+                .Start("a", (NodeReference)1)
+                .Return<object>("a.Name")
+                .Results;
+
+            results = cypher
+                .Start("a", (NodeReference)1)
+                .Return<object>("a.Name")
+                .Results;
+
+            Assert.AreEqual(0, cypher.Query.QueryParameters.Count());
+        }
+
         public class FooNode
         {
             public int Age { get; set; }

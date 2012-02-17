@@ -7,7 +7,6 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryPreStart,
         ICypherFluentQueryStarted,
         ICypherFluentQueryMatched,
-        ICypherFluentQueryWhere,
         IAttachedReference
     {
         protected readonly IGraphClient Client;
@@ -26,13 +25,15 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryStarted Start(string identity, params NodeReference[] nodeReferences)
         {
-            var newBuilder = Builder.AddStartBit(identity, nodeReferences);
+            var newBuilder = new CypherQueryBuilder();
+            newBuilder.AddStartBit(identity, nodeReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQueryStarted Start(string identity, params RelationshipReference[] relationshipReferences)
         {
-            var newBuilder = Builder.AddStartBit(identity, relationshipReferences);
+            var newBuilder = new CypherQueryBuilder();
+            newBuilder.AddStartBit(identity, relationshipReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
