@@ -484,10 +484,9 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        ICypherFluentQueryPreStart cypher;
         public ICypherFluentQueryPreStart Cypher
         {
-            get { return cypher ?? (cypher = new CypherFluentQuery(this)); }
+            get {return new CypherFluentQuery(this); }
         }
 
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
