@@ -513,9 +513,9 @@ namespace Neo4jClient.Test.Cypher
         public void WhereFilterOnRelationships()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-relationships
-            //START a=node(1), b=node(3, 2)
-            //WHERE a<--b
-            //RETURN b
+            // START a=node(1), b=node(3, 2)
+            // WHERE a<--b
+            // RETURN b
 
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
