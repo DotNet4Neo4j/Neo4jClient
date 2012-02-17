@@ -456,7 +456,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void MultipleWhereStatementsWithAnd()
+        public void WhereWithAnd()
         {
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
@@ -473,7 +473,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void MultipleWhereStatementsWithOr()
+        public void WhereWithOr()
         {
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
@@ -490,7 +490,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void MultipleWhereStatementsWithOrAnd()
+        public void WhereWithOrAnd()
         {
             var client = Substitute.For<IGraphClient>();
             var query = new CypherFluentQuery(client)
@@ -507,6 +507,28 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(3, query.QueryParameters["p1"]);
             Assert.AreEqual(1, query.QueryParameters["p2"]);
             Assert.AreEqual(10, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void WhereFilterOnRelationships()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-filter-on-relationships
+            //START a=node(1), b=node(3, 2)
+            //WHERE a<--b
+            //RETURN b
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .AddStartPoint("b", (NodeReference)3,(NodeReference)2)
+                .Where("a<--b")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START a=node({p0}), b=node({p1}, {p2})\r\nWHERE (a<--b)\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(2, query.QueryParameters["p2"]);
         }
 
         public class FooData
