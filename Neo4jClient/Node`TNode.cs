@@ -5,7 +5,7 @@ using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
-    public class Node<TNode> : IGremlinQuery, IAttachedReference
+    public class Node<TNode> : IGremlinQuery
     {
         readonly TNode data;
         readonly NodeReference<TNode> reference;
