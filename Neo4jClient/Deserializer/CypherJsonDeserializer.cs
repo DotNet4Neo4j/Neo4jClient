@@ -24,6 +24,7 @@ namespace Neo4jClient.Deserializer
 
         public IEnumerable<TResult> Deserialize(RestResponse response)
         {
+            response.Content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(response.Content);
             var content = response.Content;
             var root = JObject.Parse(content).Root;
 

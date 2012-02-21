@@ -197,7 +197,6 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                                 'data' : {
                                     'Bar' : 'bar',
                                     'Baz' : 'baz'
-                                    'Date' : '/Date(1315271562384+0000)/'
                                 },
                                 'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
                                 'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
@@ -272,7 +271,6 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual(0, firstResult.Fooness.Reference.Id);
             Assert.AreEqual("bar", firstResult.Fooness.Data.Bar);
             Assert.AreEqual("baz", firstResult.Fooness.Data.Baz);
-            Assert.AreEqual("2011-09-06 01:12:42 +00:00", firstResult.Fooness.Data.Date.Value.ToString("yyyy-MM-dd HH:mm:ss zzz"));
             Assert.AreEqual("HOSTS", firstResult.RelationshipType);
             Assert.AreEqual("foo", firstResult.Name);
             Assert.AreEqual(44321, firstResult.UniqueId);
