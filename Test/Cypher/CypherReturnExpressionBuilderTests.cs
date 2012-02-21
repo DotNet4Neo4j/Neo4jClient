@@ -42,7 +42,7 @@ namespace Neo4jClient.Test.Cypher
 
             var text = CypherReturnExpressionBuilder.BuildText(expression);
 
-            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", text);
+            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name? AS FirstName", text);
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace Neo4jClient.Test.Cypher
 
             var text = CypherReturnExpressionBuilder.BuildText(expression);
 
-            Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name AS FirstName", text);
+            Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name? AS FirstName", text);
         }
 
         [Test]
