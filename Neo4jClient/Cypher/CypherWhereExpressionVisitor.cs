@@ -102,18 +102,12 @@ namespace Neo4jClient.Cypher
                 && node.Expression.NodeType == ExpressionType.MemberAccess
                 && ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant)
             {
-                var nullIdentifier = string.Empty;
+
                 var data = ParseValueFromExpression(node.Expression);
-
                 var value = data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
-                var propertyParent = node.Member.ReflectedType;
-                var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
-
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    nullIdentifier = "?";
 
                 var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, value);
-                TextOutput.Append(string.Format("{0}{1}", nextParameterName, nullIdentifier));
+                TextOutput.Append(string.Format("{0}", nextParameterName));
             }
             else
             {
