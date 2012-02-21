@@ -323,7 +323,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name = {p1})) OR (n.Name != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -348,7 +348,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name = {p1})) OR (n.Name != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -373,7 +373,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Id? = {p1})) OR (n.Name != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Id? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -396,7 +396,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name = {p1})) OR (n.Name != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);

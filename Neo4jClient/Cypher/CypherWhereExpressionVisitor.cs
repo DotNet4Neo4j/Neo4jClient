@@ -67,12 +67,14 @@ namespace Neo4jClient.Cypher
             if (node.Value == null && text.EndsWith(NotEqual))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(NotEqual, StringComparison.Ordinal), NotEqual.Length);
+                RemoveNullQualifier(TextOutput);
                 return node;
             }
 
             if (node.Value == null && text.EndsWith(Equal))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
+                RemoveNullQualifier(TextOutput);
                 TextOutput.Append(" is null");
                 return node;
             }
@@ -80,6 +82,12 @@ namespace Neo4jClient.Cypher
             var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, node.Value);
             TextOutput.Append(nextParameterName);
             return node;
+        }
+
+        void RemoveNullQualifier(StringBuilder text)
+        {
+            if (text.ToString().EndsWith("?"))
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf("?", StringComparison.Ordinal), 1);
         }
 
         protected override Expression VisitMember(MemberExpression node)
@@ -93,8 +101,13 @@ namespace Neo4jClient.Cypher
                 var propertyParent = node.Member.ReflectedType;
                 var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
 
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                if (
+                    (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>)) 
+                    ||
+                    (propertyType == typeof(string))
+                    )
                     nullIdentifier = "?";
+
 
                 TextOutput.Append(string.Format("{0}.{1}{2}", parameter.Name, node.Member.Name, nullIdentifier));
             }
