@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace Neo4jClient.Cypher
@@ -97,12 +98,35 @@ namespace Neo4jClient.Cypher
 
                 TextOutput.Append(string.Format("{0}.{1}{2}", parameter.Name, node.Member.Name, nullIdentifier));
             }
+            else if (node.NodeType == ExpressionType.MemberAccess
+                && node.Expression.NodeType == ExpressionType.MemberAccess
+                && ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant)
+            {
+                var nullIdentifier = string.Empty;
+                var data = ParseValueFromExpression(node.Expression);
+
+                var value = data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
+                var propertyParent = node.Member.ReflectedType;
+                var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
+
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    nullIdentifier = "?";
+
+                var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, value);
+                TextOutput.Append(string.Format("{0}{1}", nextParameterName, nullIdentifier));
+            }
             else
             {
                 TextOutput.Append(string.Format("{0}", node.Member.Name));
             }
 
             return node;
+        }
+
+        static object ParseValueFromExpression(Expression expression)
+        {
+            var lambdaExpression = Expression.Lambda(expression);
+            return lambdaExpression.Compile().DynamicInvoke();
         }
     }
 }
