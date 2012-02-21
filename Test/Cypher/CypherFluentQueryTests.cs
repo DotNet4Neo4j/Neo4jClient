@@ -307,6 +307,31 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void WhereBooleanOperationWithVariable()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
+            // START n=node(3, 1)
+            // WHERE (n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias")
+            // RETURN n
+
+            const string name = "Tobias";
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => (n.Age < 30 && n.Name == name) || n.Name != "Tobias")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name = {p1})) OR (n.Name != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p3"]);
+            Assert.AreEqual(1, query.QueryParameters["p4"]);
+            Assert.AreEqual(30, query.QueryParameters["p0"]);
+            Assert.AreEqual("Tobias", query.QueryParameters["p1"]);
+            Assert.AreEqual("Tobias", query.QueryParameters["p2"]);
+        }
+
+        [Test]
         public void WhereBooleanOperations()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
@@ -328,7 +353,6 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("Tobias", query.QueryParameters["p1"]);
             Assert.AreEqual("Tobias", query.QueryParameters["p2"]);
         }
-
 
         [Test]
         public void WhereFilterOnNodeProperty()
