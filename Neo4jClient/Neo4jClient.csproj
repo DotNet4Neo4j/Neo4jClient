@@ -57,6 +57,7 @@
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Return.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Where.cs" />
+    <Compile Include="Cypher\CypherMode.cs" />
     <Compile Include="Cypher\CypherWhereExpressionBuilder.cs" />
     <Compile Include="Cypher\CypherWhereExpressionVisitor.cs" />
     <Compile Include="Cypher\ICypherFluentQueryWhere.cs" />
