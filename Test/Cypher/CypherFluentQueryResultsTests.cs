@@ -47,14 +47,17 @@ namespace Neo4jClient.Test.Cypher
             var results = cypher
                 .Start("a", (NodeReference)1)
                 .Return<object>("a.Name")
-                .Results;
+                .Results
+                .Count();
 
-            results = cypher
+            results += cypher
                 .Start("a", (NodeReference)1)
                 .Return<object>("a.Name")
-                .Results;
+                .Results
+                .Count();
 
             Assert.AreEqual(0, cypher.Query.QueryParameters.Count());
+            Assert.AreEqual(0, results);
         }
 
         public class FooNode
