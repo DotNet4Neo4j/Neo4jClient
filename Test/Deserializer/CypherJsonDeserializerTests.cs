@@ -70,7 +70,7 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
-        public void DeserializeShouldMapNodesInSingleColumnMode()
+        public void DeserializeShouldMapNodesInSetMode()
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
