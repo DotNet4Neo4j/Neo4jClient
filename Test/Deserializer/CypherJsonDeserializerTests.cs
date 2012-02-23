@@ -142,6 +142,18 @@ namespace Neo4jClient.Test.Deserializer
 
             // Assert
             Assert.AreEqual(3, results.Count());
+
+            var node = results.ElementAt(0);
+            Assert.AreEqual(5, node.Reference.Id);
+            Assert.AreEqual("東京", node.Data.Name);
+
+            node = results.ElementAt(1);
+            Assert.AreEqual(4, node.Reference.Id);
+            Assert.AreEqual("London", node.Data.Name);
+
+            node = results.ElementAt(2);
+            Assert.AreEqual(3, node.Reference.Id);
+            Assert.AreEqual("Sydney", node.Data.Name);
         }
 
         public class City
