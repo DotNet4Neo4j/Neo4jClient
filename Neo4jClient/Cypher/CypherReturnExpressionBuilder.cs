@@ -9,7 +9,7 @@ namespace Neo4jClient.Cypher
         public static string BuildText(LambdaExpression expression)
         {
             if (expression.Body.NodeType != ExpressionType.MemberInit)
-                throw new ArgumentException("The expression must be constructed as an object initialized. For example: n => new MyResultType { Foo = n.Bar }", "expression");
+                throw new ArgumentException("The expression must be constructed as an object initializer. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
             var memberInitExpression = (MemberInitExpression) expression.Body;
             if (memberInitExpression.NewExpression.Constructor.GetParameters().Any())
