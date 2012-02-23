@@ -63,7 +63,7 @@ namespace Neo4jClient.Deserializer
 
             switch (resultMode)
             {
-                case CypherResultMode.SingleColumn:
+                case CypherResultMode.Set:
                     return ParseInSingleColumnMode(root, columnNames, jsonTypeMappings);
                 case CypherResultMode.Projection:
                     return ParseInProjectionMode(root, columnNames, jsonTypeMappings);

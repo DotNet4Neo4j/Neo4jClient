@@ -11,7 +11,7 @@ namespace Neo4jClient.Test.Deserializer
     [TestFixture]
     public class CypherJsonDeserializerTests
     {
-        const string SingleColumnModeContentFormat =
+        const string SetModeContentFormat =
             @"{{
                 'columns' : [ 'a' ],
                 'data' : [ [ {{ 'Foo': '{0}', 'Bar': 'Bar' }} ] ]
@@ -24,15 +24,15 @@ namespace Neo4jClient.Test.Deserializer
             }}";
 
         [Test]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "", null)]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "rekjre", null)]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(abcs)/", null)]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherResultMode.SingleColumn, SingleColumnModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "", null)]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "rekjre", null)]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(abcs)/", null)]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(abcs+0000)/", null)]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "", null)]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "rekjre", null)]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(abcs)/", null)]
@@ -74,7 +74,7 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<Node<City>>(client, CypherResultMode.SingleColumn);
+            var deserializer = new CypherJsonDeserializer<Node<City>>(client, CypherResultMode.Set);
             var response = new RestResponse
             {
                 Content = @"{

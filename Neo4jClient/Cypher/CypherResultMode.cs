@@ -2,7 +2,7 @@
 {
     public enum CypherResultMode
     {
-        SingleColumn,
+        Set,
         Projection
     }
 }
