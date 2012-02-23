@@ -50,16 +50,16 @@ namespace Neo4jClient.Test.Deserializer
             var response = new RestResponse {Content = string.Format(contentFormat, input)};
 
             // Act
-            var result = deserializer.Deserialize(response).ToArray();
+            var result = deserializer.Deserialize(response).Single();
 
             // Assert
             if (expectedResult == null)
-                Assert.IsNull(result.First().Foo);
+                Assert.IsNull(result.Foo);
             else
             {
-                Assert.IsNotNull(result.First().Foo);
-                Assert.AreEqual(expectedResult, result.First().Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz"));
-                Assert.AreEqual("Bar", result.First().Bar);
+                Assert.IsNotNull(result.Foo);
+                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz"));
+                Assert.AreEqual("Bar", result.Bar);
             }
         }
 
