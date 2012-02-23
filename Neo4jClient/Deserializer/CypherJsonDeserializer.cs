@@ -14,14 +14,14 @@ namespace Neo4jClient.Deserializer
     public class CypherJsonDeserializer<TResult>
     {
         readonly IGraphClient client;
-        readonly CypherMode mode;
+        readonly CypherResultMode resultMode;
 
         public CultureInfo Culture { get; set; }
 
-        public CypherJsonDeserializer(IGraphClient client, CypherMode mode)
+        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode)
         {
             this.client = client;
-            this.mode = mode;
+            this.resultMode = resultMode;
             Culture = CultureInfo.InvariantCulture;
         }
 
@@ -61,11 +61,11 @@ namespace Neo4jClient.Deserializer
                 }
             };
 
-            switch (mode)
+            switch (resultMode)
             {
-                case CypherMode.SingleColumn:
+                case CypherResultMode.SingleColumn:
                     return ParseInSingleColumnMode(root, columnNames, jsonTypeMappings);
-                case CypherMode.Projection:
+                case CypherResultMode.Projection:
                     return ParseInProjectionMode(root, columnNames, jsonTypeMappings);
                 default:
                     throw new ArgumentException("Unrecognised mode.", "mode");

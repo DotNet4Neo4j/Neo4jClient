@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient.Cypher
 {
-    public enum CypherMode
+    public enum CypherResultMode
     {
         SingleColumn,
         Projection
