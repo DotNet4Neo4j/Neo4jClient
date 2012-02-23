@@ -77,12 +77,19 @@ namespace Neo4jClient.Deserializer
             if (columnNames.Count() != 1)
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
 
+            var resultType = typeof (TResult);
+            var genericTypeDefinition = resultType.IsGenericType ? resultType.GetGenericTypeDefinition() : null;
+            var mapping = jsonTypeMappings.SingleOrDefault(m =>
+                m.PropertyTypeToTriggerMapping == resultType ||
+                m.PropertyTypeToTriggerMapping == genericTypeDefinition);
+            var newType = mapping == null ? resultType : mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(resultType);
+
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
             var results = rows.Select(row =>
             {
-                var parseInto = jsonTypeMappings.Where()
-                (TResult)CommonDeserializerMethods.CreateAndMap(typeof(TResult), row, Culture, jsonTypeMappings)
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings);
+                return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
             return results;

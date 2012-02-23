@@ -11,34 +11,43 @@ namespace Neo4jClient.Test.Deserializer
     [TestFixture]
     public class CypherJsonDeserializerTests
     {
+        const string SingleColumnModeContentFormat =
+            @"{{
+                'columns' : [ 'a' ],
+                'data' : [ [ {{ 'Foo': '{0}', 'Bar': 'Bar' }} ] ]
+            }}";
+
+        const string ProjectionModeContentFormat =
+            @"{{
+                'columns' : [ 'Foo', 'Bar' ],
+                'data' : [ [ '{0}', 'Bar' ] ]
+            }}";
+
         [Test]
-        [TestCase(CypherMode.SingleColumn, "", null)]
-        [TestCase(CypherMode.SingleColumn, "rekjre", null)]
-        [TestCase(CypherMode.SingleColumn, "/Date(abcs)/", null)]
-        [TestCase(CypherMode.SingleColumn, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherMode.SingleColumn, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherMode.SingleColumn, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherMode.SingleColumn, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherMode.SingleColumn, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherMode.SingleColumn, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        [TestCase(CypherMode.Projection, "", null)]
-        [TestCase(CypherMode.Projection, "rekjre", null)]
-        [TestCase(CypherMode.Projection, "/Date(abcs)/", null)]
-        [TestCase(CypherMode.Projection, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherMode.Projection, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherMode.Projection, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherMode.Projection, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherMode.Projection, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherMode.Projection, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        public void DeserializeShouldPreserveOffsetValues(CypherMode mode, string input, string expectedResult)
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "", null)]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "rekjre", null)]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(abcs)/", null)]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(abcs+0000)/", null)]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
+        [TestCase(CypherMode.SingleColumn, SingleColumnModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "", null)]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "rekjre", null)]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(abcs)/", null)]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(abcs+0000)/", null)]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
+        [TestCase(CypherMode.Projection, ProjectionModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        public void DeserializeShouldPreserveOffsetValues(CypherMode mode, string contentFormat, string input, string expectedResult)
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<DateTimeOffsetModel>(client, mode);
-            var response = new RestResponse {Content = @"{
-                                                          'columns' : [ 'Foo', 'Bar' ],
-                                                          'data' : [ [ '" + input + @"', 'Bar' ] ]
-                                                        }"};
+            var response = new RestResponse {Content = string.Format(contentFormat, input)};
 
             // Act
             var result = deserializer.Deserialize(response).ToArray();
