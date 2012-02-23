@@ -576,7 +576,7 @@ namespace Neo4jClient
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
-            var deserializer = new CypherJsonDeserializer<TResult>(this);
+            var deserializer = new CypherJsonDeserializer<TResult>(this, CypherResultMode.Projection);
             var results = deserializer
                 .Deserialize(response)
                 .ToList();

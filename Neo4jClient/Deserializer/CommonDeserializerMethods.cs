@@ -142,7 +142,7 @@ namespace Neo4jClient.Deserializer
             }
         }
 
-        static object CreateAndMap(Type type, JToken element, CultureInfo culture, IEnumerable<TypeMapping> typeMappings)
+        public static object CreateAndMap(Type type, JToken element, CultureInfo culture, IEnumerable<TypeMapping> typeMappings)
         {
             object instance;
             if (type.IsGenericType)
