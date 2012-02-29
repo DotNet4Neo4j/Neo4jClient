@@ -439,6 +439,75 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void WhereBooleanOperationWithIntConstantOnRightSide()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
+            // START n=node(3, 1)
+            // WHERE (n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias")
+            // RETURN n
+
+            int theId = 777;
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => (n.Id == theId))
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Id? = {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(777, query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+        }
+
+        [Test]
+        public void WhereBooleanOperationWithLongConstantOnRightSide()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
+            // START n=node(3, 1)
+            // WHERE (n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias")
+            // RETURN n
+
+            long theId = 777;
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => (n.Id == theId))
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Id? = {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(777, query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+        }
+
+        [Test]
+        public void WhereBooleanOperationWithLongNullableConstantOnRightSide()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
+            // START n=node(3, 1)
+            // WHERE (n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias")
+            // RETURN n
+
+            long? theId = 777;
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3, (NodeReference)1)
+                .Where<FooData>(n => (n.Id == theId))
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Id? = {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual(777, query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
+        }
+
+        [Test]
         public void WhereBooleanOperationWithObjectProperty()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
