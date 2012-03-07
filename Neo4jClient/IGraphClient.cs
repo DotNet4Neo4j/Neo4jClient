@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
+using RestSharp;
 
 namespace Neo4jClient
 {
@@ -15,6 +16,8 @@ namespace Neo4jClient
         Node<TNode> Get<TNode>(NodeReference reference);
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
+
+        IEnumerable<Node<TNode>> GetAllNodesFromDatabase<TNode>();
 
         void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback);
 
