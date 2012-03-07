@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Neo4jClient.ApiModels;
+using Neo4jClient.Cypher;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Extensions;
@@ -11,19 +12,22 @@ using RestSharp.Extensions;
 namespace Neo4jClient.Deserializer
 {
     public class CypherJsonDeserializer<TResult>
-        where TResult : new()
     {
         readonly IGraphClient client;
+        readonly CypherResultMode resultMode;
+
         public CultureInfo Culture { get; set; }
 
-        public CypherJsonDeserializer(IGraphClient client)
+        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode)
         {
             this.client = client;
+            this.resultMode = resultMode;
             Culture = CultureInfo.InvariantCulture;
         }
 
         public IEnumerable<TResult> Deserialize(RestResponse response)
         {
+            response.Content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(response.Content);
             var content = response.Content;
             var root = JObject.Parse(content).Root;
 
@@ -32,22 +36,6 @@ namespace Neo4jClient.Deserializer
                 .Children()
                 .Select(c => c.AsString())
                 .ToArray();
-
-            var properties = typeof (TResult).GetProperties();
-            var propertiesDictionary = properties
-                .Where(p => p.CanWrite)
-                .ToDictionary(p => p.Name);
-
-            var columnsWhichDontHaveSettableProperties = columnNames.Where(c => !propertiesDictionary.ContainsKey(c)).ToArray();
-            if (columnsWhichDontHaveSettableProperties.Any())
-            {
-                var columnsWhichDontHaveSettablePropertiesCommaSeparated = string.Join(", ", columnsWhichDontHaveSettableProperties);
-                throw new ArgumentException(string.Format(
-                    "The query response contains columns {0} however {1} does not contain publically settable properties to receive this data.",
-                    columnsWhichDontHaveSettablePropertiesCommaSeparated,
-                    typeof(TResult).FullName),
-                    "response");
-            }
 
             var jsonTypeMappings = new[]
             {
@@ -73,20 +61,72 @@ namespace Neo4jClient.Deserializer
                 }
             };
 
+            switch (resultMode)
+            {
+                case CypherResultMode.Set:
+                    return ParseInSingleColumnMode(root, columnNames, jsonTypeMappings);
+                case CypherResultMode.Projection:
+                    return ParseInProjectionMode(root, columnNames, jsonTypeMappings);
+                default:
+                    throw new ArgumentException("Unrecognised mode.", "mode");
+            }
+        }
+
+        IEnumerable<TResult> ParseInSingleColumnMode(JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+        {
+            if (columnNames.Count() != 1)
+                throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
+
+            var resultType = typeof (TResult);
+            var genericTypeDefinition = resultType.IsGenericType ? resultType.GetGenericTypeDefinition() : null;
+            var mapping = jsonTypeMappings.SingleOrDefault(m =>
+                m.PropertyTypeToTriggerMapping == resultType ||
+                m.PropertyTypeToTriggerMapping == genericTypeDefinition);
+            var newType = mapping == null ? resultType : mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(resultType);
+
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
-            var results = rows.Select(row => ReadRow(row, propertiesDictionary, columnNames, jsonTypeMappings));
+            var results = rows.Select(row =>
+            {
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings);
+                return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
+            });
 
             return results;
         }
 
-        TResult ReadRow(
+        IEnumerable<TResult> ParseInProjectionMode(JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+        {
+            var properties = typeof(TResult).GetProperties();
+            var propertiesDictionary = properties
+                .Where(p => p.CanWrite)
+                .ToDictionary(p => p.Name);
+
+            var columnsWhichDontHaveSettableProperties = columnNames.Where(c => !propertiesDictionary.ContainsKey(c)).ToArray();
+            if (columnsWhichDontHaveSettableProperties.Any())
+            {
+                var columnsWhichDontHaveSettablePropertiesCommaSeparated = string.Join(", ", columnsWhichDontHaveSettableProperties);
+                throw new ArgumentException(string.Format(
+                    "The query response contains columns {0} however {1} does not contain publically settable properties to receive this data.",
+                    columnsWhichDontHaveSettablePropertiesCommaSeparated,
+                    typeof(TResult).FullName),
+                    "columnNames");
+            }
+
+            var dataArray = (JArray)root["data"];
+            var rows = dataArray.Children();
+            var results = rows.Select(row => ReadProjectionRow(row, propertiesDictionary, columnNames, jsonTypeMappings));
+
+            return results;
+        }
+
+        TResult ReadProjectionRow(
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
             string[] columnNames,
-            IEnumerable<TypeMapping> jsonTypeMappings)
+            TypeMapping[] jsonTypeMappings)
         {
-            var result = new TResult();
+            var result = Activator.CreateInstance<TResult>();
 
             var cellIndex = 0;
             foreach(var cell in row.Children())

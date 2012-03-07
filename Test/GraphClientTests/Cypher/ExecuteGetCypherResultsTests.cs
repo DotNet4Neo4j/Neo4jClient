@@ -115,6 +115,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             public string Bar { get; set; }
             public string Baz { get; set; }
+            public DateTimeOffset? Date { get; set; }
         }
 
         public class ResultWithNodeDto

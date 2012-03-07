@@ -64,8 +64,8 @@ namespace Neo4jClient.Cypher
                 memberType = fieldInfo.FieldType;
             var isNullable =
                 memberType != null &&
-                memberType.IsGenericType &&
-                memberType.GetGenericTypeDefinition() == typeof (Nullable<>);
+                ((memberType.IsGenericType &&
+                memberType.GetGenericTypeDefinition() == typeof (Nullable<>)) || memberType == typeof(string));
             return isNullable;
         }
     }

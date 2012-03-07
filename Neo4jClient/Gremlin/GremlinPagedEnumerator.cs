@@ -18,7 +18,7 @@ namespace Neo4jClient.Gremlin
         public GremlinPagedEnumerator(
             Func<IGremlinQuery, IEnumerable<TResult>> pageLoadCallback,
             IGremlinQuery query,
-            int pageSize = 1000)
+            int pageSize = 100)
         {
             this.pageLoadCallback = pageLoadCallback;
             this.query = query;
