@@ -16,8 +16,6 @@ namespace Neo4jClient
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 
-        IEnumerable<Node<TNode>> GetAllNodesFromDatabase<TNode>();
-
         void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback);
 
         void Update<TNode>(

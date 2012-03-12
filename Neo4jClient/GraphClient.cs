@@ -80,11 +80,6 @@ namespace Neo4jClient
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
                     RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(rootUri.AbsoluteUri.Length);
             }
-            if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.CustomNeo4JPlugin != null)
-            {
-                RootApiResponse.Extensions.CustomNeo4JPlugin.GetAllNodes =
-                    RootApiResponse.Extensions.CustomNeo4JPlugin.GetAllNodes.Substring(rootUri.AbsoluteUri.Length);
-            }
 
             if (RootApiResponse.Cypher != null)
             {
@@ -680,40 +675,6 @@ namespace Neo4jClient
             OnOperationCompleted(new OperationCompletedEventArgs
             {
                 QueryText = query.ToDebugQueryText(),
-                ResourcesReturned = nodes.Count(),
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return nodes;
-        }
-
-        public virtual IEnumerable<Node<TNode>> GetAllNodesFromDatabase<TNode>()
-        {
-            CheckRoot();
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var request = new RestRequest(RootApiResponse.Extensions.CustomNeo4JPlugin.GetAllNodes, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
-            };
-
-            var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
-
-            ValidateExpectedResponseCodes(
-                response,
-                HttpStatusCode.OK);
-
-            var nodes = response.Data == null
-                ? new Node<TNode>[0]
-                : response.Data.Select(r => r.ToNode(this)).ToArray();
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = "",
                 ResourcesReturned = nodes.Count(),
                 TimeTaken = stopwatch.Elapsed
             });
