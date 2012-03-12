@@ -494,6 +494,11 @@ namespace Neo4jClient
             get {return new CypherFluentQuery(this); }
         }
 
+        public IGremlinClient Gremlin
+        {
+            get { return new GremlinClient(this); }
+        }
+
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();

@@ -81,11 +81,13 @@
     <Compile Include="Deserializer\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\EmitPropertyStep.cs" />
+    <Compile Include="Gremlin\GremlinClient.cs" />
     <Compile Include="Gremlin\GremlinIterator.cs" />
     <Compile Include="Gremlin\HasNextStep.cs" />
     <Compile Include="Gremlin\IfThenElseStep.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Gremlin\IGremlinClient.cs" />
     <Compile Include="Gremlin\PrintLineStatement.cs" />
     <Compile Include="Gremlin\Statement.cs" />
     <Compile Include="Gremlin\StoreStep.cs" />

@@ -1,4 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Collections.Generic;
+using NSubstitute;
+using NUnit.Framework;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient.Test.Gremlin

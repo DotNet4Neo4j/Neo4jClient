@@ -67,5 +67,7 @@ namespace Neo4jClient
         event OperationCompletedEventHandler OperationCompleted;
 
         ICypherFluentQueryPreStart Cypher { get; }
+
+        IGremlinClient Gremlin { get; }
     }
 }
