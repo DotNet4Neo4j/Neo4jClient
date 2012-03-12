@@ -7,7 +7,8 @@ namespace Neo4jClient.Serializer
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            writer.WriteValue(value.ToString());
+            var timeZone = (TimeZoneInfo) value;
+            writer.WriteValue(timeZone.Id);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
