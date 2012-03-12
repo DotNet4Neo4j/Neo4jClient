@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
-using RestSharp;
 
 namespace Neo4jClient
 {
