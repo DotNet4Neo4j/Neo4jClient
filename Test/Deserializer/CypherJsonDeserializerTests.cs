@@ -171,7 +171,11 @@ namespace Neo4jClient.Test.Deserializer
             var response = new RestResponse
             {
                 Content = @"{
-                  'data' : [ { 'Name': '東京', 'Population': 13000000 }, { 'Name': 'London', 'Population': 8000000 }, { 'Name': 'Sydney', 'Population': 4000000 } ],
+                  'data' : [
+                    [ { 'Name': '東京', 'Population': 13000000 } ],
+                    [ { 'Name': 'London', 'Population': 8000000 } ],
+                    [ { 'Name': 'Sydney', 'Population': 4000000 } ]
+                  ],
                   'columns' : [ 'Cities' ]
                 }".Replace("'", "\"")
             };

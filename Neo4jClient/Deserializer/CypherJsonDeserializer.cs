@@ -88,7 +88,14 @@ namespace Neo4jClient.Deserializer
             var rows = dataArray.Children();
             var results = rows.Select(row =>
             {
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row, Culture, jsonTypeMappings);
+                if (!(row is JArray))
+                    throw new InvalidOperationException("Expected the row to be a JSON array of values, but it wasn't.");
+
+                var rowAsArray = (JArray) row;
+                if (rowAsArray.Count != 1)
+                    throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
+
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
