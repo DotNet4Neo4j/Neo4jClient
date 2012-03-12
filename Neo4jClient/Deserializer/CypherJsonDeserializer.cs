@@ -88,7 +88,7 @@ namespace Neo4jClient.Deserializer
             var rows = dataArray.Children();
             var results = rows.Select(row =>
             {
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings);
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row, Culture, jsonTypeMappings);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 

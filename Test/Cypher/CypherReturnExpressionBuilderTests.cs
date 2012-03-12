@@ -46,6 +46,25 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnMultiplePropertiesInAnonymousType()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
+            // START a=node(1)
+            // RETURN a.Age AS SomethingTotallyDifferent, a.Name as FirstName
+
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new
+                {
+                    SomethingTotallyDifferent = a.As<Foo>().Age,
+                    FirstName = a.As<Foo>().Name
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name? AS FirstName", text);
+        }
+
+        [Test]
         public void ReturnMultiplePropertiesFromMultipleColumns()
         {
             // http://docs.neo4j.org/chunked/milestone/cypher-query-lang.html

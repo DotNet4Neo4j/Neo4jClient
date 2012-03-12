@@ -7,7 +7,6 @@ namespace Neo4jClient.Cypher
     public class CypherFluentQuery<TResult> :
         CypherFluentQuery,
         ICypherFluentQueryReturned<TResult>
-        where TResult : new()
     {
         public CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
             : base(client, builder)

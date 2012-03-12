@@ -8,31 +8,46 @@ namespace Neo4jClient.Cypher
     {
         public static string BuildText(LambdaExpression expression)
         {
-            if (expression.Body.NodeType != ExpressionType.MemberInit)
-                throw new ArgumentException("The expression must be constructed as an object initializer. For example: n => new MyResultType { Foo = n.Bar }", "expression");
+            switch (expression.Body.NodeType)
+            {
+                case ExpressionType.MemberInit:
+                    var memberInitExpression = (MemberInitExpression) expression.Body;
+                    return BuildText(memberInitExpression);
+                case ExpressionType.New:
+                    var newExpression = (NewExpression) expression.Body;
+                    return BuildText(newExpression);
+                default:
+                    throw new ArgumentException("The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), or an anonymous type (for example: n => new { Foo = n.Bar }).", "expression");
+            }
+        }
 
-            var memberInitExpression = (MemberInitExpression) expression.Body;
-            if (memberInitExpression.NewExpression.Constructor.GetParameters().Any())
-                throw new ArgumentException("The result type must be constructed using a parameterless constructor. For example: n => new MyResultType { Foo = n.Bar }", "expression");
+        static string BuildText(MemberInitExpression expression)
+        {
+            if (expression.NewExpression.Constructor.GetParameters().Any())
+                throw new ArgumentException(
+                    "The result type must be constructed using a parameterless constructor. For example: n => new MyResultType { Foo = n.Bar }",
+                    "expression");
 
-            var bindings = memberInitExpression.Bindings;
+            var bindings = expression.Bindings;
 
             var bindingTexts = bindings.Select(binding =>
             {
                 if (binding.BindingType != MemberBindingType.Assignment)
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
-                var memberAssignment = (MemberAssignment)binding;
-                var memberExpression = (MemberExpression)UnwrapImplicitCasts(memberAssignment.Expression);
-                var methodCallExpression = (MethodCallExpression)memberExpression.Expression;
-                var targetObject = (ParameterExpression)methodCallExpression.Object;
+                var memberAssignment = (MemberAssignment) binding;
+                var memberExpression = (MemberExpression) UnwrapImplicitCasts(memberAssignment.Expression);
+                var methodCallExpression = (MethodCallExpression) memberExpression.Expression;
+                var targetObject = (ParameterExpression) methodCallExpression.Object;
 
                 if (targetObject == null)
-                    throw new InvalidOperationException("Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+                    throw new InvalidOperationException(
+                        "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
                 var bindingDeclaringType = binding.Member.DeclaringType;
                 if (bindingDeclaringType == null)
-                    throw new InvalidOperationException("Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+                    throw new InvalidOperationException(
+                        "Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
                 var bindingMemberName = binding.Member.Name;
                 var isNullable = IsMemberNullable(bindingMemberName, bindingDeclaringType);
 
@@ -42,6 +57,14 @@ namespace Neo4jClient.Cypher
             });
 
             return string.Join(", ", bindingTexts.ToArray());
+        }
+
+        static string BuildText(NewExpression expression)
+        {
+            if (expression.Arguments.Count != expression.Members.Count)
+                throw new InvalidOperationException("Somehow we had a different number of members than arguments. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+
+            throw new NotImplementedException();
         }
 
         static Expression UnwrapImplicitCasts(Expression expression)

@@ -35,8 +35,7 @@ namespace Neo4jClient
 
         string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters);
 
-        IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
-            where TResult : new();
+        IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
 
         IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new();
 

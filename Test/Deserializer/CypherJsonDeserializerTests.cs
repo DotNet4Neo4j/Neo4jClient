@@ -159,6 +159,40 @@ namespace Neo4jClient.Test.Deserializer
         public class City
         {
             public string Name { get; set; }
+            public int Population { get; set; }
+        }
+
+        [Test]
+        public void DeserializeShouldMapProjectionIntoAnonymousType()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Set);
+            var response = new RestResponse
+            {
+                Content = @"{
+                  'data' : [ { 'Name': '東京', 'Population': 13000000 }, { 'Name': 'London', 'Population': 8000000 }, { 'Name': 'Sydney', 'Population': 4000000 } ],
+                  'columns' : [ 'Cities' ]
+                }".Replace("'", "\"")
+            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray();
+
+            // Assert
+            Assert.AreEqual(3, results.Count());
+
+            var city = results.ElementAt(0);
+            Assert.AreEqual("東京", city.Name);
+            Assert.AreEqual(13000000, city.Population);
+
+            city = results.ElementAt(1);
+            Assert.AreEqual("London", city.Name);
+            Assert.AreEqual(8000000, city.Population);
+
+            city = results.ElementAt(2);
+            Assert.AreEqual("Sydney", city.Name);
+            Assert.AreEqual(4000000, city.Population);
         }
     }
 }
