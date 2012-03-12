@@ -64,7 +64,31 @@ namespace Neo4jClient.Cypher
             if (expression.Arguments.Count != expression.Members.Count)
                 throw new InvalidOperationException("Somehow we had a different number of members than arguments. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            throw new NotImplementedException();
+            var bindingTexts = expression.Members.Select((member, index) =>
+            {
+                var argument = expression.Arguments[index];
+
+                var memberExpression = (MemberExpression)UnwrapImplicitCasts(argument);
+                var methodCallExpression = (MethodCallExpression)memberExpression.Expression;
+                var targetObject = (ParameterExpression)methodCallExpression.Object;
+
+                if (targetObject == null)
+                    throw new InvalidOperationException(
+                        "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+
+                var bindingDeclaringType = member.DeclaringType;
+                if (bindingDeclaringType == null)
+                    throw new InvalidOperationException(
+                        "Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+                var bindingMemberName = member.Name;
+                var isNullable = IsMemberNullable(bindingMemberName, bindingDeclaringType);
+
+                var optionalIndicator = isNullable ? "?" : "";
+
+                return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberExpression.Member.Name, optionalIndicator, bindingMemberName);
+            });
+
+            return string.Join(", ", bindingTexts.ToArray());
         }
 
         static Expression UnwrapImplicitCasts(Expression expression)
