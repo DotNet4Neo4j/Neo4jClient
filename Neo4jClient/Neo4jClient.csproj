@@ -157,6 +157,7 @@
     <Compile Include="RootNode.cs" />
     <Compile Include="Serializer\CustomJsonSerializer.cs" />
     <Compile Include="Serializer\EnumValueConverter.cs" />
+    <Compile Include="Serializer\TimeZoneInfoConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Diagrams\Batching.cd" />
