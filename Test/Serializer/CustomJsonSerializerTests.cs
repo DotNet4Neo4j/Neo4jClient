@@ -1,7 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
 using Neo4jClient.Serializer;
-using RestSharp;
 
 namespace Neo4jClient.Test.Serializer
 {
