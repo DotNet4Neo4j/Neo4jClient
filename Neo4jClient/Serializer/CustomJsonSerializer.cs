@@ -29,6 +29,7 @@ namespace Neo4jClient.Serializer
                 DefaultValueHandling = DefaultValueHandling.Include
             };
             serializer2.Converters.Add(new EnumValueConverter());
+            serializer2.Converters.Add(new TimeZoneInfoConverter());
             var serializer = serializer2;
             using (var writer = new StringWriter())
             using (var writer2 = new JsonTextWriter(writer))

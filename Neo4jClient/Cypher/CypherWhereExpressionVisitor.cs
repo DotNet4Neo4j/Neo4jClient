@@ -90,6 +90,11 @@ namespace Neo4jClient.Cypher
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf("?", StringComparison.Ordinal), 1);
         }
 
+        protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+        {
+            return base.VisitTypeBinary(node);
+        }
+
         protected override Expression VisitMember(MemberExpression node)
         {
             if (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Parameter)
@@ -111,13 +116,17 @@ namespace Neo4jClient.Cypher
 
                 TextOutput.Append(string.Format("{0}.{1}{2}", parameter.Name, node.Member.Name, nullIdentifier));
             }
-            else if (node.NodeType == ExpressionType.MemberAccess
-                && node.Expression.NodeType == ExpressionType.MemberAccess
-                && ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant)
+            else if (
+                (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Constant)
+                || 
+                (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.MemberAccess
+                && ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant))
             {
 
-                var data = ParseValueFromExpression(node.Expression);
-                var value = data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
+                var data = node.Expression.NodeType == ExpressionType.Constant ? ParseValueFromExpression(node) :
+                ParseValueFromExpression(node.Expression);
+
+                var value = node.Expression.NodeType == ExpressionType.Constant ? data : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
 
                 var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, value);
                 TextOutput.Append(string.Format("{0}", nextParameterName));

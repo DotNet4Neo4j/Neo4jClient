@@ -40,9 +40,30 @@ namespace Neo4jClient.Test.Deserializer
             }
         }
 
+        [Test]
+        public void DeserializeTimeZoneInfo()
+        {
+            // Arrange
+            var deserializer = new CustomJsonDeserializer();
+            const string ausEasternStandardTime = "AUS Eastern Standard Time";
+            var response = new RestResponse { Content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime) };
+
+            // Act
+            var result = deserializer.Deserialize<TimeZoneModel>(response);
+
+            // Assert
+                Assert.IsNotNull(result.Foo);
+                Assert.AreEqual(TimeZoneInfo.FindSystemTimeZoneById(ausEasternStandardTime).DisplayName, result.Foo.DisplayName);
+        }
+
         public class DateTimeOffsetModel
         {
             public DateTimeOffset? Foo { get; set; }
+        }
+
+        public class TimeZoneModel
+        {
+            public TimeZoneInfo Foo { get; set; }
         }
 
         [Test]

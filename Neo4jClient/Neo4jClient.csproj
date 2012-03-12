@@ -55,6 +55,7 @@
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="ApiModels\CustomPlugin\CustomNeo4JPluginApiResponse.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Return.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Where.cs" />
     <Compile Include="Cypher\CypherResultMode.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="RootNode.cs" />
     <Compile Include="Serializer\CustomJsonSerializer.cs" />
     <Compile Include="Serializer\EnumValueConverter.cs" />
+    <Compile Include="Serializer\TimeZoneInfoConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Diagrams\Batching.cd" />
