@@ -963,13 +963,15 @@ namespace Neo4jClient
 
             request.AddParameter("query", query);
 
-            var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
+            var response = CreateClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
-            return response.Data == null
+            var data = new CustomJsonDeserializer().Deserialize<List<NodeApiResponse<TNode>>>(response);
+
+            return data == null
                 ? Enumerable.Empty<Node<TNode>>()
-                : response.Data.Select(r => r.ToNode(this));
+                : data.Select(r => r.ToNode(this));
         }
 
         public void ShutdownServer()
