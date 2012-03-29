@@ -67,7 +67,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportExceptionForPre15M02Database()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -108,7 +108,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -166,7 +166,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -221,7 +221,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -279,7 +279,7 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "{0}/relationships",
                 new RelationshipTemplate { To = "/node/789", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -352,7 +352,7 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
             batch.Add(Method.POST, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -444,7 +444,7 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "/node/789/relationships",
                 new RelationshipTemplate { To = "{0}", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },

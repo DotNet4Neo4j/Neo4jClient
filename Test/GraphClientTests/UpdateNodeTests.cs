@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -110,7 +110,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -206,7 +206,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportedExceptionForPre15M02DatabaseWithIndexEntries()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },

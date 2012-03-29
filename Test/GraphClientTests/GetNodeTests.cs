@@ -21,7 +21,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeData()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -79,7 +79,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeDataAndDeserializeToEnumType()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -133,7 +133,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeWithReferenceBackToClient()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -188,7 +188,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNullWhenNodeDoesntExist()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -227,7 +227,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeDataAndDeserialzedJsonDatesForDateTimeOffsetNullableType()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },

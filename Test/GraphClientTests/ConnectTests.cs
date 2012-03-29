@@ -13,7 +13,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 Internal Server Error")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -32,7 +32,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldRetrieveApiEndpoints()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -67,7 +67,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldParse15M02Version()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
