@@ -29,10 +29,6 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnPropertyWithNullablePropertyOnRightHandSide()
         {
-            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
-            // START a=node(1)
-            // RETURN a.Age AS SomethingTotallyDifferent
-
             Expression<Func<ICypherResultItem, Foo>> expression =
                 a => new Foo
                 {
