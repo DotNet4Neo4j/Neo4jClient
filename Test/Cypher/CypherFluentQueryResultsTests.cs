@@ -27,7 +27,7 @@ namespace Neo4jClient.Test.Cypher
                 .Start("a", (NodeReference)1)
                 .Return(a => new ReturnPropertyQueryResult
                 {
-                    SomethingTotallyDifferent = a.As<FooNode>().Age
+                    SomethingTotallyDifferent = a.As<FooNode>().Age,
                 })
                 .Results;
 
@@ -35,7 +35,32 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void ExecutingQueryMultipleTimesShouldResetParamters()
+        public void ReturnColumnAliasOfTypeEnum()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
+            // START a=node(1)
+            // RETURN a.Age AS SomethingTotallyDifferent
+
+            var client = Substitute.For<IGraphClient>();
+
+            client
+                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
+                .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
+                .Start("a", (NodeReference)1)
+                .Return(a => new FooNode
+                {
+                    TheType = a.As<FooNode>().TheType,
+                })
+                .Results;
+
+            Assert.IsInstanceOf<IEnumerable<FooNode>>(results);
+        }
+
+        [Test]
+        public void ExecutingQueryMultipleTimesShouldResetParameters()
         {
             var client = Substitute.For<IGraphClient>();
 
@@ -60,9 +85,12 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(0, results);
         }
 
+        public enum MyType {Type1, Type2}
+
         public class FooNode
         {
             public int Age { get; set; }
+            public MyType TheType { get; set; }
         }
 
         public class ReturnPropertyQueryResult

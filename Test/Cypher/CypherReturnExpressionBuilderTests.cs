@@ -27,6 +27,24 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnPropertyWithNullablePropertyOnRightHandSide()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
+            // START a=node(1)
+            // RETURN a.Age AS SomethingTotallyDifferent
+
+            Expression<Func<ICypherResultItem, Foo>> expression =
+                a => new Foo
+                {
+                    Age = a.As<Foo>().AgeNullable.Value
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("a.AgeNullable? AS Age", text);
+        }
+
+        [Test]
         public void ReturnMultipleProperties()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
@@ -106,6 +124,7 @@ namespace Neo4jClient.Test.Cypher
         public class Foo
         {
             public int Age { get; set; }
+            public int? AgeNullable { get; set; }
             public string Name { get; set; }
             public int NumberOfCats { get; set; }
         }
