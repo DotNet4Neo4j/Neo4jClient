@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldDeleteRelationship()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -57,7 +57,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NOT FOUND")]
         public void ShouldThrowApplicationExceptionWhenDeleteFails()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },

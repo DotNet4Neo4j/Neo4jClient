@@ -35,7 +35,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p0", 123}
                 });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest
@@ -150,7 +150,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p0", 123}
                 });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest
@@ -308,7 +308,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p0", 123}
                 });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest

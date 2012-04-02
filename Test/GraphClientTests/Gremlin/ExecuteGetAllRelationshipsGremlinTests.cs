@@ -6,7 +6,6 @@ using System.Linq;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Gremlin;
 using RestSharp;
-using HttpResponse = Neo4jClient.Test.GraphClientTests.HttpResponse;
 
 namespace Neo4jClient.Test.GraphClientTests.Gremlin
 {
@@ -27,7 +26,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -95,7 +94,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },
@@ -173,7 +172,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },

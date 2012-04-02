@@ -12,7 +12,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldUpdatePayload()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
             {
                 {
                     new RestRequest { Resource = "/", Method = Method.GET },

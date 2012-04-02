@@ -7,7 +7,7 @@ namespace Neo4jClient.Test.GraphClientTests
 {
     public static class MockHttpFactory
     {
-        public static IHttpFactory Generate(string baseUri, IDictionary<IRestRequest, IHttpResponse> cannedResponses)
+        public static IHttpFactory Generate(string baseUri, IDictionary<RestRequest, HttpResponse> cannedResponses)
         {
             var httpFactory = Substitute.For<IHttpFactory>();
             httpFactory
@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.GraphClientTests
             return httpFactory;
         }
 
-        static IList<HttpParameter> HandleParameters(IHttp http, Method method, string baseUri, IEnumerable<KeyValuePair<IRestRequest, IHttpResponse>> cannedResponses)
+        static IList<HttpParameter> HandleParameters(IHttp http, Method method, string baseUri, IEnumerable<KeyValuePair<RestRequest, HttpResponse>> cannedResponses)
         {
             var matchingRequests = cannedResponses
                 .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource)
@@ -55,7 +55,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 .SingleOrDefault();
         }
 
-        static IHttpResponse HandleRequest(IHttp http, Method method, string baseUri, IEnumerable<KeyValuePair<IRestRequest, IHttpResponse>> cannedResponses)
+        static HttpResponse HandleRequest(IHttp http, Method method, string baseUri, IEnumerable<KeyValuePair<RestRequest, HttpResponse>> cannedResponses)
         {
             var matchingRequests = cannedResponses
                 .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource)
