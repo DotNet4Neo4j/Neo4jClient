@@ -37,20 +37,20 @@ namespace Neo4jClient.Test.GraphClientTests
 
             restRequest.AddParameter("query", "name:foo");
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        TestContent = RootResponse.Replace('\'', '"')
                     }
                 },
                 {
                     restRequest,
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
                     }

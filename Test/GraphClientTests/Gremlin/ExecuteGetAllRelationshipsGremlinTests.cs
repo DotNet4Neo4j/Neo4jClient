@@ -26,15 +26,15 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
@@ -55,10 +55,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new GremlinApiQuery(gremlinQueryExpected, null)),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =@"[ {
+                        TestContent =@"[ {
                           'start' : 'http://127.0.0.1:5118/db/data/node/123',
                           'data' : {
                           },
@@ -94,15 +94,15 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
@@ -123,10 +123,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new GremlinApiQuery(gremlinQueryExpected, null)),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =@"[ {
+                        TestContent =@"[ {
                           'start' : 'http://127.0.0.1:5118/db/data/node/123',
                           'data' : {
                             'Foo': 'Foo',
@@ -172,15 +172,15 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
@@ -201,10 +201,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new GremlinApiQuery(gremlinQueryExpected, null)),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =@"[]"
+                        TestContent =@"[]"
                     }
                 }
             });

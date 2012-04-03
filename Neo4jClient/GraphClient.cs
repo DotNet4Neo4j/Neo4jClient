@@ -1001,7 +1001,7 @@ namespace Neo4jClient
                 ? ""
                 : commandDescription + "\r\n\r\n";
 
-            var rawBody = response.RawBytes == null
+            var rawBody = response.RawBytes == null || response.RawBytes.Length == 0
                 ? string.Empty
                 : string.Format("\r\n\r\nThe raw response body was: {0}", Encoding.UTF8.GetString(response.RawBytes));
 

@@ -13,11 +13,11 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 Internal Server Error")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.InternalServerError,
                         StatusDescription = "Internal Server Error"
@@ -32,22 +32,22 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldRetrieveApiEndpoints()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
@@ -67,15 +67,15 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldParse15M02Version()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
@@ -83,7 +83,7 @@ namespace Neo4jClient.Test.GraphClientTests
                           'reference_node' : 'http://foo/db/data/node/0',
                           'neo4j_version' : '1.5.M02',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
