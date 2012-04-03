@@ -20,29 +20,29 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldDeleteRelationship()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/relationship/456", Method = Method.DELETE },
-                    new HttpResponse { StatusCode = HttpStatusCode.NoContent }
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 }
             });
 
@@ -57,29 +57,29 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NOT FOUND")]
         public void ShouldThrowApplicationExceptionWhenDeleteFails()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/relationship/456", Method = Method.DELETE },
-                    new HttpResponse { StatusCode = HttpStatusCode.NotFound, StatusDescription = "NOT FOUND" }
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.NotFound, StatusDescription = "NOT FOUND" }
                 }
             });
 

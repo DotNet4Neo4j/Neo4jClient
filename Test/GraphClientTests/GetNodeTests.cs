@@ -21,32 +21,32 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeData()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz'
@@ -79,32 +79,32 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeDataAndDeserializeToEnumType()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Status': 'Value1'
                           },
@@ -133,32 +133,32 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeWithReferenceBackToClient()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz'
@@ -188,29 +188,29 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNullWhenNodeDoesntExist()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NotFound,
                         StatusDescription = "Node not found"
                     }
@@ -227,32 +227,32 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldReturnNodeDataAndDeserialzedJsonDatesForDateTimeOffsetNullableType()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                 {
                     new RestRequest { Resource = "/node/456", Method = Method.GET},
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz',

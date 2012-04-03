@@ -19,7 +19,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 'reference_node' : 'http://foo/db/data/node/0',
                 'neo4j_version' : '1.5.M02',
                 'extensions_info' : 'http://foo/db/data/ext',
-                'extensions'' : {
+                'extensions' : {
                 }
             }"
             .Replace('\'', '"');
@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 'relationship_index' : 'http://foo/db/data/index/relationship',
                 'reference_node' : 'http://foo/db/data/node/0',
                 'extensions_info' : 'http://foo/db/data/ext',
-                'extensions'' : {
+                'extensions' : {
                 }
             }"
             .Replace('\'', '"');
@@ -41,23 +41,23 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = rootResponse
+                        TestContent = rootResponse
                     }
                 },
                  {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz'
@@ -81,7 +81,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.PUT,
                         RequestFormat = DataFormat.Json
                     }.AddBody(nodeToUpdate),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent
                     }
                 }
@@ -110,23 +110,23 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = rootResponse
+                        TestContent = rootResponse
                     }
                 },
                  {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz'
@@ -150,7 +150,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.PUT,
                         RequestFormat = DataFormat.Json
                     }.AddBody(nodeToUpdate),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent
                     }
                 },
@@ -160,10 +160,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
                     }
                     .AddBody(new { key="foo", value="bar", uri="http://foo/db/data/node/456"}),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.Created,
                         ContentType = "application/json",
-                        Content = "Location: http://foo/db/data/index/node/foo/foo/bar/456"
+                        TestContent = "Location: http://foo/db/data/index/node/foo/foo/bar/456"
                     }
                 },
                 {
@@ -171,7 +171,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         RequestFormat = DataFormat.Json,
                         JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
                         },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent,
                         ContentType = "application/json",
                     }
@@ -206,23 +206,23 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportedExceptionForPre15M02DatabaseWithIndexEntries()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = pre15M02RootResponse
+                        TestContent = pre15M02RootResponse
                     }
                 },
                 {
                     new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'self': 'http://foo/db/data/node/456',
+                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
                             'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz'

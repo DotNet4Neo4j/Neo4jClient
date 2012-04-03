@@ -12,32 +12,32 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldUpdatePayload()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
                           'relationship_index' : 'http://foo/db/data/index/relationship',
                           'reference_node' : 'http://foo/db/data/node/0',
                           'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions'' : {
+                          'extensions' : {
                           }
                         }".Replace('\'', '"')
                     }
                 },
                  {
                     new RestRequest { Resource = "/relationship/456/properties", Method = Method.GET },
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{ 'Foo': 'foo', 'Bar': 'bar', 'Baz': 'baz' }".Replace('\'', '"')
+                        TestContent = @"{ 'Foo': 'foo', 'Bar': 'bar', 'Baz': 'baz' }".Replace('\'', '"')
                     }
                 },
                 {
@@ -46,7 +46,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.PUT,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new TestPayload { Foo = "fooUpdated", Bar = "bar", Baz = "bazUpdated" }),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent
                     }
                 }

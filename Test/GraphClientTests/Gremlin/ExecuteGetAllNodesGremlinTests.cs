@@ -37,15 +37,15 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                     {"bar", "baz"}
                 };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
@@ -66,10 +66,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new GremlinApiQuery("foo bar query", parameters)),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =@"[ {
+                        TestContent =@"[ {
                             'outgoing_relationships' : 'http://foo/db/data/node/5/relationships/out',
                             'data' : {
                                 'Bar' : 'bar',
@@ -133,15 +133,15 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             //Arrange
             const string gremlinQueryExpected = "foo bar query";
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                           'batch' : 'http://foo/db/data/batch',
                           'node' : 'http://foo/db/data/node',
                           'node_index' : 'http://foo/db/data/index/node',
@@ -162,10 +162,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new GremlinApiQuery("foo bar query", null)),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =@"[]"
+                        TestContent =@"[]"
                     }
                 }
             });

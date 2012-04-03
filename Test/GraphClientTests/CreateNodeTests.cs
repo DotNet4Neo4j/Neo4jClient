@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 'reference_node' : 'http://foo/db/data/node/0',
                 'neo4j_version' : '1.5.M02',
                 'extensions_info' : 'http://foo/db/data/ext',
-                'extensions'' : {
+                'extensions' : {
                 }
             }"
             .Replace('\'', '"');
@@ -32,7 +32,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 'relationship_index' : 'http://foo/db/data/index/relationship',
                 'reference_node' : 'http://foo/db/data/node/0',
                 'extensions_info' : 'http://foo/db/data/ext',
-                'extensions'' : {
+                'extensions' : {
                 }
             }"
             .Replace('\'', '"');
@@ -67,15 +67,15 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportExceptionForPre15M02Database()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = pre15M02RootResponse
+                        TestContent = pre15M02RootResponse
                     }
                 }
             });
@@ -108,15 +108,15 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = pre15M02RootResponse
+                        TestContent = pre15M02RootResponse
                     }
                 },
                 {
@@ -125,10 +125,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(batch),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -166,11 +166,11 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", Content = rootResponse }
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
                     new RestRequest {
@@ -178,10 +178,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(batch),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -221,11 +221,11 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", Content = rootResponse }
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
                     new RestRequest {
@@ -233,10 +233,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(batch),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -279,11 +279,11 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "{0}/relationships",
                 new RelationshipTemplate { To = "/node/789", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", Content = rootResponse }
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
                     new RestRequest {
@@ -291,10 +291,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(batch),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -352,11 +352,11 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
             batch.Add(Method.POST, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", Content = rootResponse }
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
                     new RestRequest {
@@ -364,10 +364,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(batch),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[{'id':0,'location':'http://localhost:20001/db/data/node/763','body':{
+                        TestContent = @"[{'id':0,'location':'http://localhost:20001/db/data/node/763','body':{
                           'outgoing_relationships' : 'http://localhost:20001/db/data/node/763/relationships/out',
                           'data' : {
                             'Baz' : 'baz',
@@ -444,11 +444,11 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "/node/789/relationships",
                 new RelationshipTemplate { To = "{0}", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", Content = rootResponse }
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
                     new RestRequest {
@@ -456,10 +456,10 @@ namespace Neo4jClient.Test.GraphClientTests
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(batch),
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',

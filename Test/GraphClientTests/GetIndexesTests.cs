@@ -35,23 +35,23 @@ namespace Neo4jClient.Test.GraphClientTests
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        TestContent = RootResponse.Replace('\'', '"')
                     }
                 },
                 {
                     restRequest,
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                               'agency24871-clients' : {
                                 'to_lower_case' : 'true',
                                 'template' : 'http://localhost:5102/db/data/index/node/agency24871-clients/{key}/{value}',
@@ -90,23 +90,23 @@ namespace Neo4jClient.Test.GraphClientTests
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
             };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
-                    new RestRequest { Resource = "/", Method = Method.GET },
-                    new HttpResponse
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = RootResponse.Replace('\'', '"')
+                        TestContent = RootResponse.Replace('\'', '"')
                     }
                 },
                 {
                     restRequest,
-                    new HttpResponse {
+                    new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content = @"{
+                        TestContent = @"{
                               'agency24871-clients' : {
                                 'to_lower_case' : 'true',
                                 'template' : 'http://localhost:5102/db/data/index/node/agency24871-clients/{key}/{value}',

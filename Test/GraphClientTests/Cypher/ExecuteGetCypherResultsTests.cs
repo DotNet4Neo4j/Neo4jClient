@@ -35,19 +35,19 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p0", 123}
                 });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest
                     {
-                        Resource = "/",
+                        Resource = "",
                         Method = Method.GET
                     },
-                    new HttpResponse
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =
+                        TestContent =
                             @"{
                                 'cypher' : 'http://foo/db/data/cypher',
                                 'batch' : 'http://foo/db/data/batch',
@@ -71,11 +71,11 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new CypherApiQuery(query)),
-                    new HttpResponse
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =
+                        TestContent =
                             @"{
                                 'data' : [ [ 'HOSTS', 'foo', 44321 ], [ 'LIKES', 'bar', 44311 ], [ 'HOSTS', 'baz', 42586 ] ],
                                 'columns' : [ 'RelationshipType', 'Name', 'UniqueId' ]
@@ -150,19 +150,19 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p0", 123}
                 });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest
                     {
-                        Resource = "/",
+                        Resource = "",
                         Method = Method.GET
                     },
-                    new HttpResponse
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =
+                        TestContent =
                             @"{
                                 'cypher' : 'http://foo/db/data/cypher',
                                 'batch' : 'http://foo/db/data/batch',
@@ -186,11 +186,11 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new CypherApiQuery(query)),
-                    new HttpResponse
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =
+                        TestContent =
                             @"{
                                 'data' : [ [ {
                                 'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
@@ -308,19 +308,19 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p0", 123}
                 });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<RestRequest, HttpResponse>
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
                 {
                     new RestRequest
                     {
-                        Resource = "/",
+                        Resource = "",
                         Method = Method.GET
                     },
-                    new HttpResponse
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =
+                        TestContent =
                             @"{
                                 'cypher' : 'http://foo/db/data/cypher',
                                 'batch' : 'http://foo/db/data/batch',
@@ -344,11 +344,11 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                         Method = Method.POST,
                         RequestFormat = DataFormat.Json
                     }.AddBody(new CypherApiQuery(query)),
-                    new HttpResponse
+                    new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
-                        Content =
+                        TestContent =
                             @"{
                                 'data' : [ [ {
                                 'start' : 'http://foo/db/data/node/0',
