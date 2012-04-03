@@ -10,8 +10,8 @@
     <description>A .NET client for the neo4j REST API. neo4j is an open sourced, Java based transactional graph database. It's pretty awesome.</description>
     <tags>neo4j REST nosql</tags>
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="[4.0.2]" />
-      <dependency id="RestSharp" version="[101.3]" />
+      <dependency id="Newtonsoft.Json" version="[4.0.8]" />
+      <dependency id="RestSharp" version="[102.7]" />
     </dependencies>
   </metadata>
   <files>
