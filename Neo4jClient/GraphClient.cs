@@ -560,7 +560,7 @@ namespace Neo4jClient
             return results;
         }
 
-        public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
+        public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query, CypherResultMode resultMode = CypherResultMode.Projection)
         {
             CheckRoot();
 
@@ -580,7 +580,7 @@ namespace Neo4jClient
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
-            var deserializer = new CypherJsonDeserializer<TResult>(this, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<TResult>(this, resultMode);
             var results = deserializer
                 .Deserialize(response)
                 .ToList();

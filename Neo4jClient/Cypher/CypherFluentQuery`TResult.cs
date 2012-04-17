@@ -40,7 +40,15 @@ namespace Neo4jClient.Cypher
         {
             get
             {
-                return Client.ExecuteGetCypherResults<TResult>(Query);
+                return Client.ExecuteGetCypherResults<TResult>(Query, CypherResultMode.Projection);
+            }
+        }
+
+        public IEnumerable<TResult> ResultSet
+        {
+            get
+            {
+                return Client.ExecuteGetCypherResults<TResult>(Query, CypherResultMode.Set);
             }
         }
     }

@@ -19,6 +19,97 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             public long? UniqueId { get; set; }
         }
 
+        [Test] public void ShouldDeserializePathsResultAsSetBased()
+        {
+            // Arrange
+            const string queryText = @"
+                START d=node({p0}), e=node({p1}) 
+                MATCH p = allShortestPaths( d-[*..15]-e )
+                RETURN p";
+            var query = new CypherQuery(
+                queryText,
+                new Dictionary<string, object>
+                {
+                    {"p0", 215},
+                    {"p1", 219}
+                });
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest
+                    {
+                        Resource = "",
+                        Method = Method.GET
+                    },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent =
+                            @"{
+                                'cypher' : 'http://foo/db/data/cypher',
+                                'batch' : 'http://foo/db/data/batch',
+                                'node' : 'http://foo/db/data/node',
+                                'node_index' : 'http://foo/db/data/index/node',
+                                'relationship_index' : 'http://foo/db/data/index/relationship',
+                                'reference_node' : 'http://foo/db/data/node/0',
+                                'extensions_info' : 'http://foo/db/data/ext',
+                                'extensions' : {
+                                'GremlinPlugin' : {
+                                    'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+                                }
+                                }
+                            }".Replace('\'', '"')
+                    }
+                },
+                {
+                    new RestRequest
+                    {
+                        Resource = "/cypher",
+                        Method = Method.POST,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(new CypherApiQuery(query)),
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent =
+                            @"{
+                              'data' : [ [ {
+                                'start' : 'http://foo/db/data/node/215',
+                                'nodes' : [ 'http://foo/db/data/node/215', 'http://foo/db/data/node/0', 'http://foo/db/data/node/219' ],
+                                'length' : 2,
+                                'relationships' : [ 'http://foo/db/data/relationship/247', 'http://foo/db/data/relationship/257' ],
+                                'end' : 'http://foo/db/data/node/219'
+                              } ], [ {
+                                'start' : 'http://foo/db/data/node/215',
+                                'nodes' : [ 'http://foo/db/data/node/215', 'http://foo/db/data/node/1', 'http://foo/db/data/node/219' ],
+                                'length' : 2,
+                                'relationships' : [ 'http://foo/db/data/relationship/248', 'http://foo/db/data/relationship/258' ],
+                                'end' : 'http://foo/db/data/node/219'
+                              } ] ],
+                              'columns' : [ 'p' ]
+                            }".Replace('\'', '"')
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var results = graphClient.ExecuteGetCypherResults<PathsResult>(query,CypherResultMode.Set);
+
+            //Assert
+            Assert.IsInstanceOf<IEnumerable<PathsResult>>(results);
+            Assert.AreEqual(results.First().Length, 2);
+            Assert.AreEqual(results.First().Start, "http://foo/db/data/node/215");
+            Assert.AreEqual(results.First().End, "http://foo/db/data/node/219");
+            Assert.AreEqual(results.Skip(1).First().Length, 2);
+            Assert.AreEqual(results.Skip(1).First().Start, "http://foo/db/data/node/215");
+            Assert.AreEqual(results.Skip(1).First().End, "http://foo/db/data/node/219");
+        }
+
         [Test]
         public void ShouldDeserializeSimpleTableStructure()
         {
