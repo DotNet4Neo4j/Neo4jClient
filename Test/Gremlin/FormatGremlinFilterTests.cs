@@ -23,7 +23,7 @@ namespace Neo4jClient.Test.Gremlin
             var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
             Assert.AreEqual(".filter{ it[p0] == p1 }", filter.FilterText);
             Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
-            Assert.AreEqual(guidString, filter.FilterParameters["p1"]);
+            Assert.AreEqual(guidString, filter.FilterParameters["p1"].ToString());
         }
         
         [Test]
@@ -40,7 +40,7 @@ namespace Neo4jClient.Test.Gremlin
             var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
             Assert.AreEqual(".filter{ it[p0] != p1 }", filter.FilterText);
             Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
-            Assert.AreEqual(guidString, filter.FilterParameters["p1"]);
+            Assert.AreEqual(guidString, filter.FilterParameters["p1"].ToString());
         }
         
         [Test]
