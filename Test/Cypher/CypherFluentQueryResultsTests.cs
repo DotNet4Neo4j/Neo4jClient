@@ -60,6 +60,28 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnNodeAsSet()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
+            // START a=node(1)
+            // RETURN a
+
+            var client = Substitute.For<IGraphClient>();
+
+            client
+                .ExecuteGetCypherResults<Node<FooNode>>(Arg.Any<CypherQuery>())
+                .Returns(Enumerable.Empty<Node<FooNode>>());
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
+                .Start("a", (NodeReference)1)
+                .Return<Node<FooNode>>("a")
+                .ResultSet;
+
+            Assert.IsInstanceOf<IEnumerable<Node<FooNode>>>(results);
+        }
+
+        [Test]
         public void ExecutingQueryMultipleTimesShouldResetParameters()
         {
             var client = Substitute.For<IGraphClient>();
