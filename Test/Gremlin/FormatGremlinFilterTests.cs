@@ -10,6 +10,40 @@ namespace Neo4jClient.Test.Gremlin
     public class FormatGremlinFilterTests
     {
         [Test]
+        public void FormatGremlinFilterShouldSupportGuidTypeInEqualsExpression()
+        {
+            var guidString = "1a4e451c-aa87-4388-9b53-5d00b05ac728";
+            var guidValue = Guid.Parse(guidString);
+            
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = guidValue, ExpressionType = ExpressionType.Equal  }
+            };
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>(), new List<string>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual(".filter{ it[p0] == p1 }", filter.FilterText);
+            Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
+            Assert.AreEqual(guidString, filter.FilterParameters["p1"]);
+        }
+        
+        [Test]
+        public void FormatGremlinFilterShouldSupportGuidTypeInNotEqualsExpression()
+        {
+            var guidString = "1a4e451c-aa87-4388-9b53-5d00b05ac728";
+            var guidValue = Guid.Parse(guidString);
+            
+            var filters = new List<Filter>
+            {
+                new Filter { PropertyName= "Foo", Value = guidValue, ExpressionType = ExpressionType.NotEqual  }
+            };
+            var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>(), new List<string>());
+            var filter = FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            Assert.AreEqual(".filter{ it[p0] != p1 }", filter.FilterText);
+            Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
+            Assert.AreEqual(guidString, filter.FilterParameters["p1"]);
+        }
+        
+        [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
             var filters = new List<Filter>();
