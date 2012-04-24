@@ -24,10 +24,12 @@ namespace Neo4jClient
         readonly Uri rootUri;
         readonly IHttpFactory httpFactory;
         internal RootApiResponse RootApiResponse;
+        bool jsonStreamingAvailable;
 
         const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
 
         public NullValueHandling JsonSerializerNullValueHandling { get; set; }
+        public bool UseJsonStreamingIfAvailable { get; set; }
 
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
@@ -48,6 +50,7 @@ namespace Neo4jClient
             this.rootUri = rootUri;
             this.httpFactory = httpFactory;
             JsonSerializerNullValueHandling = NullValueHandling.Ignore;
+            UseJsonStreamingIfAvailable = true;
         }
 
         IRestClient CreateClient()
@@ -55,6 +58,7 @@ namespace Neo4jClient
             var client = new RestClient(rootUri.AbsoluteUri) {HttpFactory = httpFactory};
             client.RemoveHandler("application/json");
             client.AddHandler("application/json", new CustomJsonDeserializer());
+            if (UseJsonStreamingIfAvailable && jsonStreamingAvailable) client.AddDefaultHeader("Accept", "application/json;stream=true");
             return client;
         }
 
@@ -86,6 +90,9 @@ namespace Neo4jClient
                 RootApiResponse.Cypher =
                     RootApiResponse.Cypher.Substring(rootUri.AbsoluteUri.Length);
             }
+
+            // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
+            jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8, 0, 0);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
