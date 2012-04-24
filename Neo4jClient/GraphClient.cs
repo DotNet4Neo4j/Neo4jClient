@@ -92,7 +92,7 @@ namespace Neo4jClient
             }
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
-            jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8, 0, 0);
+            jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
