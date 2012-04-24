@@ -41,6 +41,8 @@ namespace Neo4jClient.Gremlin
                 new TypeFilter { Type = typeof(long), FilterFormat = "it[{0}] <= {1}", ExpressionType = ExpressionType.LessThanOrEqual},
                 new TypeFilter { Type = typeof(bool), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
                 new TypeFilter { Type = typeof(bool), FilterFormat = "it[{0}] != {1}", ExpressionType = ExpressionType.NotEqual },
+                new TypeFilter { Type = typeof(Guid), FilterFormat = "it[{0}] == {1}", ExpressionType = ExpressionType.Equal },
+                new TypeFilter { Type = typeof(Guid), FilterFormat = "it[{0}] != {1}", ExpressionType = ExpressionType.NotEqual },
             };
 
             const string filterSeparator = " && ";
