@@ -12,9 +12,9 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void FormatGremlinFilterShouldSupportGuidTypeInEqualsExpression()
         {
-            var guidString = "1a4e451c-aa87-4388-9b53-5d00b05ac728";
+            const string guidString = "1a4e451c-aa87-4388-9b53-5d00b05ac728";
             var guidValue = Guid.Parse(guidString);
-            
+
             var filters = new List<Filter>
             {
                 new Filter { PropertyName= "Foo", Value = guidValue, ExpressionType = ExpressionType.Equal  }
@@ -25,13 +25,13 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
             Assert.AreEqual(guidString, filter.FilterParameters["p1"].ToString());
         }
-        
+
         [Test]
         public void FormatGremlinFilterShouldSupportGuidTypeInNotEqualsExpression()
         {
-            var guidString = "1a4e451c-aa87-4388-9b53-5d00b05ac728";
+            const string guidString = "1a4e451c-aa87-4388-9b53-5d00b05ac728";
             var guidValue = Guid.Parse(guidString);
-            
+
             var filters = new List<Filter>
             {
                 new Filter { PropertyName= "Foo", Value = guidValue, ExpressionType = ExpressionType.NotEqual  }
@@ -42,7 +42,7 @@ namespace Neo4jClient.Test.Gremlin
             Assert.AreEqual("Foo", filter.FilterParameters["p0"]);
             Assert.AreEqual(guidString, filter.FilterParameters["p1"].ToString());
         }
-        
+
         [Test]
         public void FormatGremlinFilterShouldReturnEmptyStringForNoCaseSensititiveFilters()
         {
