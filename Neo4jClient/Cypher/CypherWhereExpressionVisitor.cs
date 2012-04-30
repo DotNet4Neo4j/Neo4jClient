@@ -53,6 +53,9 @@ namespace Neo4jClient.Cypher
                 case ExpressionType.NotEqual:
                     TextOutput.Append(NotEqual);
                     break;
+
+                default:
+                    throw new NotSupportedException(string.Format("Expression type {0} is not supported.", node.NodeType));
             }
  
             Visit(node.Right);
