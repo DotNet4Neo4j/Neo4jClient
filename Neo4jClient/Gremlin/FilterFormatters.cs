@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -119,7 +118,7 @@ namespace Neo4jClient.Gremlin
             };
         }
 
-        internal static void TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter, IEnumerable<Filter> simpleFilters)
+        internal static IEnumerable<Filter> TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter)
         {
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
@@ -135,13 +134,15 @@ namespace Neo4jClient.Gremlin
                 ? Enum.Parse(underlyingPropertyType, underlyingPropertyType.GetEnumName(constantValue))
                 : constantValue;
 
-            ((IList) simpleFilters).Add(
+            return new[]
+            {
                 new Filter
-                    {
-                        PropertyName = key.Name,
-                        Value = convertedValue,
-                        ExpressionType = binaryExpression.NodeType
-                    });
+                {
+                    PropertyName = key.Name,
+                    Value = convertedValue,
+                    ExpressionType = binaryExpression.NodeType
+                }
+            };
         }
 
         internal static ExpressionKey ParseKeyFromExpression(Expression expression)
