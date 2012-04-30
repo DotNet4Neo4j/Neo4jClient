@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
 using Neo4jClient.Gremlin;
@@ -99,7 +100,7 @@ namespace Neo4jClient.Test.Gremlin
         public void TranslateFilterShouldResolveSinglePropertyEqualsLocalLongMaxExpression()
         {
             var filters = new List<Filter>();
-            var prop1Value = long.Parse(long.MaxValue.ToString()); // This must be a local - do not refactor this to a constant
+            var prop1Value = long.Parse(long.MaxValue.ToString(CultureInfo.InvariantCulture)); // This must be a local - do not refactor this to a constant
             FilterFormatters.TranslateFilter<NodeWithLongs>(
                 f => f.Prop1 == prop1Value,
                 filters
