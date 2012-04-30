@@ -153,7 +153,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void TranslateFilterShouldResolveMultiplePropertiesEqualNullWithBinaryAnd()
+        public void TranslateFilterShouldResolveTwoPropertiesEqualNullWithBinaryAnd()
         {
             var filters = FilterFormatters
                 .TranslateFilter<Foo>(f => f.Prop1 == null & f.Prop2 == null)
@@ -167,7 +167,7 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        public void TranslateFilterShouldResolveMultiplePropertiesEqualNullWithBinaryAndAlso()
+        public void TranslateFilterShouldResolveTwoPropertiesEqualNullWithBinaryAndAlso()
         {
             var filters = FilterFormatters
                 .TranslateFilter<Foo>(f => f.Prop1 == null && f.Prop2 == null)
