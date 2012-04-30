@@ -93,11 +93,6 @@ namespace Neo4jClient.Cypher
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf("?", StringComparison.Ordinal), 1);
         }
 
-        protected override Expression VisitTypeBinary(TypeBinaryExpression node)
-        {
-            return base.VisitTypeBinary(node);
-        }
-
         protected override Expression VisitMember(MemberExpression node)
         {
             if (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Parameter)
@@ -115,7 +110,6 @@ namespace Neo4jClient.Cypher
                     (propertyType == typeof(string))
                     )
                     nullIdentifier = "?";
-
 
                 TextOutput.Append(string.Format("{0}.{1}{2}", parameter.Name, node.Member.Name, nullIdentifier));
             }
