@@ -181,6 +181,22 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TranslateFilterShouldResolveThreePropertiesEqualNullWithBinaryAndAlso()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => f.Prop1 == null && f.Prop2 == null && f.Prop3 == null)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(3, filters.Count());
+            Assert.AreEqual("Prop1", filters[0].PropertyName);
+            Assert.AreEqual(null, filters[0].Value);
+            Assert.AreEqual("Prop2", filters[1].PropertyName);
+            Assert.AreEqual(null, filters[1].Value);
+            Assert.AreEqual("Prop3", filters[2].PropertyName);
+            Assert.AreEqual(null, filters[2].Value);
+        }
+
+        [Test]
         [ExpectedException(
             typeof(NotSupportedException),
             ExpectedMessage = "This expression is not a binary expression:",
@@ -228,6 +244,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             public string Prop1 { get; set; }
             public string Prop2 { get; set; }
+            public string Prop3 { get; set; }
         }
 
         public class Bar
