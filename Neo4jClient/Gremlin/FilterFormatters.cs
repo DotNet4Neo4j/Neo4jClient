@@ -128,20 +128,30 @@ namespace Neo4jClient.Gremlin
 
         static IEnumerable<Filter> TranslateFilterInternal(BinaryExpression binaryExpression)
         {
-            if (binaryExpression.NodeType == ExpressionType.And ||
-                binaryExpression.NodeType == ExpressionType.AndAlso)
+            switch (binaryExpression.NodeType)
             {
-                var leftBinaryExpression = binaryExpression.Left as BinaryExpression;
-                if (leftBinaryExpression == null)
-                    throw new NotSupportedException(string.Format("This expression is not a binary expression: {0}", binaryExpression.Left));
-                var firstFilter = TranslateFilterInternal(leftBinaryExpression);
+                case ExpressionType.AndAlso:
+                case ExpressionType.And:
+                    var leftBinaryExpression = binaryExpression.Left as BinaryExpression;
+                    if (leftBinaryExpression == null)
+                        throw new NotSupportedException(string.Format(
+                            "This expression is not a binary expression: {0}", binaryExpression.Left));
+                    var firstFilter = TranslateFilterInternal(leftBinaryExpression);
 
-                var rightBinaryExpression = binaryExpression.Right as BinaryExpression;
-                if (rightBinaryExpression == null)
-                    throw new NotSupportedException(string.Format("This expression is not a binary expression: {0}", binaryExpression.Right));
-                var secondFilter = TranslateFilterInternal(rightBinaryExpression);
+                    var rightBinaryExpression = binaryExpression.Right as BinaryExpression;
+                    if (rightBinaryExpression == null)
+                        throw new NotSupportedException(string.Format(
+                            "This expression is not a binary expression: {0}", binaryExpression.Right));
+                    var secondFilter = TranslateFilterInternal(rightBinaryExpression);
 
-                return firstFilter.Concat(secondFilter).ToArray();
+                    return firstFilter.Concat(secondFilter).ToArray();
+
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                    throw new NotSupportedException(string.Format(
+                        "Oprerator {0} is not yet supported. There's no reason why it can't be; we just haven't done it yet. Feel free to send a pull request if you need this feature. It was used in expression: {1}",
+                        binaryExpression.NodeType,
+                        binaryExpression));
             }
 
             var key = ParseKeyFromExpression(binaryExpression.Left);

@@ -202,6 +202,28 @@ namespace Neo4jClient.Test.Gremlin
             FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null && testVariable);
         }
 
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "Oprerator Or is not yet supported.",
+            MatchType = MessageMatch.StartsWith)]
+        public void TranslateFilterShouldThrowExceptionForOrExpression()
+        {
+            var testVariable = bool.Parse(bool.TrueString);
+            FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null | testVariable);
+        }
+
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "Oprerator OrElse is not yet supported.",
+            MatchType = MessageMatch.StartsWith)]
+        public void TranslateFilterShouldThrowExceptionForOrElseExpression()
+        {
+            var testVariable = bool.Parse(bool.TrueString);
+            FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null || testVariable);
+        }
+
         public class Foo
         {
             public string Prop1 { get; set; }
