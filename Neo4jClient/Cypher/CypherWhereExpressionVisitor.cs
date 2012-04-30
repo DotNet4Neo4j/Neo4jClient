@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Neo4jClient.Cypher
 {
-    public class CypherWhereExpressionVisitor :  ExpressionVisitor
+    public class CypherWhereExpressionVisitor : ExpressionVisitor
     {
         const string NotEqual = " != ";
         const string Equal = " = ";
