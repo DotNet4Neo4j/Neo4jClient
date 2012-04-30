@@ -131,6 +131,26 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TranslateFilterShouldResolveThreePropertiesEqualOtherStringPropertiesInBooleanAndAlsoChain()
+        {
+            var bar = new Bar { Prop1 = "def", Prop2 = "ghi", Prop3 = "jkl" };
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(
+                    // These must be property gets - do not refactor this line
+                    f => f.Prop1 == bar.Prop1 && f.Prop2 == bar.Prop2 && f.Prop3 == bar.Prop3
+                )
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(3, filters.Count());
+            Assert.AreEqual("Prop1", filters[0].PropertyName);
+            Assert.AreEqual("def", filters[0].Value);
+            Assert.AreEqual("Prop2", filters[1].PropertyName);
+            Assert.AreEqual("ghi", filters[1].Value);
+            Assert.AreEqual("Prop3", filters[2].PropertyName);
+            Assert.AreEqual("jkl", filters[2].Value);
+        }
+
+        [Test]
         public void TranslateFilterShouldResolveSinglePropertyEqualsAStringFunctionExpression()
         {
             var filters = FilterFormatters
@@ -251,6 +271,7 @@ namespace Neo4jClient.Test.Gremlin
         {
             public string Prop1 { get; set; }
             public string Prop2 { get; set; }
+            public string Prop3 { get; set; }
         }
 
         public class NodeWithIntegers
