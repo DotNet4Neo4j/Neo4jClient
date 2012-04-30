@@ -123,6 +123,26 @@ namespace Neo4jClient.Gremlin
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
                 throw new NotSupportedException("Only binary expressions are supported at this time.");
+            return TranslateFilterInternal(binaryExpression);
+        }
+
+        static IEnumerable<Filter> TranslateFilterInternal(BinaryExpression binaryExpression)
+        {
+            if (binaryExpression.NodeType == ExpressionType.And ||
+                binaryExpression.NodeType == ExpressionType.AndAlso)
+            {
+                var leftBinaryExpression = binaryExpression.Left as BinaryExpression;
+                if (leftBinaryExpression == null)
+                    throw new NotSupportedException(string.Format("This expression is not a binary expression: {0}", binaryExpression.Left));
+                var firstFilter = TranslateFilterInternal(leftBinaryExpression);
+
+                var rightBinaryExpression = binaryExpression.Right as BinaryExpression;
+                if (rightBinaryExpression == null)
+                    throw new NotSupportedException(string.Format("This expression is not a binary expression: {0}", binaryExpression.Right));
+                var secondFilter = TranslateFilterInternal(rightBinaryExpression);
+
+                return firstFilter.Concat(secondFilter).ToArray();
+            }
 
             var key = ParseKeyFromExpression(binaryExpression.Left);
             var constantValue = ParseValueFromExpression(binaryExpression.Right);

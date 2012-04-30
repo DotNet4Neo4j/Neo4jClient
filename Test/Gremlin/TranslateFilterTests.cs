@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
 using Neo4jClient.Gremlin;
@@ -149,6 +150,56 @@ namespace Neo4jClient.Test.Gremlin
                 .ToArray();
             Assert.AreEqual("Prop1", filters.FirstOrDefault().PropertyName);
             Assert.AreEqual(null, filters.FirstOrDefault().Value);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveMultiplePropertiesEqualNullWithBinaryAnd()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => f.Prop1 == null & f.Prop2 == null)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(2, filters.Count());
+            Assert.AreEqual("Prop1", filters[0].PropertyName);
+            Assert.AreEqual(null, filters[0].Value);
+            Assert.AreEqual("Prop2", filters[1].PropertyName);
+            Assert.AreEqual(null, filters[1].Value);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveMultiplePropertiesEqualNullWithBinaryAndAlso()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => f.Prop1 == null && f.Prop2 == null)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(2, filters.Count());
+            Assert.AreEqual("Prop1", filters[0].PropertyName);
+            Assert.AreEqual(null, filters[0].Value);
+            Assert.AreEqual("Prop2", filters[1].PropertyName);
+            Assert.AreEqual(null, filters[1].Value);
+        }
+
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "This expression is not a binary expression:",
+            MatchType = MessageMatch.StartsWith)]
+        public void TranslateFilterShouldThrowExceptionIfOuterExpressionIsAndAlsoAndInnerLeftExpressionIsNotABinaryExpression()
+        {
+            var testVariable = bool.Parse(bool.TrueString);
+            FilterFormatters.TranslateFilter<Foo>(f => testVariable && f.Prop2 == null);
+        }
+
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "This expression is not a binary expression:",
+            MatchType = MessageMatch.StartsWith)]
+        public void TranslateFilterShouldThrowExceptionIfOuterExpressionIsAndAlsoAndInnerRightExpressionIsNotABinaryExpression()
+        {
+            var testVariable = bool.Parse(bool.TrueString);
+            FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null && testVariable);
         }
 
         public class Foo
