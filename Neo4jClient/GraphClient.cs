@@ -400,7 +400,7 @@ namespace Neo4jClient
             var getResponse = CreateClient().Execute<TRelationshipData>(getRequest);
             ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
 
-            var payload = getResponse.Data;
+            var payload = getResponse.Data ?? new TRelationshipData();
             updateCallback(payload);
 
             var updateRequest = new RestRequest(propertiesEndpoint, Method.PUT)

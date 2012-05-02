@@ -67,6 +67,60 @@ namespace Neo4jClient.Test.GraphClientTests
             Assert.Inconclusive("Not actually asserting the calls were all made");
         }
 
+        [Test]
+        public void ShouldInitializePayloadDuringUpdate()
+        {
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = @"{
+                          'batch' : 'http://foo/db/data/batch',
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                },
+                 {
+                    new RestRequest { Resource = "/relationship/456/properties", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
+                },
+                {
+                    new RestRequest {
+                        Resource = "/relationship/456/properties",
+                        Method = Method.PUT,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(new TestPayload { Foo = "fooUpdated", Bar = "", Baz = "bazUpdated" }),
+                    new NeoHttpResponse {
+                        StatusCode = HttpStatusCode.NoContent
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            graphClient.Update<TestPayload>(
+                new RelationshipReference(456),
+                payloadFromDb =>
+                {
+                    payloadFromDb.Foo = "fooUpdated";
+                    payloadFromDb.Baz = "bazUpdated";
+                }
+            );
+
+            Assert.Inconclusive("Not actually asserting the calls were all made");
+        }
+
         public class TestPayload
         {
             public string Foo { get; set; }
