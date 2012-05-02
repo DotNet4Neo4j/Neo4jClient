@@ -55,8 +55,8 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
 
-            graphClient.Update<TestPayload>(
-                new RelationshipReference(456),
+            graphClient.Update(
+                new RelationshipReference<TestPayload>(456),
                 payloadFromDb =>
                 {
                     payloadFromDb.Foo = "fooUpdated";
@@ -109,8 +109,8 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
 
-            graphClient.Update<TestPayload>(
-                new RelationshipReference(456),
+            graphClient.Update(
+                new RelationshipReference<TestPayload>(456),
                 payloadFromDb =>
                 {
                     payloadFromDb.Foo = "fooUpdated";

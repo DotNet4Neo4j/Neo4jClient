@@ -386,7 +386,7 @@ namespace Neo4jClient
             });
         }
 
-        public void Update<TRelationshipData>(RelationshipReference relationshipReference, Action<TRelationshipData> updateCallback)
+        public void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback)
             where TRelationshipData : class, new()
         {
             CheckRoot();

@@ -23,7 +23,7 @@ namespace Neo4jClient
             Action<TNode> updateCallback,
             Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback);
 
-        void Update<TRelationshipData>(RelationshipReference relationshipReference, Action<TRelationshipData> updateCallback)
+        void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback)
             where TRelationshipData : class, new();
 
         void Delete(NodeReference reference, DeleteMode mode);
