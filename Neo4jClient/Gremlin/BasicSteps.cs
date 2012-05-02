@@ -101,7 +101,7 @@ namespace Neo4jClient.Gremlin
 
             filters = filters.Concat(new[] { filter });
 
-            var newQuery = query.AddFilterBlock(".outE", filters, StringComparison.OrdinalIgnoreCase);
+            var newQuery = query.AddFilterBlock(".outE", filters, comparison);
             return new GremlinRelationshipEnumerable<TData>(newQuery);
         }
 
