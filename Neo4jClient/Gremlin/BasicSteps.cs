@@ -92,6 +92,7 @@ namespace Neo4jClient.Gremlin
         public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
             where TData : class, new()
         {
+            // TODO: This filter should always be case sensitive, irrespective of how the rest are compared
             var filter = new Filter
             {
                 ExpressionType = ExpressionType.Equal,
