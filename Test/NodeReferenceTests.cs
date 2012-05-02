@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient.Test
@@ -108,6 +109,17 @@ namespace Neo4jClient.Test
         {
             var reference = new NodeReference(123);
             Assert.IsNull(reference.NodeType);
+        }
+
+        [Test]
+        [ExpectedException(
+            typeof(NotSupportedException),
+            ExpectedMessage = "You're tring to initialize NodeReference<Node<System.TimeZone>> which is too many levels of nesting. You should just be using NodeReference<System.TimeZone> instead. (You use a Node, or a NodeReference, but not both together.)")]
+        public void TypedNodeReferenceShouldThrowExceptionIfTNodeIsWrappedAgain()
+        {
+// ReSharper disable ObjectCreationAsStatement
+            new NodeReference<Node<TimeZone>>(123);
+// ReSharper restore ObjectCreationAsStatement
         }
 
         [Test]
