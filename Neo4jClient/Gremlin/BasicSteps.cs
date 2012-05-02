@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Gremlin
@@ -68,7 +69,27 @@ namespace Neo4jClient.Gremlin
             return new GremlinRelationshipEnumerable<TData>(newQuery);
         }
 
+        public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var newQuery = query.AddFilterBlock(".outE", filters, comparison);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, Expression<Func<TData, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var filters = FilterFormatters.TranslateFilter(filter);
+            return query.OutE<TData>(filters, comparison);
+        }
+
         public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, string label)
+            where TData : class, new()
+        {
+            return query.OutE<TData>(label, new Filter[0], StringComparison.Ordinal);
+        }
+
+        public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
             where TData : class, new()
         {
             var filter = new Filter
@@ -78,8 +99,17 @@ namespace Neo4jClient.Gremlin
                 Value = label
             };
 
-            var newQuery = query.AddFilterBlock(".outE", new[] { filter }, StringComparison.Ordinal);
+            filters = filters.Concat(new[] { filter });
+
+            var newQuery = query.AddFilterBlock(".outE", filters, StringComparison.OrdinalIgnoreCase);
             return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> OutE<TData>(this IGremlinQuery query, string label, Expression<Func<TData, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var filters = FilterFormatters.TranslateFilter(filter);
+            return query.OutE<TData>(label, filters, comparison);
         }
 
         public static IGremlinRelationshipQuery InE(this IGremlinQuery query)
