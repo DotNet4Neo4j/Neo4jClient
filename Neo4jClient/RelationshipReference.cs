@@ -1,15 +1,21 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
     [DebuggerDisplay("Relationship {id}")]
-    public class RelationshipReference
+    public class RelationshipReference : IGremlinQuery, IAttachedReference
     {
         readonly int id;
+        readonly IGraphClient client;
 
-        public RelationshipReference(int id)
+        public RelationshipReference(int id) : this(id, null) {}
+
+        public RelationshipReference(int id, IGraphClient client)
         {
             this.id = id;
+            this.client = client;
         }
 
         public int Id { get { return id; } }
@@ -43,6 +49,26 @@ namespace Neo4jClient
         public override int GetHashCode()
         {
             return id;
+        }
+
+        IGraphClient IAttachedReference.Client
+        {
+            get { return client; }
+        }
+
+        string IGremlinQuery.QueryText
+        {
+            get { return "g.e(p0)"; }
+        }
+
+        IDictionary<string, object> IGremlinQuery.QueryParameters
+        {
+            get { return new Dictionary<string, object> { { "p0", Id }}; }
+        }
+
+        IList<string> IGremlinQuery.QueryDeclarations
+        {
+            get { return new List<string>(); }
         }
     }
 }

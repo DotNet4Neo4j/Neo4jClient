@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Neo4jClient.Gremlin;
+using NUnit.Framework;
 
 namespace Neo4jClient.Test
 {
@@ -62,6 +63,15 @@ namespace Neo4jClient.Test
         {
             var lhs = new RelationshipReference(3);
             Assert.IsFalse(lhs.Equals(new object()));
+        }
+
+        [Test]
+        public void GremlinQueryTextShouldReturnSimpleEdgeStep()
+        {
+            var reference = new RelationshipReference(123);
+            var query = ((IGremlinQuery)reference);
+            Assert.AreEqual("g.e(p0)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
     }
 }

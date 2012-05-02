@@ -27,7 +27,7 @@ namespace Neo4jClient.ApiModels
             var endNodeId = int.Parse(GetLastPathSegment(End));
 
             return new RelationshipInstance<TData>(
-                new RelationshipReference(relationshipId),
+                new RelationshipReference(relationshipId, client),
                 new NodeReference(startNodeId, client),
                 new NodeReference(endNodeId, client),
                 Data);
