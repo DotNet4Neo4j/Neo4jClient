@@ -29,7 +29,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldExecuteSilentlyForSuccessDelete()
         {
             //Arrange
-            var restRequest = new RestRequest("/index/node/MyIndex", Method.DELETE)
+            var restRequest = new RestRequest("/index/node/myindex", Method.DELETE)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }

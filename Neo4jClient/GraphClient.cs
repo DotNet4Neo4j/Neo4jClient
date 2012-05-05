@@ -722,6 +722,7 @@ namespace Neo4jClient
         public bool CheckIndexExists(string indexName, IndexFor indexFor)
         {
             CheckRoot();
+            indexName = indexName.ToLower();
 
             string indexResource;
             switch (indexFor)
@@ -759,7 +760,7 @@ namespace Neo4jClient
         public void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor)
         {
             CheckRoot();
-
+            indexName = indexName.ToLower();
             string nodeResource;
             switch (indexFor)
             {
@@ -775,7 +776,7 @@ namespace Neo4jClient
 
             var createIndexApiRequest = new
                 {
-                    name = indexName.ToLower(),
+                    name = indexName,
                     config
                 };
 
@@ -823,6 +824,7 @@ namespace Neo4jClient
         public void DeleteIndex(string indexName, IndexFor indexFor)
         {
             CheckRoot();
+            indexName = indexName.ToLower();
 
             string indexResource;
             switch (indexFor)
@@ -877,6 +879,7 @@ namespace Neo4jClient
 
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
+            indexName = indexName.ToLower();
             var encodedIndexValue = EncodeIndexValue(indexValue);
             if (string.IsNullOrWhiteSpace(encodedIndexValue))
                 return;
@@ -947,6 +950,7 @@ namespace Neo4jClient
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
         {
             CheckRoot();
+            indexName = indexName.ToLower();
 
             string indexResource;
 

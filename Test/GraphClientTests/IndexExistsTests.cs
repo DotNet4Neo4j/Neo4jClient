@@ -29,7 +29,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldReturnTrueIfIndexIsFound()
         {
             //Arrange
-            var restRequest = new RestRequest("/index/node/MyIndex", Method.GET)
+            var restRequest = new RestRequest("/index/node/myindex", Method.GET)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
@@ -69,7 +69,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldReturnFalseIfIndexNotFound()
         {
             //Arrange
-            var restRequest = new RestRequest("/index/node/MyIndex", Method.GET)
+            var restRequest = new RestRequest("/index/node/myindex", Method.GET)
             {
                 RequestFormat = DataFormat.Json,
                 JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
