@@ -9,8 +9,9 @@
             RelationshipReference<TData> reference,
             NodeReference startNodeReference,
             NodeReference endNodeReference,
+            string typeKey,
             TData data)
-            : base(reference, startNodeReference, endNodeReference)
+            : base(reference, startNodeReference, endNodeReference, typeKey)
         {
             this.data = data;
         }

@@ -86,6 +86,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             Assert.AreEqual(456, relationships.ElementAt(0).Reference.Id);
             Assert.AreEqual(123, relationships.ElementAt(0).StartNodeReference.Id);
             Assert.AreEqual(789, relationships.ElementAt(0).EndNodeReference.Id);
+            Assert.AreEqual("KNOWS", relationships.ElementAt(0).TypeKey);
         }
 
         [Test]
@@ -156,6 +157,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             Assert.AreEqual(456, relationships.ElementAt(0).Reference.Id);
             Assert.AreEqual(123, relationships.ElementAt(0).StartNodeReference.Id);
             Assert.AreEqual(789, relationships.ElementAt(0).EndNodeReference.Id);
+            Assert.AreEqual("KNOWS", relationships.ElementAt(0).TypeKey);
             Assert.AreEqual("Foo", relationships.ElementAt(0).Data.Foo);
             Assert.AreEqual("Bar", relationships.ElementAt(0).Data.Bar);
         }
