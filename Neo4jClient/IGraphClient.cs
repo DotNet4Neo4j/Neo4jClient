@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 
@@ -16,7 +17,10 @@ namespace Neo4jClient
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 
-        void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback);
+        void Update<TNode>(
+            NodeReference<TNode> nodeReference,
+            Action<TNode> updateCallback,
+            Action<IEnumerable<FieldChange>> changeCallback = null);
 
         void Update<TNode>(
             NodeReference<TNode> nodeReference,

@@ -320,7 +320,7 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback)
+        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Action<IEnumerable<FieldChange>> changeCallback = null)
         {
             CheckRoot();
 
@@ -328,13 +328,27 @@ namespace Neo4jClient
             stopwatch.Start();
 
             var node = Get(nodeReference);
+
+            var serializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling };
+
+            var originalValuesString = changeCallback == null ? null : serializer.Serialize(node.Data);
+
             updateCallback(node.Data);
+
+            if (changeCallback != null)
+            {
+                var originalValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(originalValuesString);
+                var newValuesString = serializer.Serialize(node.Data);
+                var newValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(newValuesString);
+                var differences = GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
+                changeCallback(differences);
+            }
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
                 {
                     RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                    JsonSerializer = serializer
                 };
             request.AddBody(node.Data);
             var response = CreateClient().Execute(request);
@@ -348,6 +362,19 @@ namespace Neo4jClient
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
+        }
+
+        static IEnumerable<FieldChange> GetDifferencesBetweenDictionaries(IDictionary<string, string> originalValues, IDictionary<string, string> newValues)
+        {
+            return originalValues
+                .Keys
+                .Select(k => new FieldChange
+                {
+                    FieldName = k,
+                    OldValue = originalValues[k],
+                    NewValue = newValues[k]
+                })
+                .Where(c => !c.OldValue.Equals(c.NewValue, StringComparison.Ordinal));
         }
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback)

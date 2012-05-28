@@ -57,6 +57,7 @@
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\Cypher\PathsResult.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
+    <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="RelationshipReference`TData.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Return.cs" />
