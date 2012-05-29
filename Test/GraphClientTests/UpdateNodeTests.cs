@@ -153,7 +153,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent
                     }
-                },
+                }, 
                 {
                     new RestRequest("/index/node/foo", Method.POST) {
                         RequestFormat = DataFormat.Json,

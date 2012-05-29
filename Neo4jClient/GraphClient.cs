@@ -320,7 +320,9 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Action<IEnumerable<FieldChange>> changeCallback = null)
+        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback,
+            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
+            Action<IEnumerable<FieldChange>> changeCallback = null)
         {
             CheckRoot();
 
@@ -329,11 +331,18 @@ namespace Neo4jClient
 
             var node = Get(nodeReference);
 
+            var indexEntries = new IndexEntry[] {};
+
+            if (indexEntriesCallback != null)
+            {
+                indexEntries = indexEntriesCallback(node.Data).ToArray();
+                if (indexEntries.Any())
+                    AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+            }
+
             var serializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling };
 
             var originalValuesString = changeCallback == null ? null : serializer.Serialize(node.Data);
-
-            updateCallback(node.Data);
 
             if (changeCallback != null)
             {
@@ -343,38 +352,6 @@ namespace Neo4jClient
                 var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
                 changeCallback(differences);
             }
-
-            var nodeEndpoint = ResolveEndpoint(nodeReference);
-            var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = serializer
-                };
-            request.AddBody(node.Data);
-            var response = CreateClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-        }
-
-        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback)
-        {
-            CheckRoot();
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var node = Get(nodeReference);
-            var indexEntries = indexEntriesCallback(node.Data).ToArray();
-            if (indexEntries.Any())
-                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
 
             updateCallback(node.Data);
 
@@ -387,7 +364,10 @@ namespace Neo4jClient
             request.AddBody(node.Data);
             var response = CreateClient().Execute(request);
 
-            ReIndex(node.Reference, indexEntries);
+            if (indexEntriesCallback != null)
+            {
+                ReIndex(node.Reference, indexEntries);
+            }
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
 

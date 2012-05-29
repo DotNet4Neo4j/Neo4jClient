@@ -17,15 +17,10 @@ namespace Neo4jClient
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 
-        void Update<TNode>(
-            NodeReference<TNode> nodeReference,
-            Action<TNode> updateCallback,
-            Action<IEnumerable<FieldChange>> changeCallback = null);
-
-        void Update<TNode>(
-            NodeReference<TNode> nodeReference,
-            Action<TNode> updateCallback,
-            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback);
+        void Update<TNode>(NodeReference<TNode> nodeReference,
+                           Action<TNode> updateCallback,
+                           Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
+                           Action<IEnumerable<FieldChange>> changeCallback = null);
 
         void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback)
             where TRelationshipData : class, new();
