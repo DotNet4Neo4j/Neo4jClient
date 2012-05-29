@@ -164,6 +164,7 @@
     <Compile Include="Serializer\CustomJsonSerializer.cs" />
     <Compile Include="Serializer\EnumValueConverter.cs" />
     <Compile Include="Serializer\TimeZoneInfoConverter.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Diagrams\Batching.cd" />
