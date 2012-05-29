@@ -340,7 +340,7 @@ namespace Neo4jClient
                 var originalValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(originalValuesString);
                 var newValuesString = serializer.Serialize(node.Data);
                 var newValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(newValuesString);
-                var differences = GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
+                var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
                 changeCallback(differences);
             }
 
@@ -362,19 +362,6 @@ namespace Neo4jClient
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
-        }
-
-        static IEnumerable<FieldChange> GetDifferencesBetweenDictionaries(IDictionary<string, string> originalValues, IDictionary<string, string> newValues)
-        {
-            return originalValues
-                .Keys
-                .Select(k => new FieldChange
-                {
-                    FieldName = k,
-                    OldValue = originalValues[k],
-                    NewValue = newValues[k]
-                })
-                .Where(c => !c.OldValue.Equals(c.NewValue, StringComparison.Ordinal));
         }
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback)
