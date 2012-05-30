@@ -344,6 +344,8 @@ namespace Neo4jClient
 
             var originalValuesString = changeCallback == null ? null : serializer.Serialize(node.Data);
 
+            updateCallback(node.Data);
+
             if (changeCallback != null)
             {
                 var originalValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(originalValuesString);
@@ -352,8 +354,6 @@ namespace Neo4jClient
                 var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
                 changeCallback(differences);
             }
-
-            updateCallback(node.Data);
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
