@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Neo4jClient.ApiModels;
 
@@ -9,15 +8,40 @@ namespace Neo4jClient
     {
         public static IEnumerable<FieldChange> GetDifferencesBetweenDictionaries(IDictionary<string, string> originalValues, IDictionary<string, string> newValues)
         {
-            return originalValues
+            var changes = new List<FieldChange>();
+
+            changes.AddRange(originalValues
                 .Keys
+                .Where(k => !newValues.Keys.Any(n => n == k))
                 .Select(k => new FieldChange
-                    {
-                        FieldName = k,
-                        OldValue = originalValues[k],
-                        NewValue = newValues[k]
-                    })
-                .Where(c => !c.OldValue.Equals(c.NewValue, StringComparison.Ordinal));
+                {
+                    FieldName = k,
+                    OldValue = originalValues[k],
+                    NewValue = ""
+                }));
+
+            changes.AddRange(newValues
+                .Keys
+                .Where(k => !originalValues.Keys.Any(n => n == k))
+                .Select(k => new FieldChange
+                {
+                    FieldName = k,
+                    OldValue = "",
+                    NewValue = newValues[k],
+                }));
+
+            changes.AddRange(newValues
+                .Keys
+                .Where(k => originalValues.Keys.Any(n => n == k) && originalValues[k] != newValues[k])
+                .Select(k =>new FieldChange
+                        {
+                            FieldName = k,
+                            OldValue = originalValues[k],
+                            NewValue = newValues[k],
+                        }
+                ));
+
+            return changes;
         }
     }
 }
