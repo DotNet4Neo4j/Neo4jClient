@@ -7,12 +7,33 @@ namespace Neo4jClient.Gremlin
 {
     public static class BasicSteps
     {
+        const string bothV = ".bothV";
         const string outV = ".outV";
         const string inV = ".inV";
+        const string bothE = ".bothE";
         const string outE = ".outE";
         const string inE = ".inE";
+        const string both = ".both({0})";
         const string @out = ".out({0})";
         const string @in = ".in({0})";
+
+        public static IGremlinNodeQuery<TNode> BothV<TNode>(this IGremlinQuery query)
+        {
+            var newQuery = query.AddBlock(bothV);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
+        }
+
+        public static IGremlinNodeQuery<TNode> BothV<TNode>(this IGremlinQuery query, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            var newQuery = query.AddFilterBlock(bothV, filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
+        }
+
+        public static IGremlinNodeQuery<TNode> BothV<TNode>(this IGremlinQuery query, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            var filters = FilterFormatters.TranslateFilter(filter);
+            return query.BothV<TNode>(filters, comparison);
+        }
 
         public static IGremlinNodeQuery<TNode> OutV<TNode>(this IGremlinQuery query)
         {
@@ -48,6 +69,65 @@ namespace Neo4jClient.Gremlin
         {
             var filters = FilterFormatters.TranslateFilter(filter);
             return query.InV<TNode>(filters, comparison);
+        }
+
+        public static IGremlinRelationshipQuery BothE(this IGremlinQuery query)
+        {
+            var newQuery = query.AddBlock(bothE);
+            return new GremlinRelationshipEnumerable(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery BothE(this IGremlinQuery query, string label)
+        {
+            var filter = GetFilter(label);
+
+            var newQuery = query.AddFilterBlock(bothE, new[] { filter }, StringComparison.Ordinal);
+            return new GremlinRelationshipEnumerable(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> BothE<TData>(this IGremlinQuery query)
+            where TData : class, new()
+        {
+            var newQuery = query.AddBlock(bothE);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> BothE<TData>(this IGremlinQuery query, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var newQuery = query.AddFilterBlock(bothE, filters, comparison);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> BothE<TData>(this IGremlinQuery query, Expression<Func<TData, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var filters = FilterFormatters.TranslateFilter(filter);
+            return query.BothE<TData>(filters, comparison);
+        }
+
+        public static IGremlinRelationshipQuery<TData> BothE<TData>(this IGremlinQuery query, string label)
+            where TData : class, new()
+        {
+            return query.BothE<TData>(label, new Filter[0], StringComparison.Ordinal);
+        }
+
+        public static IGremlinRelationshipQuery<TData> BothE<TData>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var filter = GetFilter(label);
+
+            filters = filters.Concat(new[] { filter });
+
+            var newQuery = query.AddFilterBlock(bothE, filters, comparison);
+            return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
+        public static IGremlinRelationshipQuery<TData> BothE<TData>(this IGremlinQuery query, string label, Expression<Func<TData, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+            where TData : class, new()
+        {
+            var filters = FilterFormatters.TranslateFilter(filter);
+            return query.BothE<TData>(label, filters, comparison);
         }
 
         public static IGremlinRelationshipQuery OutE(this IGremlinQuery query)
@@ -143,6 +223,27 @@ namespace Neo4jClient.Gremlin
 
             var newQuery = query.AddFilterBlock(inE, new[] { filter }, StringComparison.Ordinal);
             return new GremlinRelationshipEnumerable<TData>(newQuery);
+        }
+
+        public static IGremlinNodeQuery<TNode> Both<TNode>(this IGremlinQuery query, string label)
+        {
+            var newQuery = query.AddBlock(both, label);
+            return new GremlinNodeEnumerable<TNode>(newQuery);
+        }
+
+        public static IGremlinNodeQuery<TNode> Both<TNode>(this IGremlinQuery query, string label, IEnumerable<Filter> filters, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            var newQuery = query.AddBlock(both, label);
+            var filterQuery = newQuery.AddFilterBlock(string.Empty, filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(filterQuery);
+        }
+
+        public static IGremlinNodeQuery<TNode> Both<TNode>(this IGremlinQuery query, string label, Expression<Func<TNode, bool>> filter, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            var newQuery = query.AddBlock(both, label);
+            var filters = FilterFormatters.TranslateFilter(filter);
+            var filterQuery = newQuery.AddFilterBlock(string.Empty, filters, comparison);
+            return new GremlinNodeEnumerable<TNode>(filterQuery);
         }
 
         public static IGremlinNodeQuery<TNode> Out<TNode>(this IGremlinQuery query, string label)

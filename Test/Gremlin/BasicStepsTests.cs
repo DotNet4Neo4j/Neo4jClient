@@ -11,6 +11,15 @@ namespace Neo4jClient.Test.Gremlin
     public class BasicStepsTests
     {
         [Test]
+        public void BothVShouldAppendStepToNodeReference()
+        {
+            var node = new NodeReference(123);
+            var query = node.BothV<object>();
+            Assert.AreEqual("g.v(p0).bothV", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void OutVShouldAppendStepToNodeReference()
         {
             var node = new NodeReference(123);
@@ -227,6 +236,14 @@ namespace Neo4jClient.Test.Gremlin
         {
             var query = new NodeReference(123).OutE().InV<object>();
             Assert.AreEqual("g.v(p0).outE.inV", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void BothEShouldAppendStepToGremlinQuery()
+        {
+            var query = new NodeReference(123).BothE();
+            Assert.AreEqual("g.v(p0).bothE", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
 
