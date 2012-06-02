@@ -32,7 +32,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 {
                     {"p0", 215},
                     {"p1", 219}
-                });
+                },
+                CypherResultMode.Set);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
@@ -98,7 +99,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             graphClient.Connect();
 
             //Act
-            var results = graphClient.ExecuteGetCypherResults<PathsResult>(query,CypherResultMode.Set);
+            var results = graphClient.ExecuteGetCypherResults<PathsResult>(query);
 
             //Assert
             Assert.IsInstanceOf<IEnumerable<PathsResult>>(results);
@@ -124,7 +125,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 new Dictionary<string, object>
                 {
                     {"p0", 123}
-                });
+                },
+                CypherResultMode.Projection);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
@@ -239,7 +241,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 new Dictionary<string, object>
                 {
                     {"p0", 123}
-                });
+                },
+                CypherResultMode.Projection);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {
@@ -397,7 +400,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 new Dictionary<string, object>
                 {
                     {"p0", 123}
-                });
+                },
+                CypherResultMode.Projection);
 
             var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
             {

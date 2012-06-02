@@ -67,18 +67,19 @@ namespace Neo4jClient.Test.Cypher
             // RETURN a
 
             var client = Substitute.For<IGraphClient>();
-
+            var set = new[] { new Node<FooNode>(new FooNode(), (NodeReference<FooNode>)123) };
             client
-                .ExecuteGetCypherResults<Node<FooNode>>(Arg.Any<CypherQuery>())
-                .Returns(Enumerable.Empty<Node<FooNode>>());
+                .ExecuteGetCypherResults<Node<FooNode>>(
+                    Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
+                .Returns(set);
 
             var cypher = new CypherFluentQuery(client);
             var results = cypher
                 .Start("a", (NodeReference)1)
                 .Return<Node<FooNode>>("a")
-                .ResultSet;
+                .Results;
 
-            Assert.IsInstanceOf<IEnumerable<Node<FooNode>>>(results);
+            CollectionAssert.AreEqual(set, results);
         }
 
         [Test]

@@ -13,6 +13,7 @@ namespace Neo4jClient.Cypher
         string whereText;
         string returnText;
         bool returnDistinct;
+        CypherResultMode resultMode;
         int? limit;
         int? skip;
         string orderBy;
@@ -26,6 +27,7 @@ namespace Neo4jClient.Cypher
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
+                resultMode = resultMode,
                 limit = limit,
                 skip = skip,
                 startBits = startBits,
@@ -87,6 +89,7 @@ namespace Neo4jClient.Cypher
             var newBuilder = Clone();
             newBuilder.returnText = identity;
             newBuilder.returnDistinct = distinct;
+            newBuilder.resultMode = CypherResultMode.Set;
             return newBuilder;
         }
 
@@ -95,6 +98,7 @@ namespace Neo4jClient.Cypher
             var newBuilder = Clone();
             newBuilder.returnText = CypherReturnExpressionBuilder.BuildText(expression);
             newBuilder.returnDistinct = distinct;
+            newBuilder.resultMode = CypherResultMode.Projection;
             return newBuilder;
         }
 
@@ -134,7 +138,7 @@ namespace Neo4jClient.Cypher
             WriteSkipClause(queryTextBuilder, queryParameters);
             WriteLimitClause(queryTextBuilder, queryParameters);
 
-            return new CypherQuery(queryTextBuilder.ToString(), queryParameters);
+            return new CypherQuery(queryTextBuilder.ToString(), queryParameters, resultMode);
         }
 
         public static string CreateParameter(IDictionary<string, object> parameters, object paramValue)

@@ -9,11 +9,16 @@ namespace Neo4jClient.Cypher
     {
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
+        readonly CypherResultMode resultMode;
 
-        public CypherQuery(string queryText, IDictionary<string, object> queryParameters)
+        public CypherQuery(
+            string queryText,
+            IDictionary<string, object> queryParameters,
+            CypherResultMode resultMode)
         {
             this.queryText = queryText;
             this.queryParameters = queryParameters;
+            this.resultMode = resultMode;
         }
 
         public IDictionary<string, object> QueryParameters
@@ -24,6 +29,11 @@ namespace Neo4jClient.Cypher
         public string QueryText
         {
             get { return queryText; }
+        }
+
+        public CypherResultMode ResultMode
+        {
+            get { return resultMode; }
         }
 
         protected string DebugQueryText

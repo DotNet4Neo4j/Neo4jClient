@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Neo4jClient.Cypher
@@ -9,14 +10,9 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryReturned<TResult> OrderBy(params string[] properties);
         ICypherFluentQueryReturned<TResult> OrderByDescending(params string[] properties);
 
-        /// <summary>
-        /// Return custom projections i.e. Multiple columns in the result.
-        /// </summary>
         IEnumerable<TResult> Results { get; }
 
-        /// <summary>
-        /// Return either Nodes, Or Relationships, Paths i.e. Only one column in the result.
-        /// </summary>
+        [Obsolete("Use the Results property instead.", true)]
         IEnumerable<TResult> ResultSet { get; }
     }
 }
