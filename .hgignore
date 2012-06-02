@@ -7,3 +7,4 @@ _ReSharper*
 TestResults
 Neo4jClient.*.nupkg
 .docstates
+.crunchsolution.cache
