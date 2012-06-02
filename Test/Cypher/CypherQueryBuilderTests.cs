@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using Neo4jClient.Cypher;
+using System.Linq.Expressions;
+using System;
 
 namespace Neo4jClient.Test.Cypher
 {
@@ -56,6 +58,31 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START a=node({p0}), b=node({p1})", query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
             Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void ShouldUseSetResultModeForIdentityBasedReturn()
+        {
+            var builder = new CypherQueryBuilder();
+            builder.SetReturn("foo", false);
+
+            var query = builder.ToQuery();
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseProjectionResultModeForLambdaBasedReturn()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new { Foo = a.As<object>() };
+
+            var builder = new CypherQueryBuilder();
+            builder.SetReturn(expression, false);
+
+            var query = builder.ToQuery();
+
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
         }
     }
 }
