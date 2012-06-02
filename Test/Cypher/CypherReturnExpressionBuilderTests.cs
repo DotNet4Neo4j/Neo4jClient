@@ -123,7 +123,7 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1)
             // RETURN a AS Foo
 
-            Expression<Func<ICypherResultItem, ICypherResultItem, ReturnPropertyQueryResult>> expression =
+            Expression<Func<ICypherResultItem, object>> expression =
                 a => new
                 {
                     Foo = a.As<Foo>()
@@ -141,7 +141,7 @@ namespace Neo4jClient.Test.Cypher
             // MATCH a<--b
             // RETURN a AS Foo, b AS Bar
 
-            Expression<Func<ICypherResultItem, ICypherResultItem, ReturnPropertyQueryResult>> expression =
+            Expression<Func<ICypherResultItem, ICypherResultItem, object>> expression =
                 (a, b) => new
                 {
                     Foo = a.As<Foo>(),
