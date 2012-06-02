@@ -117,6 +117,42 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("n.Age AS Age, n.NumberOfCats? AS NumberOfCats", text);
         }
 
+        [Test]
+        public void ReturnNodeInColumn()
+        {
+            // START a=node(1)
+            // RETURN a AS Foo
+
+            Expression<Func<ICypherResultItem, ICypherResultItem, ReturnPropertyQueryResult>> expression =
+                a => new
+                {
+                    Foo = a.As<Foo>()
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("a AS Foo", text);
+        }
+
+        [Test]
+        public void ReturnMultipleNodesInColumns()
+        {
+            // START a=node(1)
+            // MATCH a<--b
+            // RETURN a AS Foo, b AS Bar
+
+            Expression<Func<ICypherResultItem, ICypherResultItem, ReturnPropertyQueryResult>> expression =
+                (a, b) => new
+                {
+                    Foo = a.As<Foo>(),
+                    Bar = a.As<Foo>()
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("a AS Foo, b AS Bar", text);
+        }
+
         public class Foo
         {
             public int Age { get; set; }
