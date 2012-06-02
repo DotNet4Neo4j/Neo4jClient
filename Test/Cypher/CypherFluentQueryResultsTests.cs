@@ -67,7 +67,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN a
 
             var client = Substitute.For<IGraphClient>();
-            var set = new[] { new Node<FooNode>(new FooNode(), (NodeReference<FooNode>)123) };
+            var set = new[] { new Node<FooNode>(new FooNode(), new NodeReference<FooNode>(123)) };
             client
                 .ExecuteGetCypherResults<Node<FooNode>>(
                     Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
