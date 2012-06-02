@@ -320,7 +320,9 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback)
+        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback,
+            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
+            Action<IEnumerable<FieldChange>> changeCallback = null)
         {
             CheckRoot();
 
@@ -328,41 +330,30 @@ namespace Neo4jClient
             stopwatch.Start();
 
             var node = Get(nodeReference);
-            updateCallback(node.Data);
 
-            var nodeEndpoint = ResolveEndpoint(nodeReference);
-            var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
-                };
-            request.AddBody(node.Data);
-            var response = CreateClient().Execute(request);
+            var indexEntries = new IndexEntry[] {};
 
-            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
+            if (indexEntriesCallback != null)
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-        }
+                indexEntries = indexEntriesCallback(node.Data).ToArray();
+                if (indexEntries.Any())
+                    AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+            }
 
-        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback)
-        {
-            CheckRoot();
+            var serializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling };
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var node = Get(nodeReference);
-            var indexEntries = indexEntriesCallback(node.Data).ToArray();
-            if (indexEntries.Any())
-                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+            var originalValuesString = changeCallback == null ? null : serializer.Serialize(node.Data);
 
             updateCallback(node.Data);
+
+            if (changeCallback != null)
+            {
+                var originalValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(originalValuesString);
+                var newValuesString = serializer.Serialize(node.Data);
+                var newValuesDictionary = new CustomJsonDeserializer().Deserialize<Dictionary<string, string>>(newValuesString);
+                var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
+                changeCallback(differences);
+            }
 
             var nodeEndpoint = ResolveEndpoint(nodeReference);
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
@@ -373,7 +364,10 @@ namespace Neo4jClient
             request.AddBody(node.Data);
             var response = CreateClient().Execute(request);
 
-            ReIndex(node.Reference, indexEntries);
+            if (indexEntriesCallback != null)
+            {
+                ReIndex(node.Reference, indexEntries);
+            }
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
 
@@ -722,7 +716,6 @@ namespace Neo4jClient
         public bool CheckIndexExists(string indexName, IndexFor indexFor)
         {
             CheckRoot();
-            indexName = indexName.ToLower();
 
             string indexResource;
             switch (indexFor)
@@ -760,7 +753,7 @@ namespace Neo4jClient
         public void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor)
         {
             CheckRoot();
-            indexName = indexName.ToLower();
+
             string nodeResource;
             switch (indexFor)
             {
@@ -806,7 +799,7 @@ namespace Neo4jClient
             var updates = indexEntries
                 .SelectMany(
                     i => i.KeyValues,
-                    (i, kv) => new {IndexName = i.Name.ToLower(), kv.Key, kv.Value})
+                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
                 .Where(update => update.Value != null)
                 .ToList();
 
@@ -824,7 +817,6 @@ namespace Neo4jClient
         public void DeleteIndex(string indexName, IndexFor indexFor)
         {
             CheckRoot();
-            indexName = indexName.ToLower();
 
             string indexResource;
             switch (indexFor)
@@ -879,7 +871,6 @@ namespace Neo4jClient
 
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
-            indexName = indexName.ToLower();
             var encodedIndexValue = EncodeIndexValue(indexValue);
             if (string.IsNullOrWhiteSpace(encodedIndexValue))
                 return;
@@ -950,7 +941,6 @@ namespace Neo4jClient
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
         {
             CheckRoot();
-            indexName = indexName.ToLower();
 
             string indexResource;
 

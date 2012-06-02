@@ -1,6 +1,6 @@
 ﻿namespace Neo4jClient
 {
-    public interface IRelationshipAllowingTargetNode<TNode>
+    public interface IRelationshipAllowingTargetNode<out TNode>
         : IRelationshipAllowingParticipantNode<TNode>
     {
     }

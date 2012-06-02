@@ -126,6 +126,7 @@
     <Compile Include="Domain\User.cs" />
     <Compile Include="RestSharpTests\RestClientTests.cs" />
     <Compile Include="Serializer\CustomJsonSerializerTests.cs" />
+    <Compile Include="UtilitiesTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

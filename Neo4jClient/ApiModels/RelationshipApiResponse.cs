@@ -17,6 +17,9 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("end")]
         public string End { get; set; }
 
+        [JsonProperty("type")]
+        public string TypeKey { get; set; }
+
         [JsonProperty("data")]
         public TData Data { get; set; }
 
@@ -30,6 +33,7 @@ namespace Neo4jClient.ApiModels
                 new RelationshipReference<TData>(relationshipId, client),
                 new NodeReference(startNodeId, client),
                 new NodeReference(endNodeId, client),
+                TypeKey,
                 Data);
         }
 

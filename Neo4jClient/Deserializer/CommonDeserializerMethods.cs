@@ -169,7 +169,7 @@ namespace Neo4jClient.Deserializer
             }
             else if (type == typeof(string))
             {
-                instance = (string)element;
+                instance = element.ToString();
             }
             else if (type == typeof(TimeZoneInfo))
             {
