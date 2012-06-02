@@ -63,10 +63,9 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ShouldUseSetResultModeForIdentityBasedReturn()
         {
-            var builder = new CypherQueryBuilder();
-            builder.SetReturn("foo", false);
-
-            var query = builder.ToQuery();
+            var query = new CypherQueryBuilder()
+                .SetReturn("foo", false)
+                .ToQuery();
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
         }
@@ -77,10 +76,9 @@ namespace Neo4jClient.Test.Cypher
             Expression<Func<ICypherResultItem, object>> expression =
                 a => new { Foo = a.As<object>() };
 
-            var builder = new CypherQueryBuilder();
-            builder.SetReturn(expression, false);
-
-            var query = builder.ToQuery();
+            var query = new CypherQueryBuilder()
+                .SetReturn(expression, false)
+                .ToQuery();
 
             Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
         }
