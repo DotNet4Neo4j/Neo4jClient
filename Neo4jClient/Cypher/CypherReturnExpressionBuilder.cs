@@ -92,11 +92,40 @@ namespace Neo4jClient.Cypher
             var bindingTexts = expression.Members.Select((member, index) =>
             {
                 var argument = expression.Arguments[index];
-                var memberExpression = (MemberExpression)UnwrapImplicitCasts(argument);
-                return BuildText(memberExpression, member);
+                var unwrappedExpression = UnwrapImplicitCasts(argument);
+
+                var memberExpression = unwrappedExpression as MemberExpression;
+                if (memberExpression != null)
+                    return BuildText(memberExpression, member);
+
+                var methodCallExpression = unwrappedExpression as MethodCallExpression;
+                if (methodCallExpression != null)
+                    return BuildText(methodCallExpression, member);
+
+                throw new NotSupportedException(string.Format("Expression of type {0} is not supported.", unwrappedExpression.GetType().FullName));
             });
 
             return string.Join(", ", bindingTexts.ToArray());
+        }
+
+        static string BuildText(MethodCallExpression expression, MemberInfo member)
+        {
+            var targetObject = (ParameterExpression)expression.Object;
+
+            if (targetObject == null)
+                throw new InvalidOperationException(
+                    "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+
+            var bindingDeclaringType = member.DeclaringType;
+            if (bindingDeclaringType == null)
+                throw new InvalidOperationException(
+                    "Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+            var bindingMemberName = member.Name;
+            var isNullable = IsMemberNullable(bindingMemberName, bindingDeclaringType);
+
+            var optionalIndicator = isNullable ? "?" : "";
+
+            return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, bindingMemberName);
         }
 
         static Expression UnwrapImplicitCasts(Expression expression)
