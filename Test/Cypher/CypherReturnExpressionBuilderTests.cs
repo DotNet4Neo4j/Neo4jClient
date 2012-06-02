@@ -145,7 +145,7 @@ namespace Neo4jClient.Test.Cypher
                 (a, b) => new
                 {
                     Foo = a.As<Foo>(),
-                    Bar = a.As<Foo>()
+                    Bar = b.As<Foo>()
                 };
 
             var text = CypherReturnExpressionBuilder.BuildText(expression);
