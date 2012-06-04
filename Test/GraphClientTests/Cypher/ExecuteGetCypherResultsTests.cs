@@ -99,7 +99,9 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             graphClient.Connect();
 
             //Act
-            var results = graphClient.ExecuteGetCypherResults<PathsResult>(query);
+            var results = graphClient
+                .ExecuteGetCypherResults<PathsResult>(query)
+                .ToArray();
 
             //Assert
             Assert.IsInstanceOf<IEnumerable<PathsResult>>(results);
