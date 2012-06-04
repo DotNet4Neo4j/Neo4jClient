@@ -425,6 +425,34 @@ RETURN b AS NodeB";
         }
 
         [Test]
+        public void ReturnEntireNodeDataAndReferenceIntoProjectionType()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .Match("(a)-->(b)")
+                .Return((b, c) => new ReturnEntireNodeDataAndReferenceIntoProjectionTypeResult
+                {
+                    NodeB = b.Node<FooData>(),
+                })
+                .Query;
+
+            const string expected = @"
+START a=node({p0})
+MATCH (a)-->(b)
+RETURN b AS NodeB";
+
+            Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
+
+        public class ReturnEntireNodeDataAndReferenceIntoProjectionTypeResult
+        {
+            public Node<FooData> NodeB { get; set; }
+        }
+
+        [Test]
         public void WhereBooleanOperationWithVariable()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
