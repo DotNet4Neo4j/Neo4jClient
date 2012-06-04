@@ -307,6 +307,101 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnPropertiesIntoAnonymousType()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .Match("(a)-->(b)")
+                .Return(b => new
+                {
+                    SomeAge = b.As<FooData>().Age,
+                    SomeName = b.As<FooData>().Name
+                })
+                .Query;
+
+            const string expected = @"
+START a=node({p0})
+MATCH (a)-->(b)
+RETURN b.Age AS SomeAge, b.Name? AS SomeName";
+
+            Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
+
+        [Test]
+        public void ReturnPropertiesIntoAnonymousTypeWithAutoNames()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .Match("(a)-->(b)")
+                .Return(b => new
+                {
+                    b.As<FooData>().Age,
+                    b.As<FooData>().Name
+                })
+                .Query;
+
+            const string expected = @"
+START a=node({p0})
+MATCH (a)-->(b)
+RETURN b.Age AS Age, b.Name? AS Name";
+
+            Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
+
+        [Test]
+        public void ReturnPropertiesFromMultipleNodesIntoAnonymousTypeWithAutoNames()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .Match("(a)-->(b)-->(c)")
+                .Return((b, c) => new
+                {
+                    b.As<FooData>().Age,
+                    c.As<FooData>().Name
+                })
+                .Query;
+
+            const string expected = @"
+START a=node({p0})
+MATCH (a)-->(b)-->(c)
+RETURN b.Age AS Age, c.Name? AS Name";
+
+            Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
+
+        [Test]
+        public void ReturnNodeDataIntoAnonymousType()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)1)
+                .Match("(a)-->(b)")
+                .Return((b, c) => new
+                {
+                    NodeB = b.As<FooData>(),
+                })
+                .Query;
+
+            const string expected = @"
+START a=node({p0})
+MATCH (a)-->(b)
+RETURN b AS NodeB";
+
+            Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
+
+        [Test]
         public void WhereBooleanOperationWithVariable()
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-boolean-operations
