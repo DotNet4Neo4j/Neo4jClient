@@ -50,8 +50,7 @@ namespace Neo4jClient.Cypher
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
                 var memberAssignment = (MemberAssignment)binding;
-                var memberExpression = (MemberExpression)UnwrapImplicitCasts(memberAssignment.Expression);
-                return BuildStatement(memberExpression, binding.Member);
+                return BuildStatement(memberAssignment.Expression, binding.Member);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -78,20 +77,27 @@ namespace Neo4jClient.Cypher
             var bindingTexts = expression.Members.Select((member, index) =>
             {
                 var argument = expression.Arguments[index];
-                var unwrappedExpression = UnwrapImplicitCasts(argument);
-
-                var memberExpression = unwrappedExpression as MemberExpression;
-                if (memberExpression != null)
-                    return BuildStatement(memberExpression, member);
-
-                var methodCallExpression = unwrappedExpression as MethodCallExpression;
-                if (methodCallExpression != null)
-                    return BuildStatement(methodCallExpression, member);
-
-                throw new NotSupportedException(string.Format("Expression of type {0} is not supported.", unwrappedExpression.GetType().FullName));
+                return BuildStatement(argument, member);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
+        }
+
+        static string BuildStatement(Expression sourceExpression, MemberInfo targetMember)
+        {
+            var unwrappedExpression = UnwrapImplicitCasts(sourceExpression);
+
+            var memberExpression = unwrappedExpression as MemberExpression;
+            if (memberExpression != null)
+                return BuildStatement(memberExpression, targetMember);
+
+            var methodCallExpression = unwrappedExpression as MethodCallExpression;
+            if (methodCallExpression != null)
+                return BuildStatement(methodCallExpression, targetMember);
+
+            throw new NotSupportedException(string.Format(
+                "Expression of type {0} is not supported.",
+                unwrappedExpression.GetType().FullName));
         }
 
         static string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember)
