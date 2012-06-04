@@ -219,6 +219,14 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             public long? UniqueId { get; set; }
         }
 
+        public class ResultWithNodeDataObjectsDto
+        {
+            public FooData Fooness { get; set; }
+            public string RelationshipType { get; set; }
+            public string Name { get; set; }
+            public long? UniqueId { get; set; }
+        }
+
         public class ResultWithRelationshipDto
         {
             public RelationshipInstance<FooData> Fooness { get; set; }
@@ -381,6 +389,162 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             Assert.AreEqual(12, thirdResult.Fooness.Reference.Id);
             Assert.AreEqual("bar", thirdResult.Fooness.Data.Bar);
             Assert.AreEqual("baz", thirdResult.Fooness.Data.Baz);
+            Assert.AreEqual("HOSTS", thirdResult.RelationshipType);
+            Assert.AreEqual("baz", thirdResult.Name);
+            Assert.AreEqual(42586, thirdResult.UniqueId);
+        }
+
+        [Test]
+        public void ShouldDeserializeTableStructureWithNodeDataObjects()
+        {
+            // Arrange
+            const string queryText = @"
+                START x = node({p0})
+                MATCH x-[r]->n
+                RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
+                LIMIT 3";
+            var query = new CypherQuery(
+                queryText,
+                new Dictionary<string, object>
+                {
+                    {"p0", 123}
+                },
+                CypherResultMode.Projection);
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest
+                    {
+                        Resource = "",
+                        Method = Method.GET
+                    },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent =
+                            @"{
+                                'cypher' : 'http://foo/db/data/cypher',
+                                'batch' : 'http://foo/db/data/batch',
+                                'node' : 'http://foo/db/data/node',
+                                'node_index' : 'http://foo/db/data/index/node',
+                                'relationship_index' : 'http://foo/db/data/index/relationship',
+                                'reference_node' : 'http://foo/db/data/node/0',
+                                'extensions_info' : 'http://foo/db/data/ext',
+                                'extensions' : {
+                                'GremlinPlugin' : {
+                                    'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+                                }
+                                }
+                            }".Replace('\'', '"')
+                    }
+                },
+                {
+                    new RestRequest
+                    {
+                        Resource = "/cypher",
+                        Method = Method.POST,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(new CypherApiQuery(query)),
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent =
+                            @"{
+                                'data' : [ [ {
+                                'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                                'data' : {
+                                    'Bar' : 'bar',
+                                    'Baz' : 'baz'
+                                },
+                                'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                                'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                                'property' : 'http://foo/db/data/node/0/properties/{key}',
+                                'self' : 'http://foo/db/data/node/0',
+                                'properties' : 'http://foo/db/data/node/0/properties',
+                                'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                                'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                                'extensions' : {
+                                },
+                                'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                                'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                                'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                                'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                                }, 'HOSTS', 'foo', 44321 ], [ {
+                                'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                                'data' : {
+                                    'Bar' : 'bar',
+                                    'Baz' : 'baz'
+                                },
+                                'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                                'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                                'property' : 'http://foo/db/data/node/0/properties/{key}',
+                                'self' : 'http://foo/db/data/node/2',
+                                'properties' : 'http://foo/db/data/node/0/properties',
+                                'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                                'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                                'extensions' : {
+                                },
+                                'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                                'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                                'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                                'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                                }, 'LIKES', 'bar', 44311 ], [ {
+                                'outgoing_relationships' : 'http://foo/db/data/node/0/relationships/out',
+                                'data' : {
+                                    'Bar' : 'bar',
+                                    'Baz' : 'baz'
+                                },
+                                'traverse' : 'http://foo/db/data/node/0/traverse/{returnType}',
+                                'all_typed_relationships' : 'http://foo/db/data/node/0/relationships/all/{-list|&|types}',
+                                'property' : 'http://foo/db/data/node/0/properties/{key}',
+                                'self' : 'http://foo/db/data/node/12',
+                                'properties' : 'http://foo/db/data/node/0/properties',
+                                'outgoing_typed_relationships' : 'http://foo/db/data/node/0/relationships/out/{-list|&|types}',
+                                'incoming_relationships' : 'http://foo/db/data/node/0/relationships/in',
+                                'extensions' : {
+                                },
+                                'create_relationship' : 'http://foo/db/data/node/0/relationships',
+                                'paged_traverse' : 'http://foo/db/data/node/0/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                                'all_relationships' : 'http://foo/db/data/node/0/relationships/all',
+                                'incoming_typed_relationships' : 'http://foo/db/data/node/0/relationships/in/{-list|&|types}'
+                                }, 'HOSTS', 'baz', 42586 ] ],
+                                'columns' : [ 'Fooness', 'RelationshipType', 'Name', 'UniqueId' ]
+                            }".Replace('\'', '"')
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var results = graphClient.ExecuteGetCypherResults<ResultWithNodeDataObjectsDto>(query);
+
+            //Assert
+            Assert.IsInstanceOf<IEnumerable<ResultWithNodeDataObjectsDto>>(results);
+
+            var resultsArray = results.ToArray();
+            Assert.AreEqual(3, resultsArray.Count());
+
+            var firstResult = resultsArray[0];
+            Assert.AreEqual("bar", firstResult.Fooness.Bar);
+            Assert.AreEqual("baz", firstResult.Fooness.Baz);
+            Assert.AreEqual("HOSTS", firstResult.RelationshipType);
+            Assert.AreEqual("foo", firstResult.Name);
+            Assert.AreEqual(44321, firstResult.UniqueId);
+
+            var secondResult = resultsArray[1];
+            Assert.AreEqual("bar", secondResult.Fooness.Bar);
+            Assert.AreEqual("baz", secondResult.Fooness.Baz);
+            Assert.AreEqual("LIKES", secondResult.RelationshipType);
+            Assert.AreEqual("bar", secondResult.Name);
+            Assert.AreEqual(44311, secondResult.UniqueId);
+
+            var thirdResult = resultsArray[2];
+            Assert.AreEqual("bar", thirdResult.Fooness.Bar);
+            Assert.AreEqual("baz", thirdResult.Fooness.Baz);
             Assert.AreEqual("HOSTS", thirdResult.RelationshipType);
             Assert.AreEqual("baz", thirdResult.Name);
             Assert.AreEqual(42586, thirdResult.UniqueId);
