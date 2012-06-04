@@ -91,22 +91,19 @@ namespace Neo4jClient.Cypher
             return string.Join(", ", bindingTexts.ToArray());
         }
 
-        static string BuildText(MemberExpression memberExpression, MemberInfo member)
+        static string BuildText(MemberExpression memberExpression, MemberInfo targetMember)
         {
             MethodCallExpression methodCallExpression;
-            string memberName;
             MemberInfo memberInfo;
             if (memberExpression.NodeType == ExpressionType.MemberAccess && memberExpression.Expression.NodeType == ExpressionType.Call)
             {
                 methodCallExpression = (MethodCallExpression) memberExpression.Expression;
-                memberName = memberExpression.Member.Name;
                 memberInfo = memberExpression.Member;
             }
             else if (memberExpression.NodeType == ExpressionType.MemberAccess && memberExpression.Expression.NodeType == ExpressionType.MemberAccess)
             {
                 var nextedExpression = ((MemberExpression) memberExpression.Expression);
                 methodCallExpression = (MethodCallExpression) nextedExpression.Expression;
-                memberName = nextedExpression.Member.Name;
                 memberInfo = nextedExpression.Member;
             }
             else
@@ -119,19 +116,15 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            var bindingDeclaringType = member.DeclaringType;
-            if (bindingDeclaringType == null)
-                throw new InvalidOperationException(
-                    "Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
-            var bindingMemberName = member.Name;
-            var isNullable = IsMemberNullable(bindingMemberName, bindingDeclaringType) || IsMemberNullable(memberName, memberInfo.DeclaringType);
+            var isTargetMemberNullable = IsMemberNullable(targetMember);
+            var isNullable = isTargetMemberNullable || IsMemberNullable(memberInfo);
 
             var optionalIndicator = isNullable ? "?" : "";
 
-            return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberName, optionalIndicator, bindingMemberName);
+            return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberInfo.Name, optionalIndicator, targetMember.Name);
         }
 
-        static string BuildText(MethodCallExpression expression, MemberInfo member)
+        static string BuildText(MethodCallExpression expression, MemberInfo targetMember)
         {
             var targetObject = (ParameterExpression)expression.Object;
 
@@ -139,16 +132,11 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            var bindingDeclaringType = member.DeclaringType;
-            if (bindingDeclaringType == null)
-                throw new InvalidOperationException(
-                    "Somehow bindingDeclaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
-            var bindingMemberName = member.Name;
-            var isNullable = IsMemberNullable(bindingMemberName, bindingDeclaringType);
+            var isNullable = IsMemberNullable(targetMember);
 
             var optionalIndicator = isNullable ? "?" : "";
 
-            return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, bindingMemberName);
+            return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, targetMember.Name);
         }
 
         static Expression UnwrapImplicitCasts(Expression expression)
@@ -158,6 +146,15 @@ namespace Neo4jClient.Cypher
                 expression = ((UnaryExpression) expression).Operand;
             }
             return expression;
+        }
+
+        static bool IsMemberNullable(MemberInfo memberInfo)
+        {
+            var declaringType = memberInfo.DeclaringType;
+            if (declaringType == null)
+                throw new InvalidOperationException(
+                    "Somehow declaringType ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+            return IsMemberNullable(memberInfo.Name, declaringType);
         }
 
         static bool IsMemberNullable(string memberName, Type declaringType)
