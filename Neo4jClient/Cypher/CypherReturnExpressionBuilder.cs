@@ -22,6 +22,16 @@ namespace Neo4jClient.Cypher
             }
         }
 
+        /// <remarks>
+        /// This build method caters to object initializers, like:
+        /// 
+        ///     new MyType { Foo = "Bar", Baz = "Qak" }
+        /// 
+        /// It does not however cater to anonymous types, as they don't compile
+        /// down to traditional object initializers.
+        /// 
+        /// <see cref="BuildText(NewExpression)"/> caters to anonymous types.
+        /// </remarks>
         static string BuildText(MemberInitExpression expression)
         {
             if (expression.NewExpression.Constructor.GetParameters().Any())
@@ -39,6 +49,43 @@ namespace Neo4jClient.Cypher
                 var memberAssignment = (MemberAssignment)binding;
                 var memberExpression = (MemberExpression)UnwrapImplicitCasts(memberAssignment.Expression);
                 return BuildText(memberExpression, binding.Member);
+            });
+
+            return string.Join(", ", bindingTexts.ToArray());
+        }
+
+        /// <remarks>
+        /// This C#:
+        /// 
+        ///     new { Foo = "Bar", Baz = "Qak" }
+        /// 
+        /// translates to:
+        /// 
+        ///     new __SomeAnonymousType("Bar", "Qak")
+        /// 
+        /// which is then a NewExpression rather than a MemberInitExpression.
+        /// 
+        /// This is the scenario that this build method caters for.
+        /// </remarks>
+        static string BuildText(NewExpression expression)
+        {
+            if (expression.Arguments.Count != expression.Members.Count)
+                throw new InvalidOperationException("Somehow we had a different number of members than arguments. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+
+            var bindingTexts = expression.Members.Select((member, index) =>
+            {
+                var argument = expression.Arguments[index];
+                var unwrappedExpression = UnwrapImplicitCasts(argument);
+
+                var memberExpression = unwrappedExpression as MemberExpression;
+                if (memberExpression != null)
+                    return BuildText(memberExpression, member);
+
+                var methodCallExpression = unwrappedExpression as MethodCallExpression;
+                if (methodCallExpression != null)
+                    return BuildText(methodCallExpression, member);
+
+                throw new NotSupportedException(string.Format("Expression of type {0} is not supported.", unwrappedExpression.GetType().FullName));
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -82,30 +129,6 @@ namespace Neo4jClient.Cypher
             var optionalIndicator = isNullable ? "?" : "";
 
             return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberName, optionalIndicator, bindingMemberName);
-        }
-
-        static string BuildText(NewExpression expression)
-        {
-            if (expression.Arguments.Count != expression.Members.Count)
-                throw new InvalidOperationException("Somehow we had a different number of members than arguments. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
-
-            var bindingTexts = expression.Members.Select((member, index) =>
-            {
-                var argument = expression.Arguments[index];
-                var unwrappedExpression = UnwrapImplicitCasts(argument);
-
-                var memberExpression = unwrappedExpression as MemberExpression;
-                if (memberExpression != null)
-                    return BuildText(memberExpression, member);
-
-                var methodCallExpression = unwrappedExpression as MethodCallExpression;
-                if (methodCallExpression != null)
-                    return BuildText(methodCallExpression, member);
-
-                throw new NotSupportedException(string.Format("Expression of type {0} is not supported.", unwrappedExpression.GetType().FullName));
-            });
-
-            return string.Join(", ", bindingTexts.ToArray());
         }
 
         static string BuildText(MethodCallExpression expression, MemberInfo member)
