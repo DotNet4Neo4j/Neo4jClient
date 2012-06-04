@@ -37,11 +37,14 @@ namespace Neo4jClient.Deserializer
                 .Select(c => c.AsString())
                 .ToArray();
 
-            var jsonTypeMappings = new[]
+            var jsonTypeMappings = new List<TypeMapping>
             {
                 new TypeMapping
                 {
-                    PropertyTypeToTriggerMapping = typeof(Node<>),
+                    ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                        nestingLevel == 0 &&
+                        type.IsGenericType &&
+                        type.GetGenericTypeDefinition() == typeof(Node<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
                         var nodeType = t.GetGenericArguments();
@@ -51,7 +54,10 @@ namespace Neo4jClient.Deserializer
                 },
                 new TypeMapping
                 {
-                    PropertyTypeToTriggerMapping = typeof(RelationshipInstance<>),
+                    ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                        nestingLevel == 0 &&
+                        type.IsGenericType &&
+                        type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
                         var relationshipType = t.GetGenericArguments();
@@ -64,9 +70,18 @@ namespace Neo4jClient.Deserializer
             switch (resultMode)
             {
                 case CypherResultMode.Set:
-                    return ParseInSingleColumnMode(root, columnNames, jsonTypeMappings);
+                    return ParseInSingleColumnMode(root, columnNames, jsonTypeMappings.ToArray());
                 case CypherResultMode.Projection:
-                    return ParseInProjectionMode(root, columnNames, jsonTypeMappings);
+                    jsonTypeMappings.Add(new TypeMapping
+                    {
+                        ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                            nestingLevel == 0 && type.IsClass,
+                        DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                            typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
+                        MutationCallback = n =>
+                            n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
+                    });
+                    return ParseInProjectionMode(root, columnNames, jsonTypeMappings.ToArray());
                 default:
                     throw new ArgumentException("Unrecognised mode.", "mode");
             }
@@ -78,10 +93,7 @@ namespace Neo4jClient.Deserializer
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
 
             var resultType = typeof (TResult);
-            var genericTypeDefinition = resultType.IsGenericType ? resultType.GetGenericTypeDefinition() : null;
-            var mapping = jsonTypeMappings.SingleOrDefault(m =>
-                m.PropertyTypeToTriggerMapping == resultType ||
-                m.PropertyTypeToTriggerMapping == genericTypeDefinition);
+            var mapping = jsonTypeMappings.SingleOrDefault(m => m.ShouldTriggerForPropertyType(0, resultType));
             var newType = mapping == null ? resultType : mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(resultType);
 
             var dataArray = (JArray)root["data"];
@@ -95,7 +107,7 @@ namespace Neo4jClient.Deserializer
                 if (rowAsArray.Count != 1)
                     throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
 
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings);
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings, 0);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
@@ -140,7 +152,7 @@ namespace Neo4jClient.Deserializer
             {
                 var columnName = columnNames[cellIndex];
                 var property = propertiesDictionary[columnName];
-                CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings);
+                CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings, 0);
                 cellIndex++;
             }
 

@@ -4,7 +4,7 @@ namespace Neo4jClient.Deserializer
 {
     internal class TypeMapping
     {
-        public Type PropertyTypeToTriggerMapping { get; set; }
+        public Func<int, Type, bool> ShouldTriggerForPropertyType { get; set; }
         public Func<Type, Type> DetermineTypeToParseJsonIntoBasedOnPropertyType { get; set; }
         public Func<object, object> MutationCallback { get; set; }
     }

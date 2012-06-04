@@ -54,6 +54,7 @@
     <Compile Include="ApiModels\BatchStep.cs" />
     <Compile Include="ApiModels\BatchStepExtensions.cs" />
     <Compile Include="ApiModels\BatchStepResult.cs" />
+    <Compile Include="ApiModels\NodeOrRelationshipApiResponse.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\Cypher\PathsResult.cs" />
     <Compile Include="ApiModels\DataRow.cs" />
