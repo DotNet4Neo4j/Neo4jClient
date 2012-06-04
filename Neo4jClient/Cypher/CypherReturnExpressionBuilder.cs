@@ -7,6 +7,11 @@ namespace Neo4jClient.Cypher
 {
     public class CypherReturnExpressionBuilder
     {
+        // Terminology used in this file:
+        //
+        // - a "statement" is something like "x.Foo? AS Bar"
+        // - "text" is a collection of statements, like "x.Foo? AS Bar, y.Baz as Qak"
+
         public static string BuildText(LambdaExpression expression)
         {
             switch (expression.Body.NodeType)
@@ -46,7 +51,7 @@ namespace Neo4jClient.Cypher
 
                 var memberAssignment = (MemberAssignment)binding;
                 var memberExpression = (MemberExpression)UnwrapImplicitCasts(memberAssignment.Expression);
-                return BuildText(memberExpression, binding.Member);
+                return BuildStatement(memberExpression, binding.Member);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -77,11 +82,11 @@ namespace Neo4jClient.Cypher
 
                 var memberExpression = unwrappedExpression as MemberExpression;
                 if (memberExpression != null)
-                    return BuildText(memberExpression, member);
+                    return BuildStatement(memberExpression, member);
 
                 var methodCallExpression = unwrappedExpression as MethodCallExpression;
                 if (methodCallExpression != null)
-                    return BuildText(methodCallExpression, member);
+                    return BuildStatement(methodCallExpression, member);
 
                 throw new NotSupportedException(string.Format("Expression of type {0} is not supported.", unwrappedExpression.GetType().FullName));
             });
@@ -89,7 +94,7 @@ namespace Neo4jClient.Cypher
             return string.Join(", ", bindingTexts.ToArray());
         }
 
-        static string BuildText(MemberExpression memberExpression, MemberInfo targetMember)
+        static string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember)
         {
             MethodCallExpression methodCallExpression;
             MemberInfo memberInfo;
@@ -122,7 +127,7 @@ namespace Neo4jClient.Cypher
             return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberInfo.Name, optionalIndicator, targetMember.Name);
         }
 
-        static string BuildText(MethodCallExpression expression, MemberInfo targetMember)
+        static string BuildStatement(MethodCallExpression expression, MemberInfo targetMember)
         {
             var targetObject = (ParameterExpression)expression.Object;
 
