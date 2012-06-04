@@ -39,9 +39,7 @@ namespace Neo4jClient.Cypher
                     "The result type must be constructed using a parameterless constructor. For example: n => new MyResultType { Foo = n.Bar }",
                     "expression");
 
-            var bindings = expression.Bindings;
-
-            var bindingTexts = bindings.Select(binding =>
+            var bindingTexts = expression.Bindings.Select(binding =>
             {
                 if (binding.BindingType != MemberBindingType.Assignment)
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
