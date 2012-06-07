@@ -50,12 +50,12 @@ namespace Neo4jClient.Gremlin
             switch (comparison)
             {
                 case StringComparison.Ordinal:
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it[{0}].equals({1})", ExpressionType = ExpressionType.Equal});
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it[{0}].equals({1})", ExpressionType = ExpressionType.NotEqual  });
+                    typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it[{0}].equals({1})", ExpressionType = ExpressionType.Equal });
+                    typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it[{0}].equals({1})", ExpressionType = ExpressionType.NotEqual });
                     break;
                 case StringComparison.OrdinalIgnoreCase:
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it[{0}].equalsIgnoreCase({1})", ExpressionType = ExpressionType.Equal  });
-                        typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it[{0}].equalsIgnoreCase({1})", ExpressionType = ExpressionType.NotEqual  });
+                    typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "it[{0}].equalsIgnoreCase({1})", ExpressionType = ExpressionType.Equal });
+                    typeFilterFormats.Add(new TypeFilter { Type = typeof(string), FilterFormat = "!it[{0}].equalsIgnoreCase({1})", ExpressionType = ExpressionType.NotEqual });
                     break;
                 default:
                     throw new NotSupportedException(string.Format("Comparison mode {0} is not supported.", comparison));
@@ -120,6 +120,23 @@ namespace Neo4jClient.Gremlin
 
         internal static IEnumerable<Filter> TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter)
         {
+            if (filter.Body.NodeType == ExpressionType.MemberAccess && filter.Body.Type == typeof(bool))
+            {
+                var expression = filter.Body as MemberExpression;
+
+                if (expression != null && (expression.Member is PropertyInfo && expression.Member.MemberType == MemberTypes.Property))
+                {
+                    var newFilter = new Filter
+                    {
+                        ExpressionType = ExpressionType.Equal,
+                        PropertyName = expression.Member.Name,
+                        Value = true
+                    };
+
+                    return new List<Filter> { newFilter };
+                }
+            }
+
             var binaryExpression = filter.Body as BinaryExpression;
             if (binaryExpression == null)
                 throw new NotSupportedException("Only binary expressions are supported at this time.");
