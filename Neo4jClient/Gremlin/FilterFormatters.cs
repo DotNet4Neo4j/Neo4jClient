@@ -120,20 +120,45 @@ namespace Neo4jClient.Gremlin
 
         internal static IEnumerable<Filter> TranslateFilter<TNode>(Expression<Func<TNode, bool>> filter)
         {
-            if (filter.Body.NodeType == ExpressionType.MemberAccess && filter.Body.Type == typeof(bool))
+            if (filter.Body.Type == typeof(bool))
             {
-                var expression = filter.Body as MemberExpression;
-
-                if (expression != null && (expression.Member is PropertyInfo && expression.Member.MemberType == MemberTypes.Property))
+                if (filter.Body.NodeType == ExpressionType.MemberAccess)
                 {
-                    var newFilter = new Filter
-                    {
-                        ExpressionType = ExpressionType.Equal,
-                        PropertyName = expression.Member.Name,
-                        Value = true
-                    };
+                    var expression = filter.Body as MemberExpression;
 
-                    return new List<Filter> { newFilter };
+                    if (expression != null &&
+                        (expression.Member is PropertyInfo && expression.Member.MemberType == MemberTypes.Property))
+                    {
+                        var newFilter = new Filter
+                            {
+                                ExpressionType = ExpressionType.Equal,
+                                PropertyName = expression.Member.Name,
+                                Value = true
+                            };
+
+                        return new List<Filter> {newFilter};
+                    }
+                }
+
+                if(filter.Body.NodeType == ExpressionType.Not)
+                {
+                    var expression = filter.Body as UnaryExpression;
+
+                    if (expression != null)
+                    {
+                        var operand = expression.Operand as MemberExpression;
+                        if (operand != null)
+                        {
+                            var newFilter = new Filter
+                                {
+                                    ExpressionType = ExpressionType.Equal,
+                                    PropertyName = operand.Member.Name,
+                                    Value = false
+                                };
+
+                            return new List<Filter> { newFilter };
+                        }
+                    }
                 }
             }
 

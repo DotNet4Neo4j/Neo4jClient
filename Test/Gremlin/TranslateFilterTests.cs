@@ -209,6 +209,18 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TranslateFilterShouldResolveBooleanPropertyToDefaultToCompareToFalse()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => !f.Prop4)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(1, filters.Count());
+            Assert.AreEqual("Prop4", filters[0].PropertyName);
+            Assert.AreEqual(false, filters[0].Value);
+        }
+
+        [Test]
         public void TranslateFilterShouldResolveTwoPropertiesEqualNullWithBinaryAnd()
         {
             var filters = FilterFormatters
