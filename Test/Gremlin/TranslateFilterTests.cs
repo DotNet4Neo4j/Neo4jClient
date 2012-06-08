@@ -185,6 +185,42 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
+        public void TranslateFilterShouldResolvePropertiesEqualBoolean()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => f.Prop4 == true)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(1, filters.Count());
+            Assert.AreEqual("Prop4", filters[0].PropertyName);
+            Assert.AreEqual(true, filters[0].Value);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveBooleanPropertyToDefaultToCompareToTrue()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => f.Prop4)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(1, filters.Count());
+            Assert.AreEqual("Prop4", filters[0].PropertyName);
+            Assert.AreEqual(true, filters[0].Value);
+        }
+
+        [Test]
+        public void TranslateFilterShouldResolveBooleanPropertyToDefaultToCompareToFalse()
+        {
+            var filters = FilterFormatters
+                .TranslateFilter<Foo>(f => !f.Prop4)
+                .OrderBy(f => f.PropertyName)
+                .ToArray();
+            Assert.AreEqual(1, filters.Count());
+            Assert.AreEqual("Prop4", filters[0].PropertyName);
+            Assert.AreEqual(false, filters[0].Value);
+        }
+
+        [Test]
         public void TranslateFilterShouldResolveTwoPropertiesEqualNullWithBinaryAnd()
         {
             var filters = FilterFormatters
@@ -277,6 +313,7 @@ namespace Neo4jClient.Test.Gremlin
             public string Prop1 { get; set; }
             public string Prop2 { get; set; }
             public string Prop3 { get; set; }
+            public bool Prop4 { get; set; }
         }
 
         public class Bar
