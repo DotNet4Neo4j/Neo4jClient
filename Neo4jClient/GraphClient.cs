@@ -21,9 +21,10 @@ namespace Neo4jClient
 {
     public class GraphClient : IGraphClient
     {
-        readonly Uri rootUri;
+        internal readonly Uri RootUri;
         readonly IHttpFactory httpFactory;
         internal RootApiResponse RootApiResponse;
+        internal readonly IAuthenticator Authenticator;
         bool jsonStreamingAvailable;
 
         const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
@@ -47,7 +48,19 @@ namespace Neo4jClient
 
         public GraphClient(Uri rootUri, IHttpFactory httpFactory)
         {
-            this.rootUri = rootUri;
+            if(!string.IsNullOrWhiteSpace(rootUri.UserInfo))
+            {
+                string[] userInfoParts = rootUri.UserInfo.Split(':');
+                string userInfoContent = rootUri.UserInfo + "@";
+
+                if(userInfoParts.Length == 2 && rootUri.OriginalString.Contains(userInfoContent))
+                {
+                    this.Authenticator = new HttpBasicAuthenticator(userInfoParts[0], userInfoParts[1]);
+                    rootUri = new Uri(rootUri.OriginalString.Replace(userInfoContent, ""));
+                }
+            }
+
+            this.RootUri = rootUri;
             this.httpFactory = httpFactory;
             JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             UseJsonStreamingIfAvailable = true;
@@ -55,7 +68,13 @@ namespace Neo4jClient
 
         IRestClient CreateClient()
         {
-            var client = new RestClient(rootUri.AbsoluteUri) {HttpFactory = httpFactory};
+            var client = new RestClient(RootUri.AbsoluteUri) {HttpFactory = httpFactory};
+
+            if(this.Authenticator != null)
+            {
+                client.Authenticator = this.Authenticator;
+            }
+            
             client.RemoveHandler("application/json");
             client.AddHandler("application/json", new CustomJsonDeserializer());
             if (UseJsonStreamingIfAvailable && jsonStreamingAvailable) client.AddDefaultHeader("Accept", "application/json;stream=true");
@@ -73,22 +92,22 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
             RootApiResponse = response.Data;
-            RootApiResponse.Batch = RootApiResponse.Batch.Substring(rootUri.AbsoluteUri.Length);
-            RootApiResponse.Node = RootApiResponse.Node.Substring(rootUri.AbsoluteUri.Length);
-            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(rootUri.AbsoluteUri.Length);
-            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(rootUri.AbsoluteUri.Length);
-            RootApiResponse.ReferenceNode = RootApiResponse.ReferenceNode.Substring(rootUri.AbsoluteUri.Length);
-            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(rootUri.AbsoluteUri.Length);
+            RootApiResponse.Batch = RootApiResponse.Batch.Substring(RootUri.AbsoluteUri.Length);
+            RootApiResponse.Node = RootApiResponse.Node.Substring(RootUri.AbsoluteUri.Length);
+            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(RootUri.AbsoluteUri.Length);
+            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(RootUri.AbsoluteUri.Length);
+            RootApiResponse.ReferenceNode = RootApiResponse.ReferenceNode.Substring(RootUri.AbsoluteUri.Length);
+            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(RootUri.AbsoluteUri.Length);
             if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
             {
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(rootUri.AbsoluteUri.Length);
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(RootUri.AbsoluteUri.Length);
             }
 
             if (RootApiResponse.Cypher != null)
             {
                 RootApiResponse.Cypher =
-                    RootApiResponse.Cypher.Substring(rootUri.AbsoluteUri.Length);
+                    RootApiResponse.Cypher.Substring(RootUri.AbsoluteUri.Length);
             }
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
@@ -259,7 +278,7 @@ namespace Neo4jClient
         {
             var relationship = new RelationshipTemplate
                 {
-                    To = rootUri + ResolveEndpoint(targetNode),
+                    To = RootUri + ResolveEndpoint(targetNode),
                     Data = data,
                     Type = relationshipTypeKey
                 };
@@ -457,7 +476,7 @@ namespace Neo4jClient
 
             var relationshipResources = response
                 .Data
-                .Select(r => r.Self.Substring(rootUri.AbsoluteUri.Length));
+                .Select(r => r.Self.Substring(RootUri.AbsoluteUri.Length));
 
             foreach (var relationshipResource in relationshipResources)
             {
@@ -886,7 +905,7 @@ namespace Neo4jClient
             {
                 key = indexKey,
                 value = encodedIndexValue,
-                uri = string.Join("", rootUri, nodeAddress)
+                uri = string.Join("", RootUri, nodeAddress)
             });
 
             var response = CreateClient().Execute(request);

@@ -95,5 +95,29 @@ namespace Neo4jClient.Test.GraphClientTests
 
             Assert.AreEqual("1.5.0.2", graphClient.RootApiResponse.Version.ToString());
         }
+
+        [Test]
+        public void BasicAuthenticatorNotUsedWhenNoUserInfoSupplied()
+        {
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"));
+
+            Assert.IsNull(graphClient.Authenticator);
+        }
+
+        [Test]
+        public void BasicAuthenticatorUsedWhenUserInfoSupplied()
+        {
+            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
+
+            Assert.That(graphClient.Authenticator, Is.TypeOf<HttpBasicAuthenticator>());
+        }
+
+        [Test]
+        public void UserInfoRemovedFromRootUri()
+        {
+            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
+
+            Assert.That(graphClient.RootUri.OriginalString, Is.EqualTo("http://foo/db/data"));
+        }
     }
 }
