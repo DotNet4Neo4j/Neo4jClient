@@ -31,6 +31,7 @@ namespace Neo4jClient
 
         public NullValueHandling JsonSerializerNullValueHandling { get; set; }
         public bool UseJsonStreamingIfAvailable { get; set; }
+        public bool EnableSupportForNeo4jOnHeroku { get; set; }
 
         public GraphClient(Uri rootUri)
             : this(rootUri, new Http())
@@ -86,7 +87,8 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var request = new RestRequest("", Method.GET);
+            //HACK: temporary solution to issue: http://goo.gl/oCKsq
+            var request = new RestRequest(EnableSupportForNeo4jOnHeroku ? "/ " : "", Method.GET);
             var response = CreateClient().Execute<RootApiResponse>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);

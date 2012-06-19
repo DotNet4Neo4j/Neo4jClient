@@ -97,6 +97,99 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 401 Unauthorized")]
+        public void DisableSupportForNeo4jOnHerokuWhenRequiredThrow401UnAuthroized()
+        {
+            const string httpFooDbData = "http://foo/db/data";
+
+            var httpFactory = MockHttpFactory.Generate(httpFooDbData, new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.Unauthorized,
+                        StatusDescription = "Unauthorized"
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri(httpFooDbData), httpFactory) { EnableSupportForNeo4jOnHeroku = false };
+
+            graphClient.Connect();
+        }
+
+        [Test]
+        public void DisableSupportForNeo4jOnHerokuShouldNotChangeResource()
+        {
+            const string httpFooDbData = "http://foo/db/data";
+
+            var httpFactory = MockHttpFactory.Generate(httpFooDbData, new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = @"{
+                          'batch' : 'http://foo/db/data/batch',
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'neo4j_version' : '1.5.M02',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri(httpFooDbData), httpFactory) { EnableSupportForNeo4jOnHeroku = false };
+
+            graphClient.Connect();
+
+            Assert.Pass("The constructed URL matched {0} and did not have a trailing slash", httpFooDbData);
+        }
+
+        [Test]
+        public void EnableSupportForNeo4jOnHerokuShouldChangeResource()
+        {
+            const string httpFooDbData = "http://foo/db/data/";
+
+            var httpFactory = MockHttpFactory.Generate(httpFooDbData, new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = @"{
+                          'batch' : 'http://foo/db/data/batch',
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/0',
+                          'neo4j_version' : '1.5.M02',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri(httpFooDbData), httpFactory) { EnableSupportForNeo4jOnHeroku = true };
+
+            graphClient.Connect();
+
+            Assert.Pass("The constructed URL matched {0} and did have a trailing slash", httpFooDbData);
+        }
+
+        [Test]
         public void BasicAuthenticatorNotUsedWhenNoUserInfoSupplied()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"));
