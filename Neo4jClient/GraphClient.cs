@@ -244,8 +244,13 @@ namespace Neo4jClient
                 Relationship,
                 IRelationshipAllowingSourceNode<TSourceNode>
         {
+            if (sourceNodeReference == null)
+                throw new ArgumentNullException("sourceNodeReference");
+
             if (relationship.Direction == RelationshipDirection.Incoming)
                 throw new NotSupportedException("Incoming relationships are not yet supported by this method.");
+
+            CheckRoot();
 
             CreateRelationship(
                 sourceNodeReference,
