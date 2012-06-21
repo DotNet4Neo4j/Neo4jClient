@@ -51,17 +51,17 @@ namespace Neo4jClient
         {
             if(!string.IsNullOrWhiteSpace(rootUri.UserInfo))
             {
-                string[] userInfoParts = rootUri.UserInfo.Split(':');
-                string userInfoContent = rootUri.UserInfo + "@";
+                var userInfoParts = rootUri.UserInfo.Split(':');
+                var userInfoContent = rootUri.UserInfo + "@";
 
                 if(userInfoParts.Length == 2 && rootUri.OriginalString.Contains(userInfoContent))
                 {
-                    this.Authenticator = new HttpBasicAuthenticator(userInfoParts[0], userInfoParts[1]);
+                    Authenticator = new HttpBasicAuthenticator(userInfoParts[0], userInfoParts[1]);
                     rootUri = new Uri(rootUri.OriginalString.Replace(userInfoContent, ""));
                 }
             }
 
-            this.RootUri = rootUri;
+            RootUri = rootUri;
             this.httpFactory = httpFactory;
             JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             UseJsonStreamingIfAvailable = true;
@@ -71,11 +71,9 @@ namespace Neo4jClient
         {
             var client = new RestClient(RootUri.AbsoluteUri) {HttpFactory = httpFactory};
 
-            if(this.Authenticator != null)
-            {
-                client.Authenticator = this.Authenticator;
-            }
-            
+            if (Authenticator != null)
+                client.Authenticator = Authenticator;
+
             client.RemoveHandler("application/json");
             client.AddHandler("application/json", new CustomJsonDeserializer());
             if (UseJsonStreamingIfAvailable && jsonStreamingAvailable) client.AddDefaultHeader("Accept", "application/json;stream=true");
