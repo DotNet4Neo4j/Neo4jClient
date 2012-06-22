@@ -731,11 +731,21 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
 
-            var response =  CreateClient().Execute<Dictionary<string, IndexMetaData>>(request);
+            var response = CreateClient().Execute(request);
+
+            ValidateExpectedResponseCodes(
+                response, string.Empty,
+                HttpStatusCode.OK, HttpStatusCode.NoContent);
+
+            if(response.StatusCode == HttpStatusCode.NoContent)
+                return new Dictionary<string, IndexMetaData>();
+
+            var deserializer = new CustomJsonDeserializer();
+            var result = deserializer.Deserialize<Dictionary<string, IndexMetaData>>(response);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
-            return response.Data;
+            return result;
         }
 
         public bool CheckIndexExists(string indexName, IndexFor indexFor)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using NUnit.Framework;
 using Neo4jClient.Serializer;
@@ -26,7 +27,7 @@ namespace Neo4jClient.Test.GraphClientTests
                         }";
 
         [Test]
-        public void ShouldReturnHttResponse200()
+        public void ShouldReturnDataForHttpResponse200()
         {
             //Arrange
             var restRequest = new RestRequest("/index/node", Method.GET)
@@ -74,10 +75,49 @@ namespace Neo4jClient.Test.GraphClientTests
             graphClient.Connect();
 
             //Act
-            graphClient.GetIndexes(IndexFor.Node);
+            var indexes = graphClient.GetIndexes(IndexFor.Node);
 
             // Assert
-            Assert.Pass("Success.");
+            Assert.IsTrue(indexes.Any());
+        }
+
+        [Test]
+        public void ShouldReturnEmptyDictionaryOfIndexesForHttpResponse204()
+        {
+            //Arrange
+            var restRequest = new RestRequest("/index/node", Method.GET)
+            {
+                RequestFormat = DataFormat.Json,
+                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+            };
+
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = RootResponse.Replace('\'', '"')
+                    }
+                },
+                  {
+                    restRequest,
+                    new NeoHttpResponse {
+                        StatusCode = HttpStatusCode.NoContent,
+                        ContentType = "application/json",
+                    }
+                }
+            });
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            //Act
+            var indexes = graphClient.GetIndexes(IndexFor.Node);
+
+            // Assert
+            Assert.IsFalse(indexes.Any());
         }
 
         [Test]
