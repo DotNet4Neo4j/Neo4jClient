@@ -67,7 +67,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
             graphClient.Connect();
 
-            var relationshipReference = graphClient.CreateRelationship<TestNode, TestRelationship>(new NodeReference<TestNode>(81), testRelationship);
+            var relationshipReference = graphClient.CreateRelationship(new NodeReference<TestNode>(81), testRelationship);
 
             Assert.IsNotNull(((IGremlinQuery)relationshipReference).Client);
             Assert.AreEqual(38, relationshipReference.Id);
