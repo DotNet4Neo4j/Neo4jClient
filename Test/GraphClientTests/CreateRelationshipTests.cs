@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.GraphClientTests
             .Replace('\'', '"');
 
         [Test]
-        public void ShouldReturnUntypedRelationshipReferenceForUntypedRelationship()
+        public void ShouldReturnRelationshipReference()
         {
             var testRelationship = new TestRelationship(81);
 
