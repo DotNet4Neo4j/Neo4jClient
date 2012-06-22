@@ -37,6 +37,13 @@ namespace Neo4jClient.ApiModels
                 Data);
         }
 
+
+        public RelationshipReference<TData> ToRelationshipReference(IGraphClient client)
+        {
+            var relationshipId = int.Parse(GetLastPathSegment(Self));
+            return new RelationshipReference<TData>(relationshipId, client);
+        }
+
         static string GetLastPathSegment(string uri)
         {
             var path = new Uri(uri).AbsolutePath;
