@@ -27,7 +27,7 @@ namespace Neo4jClient
 
         void Delete(NodeReference reference, DeleteMode mode);
 
-        void CreateRelationship<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship)
+        RelationshipReference CreateRelationship<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship)
             where TRelationship : Relationship, IRelationshipAllowingSourceNode<TSourceNode>;
 
         void DeleteRelationship(RelationshipReference reference);

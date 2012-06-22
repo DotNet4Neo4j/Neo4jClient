@@ -256,7 +256,7 @@ namespace Neo4jClient
             return response.Data;
         }
 
-        public virtual void CreateRelationship<TSourceNode, TRelationship>(
+        public virtual RelationshipReference CreateRelationship<TSourceNode, TRelationship>(
             NodeReference<TSourceNode> sourceNodeReference,
             TRelationship relationship)
             where TRelationship :
@@ -271,15 +271,15 @@ namespace Neo4jClient
 
             CheckRoot();
 
-            CreateRelationship(
+            return CreateRelationship(
                 sourceNodeReference,
                 relationship.OtherNode,
                 relationship.RelationshipTypeKey,
                 relationship.Data);
         }
 
-        void CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey,
-                                object data)
+        RelationshipReference<TData> CreateRelationship<TData>(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey,
+                                TData data) where TData : class, new()
         {
             var relationship = new RelationshipTemplate
                 {
@@ -295,7 +295,7 @@ namespace Neo4jClient
                     JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
                 };
             request.AddBody(relationship);
-            var response = CreateClient().Execute(request);
+            var response = CreateClient().Execute<RelationshipApiResponse<TData>>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.Created, HttpStatusCode.NotFound);
 
@@ -304,6 +304,8 @@ namespace Neo4jClient
                     "One of the nodes referenced in the relationship could not be found. Referenced nodes were {0} and {1}.",
                     sourceNode.Id,
                     targetNode.Id));
+
+            return response.Data.ToRelationshipReference(this);
         }
 
         public void DeleteRelationship(RelationshipReference reference)
