@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
-using Neo4jClient.Gremlin;
 using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -25,7 +24,7 @@ namespace Neo4jClient.Test.GraphClientTests
             .Replace('\'', '"');
 
         [Test]
-        public void ShouldReturnAttachedNodeReference()
+        public void ShouldReturnUntypedRelationshipReferenceForUntypedRelationship()
         {
             var testRelationship = new TestRelationship(81);
 
@@ -69,7 +68,8 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var relationshipReference = graphClient.CreateRelationship(new NodeReference<TestNode>(81), testRelationship);
 
-            Assert.IsNotNull(((IGremlinQuery)relationshipReference).Client);
+            Assert.IsInstanceOf<RelationshipReference>(relationshipReference);
+            Assert.IsNotInstanceOf<RelationshipReference<object>>(relationshipReference);
             Assert.AreEqual(38, relationshipReference.Id);
         }
 

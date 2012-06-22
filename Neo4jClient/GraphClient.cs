@@ -278,8 +278,7 @@ namespace Neo4jClient
                 relationship.Data);
         }
 
-        RelationshipReference<TData> CreateRelationship<TData>(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey,
-                                TData data) where TData : class, new()
+        RelationshipReference CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey, object data)
         {
             var relationship = new RelationshipTemplate
                 {
@@ -295,7 +294,7 @@ namespace Neo4jClient
                     JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
                 };
             request.AddBody(relationship);
-            var response = CreateClient().Execute<RelationshipApiResponse<TData>>(request);
+            var response = CreateClient().Execute<RelationshipApiResponse<object>>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.Created, HttpStatusCode.NotFound);
 
