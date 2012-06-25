@@ -62,10 +62,6 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnNodeAsSet()
         {
-            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
-            // START a=node(1)
-            // RETURN a
-
             var client = Substitute.For<IGraphClient>();
             var set = new[] { new Node<FooNode>(new FooNode(), new NodeReference<FooNode>(123)) };
             client
@@ -77,6 +73,44 @@ namespace Neo4jClient.Test.Cypher
             var results = cypher
                 .Start("a", (NodeReference)1)
                 .Return<Node<FooNode>>("a")
+                .Results;
+
+            CollectionAssert.AreEqual(set, results);
+        }
+
+        [Test]
+        public void ReturnRelationshipWithDataAsSet()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var set = new[] { new RelationshipInstance<FooNode>(new RelationshipReference<FooNode>(1), new NodeReference(0), new NodeReference(2),"Type", new FooNode()) };
+            client
+                .ExecuteGetCypherResults<RelationshipInstance<FooNode>>(
+                    Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
+                .Returns(set);
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
+                .Start("a", (RelationshipReference)1)
+                .Return<RelationshipInstance<FooNode>>("a")
+                .Results;
+
+            CollectionAssert.AreEqual(set, results);
+        }
+
+        [Test]
+        public void ReturnRelationshipWAsSet()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var set = new[] { new RelationshipInstance(new RelationshipReference(1), new NodeReference(0), new NodeReference(2), "Type") };
+            client
+                .ExecuteGetCypherResults<RelationshipInstance>(
+                    Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
+                .Returns(set);
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
+                .Start("a", (RelationshipReference)1)
+                .Return<RelationshipInstance>("a")
                 .Results;
 
             CollectionAssert.AreEqual(set, results);
