@@ -156,6 +156,72 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual("Sydney", node.Data.Name);
         }
 
+        [Test]
+        public void DeserializeShouldMapRelationshipsInSetMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<RelationshipInstance<City>>(client, CypherResultMode.Set);
+            var response = new RestResponse
+            {
+                Content = @"{
+                  'data' : [ [ {
+                    'start' : 'http://localhost:7474/db/data/node/55872',
+                    'data' : {
+                    'Name' : '東京'
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76931/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76931',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76931/properties',
+                    'type' : 'REFERRAL_HAS_WHO_SECTION',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55875'
+                    } ], [ {
+                    'start' : 'http://localhost:7474/db/data/node/55872',
+                    'data' : {
+                    'Name' : 'London'
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76931/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76931',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76931/properties',
+                    'type' : 'REFERRAL_HAS_WHO_SECTION',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55875'
+                    } ], [ {
+                    'start' : 'http://localhost:7474/db/data/node/55872',
+                    'data' : {
+                    'Name' : 'Sydney'
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76931/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76931',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76931/properties',
+                    'type' : 'REFERRAL_HAS_WHO_SECTION',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55875'
+                    } ] ],
+                  'columns' : [ 'c' ]
+                }".Replace("'", "\"")
+            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray();
+
+            // Assert
+            Assert.AreEqual(3, results.Count());
+
+            var relationships = results.ElementAt(0);
+            Assert.AreEqual("東京", relationships.Data.Name);
+
+            relationships = results.ElementAt(1);
+            Assert.AreEqual("London", relationships.Data.Name);
+
+            relationships = results.ElementAt(2);
+            Assert.AreEqual("Sydney", relationships.Data.Name);
+        }
+
         public class City
         {
             public string Name { get; set; }
