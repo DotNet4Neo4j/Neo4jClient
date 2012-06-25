@@ -98,7 +98,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void ReturnRelationshipWAsSet()
+        public void ReturnRelationshipAsSet()
         {
             var client = Substitute.For<IGraphClient>();
             var set = new[] { new RelationshipInstance(new RelationshipReference(1), new NodeReference(0), new NodeReference(2), "Type") };
