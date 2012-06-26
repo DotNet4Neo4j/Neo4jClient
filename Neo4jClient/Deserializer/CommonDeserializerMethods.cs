@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -64,6 +63,7 @@ namespace Neo4jClient.Deserializer
 
             var genericTypeDef = propertyType.IsGenericType ? propertyType.GetGenericTypeDefinition() : null;
 
+            typeMappings = typeMappings.ToArray();
             if (propertyType.IsPrimitive)
             {
                 // no primitives can contain quotes so we can safely remove them
@@ -137,6 +137,7 @@ namespace Neo4jClient.Deserializer
         public static object CreateAndMap(Type type, JToken element, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
             object instance;
+            typeMappings = typeMappings.ToArray();
             if (type.IsGenericType)
             {
                 var genericTypeDef = type.GetGenericTypeDefinition();
@@ -199,15 +200,15 @@ namespace Neo4jClient.Deserializer
         static object MutateObject(JToken value, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel,
                                    TypeMapping mapping, Type propertyType)
         {
-            object item;
             var newType = mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(propertyType);
             var rawItem = CreateAndMap(newType, value, culture, typeMappings, nestingLevel + 1);
-            item = mapping.MutationCallback(rawItem);
+            var item = mapping.MutationCallback(rawItem);
             return item;
         }
 
         public static void Map(object targetObject, JToken parentJsonToken, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
+            typeMappings = typeMappings.ToArray();
             var objType = targetObject.GetType();
             var props = GetPropertiesForType(objType);
 
@@ -221,6 +222,7 @@ namespace Neo4jClient.Deserializer
 
         public static IDictionary BuildDictionary(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
+            typeMappings = typeMappings.ToArray();
             var dict = (IDictionary)Activator.CreateInstance(type);
             var valueType = type.GetGenericArguments()[1];
             foreach (JProperty child in elements)
@@ -235,6 +237,7 @@ namespace Neo4jClient.Deserializer
 
         public static IList BuildList(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
+            typeMappings = typeMappings.ToArray();
             var list = (IList)Activator.CreateInstance(type);
             var itemType = type
                 .GetInterfaces()
@@ -267,8 +270,8 @@ namespace Neo4jClient.Deserializer
 
         public static IList BuildIEnumerable(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
-            var itemType = type.GetGenericArguments().First();
-
+            typeMappings = typeMappings.ToArray();
+            var itemType = type.GetGenericArguments().Single();
             var listType = typeof(List<>).MakeGenericType(itemType);
             var list = (IList)Activator.CreateInstance(listType);
 
@@ -276,7 +279,6 @@ namespace Neo4jClient.Deserializer
             {
                 if (itemType.IsPrimitive)
                 {
-
                     var value = element as JValue;
                     if (value != null)
                     {
