@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
 using RestSharp;
@@ -222,10 +224,161 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual("Sydney", relationships.Data.Name);
         }
 
+        [Test]
+        public void DeserializeShouldMapIEnumerableOfRelationshipsInAProjectionMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<Projection>(client, CypherResultMode.Projection);
+            var response = new RestResponse
+            {
+                Content = @"{
+                  'data' : [ [ {
+                    'outgoing_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out',
+                    'data' : {
+                      'Name' : '東京',
+                      'Population' : 13000000
+                    },
+                    'all_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/all/{-list|&|types}',
+                    'traverse' : 'http://localhost:7474/db/data/node/55745/traverse/{returnType}',
+                    'self' : 'http://localhost:7474/db/data/node/55745',
+                    'property' : 'http://localhost:7474/db/data/node/55745/properties/{key}',
+                    'outgoing_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out/{-list|&|types}',
+                    'properties' : 'http://localhost:7474/db/data/node/55745/properties',
+                    'incoming_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/in',
+                    'extensions' : {
+                    },
+                    'create_relationship' : 'http://localhost:7474/db/data/node/55745/relationships',
+                    'paged_traverse' : 'http://localhost:7474/db/data/node/55745/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                    'all_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/all',
+                    'incoming_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/in/{-list|&|types}'
+                  }, [ {
+                    'start' : 'http://localhost:7474/db/data/node/55745',
+                    'data' : {
+                      'Number' : 66
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76743/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76743',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76743/properties',
+                    'type' : 'REFERRAL_HAS_WHO_SECTION',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55747'
+                  } ] ], [ {
+                    'outgoing_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out',
+                    'data' : {
+                      'Name' : '東京',
+                      'Population' : 13000000
+                    },
+                    'all_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/all/{-list|&|types}',
+                    'traverse' : 'http://localhost:7474/db/data/node/55745/traverse/{returnType}',
+                    'self' : 'http://localhost:7474/db/data/node/55745',
+                    'property' : 'http://localhost:7474/db/data/node/55745/properties/{key}',
+                    'outgoing_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out/{-list|&|types}',
+                    'properties' : 'http://localhost:7474/db/data/node/55745/properties',
+                    'incoming_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/in',
+                    'extensions' : {
+                    },
+                    'create_relationship' : 'http://localhost:7474/db/data/node/55745/relationships',
+                    'paged_traverse' : 'http://localhost:7474/db/data/node/55745/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                    'all_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/all',
+                    'incoming_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/in/{-list|&|types}'
+                  }, [ {
+                    'start' : 'http://localhost:7474/db/data/node/55745',
+                    'data' : {
+                      'Number' : 66
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76743/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76743',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76743/properties',
+                    'type' : 'REFERRAL_HAS_WHO_SECTION',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55747'
+                  }, {
+                    'start' : 'http://localhost:7474/db/data/node/55747',
+                    'data' : {
+                      'Number' : 77
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76745/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76745',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76745/properties',
+                    'type' : 'HAS_AUDIT',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55748'
+                  } ] ], [ {
+                    'outgoing_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out',
+                    'data' : {
+                      'Name' : '東京',
+                      'Population' : 13000000
+                    },
+                    'all_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/all/{-list|&|types}',
+                    'traverse' : 'http://localhost:7474/db/data/node/55745/traverse/{returnType}',
+                    'self' : 'http://localhost:7474/db/data/node/55745',
+                    'property' : 'http://localhost:7474/db/data/node/55745/properties/{key}',
+                    'outgoing_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out/{-list|&|types}',
+                    'properties' : 'http://localhost:7474/db/data/node/55745/properties',
+                    'incoming_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/in',
+                    'extensions' : {
+                    },
+                    'create_relationship' : 'http://localhost:7474/db/data/node/55745/relationships',
+                    'paged_traverse' : 'http://localhost:7474/db/data/node/55745/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                    'all_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/all',
+                    'incoming_typed_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/in/{-list|&|types}'
+                  }, [ {
+                    'start' : 'http://localhost:7474/db/data/node/55745',
+                    'data' : {
+                      'Number' : 77
+                    },
+                    'property' : 'http://localhost:7474/db/data/relationship/76741/properties/{key}',
+                    'self' : 'http://localhost:7474/db/data/relationship/76741',
+                    'properties' : 'http://localhost:7474/db/data/relationship/76741/properties',
+                    'type' : 'HAS_AUDIT',
+                    'extensions' : {
+                    },
+                    'end' : 'http://localhost:7474/db/data/node/55746'
+                  } ] ] ],
+                  'columns' : [ 'Node', 'Relationships' ]
+                }".Replace("'", "\"")
+                            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray();
+
+            // Assert
+            var result = results[0];
+            Assert.AreEqual("東京", result.Node.Data.Name);
+            Assert.AreEqual(13000000, result.Node.Data.Population);
+            Assert.AreEqual(66, result.Relationships.First().Data.Number);
+
+            result = results[1];
+            Assert.AreEqual("東京", result.Node.Data.Name);
+            Assert.AreEqual(13000000, result.Node.Data.Population);
+            Assert.AreEqual(66, result.Relationships.ToArray()[0].Data.Number);
+            Assert.AreEqual(77, result.Relationships.ToArray()[1].Data.Number);
+
+            result = results[2];
+            Assert.AreEqual("東京", result.Node.Data.Name);
+            Assert.AreEqual(13000000, result.Node.Data.Population);
+            Assert.AreEqual(77, result.Relationships.First().Data.Number);
+        }
+
         public class City
         {
             public string Name { get; set; }
             public int Population { get; set; }
+        }
+
+        public class Payload
+        {
+            public int Number { get; set; }
+        }
+
+        public class Projection
+        {
+            public IEnumerable<RelationshipInstance<Payload>> Relationships { get; set; }
+            public Node<City> Node { get; set; }
         }
 
         [Test]
