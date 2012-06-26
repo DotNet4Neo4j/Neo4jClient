@@ -42,7 +42,6 @@ namespace Neo4jClient.Deserializer
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        nestingLevel == 0 &&
                         type.IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(Node<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
@@ -55,7 +54,6 @@ namespace Neo4jClient.Deserializer
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        nestingLevel == 0 &&
                         type.IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>

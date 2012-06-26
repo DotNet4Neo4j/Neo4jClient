@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -127,19 +128,8 @@ namespace Neo4jClient.Deserializer
             else
             {
                 // nested objects
-                object item;
                 var mapping = typeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, propertyType));
-                if (mapping != null)
-                {
-                    var newType = mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(propertyType);
-                    var rawItem = CreateAndMap(newType, value, culture, typeMappings, nestingLevel + 1);
-                    item = mapping.MutationCallback(rawItem);
-                }
-                else
-                {
-                    item = CreateAndMap(propertyType, value, culture, typeMappings, nestingLevel + 1);
-                }
-
+                var item = mapping != null ? MutateObject(value, culture, typeMappings, nestingLevel, mapping, propertyType) : CreateAndMap(propertyType, value, culture, typeMappings, nestingLevel + 1);
                 propertyInfo.SetValue(targetObject, item, null);
             }
         }
@@ -150,22 +140,32 @@ namespace Neo4jClient.Deserializer
             if (type.IsGenericType)
             {
                 var genericTypeDef = type.GetGenericTypeDefinition();
-                if (genericTypeDef == typeof(Dictionary<,>))
+                if (genericTypeDef == typeof (Dictionary<,>))
                 {
                     instance = BuildDictionary(type, element.Children(), culture, typeMappings, nestingLevel + 1);
                 }
-                else if (genericTypeDef == typeof(List<>))
+                else if (genericTypeDef == typeof (List<>))
                 {
                     instance = BuildList(type, element.Children(), culture, typeMappings, nestingLevel + 1);
                 }
-                else if (type == typeof(string))
+                else if (genericTypeDef == typeof (IEnumerable<>))
                 {
-                    instance = (string)element;
+                    instance = BuildIEnumerable(type, element.Children(), culture, typeMappings, nestingLevel + 1);
+                }
+                else if (type == typeof (string))
+                {
+                    instance = (string) element;
                 }
                 else
                 {
-                    instance = Activator.CreateInstance(type);
-                    Map(instance, element, culture, typeMappings, nestingLevel);
+                    var mapping = typeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, type));
+                    if (mapping != null)
+                        instance = MutateObject(element, culture, typeMappings, nestingLevel, mapping, type);
+                    else
+                    {
+                        instance = Activator.CreateInstance(type);
+                        Map(instance, element, culture, typeMappings, nestingLevel);
+                    }
                 }
             }
             else if (type == typeof(string))
@@ -194,6 +194,16 @@ namespace Neo4jClient.Deserializer
                 Map(instance, element, culture, typeMappings, nestingLevel);
             }
             return instance;
+        }
+
+        static object MutateObject(JToken value, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel,
+                                   TypeMapping mapping, Type propertyType)
+        {
+            object item;
+            var newType = mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(propertyType);
+            var rawItem = CreateAndMap(newType, value, culture, typeMappings, nestingLevel + 1);
+            item = mapping.MutationCallback(rawItem);
+            return item;
         }
 
         public static void Map(object targetObject, JToken parentJsonToken, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
@@ -252,6 +262,38 @@ namespace Neo4jClient.Deserializer
                     list.Add(item);
                 }
             }
+            return list;
+        }
+
+        public static IList BuildIEnumerable(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
+        {
+            var itemType = type.GetGenericArguments().First();
+
+            var listType = typeof(List<>).MakeGenericType(itemType);
+            var list = (IList)Activator.CreateInstance(listType);
+
+            foreach (var element in elements)
+            {
+                if (itemType.IsPrimitive)
+                {
+
+                    var value = element as JValue;
+                    if (value != null)
+                    {
+                        list.Add(value.Value.ChangeType(itemType));
+                    }
+                }
+                else if (itemType == typeof (string))
+                {
+                    list.Add(element.AsString());
+                }
+                else
+                {
+                    var item = CreateAndMap(itemType, element, culture, typeMappings, nestingLevel + 1);
+                    list.Add(item);
+                }
+            }
+
             return list;
         }
 
