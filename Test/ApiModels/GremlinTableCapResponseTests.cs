@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using System.Linq;
@@ -247,7 +248,7 @@ namespace Neo4jClient.Test.ApiModels
                         }
                 });
             var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
-            Assert.IsTrue(response.Any(r => r.DateTimeOffsetNullable.ToString("dd MMM yyyy") == expectedDate));
+            Assert.IsTrue(response.Any(r => r.DateTimeOffsetNullable.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == expectedDate));
         }
 
         [Test]
@@ -274,7 +275,7 @@ namespace Neo4jClient.Test.ApiModels
                         }
                 });
             var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
-            Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy") == "23 Nov 2011"));
+            Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == "23 Nov 2011"));
         }
 
         [Test]
@@ -301,7 +302,7 @@ namespace Neo4jClient.Test.ApiModels
                         }
                 });
             var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
-            Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy") == expectedDate));
+            Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == expectedDate));
         }
 
         [Test]
@@ -328,7 +329,7 @@ namespace Neo4jClient.Test.ApiModels
                         }
                 });
             var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
-            Assert.IsTrue(response.Any(r => r.DateTime.ToString("dd MMM yyyy") == expectedDate));
+            Assert.IsTrue(response.Any(r => r.DateTime.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == expectedDate));
         }
 
     internal enum MyEnum {Foo, Bar, Baz}
