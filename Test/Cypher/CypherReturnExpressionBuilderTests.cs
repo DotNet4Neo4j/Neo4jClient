@@ -153,6 +153,25 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("a AS Foo, b AS Bar", text);
         }
 
+        [Test]
+        public void ReturnCollectedNodesInColumn()
+        {
+            // http://docs.neo4j.org/chunked/1.8.M05/query-aggregation.html#aggregation-collect
+            // START a=node(1)
+            // MATCH a<--b
+            // RETURN collect(a)
+
+            Expression<Func<ICypherResultItem, object>> expression =
+                (a) => new
+                {
+                    Foo = a.CollectAs<Foo>()
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("collect(a) AS Foo", text);
+        }
+
         public class Foo
         {
             public int Age { get; set; }
