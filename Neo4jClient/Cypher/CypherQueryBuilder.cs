@@ -84,12 +84,12 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
-        public CypherQueryBuilder SetReturn(string identity, bool distinct)
+        public CypherQueryBuilder SetReturn(string identity, bool distinct, CypherResultMode mode = CypherResultMode.Set)
         {
             var newBuilder = Clone();
             newBuilder.returnText = identity;
             newBuilder.returnDistinct = distinct;
-            newBuilder.resultMode = CypherResultMode.Set;
+            newBuilder.resultMode = mode;
             return newBuilder;
         }
 

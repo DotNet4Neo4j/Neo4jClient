@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
-using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
 using RestSharp;
@@ -431,6 +430,50 @@ namespace Neo4jClient.Test.Deserializer
 
         }
 
+        [Test]
+        public void DeserializeShouldMapIEnumerableOfStringsInAProjectionMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection);
+            var response = new RestResponse
+            {
+                Content = @"{
+                  'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
+                  'columns' : [ 'Names' ]
+                }".Replace("'", "\"")
+            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray().First().Names.ToArray();
+
+            // Assert
+            Assert.AreEqual("Ben Tu", results[0]);
+            Assert.AreEqual("Romiko Derbynew", results[1]);
+        }
+
+        [Test]
+        public void DeserializeShouldMapIEnumerableOfStringsInSetMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<IEnumerable<string>>(client, CypherResultMode.Set);
+            var response = new RestResponse
+            {
+                Content = @"{
+                  'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
+                  'columns' : [ 'Names' ]
+                }".Replace("'", "\"")
+            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray().First().ToArray();
+
+            // Assert
+            Assert.AreEqual("Ben Tu", results[0]);
+            Assert.AreEqual("Romiko Derbynew", results[1]);
+        }
+
         public class FooData
         {
             public string Bar { get; set; }
@@ -449,6 +492,12 @@ namespace Neo4jClient.Test.Deserializer
         {
             public string Name { get; set; }
             public int Population { get; set; }
+        }
+
+
+        public class People
+        {
+            public IEnumerable<string> Names { get; set; }
         }
 
         public class Payload

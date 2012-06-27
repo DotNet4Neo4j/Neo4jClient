@@ -11,6 +11,12 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
+        public ICypherFluentQueryReturned<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
+        {
+            var newBuilder = Builder.SetReturn(statement, false, resultMode);
+            return new CypherFluentQuery<TResult>(Client, newBuilder);
+        }
+
         public ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(string identity)
         {
             var newBuilder = Builder.SetReturn(identity, true);

@@ -79,6 +79,33 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnNodeAsProjection()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var expected = new[]
+                {
+                    new FooNode
+                    {
+                    Age = 1,
+                    TheType = MyType.Type1
+                    }
+                };
+
+            client
+                .ExecuteGetCypherResults<FooNode>(
+                    Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Projection))
+                .Returns(expected);
+
+            var cypher = new CypherFluentQuery(client);
+            var results = cypher
+                .Start("a", (NodeReference)1)
+                .Return<FooNode>("a", CypherResultMode.Projection)
+                .Results;
+
+            CollectionAssert.AreEqual(expected, results);
+        }
+
+        [Test]
         public void ReturnRelationshipWithDataAsSet()
         {
             var client = Substitute.For<IGraphClient>();

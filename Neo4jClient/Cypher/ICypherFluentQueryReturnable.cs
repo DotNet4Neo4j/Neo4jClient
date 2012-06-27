@@ -7,6 +7,8 @@ namespace Neo4jClient.Cypher
     {
         ICypherFluentQueryReturned<TResult> Return<TResult>(string identity);
 
+        ICypherFluentQueryReturned<TResult> Return<TResult>(string identity, CypherResultMode resultMode);
+
         ICypherFluentQueryReturned<TResult> ReturnDistinct<TResult>(string identity);
 
         ICypherFluentQueryReturned<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression);
