@@ -407,6 +407,27 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual("Romiko Derbynew", results[1]);
         }
 
+        [Test]
+        public void DeserializeShouldMapIntegerInSetMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<int>(client, CypherResultMode.Set);
+            var response = new RestResponse
+            {
+                Content = @"{
+                          'data' : [ [ 666 ] ],
+                          'columns' : [ 'count(distinct registration)' ]
+                        }".Replace("'", "\"")};
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray();
+
+            // Assert
+            Assert.AreEqual(666, results.First());
+
+        }
+
         public class City
         {
             public string Name { get; set; }

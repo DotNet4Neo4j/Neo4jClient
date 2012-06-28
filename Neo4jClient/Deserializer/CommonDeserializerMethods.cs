@@ -169,6 +169,10 @@ namespace Neo4jClient.Deserializer
                     }
                 }
             }
+            else if (type.IsValueType)
+            {
+                instance = element.ToString();
+            }
             else if (type == typeof(string))
             {
                 instance = element.ToString();
