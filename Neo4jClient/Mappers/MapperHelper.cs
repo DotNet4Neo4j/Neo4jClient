@@ -18,7 +18,7 @@ namespace Neo4jClient.Mappers
             {
                 var validType = prop.PropertyType;
                 if (prop.PropertyType.IsGenericType &&
-                    prop.PropertyType.GetGenericTypeDefinition().Equals(typeof (Nullable<>)))
+                    prop.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
                 {
                     var nullableConverter = new NullableConverter(prop.PropertyType);
                     validType = nullableConverter.UnderlyingType;

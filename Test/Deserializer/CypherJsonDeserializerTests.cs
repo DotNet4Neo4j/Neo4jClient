@@ -364,6 +364,73 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        public void DeserializeShouldMapIEnumerableOfNodesReturnedByCollectInAProjectionMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection);
+            var response = new RestResponse
+            {
+                Content = @"{
+                      'data' : [ [ [ {
+                        'outgoing_relationships' : 'http://foo/db/data/node/920/relationships/out',
+                        'data' : {
+                                    'Bar' : 'bar',
+                                    'Baz' : 'baz'
+                        },
+                        'all_typed_relationships' : 'http://foo/db/data/node/920/relationships/all/{-list|&|types}',
+                        'traverse' : 'http://foo/db/data/node/920/traverse/{returnType}',
+                        'property' : 'http://foo/db/data/node/920/properties/{key}',
+                        'self' : 'http://foo/db/data/node/920',
+                        'outgoing_typed_relationships' : 'http://foo/db/data/node/920/relationships/out/{-list|&|types}',
+                        'properties' : 'http://foo/db/data/node/920/properties',
+                        'incoming_relationships' : 'http://foo/db/data/node/920/relationships/in',
+                        'extensions' : {
+                        },
+                        'create_relationship' : 'http://foo/db/data/node/920/relationships',
+                        'paged_traverse' : 'http://foo/db/data/node/920/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                        'all_relationships' : 'http://foo/db/data/node/920/relationships/all',
+                        'incoming_typed_relationships' : 'http://foo/db/data/node/920/relationships/in/{-list|&|types}'
+                      }, {
+                        'outgoing_relationships' : 'http://foo/db/data/node/5482/relationships/out',
+                        'data' : {
+                                    'Bar' : 'bar',
+                                    'Baz' : 'baz'
+                        },
+                        'all_typed_relationships' : 'http://foo/db/data/node/5482/relationships/all/{-list|&|types}',
+                        'traverse' : 'http://foo/db/data/node/5482/traverse/{returnType}',
+                        'property' : 'http://foo/db/data/node/5482/properties/{key}',
+                        'self' : 'http://foo/db/data/node/5482',
+                        'outgoing_typed_relationships' : 'http://foo/db/data/node/5482/relationships/out/{-list|&|types}',
+                        'properties' : 'http://foo/db/data/node/5482/properties',
+                        'incoming_relationships' : 'http://foo/db/data/node/5482/relationships/in',
+                        'extensions' : {
+                        },
+                        'create_relationship' : 'http://foo/db/data/node/5482/relationships',
+                        'paged_traverse' : 'http://foo/db/data/node/5482/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                        'all_relationships' : 'http://foo/db/data/node/5482/relationships/all',
+                        'incoming_typed_relationships' : 'http://foo/db/data/node/5482/relationships/in/{-list|&|types}'
+                      } ] ] ],
+                      'columns' : ['Fooness']
+                            }".Replace('\'', '"')
+            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray();
+
+            Assert.IsInstanceOf<IEnumerable<ResultWithNestedNodeDto>>(results);
+            Assert.AreEqual(1, results.Count());
+            Assert.AreEqual(2, results[0].Fooness.Count());
+
+            Assert.AreEqual("bar", results[0].Fooness.ToArray()[0].Data.Bar);
+            Assert.AreEqual("baz", results[0].Fooness.ToArray()[0].Data.Baz);
+
+            Assert.AreEqual("bar", results[0].Fooness.ToArray()[1].Data.Bar);
+            Assert.AreEqual("baz", results[0].Fooness.ToArray()[1].Data.Baz);
+
+        }
+
+        [Test]
         public void DeserializeShouldMapIEnumerableOfStringsInAProjectionMode()
         {
             // Arrange
@@ -426,6 +493,20 @@ namespace Neo4jClient.Test.Deserializer
             // Assert
             Assert.AreEqual(666, results.First());
 
+        }
+
+        public class FooData
+        {
+            public string Bar { get; set; }
+            public string Baz { get; set; }
+            public DateTimeOffset? Date { get; set; }
+        }
+
+        public class ResultWithNestedNodeDto
+        {
+            public IEnumerable<Node<FooData>> Fooness { get; set; }
+            public string Name { get; set; }
+            public long? UniqueId { get; set; }
         }
 
         public class City

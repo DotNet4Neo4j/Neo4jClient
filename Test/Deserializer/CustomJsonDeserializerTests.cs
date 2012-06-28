@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
@@ -36,7 +37,7 @@ namespace Neo4jClient.Test.Deserializer
             else
             {
                 Assert.IsNotNull(result.Foo);
-                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz"));
+                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz", CultureInfo.InvariantCulture));
             }
         }
 

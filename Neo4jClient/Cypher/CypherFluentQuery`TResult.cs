@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Neo4jClient.Cypher
@@ -43,12 +42,6 @@ namespace Neo4jClient.Cypher
             {
                 return Client.ExecuteGetCypherResults<TResult>(Query);
             }
-        }
-
-        [Obsolete("Use the Results propery instead.", true)]
-        public IEnumerable<TResult> ResultSet
-        {
-            get { throw new NotSupportedException("Use the Results propery instead."); }
         }
     }
 }

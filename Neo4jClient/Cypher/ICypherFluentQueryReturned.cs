@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Neo4jClient.Cypher
@@ -11,8 +10,5 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryReturned<TResult> OrderByDescending(params string[] properties);
 
         IEnumerable<TResult> Results { get; }
-
-        [Obsolete("Use the Results property instead.", true)]
-        IEnumerable<TResult> ResultSet { get; }
     }
 }
