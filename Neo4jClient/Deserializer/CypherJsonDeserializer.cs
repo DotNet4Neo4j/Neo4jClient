@@ -106,12 +106,7 @@ namespace Neo4jClient.Deserializer
                     throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
 
                 var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings, 0);
-                if (mapping == null)
-                    if (parsed is IConvertible)
-                        return (TResult) Convert.ChangeType(parsed, typeof (TResult));
-                    else return (TResult) parsed;
-
-                return (TResult) mapping.MutationCallback(parsed);
+                return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
             return results;
