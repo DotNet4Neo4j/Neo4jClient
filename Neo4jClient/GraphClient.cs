@@ -877,7 +877,7 @@ namespace Neo4jClient
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
 
-        void DeleteIndexEntries(string indexName, long nodeId)
+        public void DeleteIndexEntries(string indexName, long nodeId)
         {
             var nodeIndexAddress = string.Join("/", new[]
             {
