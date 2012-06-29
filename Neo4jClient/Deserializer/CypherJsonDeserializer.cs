@@ -150,6 +150,7 @@ namespace Neo4jClient.Deserializer
             {
                 var columnName = columnNames[cellIndex];
                 var property = propertiesDictionary[columnName];
+                if (cell.ToString().Equals("[\r\n  null\r\n]")) continue;
                 CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings, 0);
                 cellIndex++;
             }
