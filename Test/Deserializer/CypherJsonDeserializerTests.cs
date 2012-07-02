@@ -431,6 +431,30 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        public void DeserializeShouldMapNullIEnumerableOfNodesReturnedByCollectInInAProjectionMode()
+        {
+
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection);
+            var response = new RestResponse
+                {
+                    Content =
+                        @"{
+                      'data' : [ [ [ null ] ] ],
+                      'columns' : ['Fooness']
+                            }"
+                            .Replace('\'', '"')
+                };
+
+            var results = deserializer.Deserialize(response).ToArray();
+
+            Assert.IsInstanceOf<IEnumerable<ResultWithNestedNodeDto>>(results);
+            Assert.AreEqual(1, results.Count());
+
+            Assert.IsNull(results[0].Fooness);
+        }
+
+        [Test]
         public void DeserializeShouldMapIEnumerableOfStringsInAProjectionMode()
         {
             // Arrange

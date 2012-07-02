@@ -150,6 +150,9 @@ namespace Neo4jClient.Deserializer
             {
                 var columnName = columnNames[cellIndex];
                 var property = propertiesDictionary[columnName];
+                if (property.ToString().Contains("System.Collections.Generic.IEnumerable") &&
+                   string.IsNullOrEmpty(cell.First().ToString()) && string.IsNullOrEmpty(cell.Last().ToString())) 
+                    continue;
                 CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings, 0);
                 cellIndex++;
             }
