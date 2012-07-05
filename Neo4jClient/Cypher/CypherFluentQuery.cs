@@ -55,6 +55,12 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
+        public ICypherFluentQueryMatched Relate(string relateText)
+        {
+            var newBuilder = Builder.SetRelateText(relateText);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
         public CypherQuery Query
         {
             get { return Builder.ToQuery(); }

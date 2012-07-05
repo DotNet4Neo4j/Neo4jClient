@@ -947,6 +947,25 @@ RETURN b AS NodeB";
             Assert.AreEqual(1, query.QueryParameters["p1"]);
         }
 
+        [Test]
+        public void CreateNodeWithValuesViaRelate()
+        {
+            // http://docs.neo4j.org/chunked/1.8.M03/query-relate.html#relate-create-nodes-with-values
+            //START root=node(2)
+            //RELATE root-[:X]-(leaf {name:'D'} )
+            //RETURN leaf
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("root", (NodeReference)2)
+                .Relate("root-[:X]-(leaf {name:'D'} )")
+                .Return<object>("leaf")
+                .Query;
+
+            Assert.AreEqual("START root=node({p0})\r\nRELATE root-[:X]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
+            Assert.AreEqual(2, query.QueryParameters["p0"]);
+        }
+
         public class FooData
         {
             public int Age { get; set; }

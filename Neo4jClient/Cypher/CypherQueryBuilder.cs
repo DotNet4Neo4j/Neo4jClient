@@ -10,6 +10,7 @@ namespace Neo4jClient.Cypher
         IDictionary<string, object> queryParameters = new Dictionary<string, object>();
         IList<CypherStartBit> startBits = new List<CypherStartBit>();
         string matchText;
+        string relateText;
         string whereText;
         string returnText;
         bool returnDistinct;
@@ -24,6 +25,7 @@ namespace Neo4jClient.Cypher
             {
                 queryParameters = queryParameters,
                 matchText = matchText,
+                relateText = relateText,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -53,6 +55,13 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.matchText = text;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetRelateText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.relateText = text;
             return newBuilder;
         }
 
@@ -132,6 +141,7 @@ namespace Neo4jClient.Cypher
             var queryTextBuilder = new StringBuilder();
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
+            WriteRelateClause(queryTextBuilder);
             WriteWhereClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteOrderByClause(queryTextBuilder);
@@ -171,6 +181,12 @@ namespace Neo4jClient.Cypher
         {
             if (matchText == null) return;
             target.AppendFormat("\r\nMATCH {0}", matchText);
+        }
+
+        void WriteRelateClause(StringBuilder target)
+        {
+            if (relateText == null) return;
+            target.AppendFormat("\r\nRELATE {0}", relateText);
         }
 
         void WriteWhereClause(StringBuilder target)
