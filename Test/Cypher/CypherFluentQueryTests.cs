@@ -966,6 +966,26 @@ RETURN b AS NodeB";
             Assert.AreEqual(2, query.QueryParameters["p0"]);
         }
 
+        [Test]
+        public void CreateNodeWithValuesViaRelateAfterMatch()
+        {
+            //START root=node(2)
+            //MATCH root-[:X]-foo
+            //RELATE foo-[:Y]-(leaf {name:'D'} )
+            //RETURN leaf
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("root", (NodeReference)2)
+                .Match("root-[:X]-foo")
+                .Relate("foo-[:Y]-(leaf {name:'D'} )")
+                .Return<object>("leaf")
+                .Query;
+
+            Assert.AreEqual("START root=node({p0})\r\nMATCH root-[:X]-foo\r\nRELATE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
+            Assert.AreEqual(2, query.QueryParameters["p0"]);
+        }
+
         public class FooData
         {
             public int Age { get; set; }
