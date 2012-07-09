@@ -12,6 +12,7 @@ namespace Neo4jClient.Cypher
         string matchText;
         string relateText;
         string whereText;
+        string deleteText;
         string returnText;
         bool returnDistinct;
         CypherResultMode resultMode;
@@ -24,6 +25,7 @@ namespace Neo4jClient.Cypher
             return new CypherQueryBuilder
             {
                 queryParameters = queryParameters,
+                deleteText = deleteText,
                 matchText = matchText,
                 relateText = relateText,
                 whereText = whereText,
@@ -48,6 +50,13 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetDeleteText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.deleteText = text;
             return newBuilder;
         }
 
@@ -147,7 +156,7 @@ namespace Neo4jClient.Cypher
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
             WriteLimitClause(queryTextBuilder, queryParameters);
-
+            WriteDeleteClause(queryTextBuilder);
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters, resultMode);
         }
 
@@ -181,6 +190,12 @@ namespace Neo4jClient.Cypher
         {
             if (matchText == null) return;
             target.AppendFormat("\r\nMATCH {0}", matchText);
+        }
+
+        void WriteDeleteClause(StringBuilder target)
+        {
+            if (deleteText == null) return;
+            target.AppendFormat("\r\nDELETE {0}", deleteText);
         }
 
         void WriteRelateClause(StringBuilder target)

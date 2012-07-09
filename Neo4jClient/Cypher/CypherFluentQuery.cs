@@ -61,6 +61,12 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
+        public ICypherFluentQueryMatched Delete(string identities)
+        {
+            var newBuilder = Builder.SetDeleteText(identities);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
         public CypherQuery Query
         {
             get { return Builder.ToQuery(); }
