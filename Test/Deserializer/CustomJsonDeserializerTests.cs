@@ -107,7 +107,7 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
-        public void DeserializeUsingSerializeReadJson()
+        public void ReadJsonCanMapNullableEnumsToEnum()
         {
             // Arrange
             var conv = new NullableEnumValueConverter();
