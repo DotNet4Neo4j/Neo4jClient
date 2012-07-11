@@ -8,7 +8,8 @@ namespace Neo4jClient
     [DebuggerDisplay("Node {id}")]
     public class NodeReference : IGremlinQuery, IAttachedReference
     {
-        public static readonly RootNode RootNode = new RootNode();
+        [Obsolete("You need to retrieve this via GraphClient.RootNode instead. This member will be removed in future builds.", true)]
+        public static readonly RootNode RootNode = null;
 
         readonly int id;
         readonly IGraphClient client;

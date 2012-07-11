@@ -39,7 +39,7 @@ namespace Neo4jClient.Test
         public void DetermineRelationshipDirectionShouldReturnExplicitDirection(RelationshipDirection direction)
         {
             // Arrange
-            var relationship = new TestRelationship(NodeReference.RootNode) { Direction = direction };
+            var relationship = new TestRelationship(new NodeReference(0)) { Direction = direction };
             var calculatedDirection = Relationship.DetermineRelationshipDirection(null, relationship);
             Assert.AreEqual(direction, calculatedDirection);
         }

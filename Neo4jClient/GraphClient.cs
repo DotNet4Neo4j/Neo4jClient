@@ -24,6 +24,7 @@ namespace Neo4jClient
         internal readonly Uri RootUri;
         readonly IHttpFactory httpFactory;
         internal RootApiResponse RootApiResponse;
+        internal RootNode rootNode;
         internal readonly IAuthenticator Authenticator;
         bool jsonStreamingAvailable;
 
@@ -96,7 +97,6 @@ namespace Neo4jClient
             RootApiResponse.Node = RootApiResponse.Node.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(RootUri.AbsoluteUri.Length);
-            RootApiResponse.ReferenceNode = RootApiResponse.ReferenceNode.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(RootUri.AbsoluteUri.Length);
             if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
             {
@@ -109,6 +109,10 @@ namespace Neo4jClient
                 RootApiResponse.Cypher =
                     RootApiResponse.Cypher.Substring(RootUri.AbsoluteUri.Length);
             }
+
+            rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
+                ? null
+                : new RootNode(int.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
             jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);
@@ -124,7 +128,11 @@ namespace Neo4jClient
 
         public virtual RootNode RootNode
         {
-            get { return new RootNode(this); }
+            get
+            {
+                CheckRoot();
+                return rootNode;
+            }
         }
 
         public virtual NodeReference<TNode> Create<TNode>(

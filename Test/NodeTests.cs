@@ -42,10 +42,10 @@ namespace Neo4jClient.Test
         public void CypherQueryShouldIncludeRootNodeAsStartBit()
         {
             var client = Substitute.For<IGraphClient>();
-            client.RootNode.ReturnsForAnyArgs(new RootNode(client));
+            client.RootNode.ReturnsForAnyArgs(new RootNode(4, client));
             var query = client.RootNode.StartCypher("foo").Query;
             Assert.AreEqual("START foo=node({p0})", query.QueryText);
-            Assert.AreEqual(0, query.QueryParameters["p0"]);
+            Assert.AreEqual(4, query.QueryParameters["p0"]);
         }
 
         [Test]

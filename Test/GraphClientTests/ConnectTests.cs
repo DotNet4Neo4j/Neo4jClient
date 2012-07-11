@@ -60,8 +60,78 @@ namespace Neo4jClient.Test.GraphClientTests
             Assert.AreEqual("/node", graphClient.RootApiResponse.Node);
             Assert.AreEqual("/index/node", graphClient.RootApiResponse.NodeIndex);
             Assert.AreEqual("/index/relationship", graphClient.RootApiResponse.RelationshipIndex);
-            Assert.AreEqual("/node/0", graphClient.RootApiResponse.ReferenceNode);
+            Assert.AreEqual("http://foo/db/data/node/0", graphClient.RootApiResponse.ReferenceNode);
             Assert.AreEqual("/ext", graphClient.RootApiResponse.ExtensionsInfo);
+        }
+
+        [Test]
+        [ExpectedException(ExpectedMessage = "The graph client is not connected to the server. Call the Connect method first.")]
+        public void RootNode_ShouldThrowInvalidOperationException_WhenNotConnectedYet()
+        {
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
+            graphClient.RootNode.ToString();
+        }
+
+        [Test]
+        public void RootNode_ShouldReturnReferenceNode()
+        {
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = @"{
+                          'batch' : 'http://foo/db/data/batch',
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'reference_node' : 'http://foo/db/data/node/123',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            Assert.IsNotNull(graphClient.RootNode);
+            Assert.AreEqual(123, graphClient.RootNode.Id);
+        }
+
+        [Test]
+        public void RootNode_ShouldReturnNullReferenceNode_WhenNoReferenceNodeDefined()
+        {
+            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = @"{
+                          'batch' : 'http://foo/db/data/batch',
+                          'node' : 'http://foo/db/data/node',
+                          'node_index' : 'http://foo/db/data/index/node',
+                          'relationship_index' : 'http://foo/db/data/index/relationship',
+                          'extensions_info' : 'http://foo/db/data/ext',
+                          'extensions' : {
+                          }
+                        }".Replace('\'', '"')
+                    }
+                }
+            });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
+            graphClient.Connect();
+
+            Assert.IsNull(graphClient.RootNode);
         }
 
         [Test]

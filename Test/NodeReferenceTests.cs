@@ -74,25 +74,33 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        public void EqualsShouldReturnTrueWhenComparingRootNodeWithZero()
+        public void EqualsShouldReturnTrueWhenComparingRootNodeWithNodeReferenceOfSameId()
         {
-            var lhs = NodeReference.RootNode;
-            var rhs = new NodeReference(0);
+            var lhs = new RootNode(123);
+            var rhs = new NodeReference(123);
             Assert.IsTrue(lhs == rhs);
         }
 
         [Test]
-        public void EqualsShouldReturnTrueWhenComparingRootNodeWithRootNode()
+        public void EqualsShouldReturnTrueWhenComparingRootNodeWithRootNodeOfSameId()
         {
-            var lhs = NodeReference.RootNode;
-            var rhs = NodeReference.RootNode;
+            var lhs = new RootNode(123);
+            var rhs = new RootNode(123);
             Assert.IsTrue(lhs == rhs);
         }
 
         [Test]
-        public void EqualsShouldReturnFalseWhenComparingRootNodeWithNonZero()
+        public void EqualsShouldReturnFalseWhenComparingRootNodeWithRootNodeOfDifferentId()
         {
-            var lhs = NodeReference.RootNode;
+            var lhs = new RootNode(123);
+            var rhs = new RootNode(456);
+            Assert.IsFalse(lhs == rhs);
+        }
+
+        [Test]
+        public void EqualsShouldReturnFalseWhenComparingRootNodeWithNodeReferenceOfDifferentId()
+        {
+            var lhs = new RootNode(123);
             var rhs = new NodeReference(4);
             Assert.IsFalse(lhs == rhs);
         }
