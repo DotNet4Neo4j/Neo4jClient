@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using NSubstitute;
 using NUnit.Framework;
-using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Deserializer;
+using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient.Test.Deserializer
@@ -47,14 +49,15 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var deserializer = new CustomJsonDeserializer();
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
-            var response = new RestResponse { Content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime) };
+            var response = new RestResponse {Content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime)};
 
             // Act
             var result = deserializer.Deserialize<TimeZoneModel>(response);
 
             // Assert
-                Assert.IsNotNull(result.Foo);
-                Assert.AreEqual(TimeZoneInfo.FindSystemTimeZoneById(ausEasternStandardTime).DisplayName, result.Foo.DisplayName);
+            Assert.IsNotNull(result.Foo);
+            Assert.AreEqual(TimeZoneInfo.FindSystemTimeZoneById(ausEasternStandardTime).DisplayName,
+                            result.Foo.DisplayName);
         }
 
         public class DateTimeOffsetModel
@@ -73,12 +76,12 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var deserializer = new CustomJsonDeserializer();
             var response = new RestResponse
-            {
-                Content = @"{
+                {
+                    Content = @"{
                               ""columns"" : [ ""ColumnA"" ],
                               ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
                             }"
-            };
+                };
 
             // Act
             var result = deserializer.Deserialize<GremlinTableCapResponse>(response);
@@ -88,6 +91,69 @@ namespace Neo4jClient.Test.Deserializer
             Assert.IsTrue(result.Columns.Any(c => c == "ColumnA"));
             Assert.IsTrue(data.Any(d => d == "DataA"));
             Assert.IsTrue(data.Any(d => d == "DataB"));
+        }
+
+        public class Foo
+        {
+            public Gender Gender { get; set; }
+            public Gender? GenderNullable { get; set; }
+        }
+
+        public enum Gender
+        {
+            Male,
+            Female,
+            Unknown
+        }
+
+        [Test]
+        public void DeserializeUsingSerializeReadJson()
+        {
+            // Arrange
+            var conv = new NullableEnumValueConverter();
+            var jsonReader = Substitute.For<JsonReader>();
+            jsonReader.Value.ReturnsForAnyArgs("Female");
+
+            // Act
+            var result = conv.ReadJson(jsonReader, typeof (Gender?), null, null);
+            var expected = (Gender?) Gender.Female;
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        [TestCase("{\"Gender\": \"Female\"}", Gender.Female)]
+        [TestCase("{\"Gender\": \"1\"}", Gender.Female)]
+        public void DeserializeEnumFromString(string content, Gender expectedGender)
+        {
+            // Arrange
+            var responseGender = new RestResponse {Content = content};
+            var deserializer = new CustomJsonDeserializer();
+
+            // Act
+            var deserialziedGender = deserializer.Deserialize<Foo>(responseGender);
+
+            // Assert
+            Assert.IsNotNull(deserialziedGender);
+            Assert.AreEqual(deserialziedGender.Gender, expectedGender);
+        }
+
+        [Test]
+        [TestCase("{\"GenderNullable\": \"Female\"}", Gender.Female)]
+        [TestCase("{\"GenderNullable\": \"1\"}", Gender.Female)]
+        public void DeserializeNullableEnumFromString(string content, Gender? expectedGender)
+        {
+            // Arrange
+            var responseGender = new RestResponse {Content = content};
+            var deserializer = new CustomJsonDeserializer();
+
+            // Act
+            var result = deserializer.Deserialize<Foo>(responseGender);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(expectedGender, result.GenderNullable);
         }
     }
 }
