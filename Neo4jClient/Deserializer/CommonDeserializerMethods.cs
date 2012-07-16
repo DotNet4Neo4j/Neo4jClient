@@ -175,6 +175,10 @@ namespace Neo4jClient.Deserializer
                 {
                     instance = Guid.Parse(element.ToString());
                 }
+                else if(type.BaseType == typeof(Enum))
+                {
+                    instance = Enum.Parse(type, element.ToString(), false);
+                }
                 else
                 {
                     instance = Convert.ChangeType(element.ToString(), type);

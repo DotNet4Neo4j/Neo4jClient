@@ -161,16 +161,34 @@ namespace Neo4jClient.Test.Deserializer
         [Test]
         public void DeserializeGuid()
         {
+            //Arrage
             var myGuid = Guid.NewGuid();
             var foo = new Foo { Guids = new List<Guid> { myGuid } };
 
+            // Act
             var customSerializer = new CustomJsonSerializer();
             var testStr = customSerializer.Serialize(foo);
 
             var customDeserializer = new CustomJsonDeserializer();
             var result = customDeserializer.Deserialize<Foo>(testStr);
 
+            // Assert
             Assert.AreEqual(myGuid, result.Guids.First());
+        }
+
+        [Test]
+        [TestCase("[ \"Male\", \"Female\", \"Unknown\" ]", new [] { Gender.Male, Gender.Female, Gender.Unknown })]
+        public void DeserializeIEnumerableOfEnum(string content, Gender[] genders)
+        {
+            // Arrange
+            var responseIenumerable = new RestResponse {Content = content};
+
+            // Act
+            var deserializer = new CustomJsonDeserializer();
+
+            // Assert
+            var result = deserializer.Deserialize<List<Gender>>(responseIenumerable);
+            CollectionAssert.AreEquivalent(result, genders);
         }
     }
 }
