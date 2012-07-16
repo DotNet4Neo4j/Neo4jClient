@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using NSubstitute;
@@ -97,6 +98,7 @@ namespace Neo4jClient.Test.Deserializer
         {
             public Gender Gender { get; set; }
             public Gender? GenderNullable { get; set; }
+            public IEnumerable<Guid>  Guids{ get; set; }
         }
 
         public enum Gender
@@ -154,6 +156,21 @@ namespace Neo4jClient.Test.Deserializer
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedGender, result.GenderNullable);
+        }
+
+        [Test]
+        public void DeserializeGuid()
+        {
+            var myGuid = Guid.NewGuid();
+            var foo = new Foo { Guids = new List<Guid> { myGuid } };
+
+            var customSerializer = new CustomJsonSerializer();
+            var testStr = customSerializer.Serialize(foo);
+
+            var customDeserializer = new CustomJsonDeserializer();
+            var result = customDeserializer.Deserialize<Foo>(testStr);
+
+            Assert.AreEqual(myGuid, result.Guids.First());
         }
     }
 }
