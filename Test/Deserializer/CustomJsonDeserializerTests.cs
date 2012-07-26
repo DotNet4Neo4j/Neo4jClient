@@ -121,8 +121,11 @@ namespace Neo4jClient.Test.Deserializer
 
         public class Foo
         {
+            [JsonProperty()]
             public Gender Gender { get; set; }
+            [JsonProperty()]
             public Gender? GenderNullable { get; set; }
+            [JsonProperty()]
             public IEnumerable<Guid>  Guids{ get; set; }
         }
 

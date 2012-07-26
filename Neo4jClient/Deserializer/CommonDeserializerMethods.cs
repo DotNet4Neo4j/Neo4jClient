@@ -352,7 +352,7 @@ namespace Neo4jClient.Deserializer
                             (JsonPropertyAttribute[])p.GetCustomAttributes(typeof(JsonPropertyAttribute), true);
                         return new
                         {
-                            Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
+                            Name = attributes.Any() && attributes.Single().PropertyName  != null ? attributes.Single().PropertyName : p.Name,
                             Property = p
                         };
                     });
