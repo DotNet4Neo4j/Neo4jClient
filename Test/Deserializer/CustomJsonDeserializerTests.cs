@@ -61,6 +61,26 @@ namespace Neo4jClient.Test.Deserializer
                             result.Foo.DisplayName);
         }
 
+        [TestCase("400.09:03:02.0100000", 400, 9,3,2,10)]
+        [TestCase("09:03:02.0100000", 0, 9, 3, 2, 10)]
+        [TestCase("09:03:02.0010000", 0, 9, 3, 2, 1)]
+        [TestCase("09:03:11.9990000", 0, 9, 3, 2, 9999)]
+        [TestCase("400.09:03:02", 400, 9, 3, 2, 0)]
+        [TestCase("09:03:02", 0, 9, 3, 2, 0)]
+        public void DeserializeTimeSpan(string value, int days, int hours, int minutes, int seconds, int milliseconds)
+        {
+            // Arrange
+            var deserializer = new CustomJsonDeserializer();
+            var response = new RestResponse { Content = string.Format("{{'Foo':'{0}'}}", value) };
+
+            // Act
+            var result = deserializer.Deserialize<TimeSpanModel>(response);
+
+            // Assert
+            Assert.IsNotNull(result.Foo);
+            Assert.AreEqual(new TimeSpan(days, hours, minutes, seconds, milliseconds), result.Foo);
+        }
+
         public class DateTimeOffsetModel
         {
             public DateTimeOffset? Foo { get; set; }
@@ -69,6 +89,11 @@ namespace Neo4jClient.Test.Deserializer
         public class TimeZoneModel
         {
             public TimeZoneInfo Foo { get; set; }
+        }
+
+        public class TimeSpanModel
+        {
+            public TimeSpan Foo { get; set; }
         }
 
         [Test]
