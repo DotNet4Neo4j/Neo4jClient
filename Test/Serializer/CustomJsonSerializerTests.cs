@@ -22,9 +22,32 @@ namespace Neo4jClient.Test.Serializer
             Assert.AreEqual(ausEasternStandardTime, result.Replace("\"",""));
         }
 
+        [Test]
+        public void SerializeTimeSpan()
+        {
+            // Arrange
+            var serializer = new CustomJsonSerializer();
+            var value = new TimeSpan(400, 13, 3, 2,10);
+            var model = new TimeSpanModel
+                {
+                    Foo = value
+                };
+
+            // Act
+            var result = serializer.Serialize(model.Foo);
+
+            // Assert
+            Assert.AreEqual("400.13:03:02.0100000", result.Replace("\"", ""));
+        }
+
         public class TimeZoneModel
         {
             public TimeZoneInfo Foo { get; set; }
+        }
+
+        public class TimeSpanModel
+        {
+            public TimeSpan Foo { get; set; }
         }
     }
 }
