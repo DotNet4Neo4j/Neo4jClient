@@ -987,6 +987,48 @@ RETURN b AS NodeB";
         }
 
         [Test]
+        public void CreateRelationshipBetweenTwoNodes()
+        {
+            //http://docs.neo4j.org/chunked/1.8.M06/query-create.html#create-create-a-relationship-between-two-nodes
+            // START a=node(1), b=node(2)
+            // CREATE a-[r:REL]->b
+            // RETURN r
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .AddStartPoint("a", (NodeReference)1)
+                .AddStartPoint("b", (NodeReference)2)
+                .Create("a-[r:REL]->b")
+                .Return<object>("r")
+                .Query;
+
+            Assert.AreEqual("START a=node({p0}), b=node({p1})\r\nCREATE a-[r:REL]->b\r\nRETURN r", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void CreateRelationshipAndSetProperties()
+        {
+            //http://docs.neo4j.org/chunked/1.8.M06/query-create.html#create-create-a-relationship-and-set-properties
+            //START a=node(1), b=node(2)
+            //CREATE a-[r:REL {name : a.name + '<->' + b.name }]->b
+            //RETURN r
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .AddStartPoint("a", (NodeReference)1)
+                .AddStartPoint("b", (NodeReference)2)
+                .Create("a-[r:REL {name : a.name + '<->' + b.name }]->b")
+                .Return<object>("r")
+                .Query;
+
+            Assert.AreEqual("START a=node({p0}), b=node({p1})\r\nCREATE a-[r:REL {name : a.name + '<->' + b.name }]->b\r\nRETURN r", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
+        [Test]
         public void DeleteMatchedIdentifier()
         {
             // http://docs.neo4j.org/chunked/milestone/query-delete.html#delete-remove-a-node-and-connected-relationships
