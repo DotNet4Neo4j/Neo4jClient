@@ -49,9 +49,9 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Match(string matchText)
+        public ICypherFluentQueryMatched Match(params string[] matchText)
         {
-            var newBuilder = Builder.SetMatchText(matchText);
+            var newBuilder = Builder.SetMatchText(string.Join(", ", matchText));
             return new CypherFluentQuery(Client, newBuilder);
         }
 

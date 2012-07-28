@@ -1060,6 +1060,26 @@ RETURN b AS NodeB";
             Assert.AreEqual(3, query.QueryParameters["p0"]);
         }
 
+        [Test]
+        public void ComplexMatching()
+        {
+            // http://docs.neo4j.org/chunked/1.8.M03/query-match.html#match-complex-matching
+            // START a=node(3)
+            // MATCH (a)-[:KNOWS]->(b)-[:KNOWS]->(c), (a)-[:BLOCKS]-(d)-[:KNOWS]-(c)
+            // RETURN a,b,c,d
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("a", (NodeReference)3)
+                .Match(
+                    "(a)-[:KNOWS]->(b)-[:KNOWS]->(c)",
+                    "(a)-[:BLOCKS]-(d)-[:KNOWS]-(c)")
+                .Query;
+
+            Assert.AreEqual("START a=node({p0})\r\nMATCH (a)-[:KNOWS]->(b)-[:KNOWS]->(c), (a)-[:BLOCKS]-(d)-[:KNOWS]-(c)", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+        }
+
         public class FooData
         {
             public int Age { get; set; }
