@@ -95,6 +95,29 @@ namespace Neo4jClient.Cypher
 
         protected override Expression VisitMember(MemberExpression node)
         {
+            if (node.NodeType == ExpressionType.MemberAccess &&
+                node.Expression == null)
+                // It's a static member
+            {
+                object value;
+                switch (node.Member.MemberType)
+                {
+                    case MemberTypes.Field:
+                        value = ((FieldInfo)node.Member).GetValue(null);
+                        break;
+                    case MemberTypes.Property:
+                        value = ((PropertyInfo)node.Member).GetValue(null, null);
+                        break;
+                    default:
+                        throw new NotImplementedException(string.Format("We haven't implemented support for reading static {0} yet", node.Member.MemberType));
+                }
+
+                var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, value);
+                TextOutput.Append(string.Format("{0}", nextParameterName));
+
+                return node;
+            }
+
             if (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Parameter)
             {
                 var parameter = ((ParameterExpression)node.Expression);

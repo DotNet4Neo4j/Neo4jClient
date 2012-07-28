@@ -61,6 +61,7 @@
     <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="ApiModels\RootApiResponseTests.cs" />
     <Compile Include="Cypher\CypherQueryBuilderTests.cs" />
+    <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
     <Compile Include="Deserializer\CypherJsonDeserializerTests.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
