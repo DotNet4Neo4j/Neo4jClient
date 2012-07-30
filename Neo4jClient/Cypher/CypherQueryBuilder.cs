@@ -162,11 +162,11 @@ namespace Neo4jClient.Cypher
             WriteRelateClause(queryTextBuilder);
             WriteCreateClause(queryTextBuilder);
             WriteWhereClause(queryTextBuilder);
+            WriteDeleteClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
             WriteLimitClause(queryTextBuilder, queryParameters);
-            WriteDeleteClause(queryTextBuilder);
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters, resultMode);
         }
 
