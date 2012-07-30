@@ -105,18 +105,8 @@ namespace Neo4jClient.Deserializer
             }
             else if (propertyType == typeof(TimeSpan))
             {
-                var timespanRegex = new Regex(@"(?<days>\d+)?.?(?<time>\d{2}:\d{2}:\d{2}).?(?<milliseconds>\d+)?");
                 var valueString = value.ToString();
-                var matched = timespanRegex.Match(valueString);
-                var theDays = matched.Groups["days"].Value;
-                var time = matched.Groups["time"].Value;
-                var theMilliseconds = matched.Groups["milliseconds"].Value;
-
-                var days = int.Parse(string.IsNullOrEmpty(theDays)? "0" : theDays);
-                var milliseconds =string.IsNullOrEmpty(theMilliseconds) ? theMilliseconds.PadLeft(7, '0') : theMilliseconds;
-                var dateTime = DateTime.ParseExact(string.Format("01/01/0001 {0}.{1}", time, milliseconds), "dd/MM/yyyy HH:mm:ss.fffffff", new DateTimeFormatInfo());
-                dateTime = dateTime.AddDays(days);
-                var timeSpan = new TimeSpan(dateTime.Ticks);
+                var timeSpan = TimeSpan.Parse(valueString);
                 propertyInfo.SetValue(targetObject, timeSpan, null);
             }
             else if (propertyType == typeof(Guid))
