@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System;
+using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 
@@ -1044,6 +1045,25 @@ RETURN b AS NodeB";
                 .Query;
 
             Assert.AreEqual("START n=node({p0})\r\nMATCH n-[r]-()\r\nDELETE n, r", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void DeleteProperty()
+        {
+            // http://docs.neo4j.org/chunked/1.8.M06/query-delete.html#delete-remove-a-property
+            //START andres = node(3)
+            //DELETE andres.age
+            //RETURN andres
+
+            var client = Substitute.For<IGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("andres", (NodeReference)3)
+                .Delete("andres.age")
+                .Return<Node<Object>>("andres")
+                .Query;
+
+            Assert.AreEqual("START andres=node({p0})\r\nDELETE andres.age\r\nRETURN andres", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
         }
 
