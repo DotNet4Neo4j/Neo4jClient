@@ -118,7 +118,7 @@ namespace Neo4jClient.Test
                             .Select(p => p.Value as string)
                             .SingleOrDefault();
                         requestBody = requestBody ?? "";
-                        return requestBody == http.RequestBody;
+                        return IsJsonEquivalent(requestBody, http.RequestBody);
                     });
             }
 
@@ -139,6 +139,28 @@ namespace Neo4jClient.Test
             if (response.ResponseStatus == ResponseStatus.None)
                 response.ResponseStatus = ResponseStatus.Completed;
             return response;
+        }
+
+        static bool IsJsonEquivalent(string lhs, string rhs)
+        {
+            lhs = NormalizeJson(lhs);
+            rhs = NormalizeJson(rhs);
+            return lhs == rhs;
+        }
+
+        static string NormalizeJson(string input)
+        {
+            if (input.First() == '"' &&
+                input.Last() == '"')
+                input = input.Substring(1, input.Length - 2);
+
+            return input
+                .Replace(" ", "")
+                .Replace("'", "\"")
+                .Replace("\r", "")
+                .Replace("\\r", "")
+                .Replace("\n", "")
+                .Replace("\\n", "");
         }
     }
 }

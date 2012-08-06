@@ -160,6 +160,64 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void ShouldSerializeAllProperties()
+        {
+            var testHarness = new RestTestHarness
+            {
+                {
+                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                },
+                {
+                    new RestRequest {
+                        Resource = "/batch",
+                        Method = Method.POST,
+                        RequestFormat = DataFormat.Json
+                    }.AddBody(@"[{
+                      'method': 'POST', 'to' : '/node',
+                      'body': {
+                        'Foo': 'foo',
+                        'Bar': 'bar',
+                        'Baz': 'baz'
+                      },
+                      'id': 0
+                    }]"),
+                    new NeoHttpResponse {
+                        StatusCode = HttpStatusCode.OK,
+                        ContentType = "application/json",
+                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                          'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
+                          'data' : {
+                            'Foo' : 'foo',
+                            'Bar' : 'bar',
+                            'Baz' : 'baz'
+                          },
+                          'traverse' : 'http://foo/db/data/node/760/traverse/{returnType}',
+                          'all_typed_relationships' : 'http://foo/db/data/node/760/relationships/all/{-list|&|types}',
+                          'self' : 'http://foo/db/data/node/760',
+                          'property' : 'http://foo/db/data/node/760/properties/{key}',
+                          'outgoing_typed_relationships' : 'http://foo/db/data/node/760/relationships/out/{-list|&|types}',
+                          'properties' : 'http://foo/db/data/node/760/properties',
+                          'incoming_relationships' : 'http://foo/db/data/node/760/relationships/in',
+                          'extensions' : {
+                          },
+                          'create_relationship' : 'http://foo/db/data/node/760/relationships',
+                          'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                          'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
+                          'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
+                        },'from':'/node'}]".Replace('\'', '\"')
+                    }
+                }
+            };
+
+            var graphClient = testHarness.CreateAndConnectGraphClient();
+
+            graphClient.Create(new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" });
+
+            testHarness.AssertAllRequestsWereReceived();
+        }
+
+        [Test]
         public void ShouldReturnReferenceToCreatedNode()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
