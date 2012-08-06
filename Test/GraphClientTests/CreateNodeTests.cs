@@ -166,7 +166,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -204,10 +204,9 @@ namespace Neo4jClient.Test.GraphClientTests
                         },'from':'/node'}]".Replace('\'', '\"')
                     }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             var node = graphClient.Create(testNode);
 
