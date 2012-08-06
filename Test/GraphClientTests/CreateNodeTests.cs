@@ -166,7 +166,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     new NeoHttpRequest {
@@ -225,7 +225,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     MockRequest.Post("/batch",
@@ -281,7 +281,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     new NeoHttpRequest {
@@ -337,7 +337,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     new RestRequest {
@@ -395,7 +395,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     new NeoHttpRequest {
@@ -468,7 +468,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     new RestRequest {
@@ -560,7 +560,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
+                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
                     new NeoHttpRequest {
