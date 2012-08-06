@@ -33,7 +33,7 @@ namespace Neo4jClient.Test
 
         public IEnumerator GetEnumerator()
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException("This is just here to support dictionary style collection initializers for this type. Nothing more than syntactic sugar. Do not try and enumerate this type.");
         }
 
         public void AssertAllRequestsWereReceived()
