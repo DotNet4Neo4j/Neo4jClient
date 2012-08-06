@@ -23,7 +23,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    new RestRequest { Resource = "/node/456", Method = Method.DELETE },
+                    new NeoHttpRequest { Resource = "/node/456", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 }
             };
@@ -58,7 +58,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
@@ -76,7 +76,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    new RestRequest { Resource = "/node/456/relationships/all", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "/node/456/relationships/all", Method = Method.GET },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -101,15 +101,15 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    new RestRequest { Resource = "/relationship/56", Method = Method.DELETE },
+                    new NeoHttpRequest { Resource = "/relationship/56", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 },
                 {
-                    new RestRequest { Resource = "/relationship/78", Method = Method.DELETE },
+                    new NeoHttpRequest { Resource = "/relationship/78", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 },
                 {
-                    new RestRequest { Resource = "/node/456", Method = Method.DELETE },
+                    new NeoHttpRequest { Resource = "/node/456", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 }
             };

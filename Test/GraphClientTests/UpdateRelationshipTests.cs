@@ -13,7 +13,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                  {
-                    new RestRequest { Resource = "/relationship/456/properties", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "/relationship/456/properties", Method = Method.GET },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -39,11 +39,12 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/relationship/456/properties",
                         Method = Method.PUT,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(new TestPayload { Foo = "fooUpdated", Bar = "bar", Baz = "bazUpdated" }),
+                        RequestFormat = DataFormat.Json,
+                        Body = new TestPayload { Foo = "fooUpdated", Bar = "bar", Baz = "bazUpdated" }
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent
                     }
@@ -70,7 +71,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
@@ -88,15 +89,16 @@ namespace Neo4jClient.Test.GraphClientTests
                     }
                 },
                  {
-                    new RestRequest { Resource = "/relationship/456/properties", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "/relationship/456/properties", Method = Method.GET },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/relationship/456/properties",
                         Method = Method.PUT,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(new TestPayload { Foo = "fooUpdated", Bar = "", Baz = "bazUpdated" }),
+                        RequestFormat = DataFormat.Json,
+                        Body = new TestPayload { Foo = "fooUpdated", Bar = "", Baz = "bazUpdated" }
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.NoContent
                     }

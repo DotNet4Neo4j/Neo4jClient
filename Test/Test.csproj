@@ -68,7 +68,8 @@
     <Compile Include="Cypher\CypherFluentQueryResultsTests.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilderTests.cs" />
     <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
-    <Compile Include="GraphClientTests\NeoHttpResponse.cs" />
+    <Compile Include="IMockRequestDefinition.cs" />
+    <Compile Include="NeoHttpResponse.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryTests.cs" />
     <Compile Include="RestTestHarness.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Domain\User.cs" />
     <Compile Include="RestSharpTests\RestClientTests.cs" />
+    <Compile Include="NeoHttpRequest.cs" />
     <Compile Include="Serializer\CustomJsonSerializerTests.cs" />
     <Compile Include="CultureInfoSetupFixture.cs" />
     <Compile Include="UtilitiesTests.cs" />

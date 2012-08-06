@@ -165,23 +165,24 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/batch",
                         Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(@"[{
-                      'method': 'POST', 'to' : '/node',
-                      'body': {
-                        'Foo': 'foo',
-                        'Bar': 'bar',
-                        'Baz': 'baz'
-                      },
-                      'id': 0
-                    }]"),
+                        RequestFormat = DataFormat.Json,
+                        Body = @"[{
+                          'method': 'POST', 'to' : '/node',
+                          'body': {
+                            'Foo': 'foo',
+                            'Bar': 'bar',
+                            'Baz': 'baz'
+                          },
+                          'id': 0
+                        }]"
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -223,23 +224,24 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/batch",
                         Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(@"[{
-                      'method': 'POST', 'to' : '/node',
-                      'body': {
-                        'Foo': 'foo東京',
-                        'Bar': 'bar',
-                        'Baz': 'baz'
-                      },
-                      'id': 0
-                    }]"),
+                        RequestFormat = DataFormat.Json,
+                        Body = @"[{
+                          'method': 'POST', 'to' : '/node',
+                          'body': {
+                            'Foo': 'foo東京',
+                            'Bar': 'bar',
+                            'Baz': 'baz'
+                          },
+                          'id': 0
+                        }]"
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -285,15 +287,16 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/batch",
                         Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
+                        RequestFormat = DataFormat.Json,
+                        Body = batch
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -398,15 +401,16 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/batch",
                         Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
+                        RequestFormat = DataFormat.Json,
+                        Body = batch
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -562,15 +566,16 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    new NeoHttpRequest { Resource = "", Method = Method.GET },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
                 },
                 {
-                    new RestRequest {
+                    new NeoHttpRequest {
                         Resource = "/batch",
                         Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
+                        RequestFormat = DataFormat.Json,
+                        Body = batch
+                    },
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",

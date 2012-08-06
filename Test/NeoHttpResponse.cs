@@ -1,6 +1,6 @@
 ﻿using RestSharp;
 
-namespace Neo4jClient.Test.GraphClientTests
+namespace Neo4jClient.Test
 {
     public class NeoHttpResponse : HttpResponse
     {

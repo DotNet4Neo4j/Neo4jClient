@@ -10,11 +10,11 @@ namespace Neo4jClient.Test
 {
     public class RestTestHarness : IEnumerable
     {
-        readonly IDictionary<IRestRequest, IHttpResponse> recordedResponses = new Dictionary<IRestRequest, IHttpResponse>();
-        readonly IList<IRestRequest> processedRequests = new List<IRestRequest>();
+        readonly IDictionary<IMockRequestDefinition, IHttpResponse> recordedResponses = new Dictionary<IMockRequestDefinition, IHttpResponse>();
+        readonly IList<IMockRequestDefinition> processedRequests = new List<IMockRequestDefinition>();
         const string BaseUri = "http://foo/db/data";
 
-        public void Add(IRestRequest request, IHttpResponse response)
+        public void Add(IMockRequestDefinition request, IHttpResponse response)
         {
             recordedResponses.Add(request, response);
         }
