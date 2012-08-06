@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldDeleteNodeOnly()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -44,19 +44,18 @@ namespace Neo4jClient.Test.GraphClientTests
                     new RestRequest { Resource = "/node/456", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
             graphClient.Delete(456, DeleteMode.NodeOnly);
 
-            Assert.Inconclusive("Not actually asserting that the node was deleted");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
         public void ShouldDeleteAllRelationshipsFirst()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -82,20 +81,20 @@ namespace Neo4jClient.Test.GraphClientTests
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
                         TestContent = @"[
-                          { 'self': 'http://localhost:7474/db/data/relationship/56',
-                            'start': 'http://localhost:7474/db/data/node/123',
-                            'end': 'http://localhost:7474/db/data/node/456',
+                          { 'self': 'http://foo/db/data/relationship/56',
+                            'start': 'http://foo/db/data/node/123',
+                            'end': 'http://foo/db/data/node/456',
                             'type': 'KNOWS',
-                            'properties': 'http://localhost:7474/db/data/relationship/56/properties',
-                            'property': 'http://localhost:7474/db/data/relationship/56/properties/{key}',
+                            'properties': 'http://foo/db/data/relationship/56/properties',
+                            'property': 'http://foo/db/data/relationship/56/properties/{key}',
                             'data': { 'date': 1270559208258 }
                           },
-                          { 'self': 'http://localhost:7474/db/data/relationship/78',
-                            'start': 'http://localhost:7474/db/data/node/456',
-                            'end': 'http://localhost:7474/db/data/node/789',
+                          { 'self': 'http://foo/db/data/relationship/78',
+                            'start': 'http://foo/db/data/node/456',
+                            'end': 'http://foo/db/data/node/789',
                             'type': 'KNOWS',
-                            'properties': 'http://localhost:7474/db/data/relationship/78/properties',
-                            'property': 'http://localhost:7474/db/data/relationship/78/properties/{key}',
+                            'properties': 'http://foo/db/data/relationship/78/properties',
+                            'property': 'http://foo/db/data/relationship/78/properties/{key}',
                             'data': { 'date': 1270559208258 }
                           }
                         ]".Replace('\'', '"')
@@ -113,13 +112,12 @@ namespace Neo4jClient.Test.GraphClientTests
                     new RestRequest { Resource = "/node/456", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
             graphClient.Delete(456, DeleteMode.NodeAndRelationships);
 
-            Assert.Inconclusive("Not actually asserting that the node was deleted");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]

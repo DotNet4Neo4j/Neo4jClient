@@ -122,7 +122,16 @@ namespace Neo4jClient.Test
                     });
             }
 
-            var result = matchingRequests.SingleOrDefault();
+            var results = matchingRequests.ToArray();
+
+            if (!results.Any())
+                throw new InvalidOperationException(string.Format(
+                    "A  {0} request was made for {1}, however no corresponding request-response pair was defined in the test harness",
+                    method,
+                    http.Url.AbsoluteUri
+                ));
+
+            var result = results.Single();
 
             processedRequests.Add(result.Key);
 

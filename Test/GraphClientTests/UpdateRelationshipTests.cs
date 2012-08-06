@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using NUnit.Framework;
 using RestSharp;
 
@@ -12,7 +10,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldUpdatePayload()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -50,10 +48,9 @@ namespace Neo4jClient.Test.GraphClientTests
                         StatusCode = HttpStatusCode.NoContent
                     }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Update(
                 new RelationshipReference<TestPayload>(456),
@@ -64,13 +61,13 @@ namespace Neo4jClient.Test.GraphClientTests
                 }
             );
 
-            Assert.Inconclusive("Not actually asserting the calls were all made");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
         public void ShouldInitializePayloadDuringUpdate()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -104,10 +101,9 @@ namespace Neo4jClient.Test.GraphClientTests
                         StatusCode = HttpStatusCode.NoContent
                     }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Update(
                 new RelationshipReference<TestPayload>(456),
@@ -118,7 +114,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 }
             );
 
-            Assert.Inconclusive("Not actually asserting the calls were all made");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         public class TestPayload

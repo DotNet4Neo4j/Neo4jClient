@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldDeleteRelationship()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -44,13 +44,12 @@ namespace Neo4jClient.Test.GraphClientTests
                     new RestRequest { Resource = "/relationship/456", Method = Method.DELETE },
                     new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
             graphClient.DeleteRelationship(456);
 
-            Assert.Inconclusive("Not actually asserting that the relationship was deleted");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
