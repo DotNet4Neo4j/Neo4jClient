@@ -67,21 +67,15 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportExceptionForPre15M02Database()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = pre15M02RootResponse
-                    }
+                    MockRequest.Get(""),
+                    MockResponse.Json(HttpStatusCode.OK, pre15M02RootResponse)
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 new object(),
@@ -108,27 +102,16 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = pre15M02RootResponse
-                    }
+                    MockRequest.Get(""),
+                    MockResponse.Json(HttpStatusCode.OK, pre15M02RootResponse)
                 },
                 {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -148,15 +131,16 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(testNode, null, null);
+
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
@@ -169,11 +153,8 @@ namespace Neo4jClient.Test.GraphClientTests
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    new NeoHttpRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json,
-                        Body = @"[{
+                    MockRequest.PostJson("/batch",
+                        @"[{
                           'method': 'POST', 'to' : '/node',
                           'body': {
                             'Foo': 'foo',
@@ -182,11 +163,9 @@ namespace Neo4jClient.Test.GraphClientTests
                           },
                           'id': 0
                         }]"
-                    },
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    ),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -206,8 +185,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
             };
 
@@ -235,10 +214,8 @@ namespace Neo4jClient.Test.GraphClientTests
                             'id': 0
                         }]"
                     ),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -258,8 +235,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
             };
 
@@ -285,10 +262,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -308,8 +283,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
             };
 
@@ -336,10 +311,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -359,8 +332,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
             };
 
@@ -389,10 +362,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -426,8 +397,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'extensions' : {
                           },
                           'end' : 'http://foo/db/data/node/789'
-                        },'from':'http://foo/db/data/node/761/relationships'}]".Replace('\'', '\"')
-                    }
+                        },'from':'http://foo/db/data/node/761/relationships'}]"
+                    )
                 }
             };
 
@@ -457,10 +428,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://localhost:20001/db/data/node/763','body':{
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://localhost:20001/db/data/node/763','body':{
                           'outgoing_relationships' : 'http://localhost:20001/db/data/node/763/relationships/out',
                           'data' : {
                             'Baz' : 'baz',
@@ -501,8 +470,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://localhost:20001/db/data/node/763/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://localhost:20001/db/data/node/763/relationships/all',
                           'incoming_typed_relationships' : 'http://localhost:20001/db/data/node/763/relationships/in/{-list|&|types}'
-                        },'from':'/index/node/my_index/key/value'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/index/node/my_index/key/value'}]"
+                    )
                 }
             };
 
@@ -544,10 +513,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -581,8 +548,8 @@ namespace Neo4jClient.Test.GraphClientTests
                           'extensions' : {
                           },
                           'end' : 'http://foo/db/data/node/789'
-                        },'from':'http://foo/db/data/node/761/relationships'}]".Replace('\'', '\"')
-                    }
+                        },'from':'http://foo/db/data/node/761/relationships'}]"
+                    )
                 }
             };
 
