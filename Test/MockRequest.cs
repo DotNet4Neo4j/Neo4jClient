@@ -9,14 +9,25 @@ namespace Neo4jClient.Test
             return new NeoHttpRequest {Resource = uri, Method = Method.GET};
         }
 
-        public static IMockRequestDefinition Post(string uri, string jsonBody)
+        public static IMockRequestDefinition PostJson(string uri, string json)
         {
             return new NeoHttpRequest
             {
                 Resource = uri,
                 Method = Method.POST,
                 RequestFormat = DataFormat.Json,
-                Body = jsonBody
+                Body = json
+            };
+        }
+
+        public static IMockRequestDefinition PostObjectAsJson(string uri, object body)
+        {
+            return new NeoHttpRequest
+            {
+                Resource = uri,
+                Method = Method.POST,
+                RequestFormat = DataFormat.Json,
+                Body = body
             };
         }
     }

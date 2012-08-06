@@ -228,7 +228,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    MockRequest.Post("/batch",
+                    MockRequest.PostJson("/batch",
                         @"[{
                             'method': 'POST', 'to' : '/node',
                             'body': { 'Foo': 'foo東京', 'Bar': 'bar', 'Baz': 'baz' },
@@ -284,12 +284,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    new NeoHttpRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json,
-                        Body = batch
-                    },
+                    MockRequest.PostObjectAsJson("/batch", batch),
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -333,18 +328,14 @@ namespace Neo4jClient.Test.GraphClientTests
             var batch = new List<BatchStep>();
             batch.Add(Method.POST, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    MockRequest.Get(""),
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
+                    MockRequest.PostObjectAsJson("/batch", batch),
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -371,10 +362,9 @@ namespace Neo4jClient.Test.GraphClientTests
                         },'from':'/node'}]".Replace('\'', '\"')
                     }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             var node = graphClient.Create(testNode);
 
@@ -398,12 +388,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    new NeoHttpRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json,
-                        Body = batch
-                    },
+                    MockRequest.PostObjectAsJson("/batch", batch),
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -464,18 +449,14 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
             batch.Add(Method.POST, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
+                    MockRequest.Get(""),
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
+                    MockRequest.PostObjectAsJson("/batch", batch),
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
@@ -523,10 +504,9 @@ namespace Neo4jClient.Test.GraphClientTests
                         },'from':'/index/node/my_index/key/value'}]".Replace('\'', '\"')
                     }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 testNode,
@@ -563,12 +543,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     MockResponse.Json(HttpStatusCode.OK, rootResponse)
                 },
                 {
-                    new NeoHttpRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json,
-                        Body = batch
-                    },
+                    MockRequest.PostObjectAsJson("/batch", batch),
                     new NeoHttpResponse {
                         StatusCode = HttpStatusCode.OK,
                         ContentType = "application/json",
