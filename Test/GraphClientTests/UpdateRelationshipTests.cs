@@ -13,7 +13,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new NeoHttpRequest { Resource = "", Method = Method.GET },
+                    MockRequest.Get(""),
                     new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
@@ -71,7 +71,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    new NeoHttpRequest { Resource = "", Method = Method.GET },
+                    MockRequest.Get(""),
                     new NeoHttpResponse
                     {
                         StatusCode = HttpStatusCode.OK,
