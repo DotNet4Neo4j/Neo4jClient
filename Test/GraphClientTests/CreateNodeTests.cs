@@ -211,6 +211,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var node = graphClient.Create(testNode);
 
             Assert.AreEqual(760, node.Id);
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
@@ -443,7 +444,7 @@ namespace Neo4jClient.Test.GraphClientTests
             batch.Add(Method.POST, "/node/789/relationships",
                 new RelationshipTemplate { To = "{0}", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
@@ -495,16 +496,15 @@ namespace Neo4jClient.Test.GraphClientTests
                         },'from':'http://foo/db/data/node/761/relationships'}]".Replace('\'', '\"')
                     }
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 
-            Assert.Inconclusive("Not actually asserting that the relationship was created");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         public class TestNode
