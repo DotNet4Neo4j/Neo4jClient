@@ -8,11 +8,11 @@ using RestSharp;
 
 namespace Neo4jClient.Test
 {
-    public class RestTestHarness : IEnumerable
+    public class RestTestHarness : IEnumerable, IDisposable
     {
         readonly IDictionary<IMockRequestDefinition, IHttpResponse> recordedResponses = new Dictionary<IMockRequestDefinition, IHttpResponse>();
         readonly IList<IMockRequestDefinition> processedRequests = new List<IMockRequestDefinition>();
-        const string BaseUri = "http://foo/db/data";
+        public readonly string BaseUri = "http://foo/db/data";
 
         public void Add(IMockRequestDefinition request, IHttpResponse response)
         {
@@ -24,9 +24,15 @@ namespace Neo4jClient.Test
             get { return GenerateHttpFactory(BaseUri); }
         }
 
-        public IGraphClient CreateAndConnectGraphClient()
+        public GraphClient CreateGraphClient()
         {
             var graphClient = new GraphClient(new Uri(BaseUri), HttpFactory);
+            return graphClient;
+        }
+
+        public IGraphClient CreateAndConnectGraphClient()
+        {
+            var graphClient = CreateGraphClient();
             graphClient.Connect();
             return graphClient;
         }
@@ -161,6 +167,11 @@ namespace Neo4jClient.Test
                 .Replace("\\r", "")
                 .Replace("\n", "")
                 .Replace("\\n", "");
+        }
+
+        public void Dispose()
+        {
+            AssertAllRequestsWereReceived();
         }
     }
 }

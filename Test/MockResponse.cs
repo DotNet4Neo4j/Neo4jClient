@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using RestSharp;
 
 namespace Neo4jClient.Test
 {
@@ -41,6 +42,15 @@ namespace Neo4jClient.Test
                 'extensions' : {
                 }
             }");
+        }
+
+        public static IHttpResponse InternalServerError()
+        {
+            return new NeoHttpResponse
+            {
+                StatusCode = HttpStatusCode.InternalServerError,
+                StatusDescription = "Internal Server Error"
+            };
         }
     }
 }
