@@ -26,6 +26,9 @@ namespace Neo4jClient.Test
                 'neo4j_version' : '1.5.M02',
                 'extensions_info' : 'http://foo/db/data/ext',
                 'extensions' : {
+                    'GremlinPlugin' : {
+                        'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+                    }
                 }
             }");
         }

@@ -12,6 +12,7 @@ namespace Neo4jClient.Test
     {
         readonly IDictionary<IMockRequestDefinition, IHttpResponse> recordedResponses = new Dictionary<IMockRequestDefinition, IHttpResponse>();
         readonly IList<IMockRequestDefinition> processedRequests = new List<IMockRequestDefinition>();
+        readonly IList<string> unservicedRequests = new List<string>();
         public readonly string BaseUri = "http://foo/db/data";
 
         public void Add(IMockRequestDefinition request, IHttpResponse response)
@@ -47,6 +48,9 @@ namespace Neo4jClient.Test
 
         public void AssertAllRequestsWereReceived()
         {
+            if (unservicedRequests.Any())
+                Assert.Fail(string.Join("\r\n\r\n", unservicedRequests.ToArray()));
+
             var resourcesThatWereNeverRequested = recordedResponses
                 .Select(r => r.Key)
                 .Where(r => !processedRequests.Contains(r))
@@ -134,11 +138,15 @@ namespace Neo4jClient.Test
             var results = matchingRequests.ToArray();
 
             if (!results.Any())
-                throw new InvalidOperationException(string.Format(
-                    "A  {0} request was made for {1}, however no corresponding request-response pair was defined in the test harness",
-                    method,
-                    http.Url.AbsoluteUri
-                ));
+            {
+                var message = string.Format("No corresponding request-response pair was defined in the test harness for: {0} {1}", method, http.Url.AbsoluteUri);
+                if (!string.IsNullOrEmpty(http.RequestBody))
+                {
+                    message += "\r\n\r\n" + http.RequestBody;
+                }
+                unservicedRequests.Add(message);
+                throw new InvalidOperationException(message);
+            }
 
             var result = results.Single();
 
