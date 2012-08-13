@@ -34,7 +34,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 Assert.AreEqual("/node", graphClient.RootApiResponse.Node);
                 Assert.AreEqual("/index/node", graphClient.RootApiResponse.NodeIndex);
                 Assert.AreEqual("/index/relationship", graphClient.RootApiResponse.RelationshipIndex);
-                Assert.AreEqual("http://foo/db/data/node/0", graphClient.RootApiResponse.ReferenceNode);
+                Assert.AreEqual("http://foo/db/data/node/123", graphClient.RootApiResponse.ReferenceNode);
                 Assert.AreEqual("/ext", graphClient.RootApiResponse.ExtensionsInfo);
             }
         }
@@ -52,23 +52,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void RootNode_ShouldReturnReferenceNode()
         {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, @"{
-                        'batch' : 'http://foo/db/data/batch',
-                        'node' : 'http://foo/db/data/node',
-                        'node_index' : 'http://foo/db/data/index/node',
-                        'relationship_index' : 'http://foo/db/data/index/relationship',
-                        'reference_node' : 'http://foo/db/data/node/123',
-                        'neo4j_version' : '1.5.M02',
-                        'extensions_info' : 'http://foo/db/data/ext',
-                        'extensions' : {
-                        }
-                    }")
-                }
-            })
+            using (var testHarness = new RestTestHarness())
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 

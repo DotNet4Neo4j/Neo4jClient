@@ -22,7 +22,7 @@ namespace Neo4jClient.Test
                 'node' : 'http://foo/db/data/node',
                 'node_index' : 'http://foo/db/data/index/node',
                 'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
+                'reference_node' : 'http://foo/db/data/node/123',
                 'neo4j_version' : '1.5.M02',
                 'extensions_info' : 'http://foo/db/data/ext',
                 'extensions' : {
@@ -37,7 +37,7 @@ namespace Neo4jClient.Test
                 'node' : 'http://foo/db/data/node',
                 'node_index' : 'http://foo/db/data/index/node',
                 'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
+                'reference_node' : 'http://foo/db/data/node/123',
                 'extensions_info' : 'http://foo/db/data/ext',
                 'extensions' : {
                 }
