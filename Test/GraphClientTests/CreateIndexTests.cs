@@ -1,238 +1,138 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using NUnit.Framework;
-using Neo4jClient.Serializer;
-using Newtonsoft.Json;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
 {
     [TestFixture]
     public class CreateIndexTests
     {
-        const string RootResponse = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                            'GremlinPlugin' : {
-                              'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
-                            }
-                          }
-                        }";
-
         [Test]
-        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeFullText()
+        [TestCase(
+            IndexFor.Node,
+            IndexProvider.lucene,
+            IndexType.fulltext,
+            "/index/node",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'fulltext', 'provider': 'lucene' }
+            }")]
+        [TestCase(
+            IndexFor.Node,
+            IndexProvider.lucene,
+            IndexType.exact,
+            "/index/node",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'exact', 'provider': 'lucene' }
+            }")]
+        [TestCase(
+            IndexFor.Relationship,
+            IndexProvider.lucene,
+            IndexType.fulltext,
+            "/index/relationship",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'fulltext', 'provider': 'lucene' }
+            }")]
+        [TestCase(
+            IndexFor.Relationship,
+            IndexProvider.lucene,
+            IndexType.exact,
+            "/index/relationship",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'exact', 'provider': 'lucene' }
+            }")]
+        public void ShouldCreateIndex(
+            IndexFor indexFor,
+            IndexProvider indexProvider,
+            IndexType indexType,
+            string createEndpoint,
+            string createJson)
         {
             //Arrange
-            var indexConfiguration = new IndexConfiguration
+            using (var testHarness = new RestTestHarness
+            {
                 {
-                    Provider = IndexProvider.lucene,
-                    Type = IndexType.fulltext
+                    MockRequest.PostJson(createEndpoint, createJson),
+                    MockResponse.Http(201)
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
+                var indexConfiguration = new IndexConfiguration
+                {
+                    Provider = indexProvider,
+                    Type = indexType
                 };
-
-            var createIndexApiRequest = new
-            {
-                name = "foo",
-                config = indexConfiguration
-            };
-
-            var restRequest = new RestRequest("/index/node", Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-            };
-            restRequest.AddBody(createIndexApiRequest);
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = RootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    restRequest,
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-
-            //Act
-            graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Node);
-
-            // Assert
-            Assert.Pass("Success.");
-        }
-
-        [Test]
-        public void ShouldReturnHttpResponse201WhenCreatingAnIndexOfTypeExact()
-        {
-            //Arrange
-            var indexConfiguration = new IndexConfiguration
-            {
-                Provider = IndexProvider.lucene,
-                Type = IndexType.exact
-
-            };
-
-            var createIndexApiRequest = new
-            {
-                name = "foo",
-                config = indexConfiguration
-            };
-
-            var restRequest = new RestRequest("/index/node", Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-            };
-            restRequest.AddBody(createIndexApiRequest);
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = RootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    restRequest,
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-
-            //Act
-            graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Node);
-
-            // Assert
-            Assert.Pass("Success.");
-        }
-
-        [Test]
-        public void ShouldReturnHttpResponse201WhenCreatingAnIndexForRelationship()
-        {
-            //Arrange
-            var indexConfiguration = new IndexConfiguration
-            {
-                Provider = IndexProvider.lucene,
-                Type = IndexType.exact
-
-            };
-
-            var createIndexApiRequest = new
-            {
-                name = "foo",
-                config = indexConfiguration
-            };
-
-            var restRequest = new RestRequest("/index/relationship", Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-            };
-            restRequest.AddBody(createIndexApiRequest);
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = RootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    restRequest,
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-
-            //Act
-            graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Relationship);
-
-            // Assert
-            Assert.Pass("Success.");
+                graphClient.CreateIndex("foo", indexConfiguration, indexFor);
+            }
         }
 
         [Test]
         [ExpectedException(typeof(ApplicationException))]
-        public void ShouldThrowApplicationExceptionIfHttpCodeIsNot201()
+        [TestCase(
+            IndexFor.Node,
+            IndexProvider.lucene,
+            IndexType.fulltext,
+            "/index/node",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'fulltext', 'provider': 'lucene' }
+            }")]
+        [TestCase(
+            IndexFor.Node,
+            IndexProvider.lucene,
+            IndexType.exact,
+            "/index/node",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'exact', 'provider': 'lucene' }
+            }")]
+        [TestCase(
+            IndexFor.Relationship,
+            IndexProvider.lucene,
+            IndexType.fulltext,
+            "/index/relationship",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'fulltext', 'provider': 'lucene' }
+            }")]
+        [TestCase(
+            IndexFor.Relationship,
+            IndexProvider.lucene,
+            IndexType.exact,
+            "/index/relationship",
+            @"{
+                'name': 'foo',
+                'config': { 'type': 'exact', 'provider': 'lucene' }
+            }")]
+        public void ShouldThrowApplicationExceptionIfHttpCodeIsNot201(
+            IndexFor indexFor,
+            IndexProvider indexProvider,
+            IndexType indexType,
+            string createEndpoint,
+            string createJson)
         {
             //Arrange
-            var indexConfiguration = new IndexConfiguration
-            {
-                Provider = IndexProvider.lucene,
-                Type = IndexType.exact
-
-            };
-
-            var createIndexApiRequest = new
-            {
-                name = "foo",
-                config = indexConfiguration
-            };
-
-            var restRequest = new RestRequest("/index/relationship", Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-            };
-            restRequest.AddBody(createIndexApiRequest);
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = RootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    restRequest,
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.ServiceUnavailable,
-                        ContentType = "application/json",
-                    }
+                    MockRequest.PostJson(createEndpoint, createJson),
+                    MockResponse.InternalServerError()
                 }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            graphClient.CreateIndex("foo", indexConfiguration, IndexFor.Relationship);
+                var indexConfiguration = new IndexConfiguration
+                {
+                    Provider = indexProvider,
+                    Type = indexType
+                };
+                graphClient.CreateIndex("foo", indexConfiguration, indexFor);
+            }
         }
     }
 }

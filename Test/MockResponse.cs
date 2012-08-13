@@ -61,5 +61,14 @@ namespace Neo4jClient.Test
                 StatusDescription = "Unauthorized"
             };
         }
+
+        public static IHttpResponse Http(int statusCode)
+        {
+            return new NeoHttpResponse
+            {
+                StatusCode = (HttpStatusCode)statusCode,
+                StatusDescription = ((HttpStatusCode)statusCode).ToString()
+            };
+        }
     }
 }
