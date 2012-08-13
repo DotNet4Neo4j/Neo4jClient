@@ -20,71 +20,34 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldDeleteRelationship()
         {
-            var testHarness = new RestTestHarness
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    MockRequest.Get(""),
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
-                },
-                {
-                    new NeoHttpRequest { Resource = "/relationship/456", Method = Method.DELETE },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.NoContent }
+                    MockRequest.Delete("/relationship/456"),
+                    MockResponse.Http(204)
                 }
-            };
-
-            var graphClient = testHarness.CreateAndConnectGraphClient();
-            graphClient.DeleteRelationship(456);
-
-            testHarness.AssertAllRequestsWereReceived();
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                graphClient.DeleteRelationship(456);
+            }
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NOT FOUND")]
+        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NotFound")]
         public void ShouldThrowApplicationExceptionWhenDeleteFails()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest { Resource = "/relationship/456", Method = Method.DELETE },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.NotFound, StatusDescription = "NOT FOUND" }
+                    MockRequest.Delete("/relationship/456"),
+                    MockResponse.Http(404)
                 }
-            });
-
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-            graphClient.DeleteRelationship(456);
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                graphClient.DeleteRelationship(456);
+            }
         }
     }
 }
