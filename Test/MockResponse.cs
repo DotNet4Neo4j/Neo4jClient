@@ -47,24 +47,6 @@ namespace Neo4jClient.Test
             }");
         }
 
-        public static IHttpResponse InternalServerError()
-        {
-            return new NeoHttpResponse
-            {
-                StatusCode = HttpStatusCode.InternalServerError,
-                StatusDescription = "Internal Server Error"
-            };
-        }
-
-        public static IHttpResponse Unauthorized()
-        {
-            return new NeoHttpResponse
-            {
-                StatusCode = HttpStatusCode.Unauthorized,
-                StatusDescription = "Unauthorized"
-            };
-        }
-
         public static IHttpResponse Http(int statusCode)
         {
             return new NeoHttpResponse

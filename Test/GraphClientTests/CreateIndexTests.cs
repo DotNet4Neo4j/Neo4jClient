@@ -120,7 +120,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.PostJson(createEndpoint, createJson),
-                    MockResponse.InternalServerError()
+                    MockResponse.Http(500)
                 }
             })
             {
