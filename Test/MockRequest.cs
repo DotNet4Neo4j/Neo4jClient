@@ -30,5 +30,10 @@ namespace Neo4jClient.Test
                 Body = body
             };
         }
+
+        public static IMockRequestDefinition Delete(string uri)
+        {
+            return new NeoHttpRequest { Resource = uri, Method = Method.DELETE };
+        }
     }
 }
