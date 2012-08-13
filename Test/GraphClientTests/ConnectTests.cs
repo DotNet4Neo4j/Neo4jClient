@@ -133,11 +133,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.Unauthorized,
-                        StatusDescription = "Unauthorized"
-                    }
+                    MockResponse.Unauthorized()
                 }
             })
             {

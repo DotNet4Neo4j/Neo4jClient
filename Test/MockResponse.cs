@@ -52,5 +52,14 @@ namespace Neo4jClient.Test
                 StatusDescription = "Internal Server Error"
             };
         }
+
+        public static IHttpResponse Unauthorized()
+        {
+            return new NeoHttpResponse
+            {
+                StatusCode = HttpStatusCode.Unauthorized,
+                StatusDescription = "Unauthorized"
+            };
+        }
     }
 }
