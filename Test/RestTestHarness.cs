@@ -50,7 +50,7 @@ namespace Neo4jClient.Test
             var resourcesThatWereNeverRequested = recordedResponses
                 .Select(r => r.Key)
                 .Where(r => !processedRequests.Contains(r))
-                .Select(r => r.Resource)
+                .Select(r => string.Format("{0} {1}", r.Method, r.Resource))
                 .ToArray();
 
             if (!resourcesThatWereNeverRequested.Any())
