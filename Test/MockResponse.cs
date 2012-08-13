@@ -5,7 +5,7 @@ namespace Neo4jClient.Test
 {
     class MockResponse
     {
-        public static NeoHttpResponse Json(HttpStatusCode statusCode, string json)
+        public static IHttpResponse Json(HttpStatusCode statusCode, string json)
         {
             return new NeoHttpResponse
             {
@@ -15,7 +15,7 @@ namespace Neo4jClient.Test
             };
         }
 
-        public static NeoHttpResponse NeoRoot()
+        public static IHttpResponse NeoRoot()
         {
             return Json(HttpStatusCode.OK, @"{
                 'batch' : 'http://foo/db/data/batch',
@@ -30,7 +30,7 @@ namespace Neo4jClient.Test
             }");
         }
 
-        public static NeoHttpResponse NeoRootPre15M02()
+        public static IHttpResponse NeoRootPre15M02()
         {
             return Json(HttpStatusCode.OK, @"{
                 'batch' : 'http://foo/db/data/batch',
