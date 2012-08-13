@@ -124,10 +124,6 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
-                {
                     MockRequest.PostJson("/batch",
                         @"[{
                           'method': 'POST', 'to' : '/node',
@@ -177,10 +173,6 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testHarness = new RestTestHarness
             {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
                 {
                     MockRequest.PostJson("/batch",
                         @"[{
@@ -232,10 +224,6 @@ namespace Neo4jClient.Test.GraphClientTests
             var testHarness = new RestTestHarness
             {
                 {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
-                {
                     MockRequest.PostObjectAsJson("/batch", batch),
                     MockResponse.Json(HttpStatusCode.OK,
                         @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
@@ -280,10 +268,6 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var testHarness = new RestTestHarness
             {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
                     MockResponse.Json(HttpStatusCode.OK,
@@ -331,10 +315,6 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var testHarness = new RestTestHarness
             {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
                     MockResponse.Json(HttpStatusCode.OK,
@@ -397,10 +377,6 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var testHarness = new RestTestHarness
             {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
                     MockResponse.Json(HttpStatusCode.OK,
@@ -482,10 +458,6 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var testHarness = new RestTestHarness
             {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
                     MockResponse.Json(HttpStatusCode.OK,

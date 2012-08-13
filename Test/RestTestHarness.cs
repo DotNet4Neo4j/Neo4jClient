@@ -26,6 +26,9 @@ namespace Neo4jClient.Test
 
         public GraphClient CreateGraphClient()
         {
+            if (!recordedResponses.Keys.Any(r => r.Resource == "" || r.Resource == "/"))
+                Add(MockRequest.Get(""), MockResponse.NeoRoot());
+
             var graphClient = new GraphClient(new Uri(BaseUri), HttpFactory);
             return graphClient;
         }

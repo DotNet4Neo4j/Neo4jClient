@@ -27,13 +27,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldRetrieveApiEndpoints()
         {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                }
-            })
+            using (var testHarness = new RestTestHarness())
             {
                 var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
@@ -111,13 +105,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void ShouldParse15M02Version()
         {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                }
-            })
+            using (var testHarness = new RestTestHarness())
             {
                 var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
@@ -146,13 +134,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [Test]
         public void DisableSupportForNeo4JOnHerokuShouldNotChangeResource()
         {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRoot()
-                }
-            })
+            using (var testHarness = new RestTestHarness())
             {
                 var graphClient = testHarness.CreateGraphClient();
                 graphClient.EnableSupportForNeo4jOnHeroku = false;
