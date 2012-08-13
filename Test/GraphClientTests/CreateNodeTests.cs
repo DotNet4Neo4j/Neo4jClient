@@ -12,31 +12,6 @@ namespace Neo4jClient.Test.GraphClientTests
     [TestFixture]
     public class CreateNodeTests
     {
-        readonly string rootResponse = @"{
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
-                'neo4j_version' : '1.5.M02',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                }
-            }"
-            .Replace('\'', '"');
-
-        readonly string pre15M02RootResponse = @"{
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                }
-            }"
-            .Replace('\'', '"');
-
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowArgumentNullExceptionForNullNode()
@@ -71,7 +46,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, pre15M02RootResponse)
+                    MockResponse.NeoRootPre15M02()
                 }
             };
 
@@ -106,7 +81,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, pre15M02RootResponse)
+                    MockResponse.NeoRootPre15M02()
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
@@ -150,7 +125,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostJson("/batch",
@@ -204,7 +179,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostJson("/batch",
@@ -258,7 +233,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
@@ -307,7 +282,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
@@ -358,7 +333,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
@@ -424,7 +399,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),
@@ -509,7 +484,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     MockRequest.PostObjectAsJson("/batch", batch),

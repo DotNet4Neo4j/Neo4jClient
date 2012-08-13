@@ -32,7 +32,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     new RestRequest {
@@ -82,7 +82,7 @@ namespace Neo4jClient.Test.GraphClientTests
             {
                 {
                     new RestRequest { Resource = "", Method = Method.GET },
-                    MockResponse.Json(HttpStatusCode.OK, rootResponse)
+                    MockResponse.NeoRoot()
                 },
                 {
                     new RestRequest {
