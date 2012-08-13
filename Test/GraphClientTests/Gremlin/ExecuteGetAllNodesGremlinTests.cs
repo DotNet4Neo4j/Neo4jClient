@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using System.Linq;
-using Neo4jClient.ApiModels;
-using Neo4jClient.ApiModels.Gremlin;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests.Gremlin
 {
@@ -29,47 +26,18 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
         [Test]
         public void ShouldReturnIEnumerableOfObjects()
         {
-            //Arrange
-            const string gremlinQueryExpected = "foo bar query";
-            var parameters = new Dictionary<string, object>
-                {
-                    {"foo", 123},
-                    {"bar", "baz"}
-                };
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                            'GremlinPlugin' : {
-                              'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
-                            }
-                          }
-                        }".Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/ext/GremlinPlugin/graphdb/execute_script",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(new GremlinApiQuery("foo bar query", parameters)),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent =@"[ {
+                    MockRequest.PostJson(
+                        "/ext/GremlinPlugin/graphdb/execute_script",
+                        @"{
+                            'script': 'foo bar query',
+                            'params': { 'foo': 123, 'bar': 'baz' }
+                        }"
+                    ),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[ {
                             'outgoing_relationships' : 'http://foo/db/data/node/5/relationships/out',
                             'data' : {
                                 'Bar' : 'bar',
@@ -106,79 +74,57 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                             'all_relationships' : 'http://foo/db/data/node/6/relationships/all',
                             'incoming_typed_relationships' : 'http://foo/db/data/node/6/relationships/in/{-list|&|types}'
                         } ]"
-                    }
+                    )
                 }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            })
+            {
+                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<Foo>(gremlinQueryExpected, parameters)
-                .ToList();
+                //Act
+                var parameters = new Dictionary<string, object>
+                {
+                    {"foo", 123},
+                    {"bar", "baz"}
+                };
+                var nodes = graphClient
+                    .ExecuteGetAllNodesGremlin<Foo>("foo bar query", parameters)
+                    .ToList();
 
-            //Assert
-            Assert.AreEqual(2, nodes.Count());
-            Assert.AreEqual(5, nodes.ElementAt(0).Reference.Id);
-            Assert.AreEqual("bar", nodes.ElementAt(0).Data.Bar);
-            Assert.AreEqual("baz", nodes.ElementAt(0).Data.Baz);
-            Assert.AreEqual(6, nodes.ElementAt(1).Reference.Id);
-            Assert.AreEqual("123", nodes.ElementAt(1).Data.Bar);
-            Assert.AreEqual("456", nodes.ElementAt(1).Data.Baz);
+                //Assert
+                Assert.AreEqual(2, nodes.Count());
+                Assert.AreEqual(5, nodes.ElementAt(0).Reference.Id);
+                Assert.AreEqual("bar", nodes.ElementAt(0).Data.Bar);
+                Assert.AreEqual("baz", nodes.ElementAt(0).Data.Baz);
+                Assert.AreEqual(6, nodes.ElementAt(1).Reference.Id);
+                Assert.AreEqual("123", nodes.ElementAt(1).Data.Bar);
+                Assert.AreEqual("456", nodes.ElementAt(1).Data.Baz);
+            }
         }
 
         [Test]
         public void ShouldReturnEmptyEnumerableForNullResult()
         {
-            //Arrange
-            const string gremlinQueryExpected = "foo bar query";
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                            'GremlinPlugin' : {
-                              'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
-                            }
-                          }
-                        }".Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/ext/GremlinPlugin/graphdb/execute_script",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(new GremlinApiQuery("foo bar query", null)),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent =@"[]"
-                    }
+                    MockRequest.PostJson(
+                        "/ext/GremlinPlugin/graphdb/execute_script",
+                        @"{ 'script': 'foo bar query', 'params': {} }"
+                    ),
+                    MockResponse.Json(HttpStatusCode.OK, @"[]")
                 }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            })
+            {
+                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            var nodes = graphClient
-                .ExecuteGetAllNodesGremlin<NodeApiResponse<string>>(gremlinQueryExpected, null)
-                .ToList();
+                //Act
+                var nodes = graphClient
+                    .ExecuteGetAllNodesGremlin<Foo>("foo bar query", null)
+                    .ToList();
 
-            //Assert
-            Assert.AreEqual(0, nodes.Count());
+                //Assert
+                Assert.AreEqual(0, nodes.Count());
+            }
         }
     }
 }
