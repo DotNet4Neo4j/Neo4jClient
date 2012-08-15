@@ -592,5 +592,80 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual("Sydney", city.Name);
             Assert.AreEqual(4000000, city.Population);
         }
+
+        [Test]
+        public void DeserializeShouldMapNodesToObjectsInSetModeWhenTheSourceLooksLikeANodeButTheDestinationDoesnt()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
+            var response = new RestResponse
+            {
+                Content = @"
+                    {
+                        'data' : [ [ {
+                        'outgoing_relationships' : 'http://foo/db/data/node/879/relationships/out',
+                        'data' : {
+                            'Name' : '67',
+                            'UniqueId' : 2
+                        },
+                        'traverse' : 'http://foo/db/data/node/879/traverse/{returnType}',
+                        'all_typed_relationships' : 'http://foo/db/data/node/879/relationships/all/{-list|&|types}',
+                        'property' : 'http://foo/db/data/node/879/properties/{key}',
+                        'self' : 'http://foo/db/data/node/879',
+                        'properties' : 'http://foo/db/data/node/879/properties',
+                        'outgoing_typed_relationships' : 'http://foo/db/data/node/879/relationships/out/{-list|&|types}',
+                        'incoming_relationships' : 'http://foo/db/data/node/879/relationships/in',
+                        'extensions' : {
+                        },
+                        'create_relationship' : 'http://foo/db/data/node/879/relationships',
+                        'paged_traverse' : 'http://foo/db/data/node/879/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                        'all_relationships' : 'http://foo/db/data/node/879/relationships/all',
+                        'incoming_typed_relationships' : 'http://foo/db/data/node/879/relationships/in/{-list|&|types}'
+                        } ], [ {
+                        'outgoing_relationships' : 'http://foo/db/data/node/878/relationships/out',
+                        'data' : {
+                            'Name' : '15 Mile',
+                            'UniqueId' : 1
+                        },
+                        'traverse' : 'http://foo/db/data/node/878/traverse/{returnType}',
+                        'all_typed_relationships' : 'http://foo/db/data/node/878/relationships/all/{-list|&|types}',
+                        'property' : 'http://foo/db/data/node/878/properties/{key}',
+                        'self' : 'http://foo/db/data/node/878',
+                        'properties' : 'http://foo/db/data/node/878/properties',
+                        'outgoing_typed_relationships' : 'http://foo/db/data/node/878/relationships/out/{-list|&|types}',
+                        'incoming_relationships' : 'http://foo/db/data/node/878/relationships/in',
+                        'extensions' : {
+                        },
+                        'create_relationship' : 'http://foo/db/data/node/878/relationships',
+                        'paged_traverse' : 'http://foo/db/data/node/878/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                        'all_relationships' : 'http://foo/db/data/node/878/relationships/all',
+                        'incoming_typed_relationships' : 'http://foo/db/data/node/878/relationships/in/{-list|&|types}'
+                        } ] ],
+                        'columns' : [ 'asset' ]
+                    }".Replace("'", "\"")
+            };
+
+            // Act
+            var results = deserializer.Deserialize(response).ToArray();
+
+            // Assert
+            var resultsArray = results.ToArray();
+            Assert.AreEqual(2, resultsArray.Count());
+
+            var firstResult = resultsArray[0];
+            Assert.AreEqual("67", firstResult.Name);
+            Assert.AreEqual(2, firstResult.UniqueId);
+
+            var secondResult = resultsArray[1];
+            Assert.AreEqual("15 Mile", secondResult.Name);
+            Assert.AreEqual(1, secondResult.UniqueId);
+        }
+
+        public class Asset
+        {
+            public long UniqueId { get; set; }
+            public string Name { get; set; }
+        }
     }
 }

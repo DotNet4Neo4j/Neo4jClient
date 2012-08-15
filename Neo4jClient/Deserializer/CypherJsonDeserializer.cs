@@ -90,7 +90,10 @@ namespace Neo4jClient.Deserializer
             if (columnNames.Count() != 1)
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
 
-            var resultType = typeof (TResult);
+            var resultType = typeof(TResult);
+            var isResultTypeANodeOrRelationshipInstance = resultType.IsGenericType &&
+                                       (resultType.GetGenericTypeDefinition() == typeof(Node<>) ||
+                                        resultType.GetGenericTypeDefinition() == typeof(RelationshipInstance<>));
             var mapping = jsonTypeMappings.SingleOrDefault(m => m.ShouldTriggerForPropertyType(0, resultType));
             var newType = mapping == null ? resultType : mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(resultType);
 
@@ -105,7 +108,23 @@ namespace Neo4jClient.Deserializer
                 if (rowAsArray.Count != 1)
                     throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
 
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings, 0);
+                var elementToParse = row[0];
+                if (elementToParse is JObject)
+                {
+                    var propertyNames = ((JObject) elementToParse)
+                        .Properties()
+                        .Select(p => p.Name)
+                        .ToArray();
+                    var dataElementLooksLikeANodeOrRelationshipInstance =
+                        new[] {"data", "self", "traverse", "properties"}.All(propertyNames.Contains);
+                    if (!isResultTypeANodeOrRelationshipInstance &&
+                        dataElementLooksLikeANodeOrRelationshipInstance)
+                    {
+                        elementToParse = elementToParse["data"];
+                    }
+                }
+
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, elementToParse, Culture, jsonTypeMappings, 0);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
