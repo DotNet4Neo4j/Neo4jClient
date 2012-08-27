@@ -18,6 +18,7 @@ namespace Neo4jClient.Test
         public static IHttpResponse NeoRoot()
         {
             return Json(HttpStatusCode.OK, @"{
+                'cypher' : 'http://foo/db/data/cypher',
                 'batch' : 'http://foo/db/data/batch',
                 'node' : 'http://foo/db/data/node',
                 'node_index' : 'http://foo/db/data/index/node',
