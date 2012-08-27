@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Net;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -15,11 +17,10 @@ namespace Neo4jClient.Test.RestSharpTests
             var uri = new Uri("http://foo/db/data");
             var testNode = new TestNode { Foo = "foo", Bar = "bar" };
 
-            var request = new RestRequest(uri, Method.POST) { RequestFormat = DataFormat.Json };
-            request.AddBody(testNode);
+            var request = MockRequest.PostObjectAsJson(uri.AbsoluteUri, testNode);
 
             const string expectedValue = "{\r\n  \"Foo\": \"foo\",\r\n  \"Bar\": \"bar\"\r\n}";
-            Assert.AreEqual(expectedValue, request.Parameters[0].Value);
+            Assert.AreEqual(expectedValue, request.Parameters.First().Value);
         }
 
         [Test]
