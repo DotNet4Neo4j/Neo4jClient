@@ -31,6 +31,17 @@ namespace Neo4jClient.Test
             };
         }
 
+        public static IMockRequestDefinition PutObjectAsJson(string uri, object body)
+        {
+            return new NeoHttpRequest
+            {
+                Resource = uri,
+                Method = Method.PUT,
+                RequestFormat = DataFormat.Json,
+                Body = body
+            };
+        }
+
         public static IMockRequestDefinition Delete(string uri)
         {
             return new NeoHttpRequest { Resource = uri, Method = Method.DELETE };
