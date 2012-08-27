@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 using System.Linq;
-using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Gremlin;
 using RestSharp;
 
