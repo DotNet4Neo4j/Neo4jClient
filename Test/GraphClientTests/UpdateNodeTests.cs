@@ -42,23 +42,11 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
+            using (var testHarness = new RestTestHarness()
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
                     {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = rootResponse
-                    }
-                },
-                 {
-                    new RestRequest { Resource = "/node/456", Method = Method.GET },
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{ 'self': 'http://foo/db/data/node/456',
+                        MockRequest.Get("/node/456"),
+                        MockResponse.Json(HttpStatusCode.OK, @"{ 'self': 'http://foo/db/data/node/456',
                           'data': { 'Foo': 'foo',
                                     'Bar': 'bar',
                                     'Baz': 'baz'
@@ -73,37 +61,31 @@ namespace Neo4jClient.Test.GraphClientTests
                           'properties': 'http://foo/db/data/node/456/properties',
                           'property': 'http://foo/db/data/node/456/property/{key}',
                           'traverse': 'http://foo/db/data/node/456/traverse/{returnType}'
-                        }".Replace('\'', '"')
+                        }")
+                    },
+                                        {
+                        MockRequest.PutObjectAsJson("/node/456/properties", nodeToUpdate),
+                        MockResponse.Http((int)HttpStatusCode.NoContent)
                     }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/node/456/properties",
-                        Method = Method.PUT,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(nodeToUpdate),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.NoContent
-                    }
-                }
-            });
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-
-            var pocoReference = new NodeReference<TestNode>(456);
-            graphClient.Update(
-                pocoReference, nodeFromDb =>
+                //Act
+                var pocoReference = new NodeReference<TestNode>(456);
+                graphClient.Update(
+                    pocoReference, nodeFromDb =>
                     {
                         nodeFromDb.Foo = "fooUpdated";
                         nodeFromDb.Baz = "bazUpdated";
                         nodeToUpdate = nodeFromDb;
                     }
-                );
+                    );
 
-            Assert.AreEqual("fooUpdated", nodeToUpdate.Foo);
-            Assert.AreEqual("bazUpdated", nodeToUpdate.Baz);
-            Assert.AreEqual("bar", nodeToUpdate.Bar);
+                Assert.AreEqual("fooUpdated", nodeToUpdate.Foo);
+                Assert.AreEqual("bazUpdated", nodeToUpdate.Baz);
+                Assert.AreEqual("bar", nodeToUpdate.Bar);
+            }
         }
 
         [Test]
