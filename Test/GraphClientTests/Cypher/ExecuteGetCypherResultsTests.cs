@@ -39,10 +39,6 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             using (var testHarness = new RestTestHarness
                 {
                     {
-                        MockRequest.Get(""),
-                        MockResponse.NeoRoot()
-                    },
-                    {
                     MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
                     MockResponse.Json(HttpStatusCode.OK,
                     @"{
