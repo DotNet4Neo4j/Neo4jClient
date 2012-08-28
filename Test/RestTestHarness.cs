@@ -76,33 +76,17 @@ namespace Neo4jClient.Test
                     http.Delete().Returns(ci => HandleRequest(http, Method.DELETE, baseUri));
                     http.Get().Returns(ci => HandleRequest(http, Method.GET, baseUri));
                     http.Post().Returns(ci => HandleRequest(http, Method.POST, baseUri));
-                    http.Parameters.ReturnsForAnyArgs(ci => HandleParameters(http, Method.POST, baseUri));
+                    http.Parameters.ReturnsForAnyArgs(ci => HandleParameters(http, baseUri));
                     http.Put().Returns(ci => HandleRequest(http, Method.PUT, baseUri));
                     return http;
                 });
             return httpFactory;
         }
 
-        IList<HttpParameter> HandleParameters(IHttp http, Method method, string baseUri)
+        IList<HttpParameter> HandleParameters(IHttp http, string baseUri)
         {
             var matchingRequests = recordedResponses
-                .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource)
-                .Where(can => can.Key.Method == method);
-
-            if (method == Method.POST)
-            {
-                matchingRequests = matchingRequests
-                    .Where(can =>
-                    {
-                        var request = can.Key;
-                        var requestParam = request
-                            .Parameters
-                            .Where(p => p.Type == ParameterType.GetOrPost)
-                            .Select(p => p.Value as string)
-                            .SingleOrDefault();
-                        return !string.IsNullOrEmpty(requestParam);
-                    });
-            }
+                .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource);
 
             return matchingRequests
                 .Select(can => can
