@@ -43,7 +43,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(ExpectedMessage = "The graph client is not connected to the server. Call the Connect method first.")]
         public void RootNode_ShouldThrowInvalidOperationException_WhenNotConnectedYet()
         {
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null, null);
 // ReSharper disable ReturnValueOfPureMethodIsNotUsed
             graphClient.RootNode.ToString();
 // ReSharper restore ReturnValueOfPureMethodIsNotUsed

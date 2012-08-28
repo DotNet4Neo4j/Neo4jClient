@@ -30,7 +30,9 @@ namespace Neo4jClient.Test
             if (!recordedResponses.Keys.Any(r => r.Resource == "" || r.Resource == "/"))
                 Add(MockRequest.Get(""), MockResponse.NeoRoot());
 
-            var graphClient = new GraphClient(new Uri(BaseUri), HttpFactory);
+            var httpClient = GenerateHttpClient();
+
+            var graphClient = new GraphClient(new Uri(BaseUri), HttpFactory, httpClient);
             return graphClient;
         }
 
@@ -81,6 +83,11 @@ namespace Neo4jClient.Test
                     return http;
                 });
             return httpFactory;
+        }
+
+        public IHttpClient GenerateHttpClient()
+        {
+            return Substitute.For<IHttpClient>();
         }
 
         IList<HttpParameter> HandleParameters(IHttp http, string baseUri)

@@ -23,6 +23,7 @@ namespace Neo4jClient
     {
         internal readonly Uri RootUri;
         readonly IHttpFactory httpFactory;
+        readonly IHttpClient httpClient;
         internal RootApiResponse RootApiResponse;
         internal RootNode rootNode;
         internal readonly IAuthenticator Authenticator;
@@ -35,20 +36,20 @@ namespace Neo4jClient
         public bool EnableSupportForNeo4jOnHeroku { get; set; }
 
         public GraphClient(Uri rootUri)
-            : this(rootUri, new Http())
+            : this(rootUri, new Http(), new HttpClient())
         {
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.UseNagleAlgorithm = false;
         }
 
         public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm)
-            : this(rootUri, new Http())
+            : this(rootUri, new Http(), new HttpClient())
         {
             ServicePointManager.Expect100Continue = expect100Continue;
             ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
 
-        public GraphClient(Uri rootUri, IHttpFactory httpFactory)
+        public GraphClient(Uri rootUri, IHttpFactory httpFactory, IHttpClient httpClient)
         {
             if(!string.IsNullOrWhiteSpace(rootUri.UserInfo))
             {
@@ -64,6 +65,7 @@ namespace Neo4jClient
 
             RootUri = rootUri;
             this.httpFactory = httpFactory;
+            this.httpClient = httpClient;
             JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             UseJsonStreamingIfAvailable = true;
         }
