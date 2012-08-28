@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Serializer
 {
@@ -38,6 +39,72 @@ namespace Neo4jClient.Test.Serializer
 
             // Assert
             Assert.AreEqual("400.13:03:02.0100000", result.Replace("\"", ""));
+        }
+
+        [Test]
+        public void ExecuteShouldJsonSerializeAllProperties()
+        {
+            // Arrange
+            var testNode = new TestNode { Foo = "foo", Bar = "bar" };
+            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore };
+
+            // Act
+            var result = serializer.Serialize(testNode);
+            const string expectedValue = "{\r\n  \"Foo\": \"foo\",\r\n  \"Bar\": \"bar\"\r\n}";
+
+            // Assert
+            Assert.AreEqual(expectedValue, result);
+        }
+
+        [Test]
+        public void ExecuteShouldNotJSonSerializeNullProperties()
+        {
+            // Arrange
+            var testNode = new TestNode { Foo = "foo", Bar = null };
+            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore };
+
+            // Act
+            var result = serializer.Serialize(testNode);
+
+            const string expectedValue = "{\r\n  \"Foo\": \"foo\"\r\n}";
+
+            // Assert
+            Assert.AreEqual(expectedValue, result);
+        }
+
+        [Test]
+        public void ExecuteShouldSerializeEnumTypesToString()
+        {
+            // Arrange
+            var testNode = new TestNodeWithEnum { Status = TestEnum.Value1 };
+            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore };
+
+            // Act
+            var result = serializer.Serialize(testNode);
+
+            const string expectedValue = "{\r\n  \"Status\": \"Value1\"\r\n}";
+
+            // Assert
+            Assert.AreEqual(expectedValue, result);
+        }
+
+        public class TestNode
+        {
+            public string Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        public class TestNodeWithEnum
+        {
+            public string Foo { get; set; }
+            public string Bar { get; set; }
+            public TestEnum Status { get; set; }
+        }
+
+        public enum TestEnum
+        {
+            Value1,
+            Value2
         }
 
         public class TimeZoneModel
