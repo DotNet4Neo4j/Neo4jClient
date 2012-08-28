@@ -70,7 +70,8 @@ namespace Neo4jClient
             UseJsonStreamingIfAvailable = true;
         }
 
-        IRestClient CreateClient()
+        [Obsolete("Use the httpClient field instead")]
+        IRestClient CreateRestSharpClient()
         {
             var client = new RestClient(RootUri.AbsoluteUri) {HttpFactory = httpFactory};
 
@@ -90,7 +91,7 @@ namespace Neo4jClient
 
             //HACK: temporary solution to issue: http://goo.gl/oCKsq
             var request = new RestRequest(EnableSupportForNeo4jOnHeroku ? "/ " : "", Method.GET);
-            var response = CreateClient().Execute<RootApiResponse>(request);
+            var response = CreateRestSharpClient().Execute<RootApiResponse>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
@@ -259,7 +260,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(batchSteps);
-            var response = CreateClient().Execute<BatchResponse>(request);
+            var response = CreateRestSharpClient().Execute<BatchResponse>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
@@ -304,7 +305,7 @@ namespace Neo4jClient
                     JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
                 };
             request.AddBody(relationship);
-            var response = CreateClient().Execute<RelationshipApiResponse<object>>(request);
+            var response = CreateRestSharpClient().Execute<RelationshipApiResponse<object>>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.Created, HttpStatusCode.NotFound);
 
@@ -323,7 +324,7 @@ namespace Neo4jClient
 
             var relationshipEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(relationshipEndpoint, Method.DELETE);
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent, HttpStatusCode.NotFound);
 
@@ -340,7 +341,7 @@ namespace Neo4jClient
 
             var nodeEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(nodeEndpoint, Method.GET);
-            var response = CreateClient().Execute<NodeApiResponse<TNode>>(request);
+            var response = CreateRestSharpClient().Execute<NodeApiResponse<TNode>>(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
 
@@ -397,7 +398,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(node.Data);
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             if (indexEntriesCallback != null)
             {
@@ -426,7 +427,7 @@ namespace Neo4jClient
             var propertiesEndpoint = ResolveEndpoint(relationshipReference) + "/properties";
 
             var getRequest = new RestRequest(propertiesEndpoint, Method.GET);
-            var getResponse = CreateClient().Execute<TRelationshipData>(getRequest);
+            var getResponse = CreateRestSharpClient().Execute<TRelationshipData>(getRequest);
             ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
 
             var payload = getResponse.Data ?? new TRelationshipData();
@@ -438,7 +439,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             updateRequest.AddBody(payload);
-            var updateResponse = CreateClient().Execute(updateRequest);
+            var updateResponse = CreateRestSharpClient().Execute(updateRequest);
             ValidateExpectedResponseCodes(updateResponse, HttpStatusCode.NoContent);
 
             stopwatch.Stop();
@@ -464,7 +465,7 @@ namespace Neo4jClient
 
             var nodeEndpoint = ResolveEndpoint(reference);
             var request = new RestRequest(nodeEndpoint, Method.DELETE);
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent, HttpStatusCode.Conflict);
 
@@ -488,7 +489,7 @@ namespace Neo4jClient
             //TODO: Make this a dynamic endpoint resolution
             var relationshipsEndpoint = ResolveEndpoint(reference) + "/relationships/all";
             var request = new RestRequest(relationshipsEndpoint, Method.GET);
-            var response = CreateClient().Execute<List<RelationshipApiResponse<object>>>(request);
+            var response = CreateRestSharpClient().Execute<List<RelationshipApiResponse<object>>>(request);
 
             var relationshipResources = response
                 .Data
@@ -497,7 +498,7 @@ namespace Neo4jClient
             foreach (var relationshipResource in relationshipResources)
             {
                 request = new RestRequest(relationshipResource, Method.DELETE);
-                CreateClient().Execute(request);
+                CreateRestSharpClient().Execute(request);
             }
         }
 
@@ -543,7 +544,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query, parameters));
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -574,7 +575,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateClient().Execute<List<List<GremlinTableCapResponse>>>(request);
+            var response = CreateRestSharpClient().Execute<List<List<GremlinTableCapResponse>>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -609,7 +610,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new CypherApiQuery(query));
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -651,7 +652,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query, parameters));
-            var response = CreateClient().Execute<List<RelationshipApiResponse<TData>>>(request);
+            var response = CreateRestSharpClient().Execute<List<RelationshipApiResponse<TData>>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -696,7 +697,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
             request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateClient().Execute<List<NodeApiResponse<TNode>>>(request);
+            var response = CreateRestSharpClient().Execute<List<NodeApiResponse<TNode>>>(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -741,7 +742,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(
                 response, string.Empty,
@@ -781,7 +782,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
 
@@ -825,7 +826,7 @@ namespace Neo4jClient
                 };
             request.AddBody(createIndexApiRequest);
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
         }
@@ -882,7 +883,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
         }
@@ -901,7 +902,7 @@ namespace Neo4jClient
                 JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
             };
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -934,7 +935,7 @@ namespace Neo4jClient
                 uri = string.Join("", RootUri, nodeAddress)
             });
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(
                 response,
@@ -1009,7 +1010,7 @@ namespace Neo4jClient
 
             request.AddParameter("query", query);
 
-            var response = CreateClient().Execute(request);
+            var response = CreateRestSharpClient().Execute(request);
 
             ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
 
