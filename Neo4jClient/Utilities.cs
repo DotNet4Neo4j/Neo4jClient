@@ -12,7 +12,7 @@ namespace Neo4jClient
 
             changes.AddRange(originalValues
                 .Keys
-                .Where(k => !newValues.Keys.Any(n => n == k))
+                .Where(k => newValues.Keys.All(n => n != k))
                 .Select(k => new FieldChange
                 {
                     FieldName = k,
@@ -22,7 +22,7 @@ namespace Neo4jClient
 
             changes.AddRange(newValues
                 .Keys
-                .Where(k => !originalValues.Keys.Any(n => n == k))
+                .Where(k => originalValues.Keys.All(n => n != k))
                 .Select(k => new FieldChange
                 {
                     FieldName = k,
