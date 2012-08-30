@@ -34,7 +34,7 @@ namespace Neo4jClient.Test
 
             var httpClient = GenerateHttpClient(BaseUri);
 
-            var graphClient = new GraphClient(new Uri(BaseUri), HttpFactory, httpClient);
+            var graphClient = new GraphClient(new Uri(BaseUri), httpClient);
             return graphClient;
         }
 

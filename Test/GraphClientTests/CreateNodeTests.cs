@@ -32,7 +32,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(ValidationException))]
         public void ShouldThrowValidationExceptionForInvalidNodes()
         {
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null, null);
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
 
             var testNode = new TestNode {Foo = "text is too long", Bar = null, Baz = "123"};
             graphClient.Create(testNode);

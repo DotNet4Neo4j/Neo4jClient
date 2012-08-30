@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using NUnit.Framework;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
 {
@@ -43,7 +42,7 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(ExpectedMessage = "The graph client is not connected to the server. Call the Connect method first.")]
         public void RootNode_ShouldThrowInvalidOperationException_WhenNotConnectedYet()
         {
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null, null);
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
 // ReSharper disable ReturnValueOfPureMethodIsNotUsed
             graphClient.RootNode.ToString();
 // ReSharper restore ReturnValueOfPureMethodIsNotUsed
@@ -98,27 +97,11 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void BasicAuthenticatorNotUsedWhenNoUserInfoSupplied()
-        {
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"));
-
-            Assert.IsNull(graphClient.Authenticator);
-        }
-
-        [Test]
-        public void BasicAuthenticatorUsedWhenUserInfoSupplied()
+        public void UserInfoPreservedInRootUri()
         {
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
 
-            Assert.That(graphClient.Authenticator, Is.TypeOf<HttpBasicAuthenticator>());
-        }
-
-        [Test]
-        public void UserInfoRemovedFromRootUri()
-        {
-            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
-
-            Assert.That(graphClient.RootUri.OriginalString, Is.EqualTo("http://foo/db/data"));
+            Assert.That(graphClient.RootUri.OriginalString, Is.EqualTo("http://username:password@foo/db/data"));
         }
     }
 }

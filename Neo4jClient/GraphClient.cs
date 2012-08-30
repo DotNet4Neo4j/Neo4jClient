@@ -25,14 +25,12 @@ namespace Neo4jClient
         readonly IHttpClient httpClient;
         internal RootApiResponse RootApiResponse;
         RootNode rootNode;
-        internal readonly IAuthenticator Authenticator;
         bool jsonStreamingAvailable;
 
         const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
 
         public bool UseJsonStreamingIfAvailable { get; set; }
-        public bool EnableSupportForNeo4jOnHeroku { get; set; }
-
+        
         public GraphClient(Uri rootUri)
             : this(rootUri, new HttpClientWrapper())
         {
@@ -49,18 +47,6 @@ namespace Neo4jClient
 
         public GraphClient(Uri rootUri, IHttpClient httpClient)
         {
-            if(!string.IsNullOrWhiteSpace(rootUri.UserInfo))
-            {
-                var userInfoParts = rootUri.UserInfo.Split(':');
-                var userInfoContent = rootUri.UserInfo + "@";
-
-                if(userInfoParts.Length == 2 && rootUri.OriginalString.Contains(userInfoContent))
-                {
-                    Authenticator = new HttpBasicAuthenticator(userInfoParts[0], userInfoParts[1]);
-                    rootUri = new Uri(rootUri.OriginalString.Replace(userInfoContent, ""));
-                }
-            }
-
             RootUri = rootUri;
             this.httpClient = httpClient;
             UseJsonStreamingIfAvailable = true;
