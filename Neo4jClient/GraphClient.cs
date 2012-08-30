@@ -788,7 +788,7 @@ namespace Neo4jClient
 
             var response = SendHttpRequest(
                 HttpGet(string.Format("{0}/{1}",indexResource, indexName)),
-                HttpStatusCode.OK, HttpStatusCode.NoContent);
+                HttpStatusCode.OK, HttpStatusCode.NotFound);
 
             return response.StatusCode == HttpStatusCode.OK;
         }
