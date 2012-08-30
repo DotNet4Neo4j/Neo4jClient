@@ -97,19 +97,28 @@ namespace Neo4jClient
             return new HttpRequestMessage(HttpMethod.Get, absoluteUri);
         }
 
+        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
+        {
+            var requestTask = httpClient.SendAsync(request);
+            requestTask.RunSynchronously();
+            var response = requestTask.Result;
+            response.EnsureExpectedStatusCode(expectedStatusCodes);
+            var responseDataTask = response.Content.ReadAsJson<T>(new JsonSerializer());
+            responseDataTask.Wait();
+            var result = responseDataTask.Result;
+            return result;
+        }
+
         public virtual void Connect()
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var requestTask = httpClient.SendAsync(Get(""));
-            requestTask.RunSynchronously();
-            var response = requestTask.Result;
-            response.EnsureExpectedStatusCode(HttpStatusCode.OK);
-            var responseDataTask = response.Content.ReadAsJson<RootApiResponse>(new JsonSerializer());
-            responseDataTask.Wait();
+            var result = SendHttpRequestAndParseResultAs<RootApiResponse>(
+                Get(""),
+                HttpStatusCode.OK);
 
-            RootApiResponse = responseDataTask.Result;
+            RootApiResponse = result;
             RootApiResponse.Batch = RootApiResponse.Batch.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.Node = RootApiResponse.Node.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(RootUri.AbsoluteUri.Length);
