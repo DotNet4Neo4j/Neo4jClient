@@ -874,15 +874,9 @@ namespace Neo4jClient
                     throw new NotSupportedException(string.Format("DeleteIndex does not support indexfor {0}", indexFor));
             }
 
-            var request = new RestRequest(string.Format("{0}/{1}", indexResource, indexName), Method.DELETE)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
+            SendHttpRequest(
+                HttpDelete(string.Format("{0}/{1}", indexResource, indexName)),
+                HttpStatusCode.NoContent);
         }
 
         public void DeleteIndexEntries(string indexName, long nodeId)
