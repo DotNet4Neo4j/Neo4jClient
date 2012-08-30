@@ -145,6 +145,11 @@ namespace Neo4jClient
 
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
+            return SendHttpRequestAndParseResultAs<T>(request, null, expectedStatusCodes);
+        }
+
+        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        {
             var response = SendHttpRequest(request, expectedStatusCodes);
             return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(new JsonSerializer());
         }
@@ -687,22 +692,14 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(new GremlinApiQuery(query, parameters));
-            var response = CreateRestSharpClient().Execute<List<RelationshipApiResponse<TData>>>(request);
-
-            ValidateExpectedResponseCodes(
-                response,
+            var response = SendHttpRequestAndParseResultAs<List<RelationshipApiResponse<TData>>>(
+                HttpPostAsJson(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, new GremlinApiQuery(query, parameters)),
                 string.Format("The query was: {0}", query),
                 HttpStatusCode.OK);
 
-            var relationships = response.Data == null
+            var relationships = response == null
                 ? new RelationshipInstance<TData>[0]
-                : response.Data.Select(r => r.ToRelationshipInstance(this)).ToArray();
+                : response.Select(r => r.ToRelationshipInstance(this)).ToArray();
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
