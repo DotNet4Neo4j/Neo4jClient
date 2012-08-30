@@ -954,7 +954,6 @@ namespace Neo4jClient
             CheckRoot();
 
             string indexResource;
-
             switch (indexFor)
             {
                 case IndexFor.Node:
@@ -967,19 +966,12 @@ namespace Neo4jClient
                     throw new NotSupportedException(string.Format("QueryIndex does not support indexfor {0}", indexFor));
             }
 
-            var request = new RestRequest(indexResource + "/" + indexName, Method.GET)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = BuildSerializer()
-                };
+            indexResource = string.Format("{0}/{1}?query={2}", indexResource, indexName, Uri.EscapeDataString(query));
+            var response = SendHttpRequest(
+                HttpGet(indexResource),
+                HttpStatusCode.OK);
 
-            request.AddParameter("query", query);
-
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
-
-            var data = new CustomJsonDeserializer().Deserialize<List<NodeApiResponse<TNode>>>(response);
+            var data = new CustomJsonDeserializer().Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
 
             return data == null
                 ? Enumerable.Empty<Node<TNode>>()
