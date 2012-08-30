@@ -100,7 +100,7 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var deserializer = new CustomJsonDeserializer();
-            var content = @"{
+            const string content = @"{
                               ""columns"" : [ ""ColumnA"" ],
                               ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
                             }";
@@ -115,14 +115,12 @@ namespace Neo4jClient.Test.Deserializer
             Assert.IsTrue(data.Any(d => d == "DataB"));
         }
 
-        public class Foo
+        public class EnumModel
         {
-            [JsonProperty()]
+            [JsonProperty]
             public Gender Gender { get; set; }
-            [JsonProperty()]
+            [JsonProperty]
             public Gender? GenderNullable { get; set; }
-            [JsonProperty()]
-            public IEnumerable<Guid>  Guids{ get; set; }
         }
 
         public enum Gender
@@ -130,6 +128,12 @@ namespace Neo4jClient.Test.Deserializer
             Male,
             Female,
             Unknown
+        }
+
+        public class EnumerableModel
+        {
+            [JsonProperty]
+            public IEnumerable<Guid> Guids { get; set; }
         }
 
         [Test]
@@ -157,7 +161,7 @@ namespace Neo4jClient.Test.Deserializer
             var deserializer = new CustomJsonDeserializer();
 
             // Act
-            var deserialziedGender = deserializer.Deserialize<Foo>(content);
+            var deserialziedGender = deserializer.Deserialize<EnumModel>(content);
 
             // Assert
             Assert.IsNotNull(deserialziedGender);
@@ -173,7 +177,7 @@ namespace Neo4jClient.Test.Deserializer
             var deserializer = new CustomJsonDeserializer();
 
             // Act
-            var result = deserializer.Deserialize<Foo>(content);
+            var result = deserializer.Deserialize<EnumModel>(content);
 
             // Assert
             Assert.IsNotNull(result);
@@ -185,14 +189,14 @@ namespace Neo4jClient.Test.Deserializer
         {
             //Arrage
             var myGuid = Guid.NewGuid();
-            var foo = new Foo { Guids = new List<Guid> { myGuid } };
+            var foo = new EnumerableModel { Guids = new List<Guid> { myGuid } };
 
             // Act
             var customSerializer = new CustomJsonSerializer();
             var testStr = customSerializer.Serialize(foo);
 
             var customDeserializer = new CustomJsonDeserializer();
-            var result = customDeserializer.Deserialize<Foo>(testStr);
+            var result = customDeserializer.Deserialize<EnumerableModel>(testStr);
 
             // Assert
             Assert.AreEqual(myGuid, result.Guids.First());
