@@ -7,7 +7,14 @@ namespace Neo4jClient
 {
     internal static class HttpContentExtensions
     {
-        public static Task<T> ReadAsJson<T>(this HttpContent content, JsonSerializer serializer)
+        public static T ReadAsJson<T>(this HttpContent content, JsonSerializer serializer)
+        {
+            var readTask = content.ReadAsJsonAsync<T>(serializer);
+            readTask.Wait();
+            return readTask.Result;
+        }
+
+        public static Task<T> ReadAsJsonAsync<T>(this HttpContent content, JsonSerializer serializer)
         {
             return content
                 .ReadAsStreamAsync()

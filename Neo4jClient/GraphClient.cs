@@ -92,6 +92,9 @@ namespace Neo4jClient
             if (!RootUri.AbsoluteUri.EndsWith("/"))
                 baseUri = new Uri(RootUri.AbsoluteUri + "/");
 
+            if (relativeUri.StartsWith("/"))
+                relativeUri = relativeUri.Substring(1);
+
             return new Uri(baseUri, relativeUri);
         }
 
@@ -119,9 +122,7 @@ namespace Neo4jClient
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
             var response = SendHttpRequest(request, expectedStatusCodes);
-            var responseDataTask = response.Content.ReadAsJson<T>(new JsonSerializer());
-            responseDataTask.Wait();
-            var result = responseDataTask.Result;
+            var result = response.Content.ReadAsJson<T>(new JsonSerializer());
             return result;
         }
 
@@ -384,15 +385,17 @@ namespace Neo4jClient
             CheckRoot();
 
             var nodeEndpoint = ResolveEndpoint(reference);
-            var request = new RestRequest(nodeEndpoint, Method.GET);
-            var response = CreateRestSharpClient().Execute<NodeApiResponse<TNode>>(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
+            var response = SendHttpRequest(
+                HttpGet(nodeEndpoint),
+                HttpStatusCode.OK, HttpStatusCode.NotFound);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return null;
 
-            return response.Data.ToNode(this);
+            return response
+                .Content
+                .ReadAsJson<NodeApiResponse<TNode>>(new JsonSerializer())
+                .ToNode(this);
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
