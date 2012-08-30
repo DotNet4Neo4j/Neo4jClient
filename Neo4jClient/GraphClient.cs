@@ -992,12 +992,6 @@ namespace Neo4jClient
                 eventInstance(this, args);
         }
 
-        [Obsolete("Use response.EnsureExpectedStatusCode instead")]
-        static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)
-        {
-            ValidateExpectedResponseCodes(response, null, allowedStatusCodes);
-        }
-
 // ReSharper disable UnusedParameter.Local
         [Obsolete("Use response.EnsureExpectedStatusCode instead")]
         static void ValidateExpectedResponseCodes(RestResponseBase response, string commandDescription, params HttpStatusCode[] allowedStatusCodes)
