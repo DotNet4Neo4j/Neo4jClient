@@ -33,7 +33,6 @@ namespace Neo4jClient
 
         const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
 
-        public NullValueHandling JsonSerializerNullValueHandling { get; set; }
         public bool UseJsonStreamingIfAvailable { get; set; }
         public bool EnableSupportForNeo4jOnHeroku { get; set; }
 
@@ -68,7 +67,6 @@ namespace Neo4jClient
             RootUri = rootUri;
             this.httpFactory = httpFactory;
             this.httpClient = httpClient;
-            JsonSerializerNullValueHandling = NullValueHandling.Ignore;
             UseJsonStreamingIfAvailable = true;
         }
 
@@ -361,7 +359,7 @@ namespace Neo4jClient
         [Obsolete]
         CustomJsonSerializer BuildSerializer()
         {
-            return new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling};
+            return new CustomJsonSerializer();
         }
 
         public void DeleteRelationship(RelationshipReference reference)
