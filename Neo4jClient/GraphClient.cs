@@ -27,7 +27,7 @@ namespace Neo4jClient
         readonly IHttpFactory httpFactory;
         readonly IHttpClient httpClient;
         internal RootApiResponse RootApiResponse;
-        internal RootNode rootNode;
+        RootNode rootNode;
         internal readonly IAuthenticator Authenticator;
         bool jsonStreamingAvailable;
 
