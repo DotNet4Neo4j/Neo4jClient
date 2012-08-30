@@ -10,6 +10,7 @@
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
     <tags>neo4j REST nosql</tags>
     <dependencies>
+      <dependency id="Microsoft.Net.Http" />
       <dependency id="Newtonsoft.Json" version="[4.0.8]" />
     </dependencies>
   </metadata>
