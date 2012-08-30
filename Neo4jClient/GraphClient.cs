@@ -786,15 +786,9 @@ namespace Neo4jClient
                     throw new NotSupportedException(string.Format("IndexExists does not support indexfor {0}", indexFor));
             }
 
-            var request = new RestRequest(string.Format("{0}/{1}",indexResource, indexName), Method.GET)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.OK, HttpStatusCode.NotFound);
+            var response = SendHttpRequest(
+                HttpGet(string.Format("{0}/{1}",indexResource, indexName)),
+                HttpStatusCode.OK, HttpStatusCode.NoContent);
 
             return response.StatusCode == HttpStatusCode.OK;
         }
