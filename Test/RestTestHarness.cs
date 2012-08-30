@@ -73,7 +73,9 @@ namespace Neo4jClient.Test
                 {
                     var request = ci.Arg<HttpRequestMessage>();
                     var response = HandleRequest(request, baseUri);
-                    return new Task<HttpResponseMessage>(() => response);
+                    var task = new Task<HttpResponseMessage>(() => response);
+                    task.Start();
+                    return task;
                 });
 
             return httpClient;

@@ -112,7 +112,7 @@ namespace Neo4jClient
             }
 
             var requestTask = httpClient.SendAsync(request);
-            requestTask.RunSynchronously();
+            requestTask.Wait();
             var response = requestTask.Result;
             response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
             return response;
