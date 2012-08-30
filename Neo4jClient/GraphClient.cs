@@ -541,18 +541,17 @@ namespace Neo4jClient
         {
             //TODO: Make this a dynamic endpoint resolution
             var relationshipsEndpoint = ResolveEndpoint(reference) + "/relationships/all";
-            var request = new RestRequest(relationshipsEndpoint, Method.GET);
-            var response = CreateRestSharpClient().Execute<List<RelationshipApiResponse<object>>>(request);
+            var result = SendHttpRequestAndParseResultAs<List<RelationshipApiResponse<object>>>(
+                HttpGet(relationshipsEndpoint),
+                HttpStatusCode.OK);
 
-            var relationshipResources = response
-                .Data
+            var relationshipResources = result
                 .Select(r => r.Self.Substring(RootUri.AbsoluteUri.Length));
 
             foreach (var relationshipResource in relationshipResources)
-            {
-                request = new RestRequest(relationshipResource, Method.DELETE);
-                CreateRestSharpClient().Execute(request);
-            }
+                SendHttpRequest(
+                    HttpDelete(relationshipResource),
+                    HttpStatusCode.NoContent, HttpStatusCode.NotFound);
         }
 
         string ResolveEndpoint(NodeReference node)
