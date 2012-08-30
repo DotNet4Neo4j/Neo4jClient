@@ -15,7 +15,6 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serializer;
-using Newtonsoft.Json;
 using RestSharp;
 
 namespace Neo4jClient
