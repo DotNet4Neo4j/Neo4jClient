@@ -377,8 +377,7 @@ namespace Neo4jClient
                 .ToRelationshipReference(this);
         }
 
-        [Obsolete]
-        CustomJsonSerializer BuildSerializer()
+        static CustomJsonSerializer BuildSerializer()
         {
             return new CustomJsonSerializer();
         }
