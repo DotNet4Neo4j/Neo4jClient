@@ -98,24 +98,6 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 401 Unauthorized")]
-        public void DisableSupportForNeo4JOnHerokuWhenRequiredThrow401UnAuthorized()
-        {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.Http(401)
-                }
-            })
-            {
-                var graphClient = testHarness.CreateGraphClient();
-                graphClient.EnableSupportForNeo4jOnHeroku = false;
-                graphClient.Connect();
-            }
-        }
-
-        [Test]
         public void BasicAuthenticatorNotUsedWhenNoUserInfoSupplied()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"));
