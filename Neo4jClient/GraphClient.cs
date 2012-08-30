@@ -613,20 +613,14 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
-            var response = CreateRestSharpClient().Execute<List<List<GremlinTableCapResponse>>>(request);
-
-            ValidateExpectedResponseCodes(
-                response,
+            var response = SendHttpRequestAndParseResultAs<List<List<GremlinTableCapResponse>>>(
+                HttpPostAsJson(
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript,
+                    new GremlinApiQuery(query.QueryText, query.QueryParameters)),
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
-            var responses = response.Data ?? new List<List<GremlinTableCapResponse>> { new List<GremlinTableCapResponse>() };
+            var responses = response ?? new List<List<GremlinTableCapResponse>> { new List<GremlinTableCapResponse>() };
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
