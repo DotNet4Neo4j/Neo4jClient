@@ -341,15 +341,9 @@ namespace Neo4jClient
                 };
 
             var sourceNodeEndpoint = ResolveEndpoint(sourceNode) + "/relationships";
-            var request = new RestRequest(sourceNodeEndpoint, Method.POST)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = BuildSerializer()
-                };
-            request.AddBody(relationship);
-            var response = CreateRestSharpClient().Execute<RelationshipApiResponse<object>>(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.Created, HttpStatusCode.NotFound);
+            var response = SendHttpRequest(
+                HttpPostAsJson(sourceNodeEndpoint, relationship),
+                HttpStatusCode.Created, HttpStatusCode.NotFound);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new ApplicationException(string.Format(
@@ -357,7 +351,10 @@ namespace Neo4jClient
                     sourceNode.Id,
                     targetNode.Id));
 
-            return response.Data.ToRelationshipReference(this);
+            return response
+                .Content
+                .ReadAsJson<RelationshipApiResponse<object>>(new JsonSerializer())
+                .ToRelationshipReference(this);
         }
 
         [Obsolete]
