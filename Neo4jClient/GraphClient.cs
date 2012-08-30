@@ -902,30 +902,16 @@ namespace Neo4jClient
 
             var nodeIndexAddress = BuildNodeIndexAddress(indexName);
 
-            var request = new RestRequest(nodeIndexAddress, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(new
+            var indexEntry = new
             {
                 key = indexKey,
                 value = encodedIndexValue,
                 uri = string.Join("", RootUri, nodeAddress)
-            });
+            };
 
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(
-                response,
-                string.Format(
-                    "Adding '{0}'='{1}' to index {2} for {3} by POSTing to {4}.",
-                    indexKey,
-                    indexValue,
-                    indexName,
-                    nodeAddress,
-                    nodeIndexAddress
-                ),
+            SendHttpRequest(
+                HttpPostAsJson(nodeIndexAddress, indexEntry),
+                string.Format("Adding '{0}'='{1}' to index {2} for {3}", indexKey, indexValue, indexName, nodeAddress),
                 HttpStatusCode.Created);
         }
 
