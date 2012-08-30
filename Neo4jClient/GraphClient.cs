@@ -756,25 +756,15 @@ namespace Neo4jClient
                     throw new NotSupportedException(string.Format("GetIndexes does not support indexfor {0}", indexFor));
             }
 
-            var request = new RestRequest(indexResource, Method.GET)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(
-                response, string.Empty,
+            var response = SendHttpRequest(
+                HttpGet(indexResource),
                 HttpStatusCode.OK, HttpStatusCode.NoContent);
 
             if(response.StatusCode == HttpStatusCode.NoContent)
                 return new Dictionary<string, IndexMetaData>();
 
             var deserializer = new CustomJsonDeserializer();
-            var result = deserializer.Deserialize<Dictionary<string, IndexMetaData>>(response);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
+            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>(deserializer);
 
             return result;
         }

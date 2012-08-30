@@ -1,6 +1,8 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Neo4jClient.Deserializer;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
@@ -12,6 +14,13 @@ namespace Neo4jClient
             var readTask = content.ReadAsStringAsync();
             readTask.Wait();
             return readTask.Result;
+        }
+
+        [Obsolete]
+        public static T ReadAsJson<T>(this HttpContent content, CustomJsonDeserializer serializer) where T : new()
+        {
+            var stringContent = content.ReadAsString();
+            return serializer.Deserialize<T>(stringContent);
         }
 
         public static T ReadAsJson<T>(this HttpContent content, JsonSerializer serializer)
