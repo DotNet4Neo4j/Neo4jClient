@@ -280,7 +280,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootApiResponse.Batch, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(batchSteps);
             var response = CreateRestSharpClient().Execute<BatchResponse>(request);
@@ -325,7 +325,7 @@ namespace Neo4jClient
             var request = new RestRequest(sourceNodeEndpoint, Method.POST)
                 {
                     RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                    JsonSerializer = BuildSerializer()
                 };
             request.AddBody(relationship);
             var response = CreateRestSharpClient().Execute<RelationshipApiResponse<object>>(request);
@@ -339,6 +339,12 @@ namespace Neo4jClient
                     targetNode.Id));
 
             return response.Data.ToRelationshipReference(this);
+        }
+
+        [Obsolete]
+        CustomJsonSerializer BuildSerializer()
+        {
+            return new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling};
         }
 
         public void DeleteRelationship(RelationshipReference reference)
@@ -399,7 +405,7 @@ namespace Neo4jClient
                     AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
             }
 
-            var serializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling };
+            var serializer = BuildSerializer();
 
             var originalValuesString = changeCallback == null ? null : serializer.Serialize(node.Data);
 
@@ -418,7 +424,7 @@ namespace Neo4jClient
             var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(node.Data);
             var response = CreateRestSharpClient().Execute(request);
@@ -459,7 +465,7 @@ namespace Neo4jClient
             var updateRequest = new RestRequest(propertiesEndpoint, Method.PUT)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             updateRequest.AddBody(payload);
             var updateResponse = CreateRestSharpClient().Execute(updateRequest);
@@ -564,7 +570,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(new GremlinApiQuery(query, parameters));
             var response = CreateRestSharpClient().Execute(request);
@@ -595,7 +601,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
             var response = CreateRestSharpClient().Execute<List<List<GremlinTableCapResponse>>>(request);
@@ -630,7 +636,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(new CypherApiQuery(query));
             var response = CreateRestSharpClient().Execute(request);
@@ -672,7 +678,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(new GremlinApiQuery(query, parameters));
             var response = CreateRestSharpClient().Execute<List<RelationshipApiResponse<TData>>>(request);
@@ -717,7 +723,7 @@ namespace Neo4jClient
             var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(new GremlinApiQuery(query.QueryText, query.QueryParameters));
             var response = CreateRestSharpClient().Execute<List<NodeApiResponse<TNode>>>(request);
@@ -762,7 +768,7 @@ namespace Neo4jClient
             var request = new RestRequest(indexResource, Method.GET)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
 
             var response = CreateRestSharpClient().Execute(request);
@@ -802,7 +808,7 @@ namespace Neo4jClient
             var request = new RestRequest(string.Format("{0}/{1}",indexResource, indexName), Method.GET)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
 
             var response = CreateRestSharpClient().Execute(request);
@@ -845,7 +851,7 @@ namespace Neo4jClient
             var request = new RestRequest(nodeResource, Method.POST)
                 {
                     RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                    JsonSerializer = BuildSerializer()
                 };
             request.AddBody(createIndexApiRequest);
 
@@ -903,7 +909,7 @@ namespace Neo4jClient
             var request = new RestRequest(string.Format("{0}/{1}", indexResource, indexName), Method.DELETE)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
 
             var response = CreateRestSharpClient().Execute(request);
@@ -922,7 +928,7 @@ namespace Neo4jClient
             var request = new RestRequest(nodeIndexAddress, Method.DELETE)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
 
             var response = CreateRestSharpClient().Execute(request);
@@ -949,7 +955,7 @@ namespace Neo4jClient
             var request = new RestRequest(nodeIndexAddress, Method.POST)
             {
                 RequestFormat = DataFormat.Json,
-                JsonSerializer = new CustomJsonSerializer { NullHandling = JsonSerializerNullValueHandling }
+                JsonSerializer = BuildSerializer()
             };
             request.AddBody(new
             {
@@ -1028,7 +1034,7 @@ namespace Neo4jClient
             var request = new RestRequest(indexResource + "/" + indexName, Method.GET)
                 {
                     RequestFormat = DataFormat.Json,
-                    JsonSerializer = new CustomJsonSerializer {NullHandling = JsonSerializerNullValueHandling}
+                    JsonSerializer = BuildSerializer()
                 };
 
             request.AddParameter("query", query);
