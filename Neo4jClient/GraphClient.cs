@@ -118,6 +118,17 @@ namespace Neo4jClient
             return request;
         }
 
+        HttpRequestMessage HttpPutAsJson(string relativeUri, object putBody)
+        {
+            var absoluteUri = BuildUri(relativeUri);
+            var postBodyJson = BuildSerializer().Serialize(putBody);
+            var request = new HttpRequestMessage(HttpMethod.Put, absoluteUri)
+            {
+                Content = new StringContent(postBodyJson, Encoding.UTF8, "application/json")
+            };
+            return request;
+        }
+
         HttpResponseMessage SendHttpRequest(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
             var requestTask = httpClient.SendAsync(request);
@@ -437,21 +448,15 @@ namespace Neo4jClient
                 changeCallback(differences);
             }
 
-            var nodeEndpoint = ResolveEndpoint(nodeReference);
-            var request = new RestRequest(nodeEndpoint + "/properties", Method.PUT)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(node.Data);
-            var response = CreateRestSharpClient().Execute(request);
+            var nodePropertiesEndpoint = ResolveEndpoint(nodeReference) + "/properties";
+            SendHttpRequest(
+                HttpPutAsJson(nodePropertiesEndpoint, node.Data),
+                HttpStatusCode.NoContent);
 
             if (indexEntriesCallback != null)
             {
                 ReIndex(node.Reference, indexEntries);
             }
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
