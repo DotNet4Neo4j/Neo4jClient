@@ -141,8 +141,7 @@ namespace Neo4jClient
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
             var response = SendHttpRequest(request, expectedStatusCodes);
-            var result = response.Content.ReadAsJson<T>(new JsonSerializer());
-            return result;
+            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(new JsonSerializer());
         }
 
         public virtual void Connect()
@@ -477,21 +476,16 @@ namespace Neo4jClient
 
             var propertiesEndpoint = ResolveEndpoint(relationshipReference) + "/properties";
 
-            var getRequest = new RestRequest(propertiesEndpoint, Method.GET);
-            var getResponse = CreateRestSharpClient().Execute<TRelationshipData>(getRequest);
-            ValidateExpectedResponseCodes(getResponse, HttpStatusCode.OK, HttpStatusCode.NoContent);
+            var currentData = SendHttpRequestAndParseResultAs<TRelationshipData>(
+                HttpGet(propertiesEndpoint),
+                HttpStatusCode.OK, HttpStatusCode.NoContent);
 
-            var payload = getResponse.Data ?? new TRelationshipData();
+            var payload = currentData ?? new TRelationshipData();
             updateCallback(payload);
 
-            var updateRequest = new RestRequest(propertiesEndpoint, Method.PUT)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            updateRequest.AddBody(payload);
-            var updateResponse = CreateRestSharpClient().Execute(updateRequest);
-            ValidateExpectedResponseCodes(updateResponse, HttpStatusCode.NoContent);
+            SendHttpRequest(
+                HttpPutAsJson(propertiesEndpoint, payload),
+                HttpStatusCode.NoContent);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
