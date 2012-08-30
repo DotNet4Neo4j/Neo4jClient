@@ -1,51 +1,55 @@
-﻿using RestSharp;
+﻿using System.Net.Http;
+using Neo4jClient.Serializer;
 
 namespace Neo4jClient.Test
 {
-    class MockRequest
+    public class MockRequest
     {
-        public static IMockRequestDefinition Get(string uri)
+        MockRequest() {}
+
+        public HttpMethod Method { get; set; }
+        public string Resource { get; set; }
+        public string Body { get; set; }
+
+        public static MockRequest Get(string uri)
         {
             if (uri == "") uri = "/";
-            return new NeoHttpRequest {Resource = uri, Method = Method.GET};
+            return new MockRequest { Resource = uri, Method = HttpMethod.Get };
         }
 
-        public static IMockRequestDefinition PostJson(string uri, string json)
+        public static MockRequest PostJson(string uri, string json)
         {
-            return new NeoHttpRequest
+            return new MockRequest
             {
                 Resource = uri,
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json,
+                Method = HttpMethod.Post,
                 Body = json
             };
         }
 
-        public static IMockRequestDefinition PostObjectAsJson(string uri, object body)
+        public static MockRequest PostObjectAsJson(string uri, object body)
         {
-            return new NeoHttpRequest
+            return new MockRequest
             {
                 Resource = uri,
-                Method = Method.POST,
-                RequestFormat = DataFormat.Json,
-                Body = body
+                Method = HttpMethod.Post,
+                Body = new CustomJsonSerializer().Serialize(body)
             };
         }
 
-        public static IMockRequestDefinition PutObjectAsJson(string uri, object body)
+        public static MockRequest PutObjectAsJson(string uri, object body)
         {
-            return new NeoHttpRequest
+            return new MockRequest
             {
                 Resource = uri,
-                Method = Method.PUT,
-                RequestFormat = DataFormat.Json,
-                Body = body
+                Method = HttpMethod.Put,
+                Body = new CustomJsonSerializer().Serialize(body)
             };
         }
 
-        public static IMockRequestDefinition Delete(string uri)
+        public static MockRequest Delete(string uri)
         {
-            return new NeoHttpRequest { Resource = uri, Method = Method.DELETE };
+            return new MockRequest { Resource = uri, Method = HttpMethod.Delete };
         }
     }
 }

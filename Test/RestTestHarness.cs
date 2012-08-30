@@ -12,12 +12,12 @@ namespace Neo4jClient.Test
 {
     public class RestTestHarness : IEnumerable, IDisposable
     {
-        readonly IDictionary<IMockRequestDefinition, IHttpResponse> recordedResponses = new Dictionary<IMockRequestDefinition, IHttpResponse>();
-        readonly IList<IMockRequestDefinition> processedRequests = new List<IMockRequestDefinition>();
+        readonly IDictionary<MockRequest, IHttpResponse> recordedResponses = new Dictionary<MockRequest, IHttpResponse>();
+        readonly IList<MockRequest> processedRequests = new List<MockRequest>();
         readonly IList<string> unservicedRequests = new List<string>();
         public readonly string BaseUri = "http://foo/db/data";
 
-        public void Add(IMockRequestDefinition request, IHttpResponse response)
+        public void Add(MockRequest request, IHttpResponse response)
         {
             recordedResponses.Add(request, response);
         }
@@ -100,11 +100,7 @@ namespace Neo4jClient.Test
                     .Where(can =>
                     {
                         var cannedRequest = can.Key;
-                        var cannedRequestBody = cannedRequest
-                            .Parameters
-                            .Where(p => p.Type == ParameterType.RequestBody)
-                            .Select(p => p.Value as string)
-                            .SingleOrDefault();
+                        var cannedRequestBody = cannedRequest.Body;
                         cannedRequestBody = cannedRequestBody ?? "";
                         return IsJsonEquivalent(cannedRequestBody, requestBody);
                     });
