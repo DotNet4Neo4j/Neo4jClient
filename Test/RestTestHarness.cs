@@ -114,7 +114,7 @@ namespace Neo4jClient.Test
             if (request.Content != null)
             {
                 var requestBodyTask = request.Content.ReadAsStringAsync();
-                requestBodyTask.RunSynchronously();
+                requestBodyTask.Wait();
                 requestBody = requestBodyTask.Result;
             }
 

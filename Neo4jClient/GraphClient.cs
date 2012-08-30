@@ -107,6 +107,17 @@ namespace Neo4jClient
             return new HttpRequestMessage(HttpMethod.Get, absoluteUri);
         }
 
+        HttpRequestMessage HttpPostAsJson(string relativeUri, object postBody)
+        {
+            var absoluteUri = BuildUri(relativeUri);
+            var postBodyJson = BuildSerializer().Serialize(postBody);
+            var request = new HttpRequestMessage(HttpMethod.Post, absoluteUri)
+            {
+                Content = new StringContent(postBodyJson, Encoding.UTF8, "application/json")
+            };
+            return request;
+        }
+
         HttpResponseMessage SendHttpRequest(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
             var requestTask = httpClient.SendAsync(request);
@@ -291,17 +302,11 @@ namespace Neo4jClient
 
         BatchResponse ExecuteBatch(List<BatchStep> batchSteps)
         {
-            var request = new RestRequest(RootApiResponse.Batch, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(batchSteps);
-            var response = CreateRestSharpClient().Execute<BatchResponse>(request);
+            var response = SendHttpRequestAndParseResultAs<BatchResponse>(
+                HttpPostAsJson(RootApiResponse.Batch, batchSteps),
+                HttpStatusCode.OK);
 
-            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
-
-            return response.Data;
+            return response;
         }
 
         public virtual RelationshipReference CreateRelationship<TSourceNode, TRelationship>(
