@@ -23,7 +23,6 @@ namespace Neo4jClient
     public class GraphClient : IGraphClient
     {
         internal readonly Uri RootUri;
-        readonly IHttpFactory httpFactory;
         readonly IHttpClient httpClient;
         internal RootApiResponse RootApiResponse;
         RootNode rootNode;
@@ -36,20 +35,20 @@ namespace Neo4jClient
         public bool EnableSupportForNeo4jOnHeroku { get; set; }
 
         public GraphClient(Uri rootUri)
-            : this(rootUri, new Http(), new HttpClientWrapper())
+            : this(rootUri, new HttpClientWrapper())
         {
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.UseNagleAlgorithm = false;
         }
 
         public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm)
-            : this(rootUri, new Http(), new HttpClientWrapper())
+            : this(rootUri, new HttpClientWrapper())
         {
             ServicePointManager.Expect100Continue = expect100Continue;
             ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
 
-        public GraphClient(Uri rootUri, IHttpFactory httpFactory, IHttpClient httpClient)
+        public GraphClient(Uri rootUri, IHttpClient httpClient)
         {
             if(!string.IsNullOrWhiteSpace(rootUri.UserInfo))
             {
@@ -64,23 +63,8 @@ namespace Neo4jClient
             }
 
             RootUri = rootUri;
-            this.httpFactory = httpFactory;
             this.httpClient = httpClient;
             UseJsonStreamingIfAvailable = true;
-        }
-
-        [Obsolete("Use the httpClient field instead")]
-        IRestClient CreateRestSharpClient()
-        {
-            var client = new RestClient(RootUri.AbsoluteUri) {HttpFactory = httpFactory};
-
-            if (Authenticator != null)
-                client.Authenticator = Authenticator;
-
-            client.RemoveHandler("application/json");
-            client.AddHandler("application/json", new CustomJsonDeserializer());
-            if (UseJsonStreamingIfAvailable && jsonStreamingAvailable) client.AddDefaultHeader("Accept", "application/json;stream=true");
-            return client;
         }
 
         Uri BuildUri(string relativeUri)
@@ -136,6 +120,13 @@ namespace Neo4jClient
 
         HttpResponseMessage SendHttpRequest(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
         {
+            if (UseJsonStreamingIfAvailable && jsonStreamingAvailable)
+            {
+                request.Headers.Accept.Clear();
+                request.Headers.Remove("Accept");
+                request.Headers.Add("Accept", "application/json;stream=true");
+            }
+
             var requestTask = httpClient.SendAsync(request);
             requestTask.RunSynchronously();
             var response = requestTask.Result;
@@ -143,15 +134,15 @@ namespace Neo4jClient
             return response;
         }
 
-        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
+        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes) where T : new()
         {
             return SendHttpRequestAndParseResultAs<T>(request, null, expectedStatusCodes);
         }
 
-        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes) where T : new()
         {
             var response = SendHttpRequest(request, commandDescription, expectedStatusCodes);
-            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(new JsonSerializer());
+            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>();
         }
 
         public virtual void Connect()
@@ -373,7 +364,7 @@ namespace Neo4jClient
 
             return response
                 .Content
-                .ReadAsJson<RelationshipApiResponse<object>>(new JsonSerializer())
+                .ReadAsJson<RelationshipApiResponse<object>>()
                 .ToRelationshipReference(this);
         }
 
@@ -412,7 +403,7 @@ namespace Neo4jClient
 
             return response
                 .Content
-                .ReadAsJson<NodeApiResponse<TNode>>(new JsonSerializer())
+                .ReadAsJson<NodeApiResponse<TNode>>()
                 .ToNode(this);
         }
 
@@ -757,8 +748,7 @@ namespace Neo4jClient
             if(response.StatusCode == HttpStatusCode.NoContent)
                 return new Dictionary<string, IndexMetaData>();
 
-            var deserializer = new CustomJsonDeserializer();
-            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>(deserializer);
+            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>();
 
             return result;
         }
@@ -984,36 +974,6 @@ namespace Neo4jClient
             var eventInstance = OperationCompleted;
             if (eventInstance != null)
                 eventInstance(this, args);
-        }
-
-// ReSharper disable UnusedParameter.Local
-        [Obsolete("Use response.EnsureExpectedStatusCode instead")]
-        static void ValidateExpectedResponseCodes(RestResponseBase response, string commandDescription, params HttpStatusCode[] allowedStatusCodes)
-// ReSharper restore UnusedParameter.Local
-        {
-            commandDescription = string.IsNullOrWhiteSpace(commandDescription)
-                ? ""
-                : commandDescription + "\r\n\r\n";
-
-            var rawBody = response.RawBytes == null || response.RawBytes.Length == 0
-                ? string.Empty
-                : string.Format("\r\n\r\nThe raw response body was: {0}", Encoding.UTF8.GetString(response.RawBytes));
-
-            if (response.ErrorException != null)
-                throw new ApplicationException(string.Format(
-                    "Received an exception when executing the request.\r\n\r\n{0}The exception was: {1} {2}{3}",
-                    commandDescription,
-                    response.ErrorMessage,
-                    response.ErrorException,
-                    rawBody));
-
-            if (!allowedStatusCodes.Contains(response.StatusCode))
-                throw new ApplicationException(string.Format(
-                    "Received an unexpected HTTP status when executing the request.\r\n\r\n{0}The response status was: {1} {2}{3}",
-                    commandDescription,
-                    (int) response.StatusCode,
-                    response.StatusDescription,
-                    rawBody));
         }
     }
 }
