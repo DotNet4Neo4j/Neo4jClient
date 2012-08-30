@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RestSharp.Extensions;
 
 namespace Neo4jClient.Deserializer
 {
@@ -68,8 +67,9 @@ namespace Neo4jClient.Deserializer
             {
                 // no primitives can contain quotes so we can safely remove them
                 // allows converting a json value like {"index": "1"} to an int
-                var tmpVal = value.AsString().Replace("\"", string.Empty);
-                propertyInfo.SetValue(targetObject, tmpVal.ChangeType(propertyType), null);
+                object tmpVal = value.AsString().Replace("\"", string.Empty);
+                tmpVal = Convert.ChangeType(tmpVal, propertyType);
+                propertyInfo.SetValue(targetObject, tmpVal, null);
             }
             else if (propertyType.IsEnum)
             {
@@ -273,7 +273,7 @@ namespace Neo4jClient.Deserializer
                     var value = element as JValue;
                     if (value != null)
                     {
-                        list.Add(value.Value.ChangeType(itemType));
+                        list.Add(Convert.ChangeType(value.Value, itemType));
                     }
                 }
                 else if (itemType == typeof(string))
@@ -303,7 +303,7 @@ namespace Neo4jClient.Deserializer
                     var value = element as JValue;
                     if (value != null)
                     {
-                        list.Add(value.Value.ChangeType(itemType));
+                        list.Add(Convert.ChangeType(value.Value, itemType));
                     }
                 }
                 else if (itemType == typeof (string))
