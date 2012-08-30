@@ -887,22 +887,10 @@ namespace Neo4jClient
                 Uri.EscapeDataString(indexName),
                 Uri.EscapeDataString(nodeId.ToString(CultureInfo.InvariantCulture))
             });
-            var request = new RestRequest(nodeIndexAddress, Method.DELETE)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
 
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(
-                response,
-                string.Format(
-                    "Deleting entries from index {0} for node {1} by DELETing to {2}.",
-                    indexName,
-                    nodeId,
-                    nodeIndexAddress
-                ),
+            SendHttpRequest(
+                HttpDelete(nodeIndexAddress),
+                string.Format("Deleting entries from index {0} for node {1}", indexName, nodeId),
                 HttpStatusCode.NoContent);
         }
 
