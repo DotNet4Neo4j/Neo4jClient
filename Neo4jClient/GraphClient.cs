@@ -804,14 +804,14 @@ namespace Neo4jClient
         {
             CheckRoot();
 
-            string nodeResource;
+            string indexResource;
             switch (indexFor)
             {
                 case IndexFor.Node:
-                    nodeResource = RootApiResponse.NodeIndex;
+                    indexResource = RootApiResponse.NodeIndex;
                     break;
                 case IndexFor.Relationship:
-                    nodeResource = RootApiResponse.RelationshipIndex;
+                    indexResource = RootApiResponse.RelationshipIndex;
                     break;
                 default:
                     throw new NotSupportedException(string.Format("CreateIndex does not support indexfor {0}", indexFor));
@@ -823,16 +823,9 @@ namespace Neo4jClient
                     config
                 };
 
-            var request = new RestRequest(nodeResource, Method.POST)
-                {
-                    RequestFormat = DataFormat.Json,
-                    JsonSerializer = BuildSerializer()
-                };
-            request.AddBody(createIndexApiRequest);
-
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.Created);
+            SendHttpRequest(
+                HttpPostAsJson(indexResource, createIndexApiRequest),
+                HttpStatusCode.Created);
         }
 
         public void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries)
