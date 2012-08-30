@@ -116,34 +116,6 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        public void DisableSupportForNeo4JOnHerokuShouldNotChangeResource()
-        {
-            using (var testHarness = new RestTestHarness())
-            {
-                var graphClient = testHarness.CreateGraphClient();
-                graphClient.EnableSupportForNeo4jOnHeroku = false;
-                graphClient.Connect();
-            }
-        }
-
-        [Test]
-        public void EnableSupportForNeo4JOnHerokuShouldChangeResourceToTrailingSlash()
-        {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get("/"),
-                    MockResponse.NeoRoot()
-                }
-            })
-            {
-                var graphClient = testHarness.CreateGraphClient();
-                graphClient.EnableSupportForNeo4jOnHeroku = true;
-                graphClient.Connect();
-            }
-        }
-
-        [Test]
         public void BasicAuthenticatorNotUsedWhenNoUserInfoSupplied()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"));

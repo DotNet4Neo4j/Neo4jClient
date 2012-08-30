@@ -6,7 +6,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.ApiModels.Gremlin;
@@ -36,14 +38,14 @@ namespace Neo4jClient
         public bool EnableSupportForNeo4jOnHeroku { get; set; }
 
         public GraphClient(Uri rootUri)
-            : this(rootUri, new Http(), new HttpClient())
+            : this(rootUri, new Http(), new HttpClientWrapper())
         {
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.UseNagleAlgorithm = false;
         }
 
         public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm)
-            : this(rootUri, new Http(), new HttpClient())
+            : this(rootUri, new Http(), new HttpClientWrapper())
         {
             ServicePointManager.Expect100Continue = expect100Continue;
             ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
@@ -84,18 +86,30 @@ namespace Neo4jClient
             return client;
         }
 
+        Uri BuildUri(string relativeUri)
+        {
+            return new Uri(RootUri, relativeUri);
+        }
+
+        HttpRequestMessage Get(string relativeUri)
+        {
+            var absoluteUri = BuildUri(relativeUri);
+            return new HttpRequestMessage(HttpMethod.Get, absoluteUri);
+        }
+
         public virtual void Connect()
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            //HACK: temporary solution to issue: http://goo.gl/oCKsq
-            var request = new RestRequest(EnableSupportForNeo4jOnHeroku ? "/ " : "", Method.GET);
-            var response = CreateRestSharpClient().Execute<RootApiResponse>(request);
+            var requestTask = httpClient.SendAsync(Get(""));
+            requestTask.RunSynchronously();
+            var response = requestTask.Result;
+            response.EnsureExpectedStatusCode(HttpStatusCode.OK);
+            var responseDataTask = response.Content.ReadAsJson<RootApiResponse>(new JsonSerializer());
+            responseDataTask.Wait();
 
-            ValidateExpectedResponseCodes(response, HttpStatusCode.OK);
-
-            RootApiResponse = response.Data;
+            RootApiResponse = responseDataTask.Result;
             RootApiResponse.Batch = RootApiResponse.Batch.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.Node = RootApiResponse.Node.Substring(RootUri.AbsoluteUri.Length);
             RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(RootUri.AbsoluteUri.Length);
@@ -1035,12 +1049,14 @@ namespace Neo4jClient
                 eventInstance(this, args);
         }
 
+        [Obsolete("Use response.EnsureExpectedStatusCode instead")]
         static void ValidateExpectedResponseCodes(RestResponseBase response, params HttpStatusCode[] allowedStatusCodes)
         {
             ValidateExpectedResponseCodes(response, null, allowedStatusCodes);
         }
 
 // ReSharper disable UnusedParameter.Local
+        [Obsolete("Use response.EnsureExpectedStatusCode instead")]
         static void ValidateExpectedResponseCodes(RestResponseBase response, string commandDescription, params HttpStatusCode[] allowedStatusCodes)
 // ReSharper restore UnusedParameter.Local
         {

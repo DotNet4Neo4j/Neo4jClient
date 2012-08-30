@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using RestSharp;
@@ -30,7 +32,7 @@ namespace Neo4jClient.Test
             if (!recordedResponses.Keys.Any(r => r.Resource == "" || r.Resource == "/"))
                 Add(MockRequest.Get(""), MockResponse.NeoRoot());
 
-            var httpClient = GenerateHttpClient();
+            var httpClient = GenerateHttpClient(BaseUri);
 
             var graphClient = new GraphClient(new Uri(BaseUri), HttpFactory, httpClient);
             return graphClient;
@@ -67,6 +69,7 @@ namespace Neo4jClient.Test
                 string.Join(", ", resourcesThatWereNeverRequested));
         }
 
+        [Obsolete("This is only to support RestSharp")]
         public IHttpFactory GenerateHttpFactory(string baseUri)
         {
             var httpFactory = Substitute.For<IHttpFactory>();
@@ -85,11 +88,80 @@ namespace Neo4jClient.Test
             return httpFactory;
         }
 
-        public IHttpClient GenerateHttpClient()
+        public IHttpClient GenerateHttpClient(string baseUri)
         {
-            return Substitute.For<IHttpClient>();
+            var httpClient = Substitute.For<IHttpClient>();
+
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>())
+                .ReturnsForAnyArgs(ci =>
+                {
+                    var request = ci.Arg<HttpRequestMessage>();
+                    var response = HandleRequest(request, baseUri);
+                    return new Task<HttpResponseMessage>(() => response);
+                });
+
+            return httpClient;
         }
 
+        HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
+        {
+            var matchingRequests = recordedResponses
+                .Where(can => request.RequestUri.AbsoluteUri == baseUri + can.Key.Resource)
+                .Where(can => request.Method.ToString().Equals(can.Key.Method.ToString(), StringComparison.OrdinalIgnoreCase));
+
+            string requestBody = null;
+            if (request.Content != null)
+            {
+                var requestBodyTask = request.Content.ReadAsStringAsync();
+                requestBodyTask.RunSynchronously();
+                requestBody = requestBodyTask.Result;
+            }
+
+            if (request.Method == HttpMethod.Post)
+            {
+                matchingRequests = matchingRequests
+                    .Where(can =>
+                    {
+                        var cannedRequest = can.Key;
+                        var cannedRequestBody = cannedRequest
+                            .Parameters
+                            .Where(p => p.Type == ParameterType.RequestBody)
+                            .Select(p => p.Value as string)
+                            .SingleOrDefault();
+                        cannedRequestBody = cannedRequestBody ?? "";
+                        return IsJsonEquivalent(cannedRequestBody, requestBody);
+                    });
+            }
+
+            var results = matchingRequests.ToArray();
+
+            if (!results.Any())
+            {
+                var message = string.Format("No corresponding request-response pair was defined in the test harness for: {0} {1}", request.Method, request.RequestUri.AbsoluteUri);
+                if (!string.IsNullOrEmpty(requestBody))
+                {
+                    message += "\r\n\r\n" + requestBody;
+                }
+                unservicedRequests.Add(message);
+                throw new InvalidOperationException(message);
+            }
+
+            var result = results.Single();
+
+            processedRequests.Add(result.Key);
+
+            var response = result.Value;
+
+            return new HttpResponseMessage
+            {
+                StatusCode = response.StatusCode,
+                ReasonPhrase = response.StatusDescription,
+                Content = string.IsNullOrEmpty(response.Content) ? null : new StringContent(response.Content, null, response.ContentType)
+            };
+        }
+
+        [Obsolete("This is only to support RestSharp")]
         IList<HttpParameter> HandleParameters(IHttp http, string baseUri)
         {
             var matchingRequests = recordedResponses
@@ -104,6 +176,7 @@ namespace Neo4jClient.Test
                 .SingleOrDefault();
         }
 
+        [Obsolete("This is only to support RestSharp")]
         IHttpResponse HandleRequest(IHttp http, Method method, string baseUri)
         {
             var matchingRequests = recordedResponses

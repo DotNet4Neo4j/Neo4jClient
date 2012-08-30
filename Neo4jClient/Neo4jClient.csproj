@@ -67,6 +67,8 @@
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="HttpClient.cs" />
+    <Compile Include="HttpContentExtensions.cs" />
+    <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="IHttpClient.cs" />
     <Compile Include="RelationshipReference`TData.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Return.cs" />
