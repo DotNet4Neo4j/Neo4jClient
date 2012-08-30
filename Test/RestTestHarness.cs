@@ -22,11 +22,6 @@ namespace Neo4jClient.Test
             recordedResponses.Add(request, response);
         }
 
-        IHttpFactory HttpFactory
-        {
-            get { return GenerateHttpFactory(BaseUri); }
-        }
-
         public GraphClient CreateGraphClient()
         {
             if (!recordedResponses.Keys.Any(r => r.Resource == "" || r.Resource == "/"))
@@ -67,25 +62,6 @@ namespace Neo4jClient.Test
             Assert.Fail(
                 "The test expected REST requests for the following resources, but they were never made: {0}",
                 string.Join(", ", resourcesThatWereNeverRequested));
-        }
-
-        [Obsolete("This is only to support RestSharp")]
-        public IHttpFactory GenerateHttpFactory(string baseUri)
-        {
-            var httpFactory = Substitute.For<IHttpFactory>();
-            httpFactory
-                .Create()
-                .Returns(callInfo =>
-                {
-                    var http = Substitute.For<IHttp>();
-                    http.Delete().Returns(ci => HandleRequest(http, Method.DELETE, baseUri));
-                    http.Get().Returns(ci => HandleRequest(http, Method.GET, baseUri));
-                    http.Post().Returns(ci => HandleRequest(http, Method.POST, baseUri));
-                    http.Parameters.ReturnsForAnyArgs(ci => HandleParameters(http, baseUri));
-                    http.Put().Returns(ci => HandleRequest(http, Method.PUT, baseUri));
-                    return http;
-                });
-            return httpFactory;
         }
 
         public IHttpClient GenerateHttpClient(string baseUri)
@@ -159,67 +135,6 @@ namespace Neo4jClient.Test
                 ReasonPhrase = response.StatusDescription,
                 Content = string.IsNullOrEmpty(response.Content) ? null : new StringContent(response.Content, null, response.ContentType)
             };
-        }
-
-        [Obsolete("This is only to support RestSharp")]
-        IList<HttpParameter> HandleParameters(IHttp http, string baseUri)
-        {
-            var matchingRequests = recordedResponses
-                .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource);
-
-            return matchingRequests
-                .Select(can => can
-                    .Key
-                    .Parameters
-                    .Select(param => new HttpParameter { Name = param.Name, Value = param.Value.ToString() })
-                    .ToList())
-                .SingleOrDefault();
-        }
-
-        [Obsolete("This is only to support RestSharp")]
-        IHttpResponse HandleRequest(IHttp http, Method method, string baseUri)
-        {
-            var matchingRequests = recordedResponses
-                .Where(can => http.Url.AbsoluteUri == baseUri + can.Key.Resource)
-                .Where(can => can.Key.Method == method);
-
-            if (method == Method.POST)
-            {
-                matchingRequests = matchingRequests
-                    .Where(can =>
-                    {
-                        var request = can.Key;
-                        var requestBody = request
-                            .Parameters
-                            .Where(p => p.Type == ParameterType.RequestBody)
-                            .Select(p => p.Value as string)
-                            .SingleOrDefault();
-                        requestBody = requestBody ?? "";
-                        return IsJsonEquivalent(requestBody, http.RequestBody);
-                    });
-            }
-
-            var results = matchingRequests.ToArray();
-
-            if (!results.Any())
-            {
-                var message = string.Format("No corresponding request-response pair was defined in the test harness for: {0} {1}", method, http.Url.AbsoluteUri);
-                if (!string.IsNullOrEmpty(http.RequestBody))
-                {
-                    message += "\r\n\r\n" + http.RequestBody;
-                }
-                unservicedRequests.Add(message);
-                throw new InvalidOperationException(message);
-            }
-
-            var result = results.Single();
-
-            processedRequests.Add(result.Key);
-
-            var response = result.Value;
-            if (response.ResponseStatus == ResponseStatus.None)
-                response.ResponseStatus = ResponseStatus.Completed;
-            return response;
         }
 
         static bool IsJsonEquivalent(string lhs, string rhs)
