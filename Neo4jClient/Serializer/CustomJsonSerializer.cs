@@ -1,11 +1,10 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
-using RestSharp.Serializers;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Neo4jClient.Serializer
 {
-    public class CustomJsonSerializer : ISerializer
+    public class CustomJsonSerializer
     {
         public string ContentType { get; set; }
         public string DateFormat { get; set; }
