@@ -76,7 +76,6 @@
     <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
     <Compile Include="MockRequest.cs" />
     <Compile Include="MockResponse.cs" />
-    <Compile Include="NeoHttpResponse.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryTests.cs" />
     <Compile Include="RestTestHarness.cs" />

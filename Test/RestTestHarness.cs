@@ -6,18 +6,17 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 
 namespace Neo4jClient.Test
 {
     public class RestTestHarness : IEnumerable, IDisposable
     {
-        readonly IDictionary<MockRequest, IHttpResponse> recordedResponses = new Dictionary<MockRequest, IHttpResponse>();
+        readonly IDictionary<MockRequest, MockResponse> recordedResponses = new Dictionary<MockRequest, MockResponse>();
         readonly IList<MockRequest> processedRequests = new List<MockRequest>();
         readonly IList<string> unservicedRequests = new List<string>();
         public readonly string BaseUri = "http://foo/db/data";
 
-        public void Add(MockRequest request, IHttpResponse response)
+        public void Add(MockRequest request, MockResponse response)
         {
             recordedResponses.Add(request, response);
         }

@@ -1,21 +1,32 @@
 ﻿using System.Net;
-using RestSharp;
 
 namespace Neo4jClient.Test
 {
-    class MockResponse
+    public class MockResponse
     {
-        public static IHttpResponse Json(HttpStatusCode statusCode, string json)
+        MockResponse() {}
+
+        public HttpStatusCode StatusCode { get; set; }
+
+        public string StatusDescription
         {
-            return new NeoHttpResponse
+            get { return StatusCode.ToString(); }
+        }
+
+        public string ContentType { get; set; }
+        public string Content { get; set; }
+
+        public static MockResponse Json(HttpStatusCode statusCode, string json)
+        {
+            return new MockResponse
             {
                 StatusCode = statusCode,
                 ContentType = "application/json",
-                TestContent = json
+                Content = json
             };
         }
 
-        public static IHttpResponse NeoRoot()
+        public static MockResponse NeoRoot()
         {
             return Json(HttpStatusCode.OK, @"{
                 'cypher' : 'http://foo/db/data/cypher',
@@ -34,7 +45,7 @@ namespace Neo4jClient.Test
             }");
         }
 
-        public static IHttpResponse NeoRootPre15M02()
+        public static MockResponse NeoRootPre15M02()
         {
             return Json(HttpStatusCode.OK, @"{
                 'batch' : 'http://foo/db/data/batch',
@@ -48,12 +59,11 @@ namespace Neo4jClient.Test
             }");
         }
 
-        public static IHttpResponse Http(int statusCode)
+        public static MockResponse Http(int statusCode)
         {
-            return new NeoHttpResponse
+            return new MockResponse
             {
-                StatusCode = (HttpStatusCode)statusCode,
-                StatusDescription = ((HttpStatusCode)statusCode).ToString()
+                StatusCode = (HttpStatusCode)statusCode
             };
         }
     }
