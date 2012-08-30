@@ -150,7 +150,7 @@ namespace Neo4jClient
 
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
         {
-            var response = SendHttpRequest(request, expectedStatusCodes);
+            var response = SendHttpRequest(request, commandDescription, expectedStatusCodes);
             return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(new JsonSerializer());
         }
 
