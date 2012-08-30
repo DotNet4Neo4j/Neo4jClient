@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Net.Http;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Gremlin;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
 {
@@ -75,7 +75,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node", testNode);
 
             var testHarness = new RestTestHarness
             {
@@ -219,7 +219,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node", testNode);
 
             var testHarness = new RestTestHarness
             {
@@ -264,7 +264,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node", testNode);
 
             var testHarness = new RestTestHarness
             {
@@ -309,8 +309,8 @@ namespace Neo4jClient.Test.GraphClientTests
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var testRelationshipPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "{0}/relationships",
+            batch.Add(HttpMethod.Post, "/node", testNode);
+            batch.Add(HttpMethod.Post, "{0}/relationships",
                 new RelationshipTemplate { To = "/node/789", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
             var testHarness = new RestTestHarness
@@ -371,9 +371,9 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
-            batch.Add(Method.POST, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
+            batch.Add(HttpMethod.Post, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
+            batch.Add(HttpMethod.Post, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
 
             var testHarness = new RestTestHarness
             {
@@ -452,8 +452,8 @@ namespace Neo4jClient.Test.GraphClientTests
             var testNode = new TestNode2 { Foo = "foo", Bar = "bar" };
             var testRelationshipPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "/node/789/relationships",
+            batch.Add(HttpMethod.Post, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node/789/relationships",
                 new RelationshipTemplate { To = "{0}", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
             var testHarness = new RestTestHarness
