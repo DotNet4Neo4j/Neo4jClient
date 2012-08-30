@@ -1,13 +1,10 @@
 ﻿using System.Collections;
 using Newtonsoft.Json.Linq;
-using RestSharp;
-using RestSharp.Deserializers;
-using RestSharp.Extensions;
 using System.Globalization;
 
 namespace Neo4jClient.Deserializer
 {
-    public class CustomJsonDeserializer : IDeserializer
+    public class CustomJsonDeserializer
     {
         public string RootElement { get; set; }
         public string Namespace { get; set; }
@@ -21,41 +18,33 @@ namespace Neo4jClient.Deserializer
 
         public T Deserialize<T>(string content) where T : new()
         {
-            return Deserialize<T>(new RestResponse
-            {
-                Content = content
-            });
-        }
-
-        public T Deserialize<T>(RestResponse response) where T : new()
-        {
             var target = new T();
 
-            response.Content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(response.Content);
+            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
             if (target is IList)
             {
                 var objType = target.GetType();
 
-                if (RootElement.HasValue())
+                if (!string.IsNullOrEmpty(RootElement))
                 {
-                    var root = FindRoot(response.Content);
+                    var root = FindRoot(content);
                     target = (T)CommonDeserializerMethods.BuildList(objType, root.Children(), Culture, new TypeMapping[0], 0);
                 }
                 else
                 {
-                    var json = JArray.Parse(response.Content);
+                    var json = JArray.Parse(content);
                     target = (T)CommonDeserializerMethods.BuildList(objType, json.Root.Children(), Culture, new TypeMapping[0], 0);
                 }
             }
             else if (target is IDictionary)
             {
-                var root = FindRoot(response.Content);
+                var root = FindRoot(content);
                 target = (T)CommonDeserializerMethods.BuildDictionary(target.GetType(), root.Children(), Culture, new TypeMapping[0], 0);
             }
             else
             {
-                var root = FindRoot(response.Content);
+                var root = FindRoot(content);
                 CommonDeserializerMethods.Map(target, root, Culture, new TypeMapping[0], 0);
             }
 
@@ -67,7 +56,7 @@ namespace Neo4jClient.Deserializer
             var json = JObject.Parse(content);
             var root = json.Root;
 
-            if (RootElement.HasValue())
+            if (!string.IsNullOrEmpty(RootElement))
                 root = json.SelectToken(RootElement);
 
             return root;

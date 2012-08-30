@@ -8,7 +8,6 @@ using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Deserializer;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
-using RestSharp;
 
 namespace Neo4jClient.Test.Deserializer
 {
@@ -29,10 +28,10 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var deserializer = new CustomJsonDeserializer();
-            var response = new RestResponse {Content = string.Format("{{'Foo':'{0}'}}", input)};
+            var content = string.Format("{{'Foo':'{0}'}}", input);
 
             // Act
-            var result = deserializer.Deserialize<DateTimeOffsetModel>(response);
+            var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
 
             // Assert
             if (expectedResult == null)
@@ -50,10 +49,10 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var deserializer = new CustomJsonDeserializer();
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
-            var response = new RestResponse {Content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime)};
+            var content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime);
 
             // Act
-            var result = deserializer.Deserialize<TimeZoneModel>(response);
+            var result = deserializer.Deserialize<TimeZoneModel>(content);
 
             // Assert
             Assert.IsNotNull(result.Foo);
@@ -71,10 +70,10 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var deserializer = new CustomJsonDeserializer();
-            var response = new RestResponse { Content = string.Format("{{'Foo':'{0}'}}", value) };
+            var content = string.Format("{{'Foo':'{0}'}}", value);
 
             // Act
-            var result = deserializer.Deserialize<TimeSpanModel>(response);
+            var result = deserializer.Deserialize<TimeSpanModel>(content);
 
             // Assert
             Assert.IsNotNull(result.Foo);
@@ -101,16 +100,13 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var deserializer = new CustomJsonDeserializer();
-            var response = new RestResponse
-                {
-                    Content = @"{
+            var content = @"{
                               ""columns"" : [ ""ColumnA"" ],
                               ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
-                            }"
-                };
+                            }";
 
             // Act
-            var result = deserializer.Deserialize<GremlinTableCapResponse>(response);
+            var result = deserializer.Deserialize<GremlinTableCapResponse>(content);
             var data = result.Data.SelectMany(d => d).ToArray();
 
             // Assert
@@ -158,11 +154,10 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeEnumFromString(string content, Gender expectedGender)
         {
             // Arrange
-            var responseGender = new RestResponse {Content = content};
             var deserializer = new CustomJsonDeserializer();
 
             // Act
-            var deserialziedGender = deserializer.Deserialize<Foo>(responseGender);
+            var deserialziedGender = deserializer.Deserialize<Foo>(content);
 
             // Assert
             Assert.IsNotNull(deserialziedGender);
@@ -175,11 +170,10 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeNullableEnumFromString(string content, Gender? expectedGender)
         {
             // Arrange
-            var responseGender = new RestResponse {Content = content};
             var deserializer = new CustomJsonDeserializer();
 
             // Act
-            var result = deserializer.Deserialize<Foo>(responseGender);
+            var result = deserializer.Deserialize<Foo>(content);
 
             // Assert
             Assert.IsNotNull(result);
@@ -208,14 +202,11 @@ namespace Neo4jClient.Test.Deserializer
         [TestCase("[ \"Male\", \"Female\", \"Unknown\" ]", new [] { Gender.Male, Gender.Female, Gender.Unknown })]
         public void DeserializeIEnumerableOfEnum(string content, Gender[] genders)
         {
-            // Arrange
-            var responseIenumerable = new RestResponse {Content = content};
-
             // Act
             var deserializer = new CustomJsonDeserializer();
 
             // Assert
-            var result = deserializer.Deserialize<List<Gender>>(responseIenumerable);
+            var result = deserializer.Deserialize<List<Gender>>(content);
             CollectionAssert.AreEquivalent(result, genders);
         }
     }
