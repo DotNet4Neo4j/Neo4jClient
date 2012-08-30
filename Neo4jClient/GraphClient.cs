@@ -509,16 +509,15 @@ namespace Neo4jClient
             }
 
             var nodeEndpoint = ResolveEndpoint(reference);
-            var request = new RestRequest(nodeEndpoint, Method.DELETE);
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent, HttpStatusCode.Conflict);
+            var response = SendHttpRequest(
+                HttpDelete(nodeEndpoint),
+                HttpStatusCode.NoContent, HttpStatusCode.Conflict);
 
             if (response.StatusCode == HttpStatusCode.Conflict)
                 throw new ApplicationException(string.Format(
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
                     (int) response.StatusCode,
-                    response.StatusDescription));
+                    response.ReasonPhrase));
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
