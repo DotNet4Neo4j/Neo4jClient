@@ -15,7 +15,6 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serializer;
-using RestSharp;
 
 namespace Neo4jClient
 {
@@ -216,7 +215,7 @@ namespace Neo4jClient
 
             var batchSteps = new List<BatchStep>();
 
-            var createNodeStep = batchSteps.Add(Method.POST, "/node", node);
+            var createNodeStep = batchSteps.Add(HttpMethod.Post, "/node", node);
 
             foreach (var relationship in calculatedRelationships)
             {
@@ -248,7 +247,7 @@ namespace Neo4jClient
                     Data = relationship.Relationship.Data,
                     Type = relationship.Relationship.RelationshipTypeKey
                 };
-                batchSteps.Add(Method.POST, sourceNode + "/relationships", relationshipTemplate);
+                batchSteps.Add(HttpMethod.Post, sourceNode + "/relationships", relationshipTemplate);
             }
 
             var entries = indexEntries
@@ -263,7 +262,7 @@ namespace Neo4jClient
                     .Where(e => !string.IsNullOrEmpty(e.Value)));
             foreach (var indexEntry in entries)
             {
-                batchSteps.Add(Method.POST, indexEntry.IndexAddress, new
+                batchSteps.Add(HttpMethod.Post, indexEntry.IndexAddress, new
                 {
                     key = indexEntry.Key,
                     value = indexEntry.Value,

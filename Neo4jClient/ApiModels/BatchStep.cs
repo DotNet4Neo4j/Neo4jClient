@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Net.Http;
 using Newtonsoft.Json;
-using RestSharp;
 
 namespace Neo4jClient.ApiModels
 {
@@ -8,12 +8,12 @@ namespace Neo4jClient.ApiModels
     class BatchStep
     {
         [JsonIgnore]
-        public Method Method { get; set; }
+        public HttpMethod Method { get; set; }
 
         [JsonProperty("method")]
         public string MethodAsString
         {
-            get { return Method.ToString(); }
+            get { return Method.Method; }
         }
 
         [JsonProperty("to")]
