@@ -6,7 +6,6 @@ using System.Reflection;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json.Linq;
-using RestSharp.Extensions;
 
 namespace Neo4jClient.Deserializer
 {
@@ -79,11 +78,13 @@ namespace Neo4jClient.Deserializer
                     });
                     return ParseInProjectionMode(root, columnNames, jsonTypeMappings.ToArray());
                 default:
-                    throw new ArgumentException("Unrecognised mode.", "mode");
+                    throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
             }
         }
 
+// ReSharper disable UnusedParameter.Local
         IEnumerable<TResult> ParseInSingleColumnMode(JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+// ReSharper restore UnusedParameter.Local
         {
             if (columnNames.Count() != 1)
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
