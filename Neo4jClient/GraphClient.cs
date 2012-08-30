@@ -590,16 +590,8 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var request = new RestRequest(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(new GremlinApiQuery(query, parameters));
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(
-                response,
+            var response = SendHttpRequest(
+                HttpPostAsJson(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript, new GremlinApiQuery(query, parameters)),
                 string.Format("The query was: {0}", query),
                 HttpStatusCode.OK);
 
@@ -611,7 +603,7 @@ namespace Neo4jClient
                 TimeTaken = stopwatch.Elapsed
             });
 
-            return response.Content;
+            return response.Content.ReadAsString();
         }
 
         public virtual IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new()
