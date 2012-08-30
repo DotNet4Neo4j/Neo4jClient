@@ -129,7 +129,6 @@
     <Compile Include="GraphClientTests\ConnectTests.cs" />
     <Compile Include="GraphClientTests\CreateNodeTests.cs" />
     <Compile Include="GraphClientTests\GetNodeTests.cs" />
-    <Compile Include="MockHttpFactory.cs" />
     <Compile Include="NodeReferenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Domain\User.cs" />
