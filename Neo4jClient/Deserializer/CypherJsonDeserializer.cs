@@ -6,7 +6,6 @@ using System.Reflection;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json.Linq;
-using RestSharp;
 using RestSharp.Extensions;
 
 namespace Neo4jClient.Deserializer
@@ -25,10 +24,9 @@ namespace Neo4jClient.Deserializer
             Culture = CultureInfo.InvariantCulture;
         }
 
-        public IEnumerable<TResult> Deserialize(RestResponse response)
+        public IEnumerable<TResult> Deserialize(string content)
         {
-            response.Content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(response.Content);
-            var content = response.Content;
+            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
             var root = JObject.Parse(content).Root;
 
             var columnsArray = (JArray)root["columns"];

@@ -131,10 +131,15 @@ namespace Neo4jClient
 
         HttpResponseMessage SendHttpRequest(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
+            return SendHttpRequest(request, null, expectedStatusCodes);
+        }
+
+        HttpResponseMessage SendHttpRequest(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        {
             var requestTask = httpClient.SendAsync(request);
             requestTask.RunSynchronously();
             var response = requestTask.Result;
-            response.EnsureExpectedStatusCode(expectedStatusCodes);
+            response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
             return response;
         }
 
@@ -648,22 +653,14 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var request = new RestRequest(RootApiResponse.Cypher, Method.POST)
-            {
-                RequestFormat = DataFormat.Json,
-                JsonSerializer = BuildSerializer()
-            };
-            request.AddBody(new CypherApiQuery(query));
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(
-                response,
+            var response = SendHttpRequest(
+                HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK);
 
             var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
             var results = deserializer
-                .Deserialize(response)
+                .Deserialize(response.Content.ReadAsString())
                 .ToList();
 
             stopwatch.Stop();

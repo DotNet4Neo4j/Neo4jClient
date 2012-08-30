@@ -5,7 +5,6 @@ using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
-using RestSharp;
 
 namespace Neo4jClient.Test.Deserializer
 {
@@ -48,10 +47,10 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<DateTimeOffsetModel>(client, resultMode);
-            var response = new RestResponse {Content = string.Format(contentFormat, input)};
+            var content = string.Format(contentFormat, input);
 
             // Act
-            var result = deserializer.Deserialize(response).Single();
+            var result = deserializer.Deserialize(content).Single();
 
             // Assert
             if (expectedResult == null)
@@ -76,9 +75,7 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<Node<City>>(client, CypherResultMode.Set);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                   'data' : [ [ {
                     'outgoing_relationships' : 'http://localhost:7474/db/data/node/5/relationships/out',
                     'data' : {
@@ -135,11 +132,10 @@ namespace Neo4jClient.Test.Deserializer
                     'incoming_typed_relationships' : 'http://localhost:7474/db/data/node/3/relationships/in/{-list|&|types}'
                   } ] ],
                   'columns' : [ 'c' ]
-                }".Replace("'", "\"")
-            };
+                }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
             Assert.AreEqual(3, results.Count());
@@ -163,9 +159,7 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<RelationshipInstance<City>>(client, CypherResultMode.Set);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                   'data' : [ [ {
                     'start' : 'http://localhost:7474/db/data/node/55872',
                     'data' : {
@@ -204,11 +198,10 @@ namespace Neo4jClient.Test.Deserializer
                     'end' : 'http://localhost:7474/db/data/node/55875'
                     } ] ],
                   'columns' : [ 'c' ]
-                }".Replace("'", "\"")
-            };
+                }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
             Assert.AreEqual(3, results.Count());
@@ -229,9 +222,7 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<Projection>(client, CypherResultMode.Projection);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                   'data' : [ [ {
                     'outgoing_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out',
                     'data' : {
@@ -339,11 +330,10 @@ namespace Neo4jClient.Test.Deserializer
                     'end' : 'http://localhost:7474/db/data/node/55746'
                   } ] ] ],
                   'columns' : [ 'Node', 'Relationships' ]
-                }".Replace("'", "\"")
-                            };
+                }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
             var result = results[0];
@@ -369,9 +359,7 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                       'data' : [ [ [ {
                         'outgoing_relationships' : 'http://foo/db/data/node/920/relationships/out',
                         'data' : {
@@ -412,11 +400,10 @@ namespace Neo4jClient.Test.Deserializer
                         'incoming_typed_relationships' : 'http://foo/db/data/node/5482/relationships/in/{-list|&|types}'
                       } ] ] ],
                       'columns' : ['Fooness']
-                            }".Replace('\'', '"')
-            };
+                            }".Replace('\'', '"');
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             Assert.IsInstanceOf<IEnumerable<ResultWithNestedNodeDto>>(results);
             Assert.AreEqual(1, results.Count());
@@ -436,17 +423,14 @@ namespace Neo4jClient.Test.Deserializer
 
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection);
-            var response = new RestResponse
-                {
-                    Content =
+            var content =
                         @"{
                       'data' : [ [ [ null ] ] ],
                       'columns' : ['Fooness']
                             }"
-                            .Replace('\'', '"')
-                };
+                            .Replace('\'', '"');
 
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             Assert.IsInstanceOf<IEnumerable<ResultWithNestedNodeDto>>(results);
             Assert.AreEqual(1, results.Count());
@@ -460,16 +444,13 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                   'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
                   'columns' : [ 'Names' ]
-                }".Replace("'", "\"")
-            };
+                }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray().First().Names.ToArray();
+            var results = deserializer.Deserialize(content).ToArray().First().Names.ToArray();
 
             // Assert
             Assert.AreEqual("Ben Tu", results[0]);
@@ -482,16 +463,13 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<IEnumerable<string>>(client, CypherResultMode.Set);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                   'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
                   'columns' : [ 'Names' ]
-                }".Replace("'", "\"")
-            };
+                }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray().First().ToArray();
+            var results = deserializer.Deserialize(content).ToArray().First().ToArray();
 
             // Assert
             Assert.AreEqual("Ben Tu", results[0]);
@@ -504,15 +482,13 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<int>(client, CypherResultMode.Set);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                           'data' : [ [ 666 ] ],
                           'columns' : [ 'count(distinct registration)' ]
-                        }".Replace("'", "\"")};
+                        }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
             Assert.AreEqual(666, results.First());
@@ -562,20 +538,17 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Set);
-            var response = new RestResponse
-            {
-                Content = @"{
+            var content = @"{
                   'data' : [
                     [ { 'Name': '東京', 'Population': 13000000 } ],
                     [ { 'Name': 'London', 'Population': 8000000 } ],
                     [ { 'Name': 'Sydney', 'Population': 4000000 } ]
                   ],
                   'columns' : [ 'Cities' ]
-                }".Replace("'", "\"")
-            };
+                }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
             Assert.AreEqual(3, results.Count());
@@ -599,9 +572,7 @@ namespace Neo4jClient.Test.Deserializer
             // Arrange
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
-            var response = new RestResponse
-            {
-                Content = @"
+            var content = @"
                     {
                         'data' : [ [ {
                         'outgoing_relationships' : 'http://foo/db/data/node/879/relationships/out',
@@ -643,11 +614,10 @@ namespace Neo4jClient.Test.Deserializer
                         'incoming_typed_relationships' : 'http://foo/db/data/node/878/relationships/in/{-list|&|types}'
                         } ] ],
                         'columns' : [ 'asset' ]
-                    }".Replace("'", "\"")
-            };
+                    }".Replace("'", "\"");
 
             // Act
-            var results = deserializer.Deserialize(response).ToArray();
+            var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
             var resultsArray = results.ToArray();
