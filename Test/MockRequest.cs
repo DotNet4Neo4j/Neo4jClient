@@ -6,6 +6,7 @@ namespace Neo4jClient.Test
     {
         public static IMockRequestDefinition Get(string uri)
         {
+            if (uri == "") uri = "/";
             return new NeoHttpRequest {Resource = uri, Method = Method.GET};
         }
 

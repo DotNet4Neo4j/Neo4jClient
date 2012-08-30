@@ -88,21 +88,37 @@ namespace Neo4jClient
 
         Uri BuildUri(string relativeUri)
         {
-            return new Uri(RootUri, relativeUri);
+            var baseUri = RootUri;
+            if (!RootUri.AbsoluteUri.EndsWith("/"))
+                baseUri = new Uri(RootUri.AbsoluteUri + "/");
+
+            return new Uri(baseUri, relativeUri);
         }
 
-        HttpRequestMessage Get(string relativeUri)
+        HttpRequestMessage HttpDelete(string relativeUri)
+        {
+            var absoluteUri = BuildUri(relativeUri);
+            return new HttpRequestMessage(HttpMethod.Delete, absoluteUri);
+        }
+
+        HttpRequestMessage HttpGet(string relativeUri)
         {
             var absoluteUri = BuildUri(relativeUri);
             return new HttpRequestMessage(HttpMethod.Get, absoluteUri);
         }
 
-        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
+        HttpResponseMessage SendHttpRequest(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
         {
             var requestTask = httpClient.SendAsync(request);
             requestTask.RunSynchronously();
             var response = requestTask.Result;
             response.EnsureExpectedStatusCode(expectedStatusCodes);
+            return response;
+        }
+
+        T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
+        {
+            var response = SendHttpRequest(request, expectedStatusCodes);
             var responseDataTask = response.Content.ReadAsJson<T>(new JsonSerializer());
             responseDataTask.Wait();
             var result = responseDataTask.Result;
@@ -115,7 +131,7 @@ namespace Neo4jClient
             stopwatch.Start();
 
             var result = SendHttpRequestAndParseResultAs<RootApiResponse>(
-                Get(""),
+                HttpGet(""),
                 HttpStatusCode.OK);
 
             RootApiResponse = result;
@@ -352,16 +368,15 @@ namespace Neo4jClient
             CheckRoot();
 
             var relationshipEndpoint = ResolveEndpoint(reference);
-            var request = new RestRequest(relationshipEndpoint, Method.DELETE);
-            var response = CreateRestSharpClient().Execute(request);
-
-            ValidateExpectedResponseCodes(response, HttpStatusCode.NoContent, HttpStatusCode.NotFound);
+            var response = SendHttpRequest(
+                HttpDelete(relationshipEndpoint),
+                HttpStatusCode.NoContent, HttpStatusCode.NotFound);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 throw new ApplicationException(string.Format(
                     "Unable to delete the relationship. The response status was: {0} {1}",
                     (int) response.StatusCode,
-                    response.StatusDescription));
+                    response.ReasonPhrase));
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
