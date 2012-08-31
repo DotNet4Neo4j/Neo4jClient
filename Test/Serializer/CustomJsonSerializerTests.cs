@@ -115,7 +115,13 @@ namespace Neo4jClient.Test.Serializer
         public class TimeSpanModel
         {
             public TimeSpan Foo { get; set; }
-		}
+        }
+
+        public class DateModel
+        {
+            public DateTimeOffset DateTime { get; set; }
+            public DateTimeOffset? DateTimeNullable { get; set; }
+        }
 
         public enum Gender{Male, Female, Unknown}
 

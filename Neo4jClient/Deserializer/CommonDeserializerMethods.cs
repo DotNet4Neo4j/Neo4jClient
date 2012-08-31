@@ -31,11 +31,16 @@ namespace Neo4jClient.Deserializer
                 return null;
 
             rawValue = rawValue.Replace("NeoDate", "Date");
+
             if (!DateRegex.IsMatch(rawValue))
-                return null;
+            {
+                DateTimeOffset parsed;
+                if (!DateTimeOffset.TryParse(rawValue, out parsed))
+                    return null;
+            }
 
             var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
-            var reader = new JsonTextReader(new StringReader(text));
+            var reader = new JsonTextReader(new StringReader(text)) {DateParseHandling = DateParseHandling.DateTimeOffset};
             reader.Read(); // JsonToken.StartObject
             reader.Read(); // JsonToken.PropertyName
             return reader.ReadAsDateTimeOffset();

@@ -44,6 +44,28 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        [TestCase("2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
+        [TestCase("2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
+        public void DeserializeShouldPreserveOffsetValuesUsingIso8601Format(string input, string expectedResult)
+        {
+            // Arrange
+            var deserializer = new CustomJsonDeserializer();
+            var content = string.Format("{{'Foo':'{0}'}}", input);
+
+            // Act
+            var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
+
+            // Assert
+            if (expectedResult == null)
+                Assert.IsNull(result.Foo);
+            else
+            {
+                Assert.IsNotNull(result.Foo);
+                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz", CultureInfo.InvariantCulture));
+            }
+        }
+
+        [Test]
         public void DeserializeTimeZoneInfo()
         {
             // Arrange

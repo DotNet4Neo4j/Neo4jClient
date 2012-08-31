@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
 
@@ -42,6 +43,7 @@ namespace Neo4jClient.Deserializer
                 var root = FindRoot(content);
                 target = (T)CommonDeserializerMethods.BuildDictionary(target.GetType(), root.Children(), Culture, new TypeMapping[0], 0);
             }
+
             else
             {
                 var root = FindRoot(content);
@@ -53,7 +55,7 @@ namespace Neo4jClient.Deserializer
 
         JToken FindRoot(string content)
         {
-            var json = JObject.Parse(content);
+            var json = JObjectCustom.Parse(content);
             var root = json.Root;
 
             if (!string.IsNullOrEmpty(RootElement))

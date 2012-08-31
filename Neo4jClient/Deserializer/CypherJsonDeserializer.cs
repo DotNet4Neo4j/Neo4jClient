@@ -26,7 +26,7 @@ namespace Neo4jClient.Deserializer
         public IEnumerable<TResult> Deserialize(string content)
         {
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
-            var root = JObject.Parse(content).Root;
+            var root = JObjectCustom.Parse(content).Root;
 
             var columnsArray = (JArray)root["columns"];
             var columnNames = columnsArray
