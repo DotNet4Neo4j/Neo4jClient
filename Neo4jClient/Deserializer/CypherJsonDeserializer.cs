@@ -158,7 +158,7 @@ namespace Neo4jClient.Deserializer
         TResult ReadProjectionRow(
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
-            string[] columnNames,
+            IList<string> columnNames,
             TypeMapping[] jsonTypeMappings)
         {
             var result = Activator.CreateInstance<TResult>();
