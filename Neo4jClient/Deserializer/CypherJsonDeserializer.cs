@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Neo4jClient.Deserializer
@@ -26,7 +28,12 @@ namespace Neo4jClient.Deserializer
         public IEnumerable<TResult> Deserialize(string content)
         {
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
-            var root = JObjectCustom.Parse(content).Root;
+
+            var reader = new JsonTextReader(new StringReader(content))
+            {
+                DateParseHandling = DateParseHandling.DateTimeOffset
+            };
+            var root = JToken.ReadFrom(reader).Root;
 
             var columnsArray = (JArray)root["columns"];
             var columnNames = columnsArray
