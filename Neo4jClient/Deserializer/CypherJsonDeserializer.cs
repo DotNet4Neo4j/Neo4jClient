@@ -16,13 +16,12 @@ namespace Neo4jClient.Deserializer
         readonly IGraphClient client;
         readonly CypherResultMode resultMode;
 
-        public CultureInfo Culture { get; set; }
+        readonly CultureInfo culture = CultureInfo.InvariantCulture;
 
         public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode)
         {
             this.client = client;
             this.resultMode = resultMode;
-            Culture = CultureInfo.InvariantCulture;
         }
 
         public IEnumerable<TResult> Deserialize(string content)
@@ -130,7 +129,7 @@ namespace Neo4jClient.Deserializer
                     }
                 }
 
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, elementToParse, Culture, jsonTypeMappings, 0);
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, elementToParse, culture, jsonTypeMappings, 0);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
@@ -178,7 +177,7 @@ namespace Neo4jClient.Deserializer
                 if (property.ToString().Contains("System.Collections.Generic.IEnumerable") &&
                    string.IsNullOrEmpty(cell.First().ToString()) && string.IsNullOrEmpty(cell.Last().ToString())) 
                     continue;
-                CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings, 0);
+                CommonDeserializerMethods.SetPropertyValue(result, property, cell, culture, jsonTypeMappings, 0);
                 cellIndex++;
             }
 
