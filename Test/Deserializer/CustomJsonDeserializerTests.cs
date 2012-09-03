@@ -46,6 +46,8 @@ namespace Neo4jClient.Test.Deserializer
         [Test]
         [TestCase("2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
         [TestCase("2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
+        [TestCase("2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
+        [TestCase("2012-08-31 10:11:00 AM", "2012-08-31 10:11:00 +10:00")]
         public void DeserializeShouldPreserveOffsetValuesUsingIso8601Format(string input, string expectedResult)
         {
             // Arrange
