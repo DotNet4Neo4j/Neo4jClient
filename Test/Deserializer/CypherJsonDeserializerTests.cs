@@ -33,6 +33,9 @@ namespace Neo4jClient.Test.Deserializer
         [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
         [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
         [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Set, SetModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "", null)]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "rekjre", null)]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(abcs)/", null)]
@@ -42,6 +45,9 @@ namespace Neo4jClient.Test.Deserializer
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
         [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
+        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
         public void DeserializeShouldPreserveOffsetValues(CypherResultMode resultMode, string contentFormat, string input, string expectedResult)
         {
             // Arrange

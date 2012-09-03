@@ -24,29 +24,12 @@ namespace Neo4jClient.Test.Deserializer
         [TestCase("/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
         [TestCase("/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
         [TestCase("/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        public void DeserializeShouldPreserveOffsetValues(string input, string expectedResult)
-        {
-            // Arrange
-            var deserializer = new CustomJsonDeserializer();
-            var content = string.Format("{{'Foo':'{0}'}}", input);
-
-            // Act
-            var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
-
-            // Assert
-            if (expectedResult == null)
-                Assert.IsNull(result.Foo);
-            else
-            {
-                Assert.IsNotNull(result.Foo);
-                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz", CultureInfo.InvariantCulture));
-            }
-        }
-
-        [Test]
         [TestCase("2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
         [TestCase("2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
         [TestCase("2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
+        [TestCase("2011/09/06 10:11:00 +10:00", "2011-09-06 10:11:00 +10:00")]
+        [TestCase("2011/09/06 10:11:00 AM +10:00", "2011-09-06 10:11:00 +10:00")]
+        [TestCase("2011/09/06 10:11:00 PM +10:00", "2011-09-06 12:11:00 +10:00")]
         public void DeserializeShouldPreserveOffsetValuesUsingIso8601Format(string input, string expectedResult)
         {
             // Arrange
