@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Gremlin;
@@ -19,33 +20,51 @@ namespace Neo4jClient.Test.Deserializer
         [TestCase("rekjre", null)]
         [TestCase("/Date(abcs)/", null)]
         [TestCase("/Date(abcs+0000)/", null)]
-        [TestCase("/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase("/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase("/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase("/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase("/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        [TestCase("2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
-        [TestCase("2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
-        [TestCase("2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
-        [TestCase("2011/09/06 10:11:00 +10:00", "2011-09-06 10:11:00 +10:00")]
-        [TestCase("2011/09/06 10:11:00 AM +10:00", "2011-09-06 10:11:00 +10:00")]
-        [TestCase("2011/09/06 12:11:00 PM +10:00", "2011-09-06 12:11:00 +10:00")]
+        [TestCase("/Date(1315271562384)/", "2011-09-06T01:12:42.3840000+00:00")]
+        [TestCase("/Date(1315271562384+0000)/", "2011-09-06T01:12:42.3840000+00:00")]
+        [TestCase("/Date(1315271562384+0200)/", "2011-09-06T03:12:42.3840000+02:00")]
+        [TestCase("/Date(1315271562384+1000)/", "2011-09-06T11:12:42.3840000+10:00")]
+        [TestCase("/Date(-2187290565386+0000)/", "1900-09-09T03:17:14.6140000+00:00")]
+        [TestCase("2011-09-06T01:12:42+10:00", "2011-09-06T01:12:42.0000000+10:00")]
+        [TestCase("2011-09-06T01:12:42+00:00", "2011-09-06T01:12:42.0000000+00:00")]
+        [TestCase("2012-08-31T10:11:00.3642578+10:00", "2012-08-31T10:11:00.3642578+10:00")]
+        [TestCase("2012-08-31T00:11:00.3642578+00:00", "2012-08-31T00:11:00.3642578+00:00")]
+        [TestCase("2011/09/06 10:11:00 +10:00", "2011-09-06T10:11:00.0000000+10:00")]
+        [TestCase("2011/09/06 10:11:00 AM +10:00", "2011-09-06T10:11:00.0000000+10:00")]
+        [TestCase("2011/09/06 12:11:00 PM +10:00", "2011-09-06T12:11:00.0000000+10:00")]
         public void DeserializeShouldPreserveOffsetValuesUsingIso8601Format(string input, string expectedResult)
         {
-            // Arrange
-            var deserializer = new CustomJsonDeserializer();
-            var content = string.Format("{{'Foo':'{0}'}}", input);
+            var thread = Thread.CurrentThread;
+            var previousCulture = thread.CurrentCulture;
 
-            // Act
-            var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
+            var culturesToTest = new[] {"en-AU", "en-US", previousCulture.Name};
 
-            // Assert
-            if (expectedResult == null)
-                Assert.IsNull(result.Foo);
-            else
+            try
             {
-                Assert.IsNotNull(result.Foo);
-                Assert.AreEqual(expectedResult, result.Foo.Value.ToString("yyyy-MM-dd HH:mm:ss zzz", CultureInfo.InvariantCulture));
+                foreach (var cultureName in culturesToTest)
+                {
+                    thread.CurrentCulture = thread.CurrentUICulture = new CultureInfo(cultureName);
+
+                    // Arrange
+                    var deserializer = new CustomJsonDeserializer();
+                    var content = string.Format("{{'Foo':'{0}'}}", input);
+
+                    // Act
+                    var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
+
+                    // Assert
+                    if (expectedResult == null)
+                        Assert.IsNull(result.Foo);
+                    else
+                    {
+                        Assert.IsNotNull(result.Foo);
+                        Assert.AreEqual(expectedResult, result.Foo.Value.ToString("o", CultureInfo.InvariantCulture));
+                    }
+                }
+            }
+            finally
+            {
+                thread.CurrentCulture = thread.CurrentUICulture = previousCulture;
             }
         }
 

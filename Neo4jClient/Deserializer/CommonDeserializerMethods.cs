@@ -25,6 +25,16 @@ namespace Neo4jClient.Deserializer
 
         public static DateTimeOffset? ParseDateTimeOffset(JToken value)
         {
+            var jValue = value as JValue;
+            if (jValue != null)
+            {
+                if (jValue.Value == null)
+                    return null;
+
+                if (jValue.Value is DateTimeOffset)
+                    return jValue.Value<DateTimeOffset>();
+            }
+
             var rawValue = value.AsString();
 
             if (string.IsNullOrWhiteSpace(rawValue))
