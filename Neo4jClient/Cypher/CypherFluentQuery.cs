@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace Neo4jClient.Cypher
 {
@@ -9,7 +10,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryMatched,
         IAttachedReference
     {
-        protected readonly IGraphClient Client;
+        protected readonly IRawGraphClient Client;
         protected readonly CypherQueryBuilder Builder;
 
         public CypherFluentQuery(IGraphClient client)
@@ -19,7 +20,10 @@ namespace Neo4jClient.Cypher
 
         protected CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
         {
-            Client = client;
+            if (!(client is IRawGraphClient))
+                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
+
+            Client = (IRawGraphClient)client;
             Builder = builder;
         }
 

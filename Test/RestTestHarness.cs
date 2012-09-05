@@ -32,7 +32,7 @@ namespace Neo4jClient.Test
             return graphClient;
         }
 
-        public IGraphClient CreateAndConnectGraphClient()
+        public IRawGraphClient CreateAndConnectGraphClient()
         {
             var graphClient = CreateGraphClient();
             graphClient.Connect();

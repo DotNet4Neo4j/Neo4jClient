@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
@@ -18,7 +19,7 @@ using Neo4jClient.Serializer;
 
 namespace Neo4jClient
 {
-    public class GraphClient : IGraphClient
+    public class GraphClient : IGraphClient, IRawGraphClient
     {
         internal readonly Uri RootUri;
         readonly IHttpClient httpClient;
@@ -610,7 +611,14 @@ namespace Neo4jClient
             return results;
         }
 
+        [Obsolete("This method is for use by the framework internally. You should really be using GraphClient.Cypher instead. If you really really want to use this method, you'll have to access it via an explicit interface implementation on IRawGraphClient instead. This hurdle is for your own protection.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
             CheckRoot();
 

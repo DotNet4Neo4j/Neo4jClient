@@ -16,7 +16,7 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
 
             client
                 .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
@@ -41,7 +41,7 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
 
             client
                 .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
@@ -62,7 +62,7 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnNodeAsSet()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var set = new[] { new Node<FooNode>(new FooNode(), new NodeReference<FooNode>(123)) };
             client
                 .ExecuteGetCypherResults<Node<FooNode>>(
@@ -81,7 +81,7 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnNodeAsProjection()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var expected = new[]
                 {
                     new FooNode
@@ -108,7 +108,7 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnRelationshipWithDataAsSet()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var set = new[] { new RelationshipInstance<FooNode>(new RelationshipReference<FooNode>(1), new NodeReference(0), new NodeReference(2),"Type", new FooNode()) };
             client
                 .ExecuteGetCypherResults<RelationshipInstance<FooNode>>(
@@ -127,7 +127,7 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnRelationshipAsSet()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var set = new[] { new RelationshipInstance(new RelationshipReference(1), new NodeReference(0), new NodeReference(2), "Type") };
             client
                 .ExecuteGetCypherResults<RelationshipInstance>(
@@ -146,7 +146,7 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ExecutingQueryMultipleTimesShouldResetParameters()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
 
             client
                 .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())

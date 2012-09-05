@@ -15,7 +15,7 @@ namespace Neo4jClient.Test.Cypher
             // START n=node(1)
             // RETURN n
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)1)
                 .Return<object>("n")
@@ -32,7 +32,7 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1), b=node(2)
             // RETURN a,b
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)2)
@@ -51,7 +51,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN n
             // LIMIT 3
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)4, (NodeReference)5, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -76,7 +76,7 @@ namespace Neo4jClient.Test.Cypher
             // ORDER BY n.name 
             // SKIP 3
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)4, (NodeReference)5, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -103,7 +103,7 @@ namespace Neo4jClient.Test.Cypher
             // SKIP 1
             // LIMIT 2
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)4, (NodeReference)5, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -130,7 +130,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN n.length?, n
             // ORDER BY n.length?
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n.length?, n")
@@ -151,7 +151,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN n
             // ORDER BY n.name
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -172,7 +172,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN n
             // ORDER BY n.age, n.name
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -193,7 +193,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN n
             // ORDER BY n.name DESC
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -214,7 +214,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN n
             // ORDER BY n.age, n.name DESC
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1, (NodeReference)2)
                 .Return<object>("n")
@@ -235,7 +235,7 @@ namespace Neo4jClient.Test.Cypher
             // MATCH (n)--(x)
             // RETURN x
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Match("(n)--(x)")
@@ -253,7 +253,7 @@ namespace Neo4jClient.Test.Cypher
             // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Return(a => new ReturnPropertyQueryResult
@@ -274,7 +274,7 @@ namespace Neo4jClient.Test.Cypher
             // MATCH (a)-->(b)
             // RETURN distinct b
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -293,7 +293,7 @@ namespace Neo4jClient.Test.Cypher
             // MATCH (a)-->(b)
             // RETURN distinct b
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -310,7 +310,7 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ReturnPropertiesIntoAnonymousType()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -334,7 +334,7 @@ RETURN b.Age AS SomeAge, b.Name? AS SomeName";
         [Test]
         public void ReturnPropertiesIntoAnonymousTypeWithAutoNames()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -358,7 +358,7 @@ RETURN b.Age AS Age, b.Name? AS Name";
         [Test]
         public void ReturnPropertiesFromMultipleNodesIntoAnonymousTypeWithAutoNames()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)-->(c)")
@@ -382,7 +382,7 @@ RETURN b.Age AS Age, c.Name? AS Name";
         [Test]
         public void ReturnNodeDataIntoAnonymousType()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -405,7 +405,7 @@ RETURN b AS NodeB";
         [Test]
         public void ReturnEntireNodeDataAndReferenceIntoAnonymousType()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -428,7 +428,7 @@ RETURN b AS NodeB";
         [Test]
         public void ReturnEntireNodeDataAndReferenceIntoProjectionType()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .Match("(a)-->(b)")
@@ -463,7 +463,7 @@ RETURN b AS NodeB";
 
             const string name = "Tobias";
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Age < 30 && n.Name == name) || n.Name != "Tobias")
@@ -488,7 +488,7 @@ RETURN b AS NodeB";
 
             const string name = "Tobias";
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.AgeLong < 30 && n.Name == name) || n.Name != "Tobias")
@@ -513,7 +513,7 @@ RETURN b AS NodeB";
 
             const string name = "Tobias";
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.AgeLongNullable < 30 && n.Name == name) || n.Name != "Tobias")
@@ -541,7 +541,7 @@ RETURN b AS NodeB";
                     Name = "Tobias"
                 };
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Age < 30 && n.Name == foo.Name) || n.Name != "Tobias")
@@ -570,7 +570,7 @@ RETURN b AS NodeB";
                 Id = 777
             };
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Age < 30 && n.Id == foo.Id) || n.Name != "Tobias")
@@ -595,7 +595,7 @@ RETURN b AS NodeB";
 
             int theId = 777;
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Id == theId))
@@ -618,7 +618,7 @@ RETURN b AS NodeB";
 
             long theId = 777;
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Id == theId))
@@ -641,7 +641,7 @@ RETURN b AS NodeB";
 
             long? theId = 777;
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Id == theId))
@@ -664,7 +664,7 @@ RETURN b AS NodeB";
 
             var fooData = new FooData {Name = "Tobias"};
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Age < 30 && n.Name == fooData.Name) || n.Name != "Tobias")
@@ -689,7 +689,7 @@ RETURN b AS NodeB";
 
             var fooData = new FooData { Id = 777 };
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Age < 30 && n.Id == fooData.Id) || n.Name != "Tobias")
@@ -712,7 +712,7 @@ RETURN b AS NodeB";
             // WHERE (n.age < 30 and n.name = "Tobias") or not(n.name = "Tobias")
             // RETURN n
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => (n.Age < 30 && n.Name == "Tobias") || n.Name != "Tobias")
@@ -735,7 +735,7 @@ RETURN b AS NodeB";
             // WHERE n.age < 30
             // RETURN n
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Age < 30 )
@@ -756,7 +756,7 @@ RETURN b AS NodeB";
             // WHERE n.Belt
             // RETURN n
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name != null)
@@ -776,7 +776,7 @@ RETURN b AS NodeB";
             // WHERE n.Belt? = 'white'
             // RETURN n
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Id < 30)
@@ -798,7 +798,7 @@ RETURN b AS NodeB";
             // WHERE r is null
             // RETURN b
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)3, (NodeReference)2)
@@ -817,7 +817,7 @@ RETURN b AS NodeB";
         [Test]
         public void WhereFilterOnMultipleNodesProperties()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData, BarData>((n1, n2) => n1.Age < 30 && n2.Key == 11)
@@ -840,7 +840,7 @@ RETURN b AS NodeB";
             // WHERE type(r) = "HOSTS"
             // RETURN r
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Match("(n)-[r]->()")
@@ -855,7 +855,7 @@ RETURN b AS NodeB";
         [Test]
         public void WhereWithAnd()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name != null)
@@ -872,7 +872,7 @@ RETURN b AS NodeB";
         [Test]
         public void WhereWithOr()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name != null)
@@ -889,7 +889,7 @@ RETURN b AS NodeB";
         [Test]
         public void WhereWithOrAnd()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name != null)
@@ -914,7 +914,7 @@ RETURN b AS NodeB";
             // WHERE a<--b
             // RETURN b
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)3,(NodeReference)2)
@@ -936,7 +936,7 @@ RETURN b AS NodeB";
             // WHERE n.name =~ /Tob.*/
             // RETURN n
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where("n.Name =~ /Tob.*/")
@@ -956,7 +956,7 @@ RETURN b AS NodeB";
             //RELATE root-[:X]-(leaf {name:'D'} )
             //RETURN leaf
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("root", (NodeReference)2)
                 .Relate("root-[:X]-(leaf {name:'D'} )")
@@ -975,7 +975,7 @@ RETURN b AS NodeB";
             //RELATE foo-[:Y]-(leaf {name:'D'} )
             //RETURN leaf
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("root", (NodeReference)2)
                 .Match("root-[:X]-foo")
@@ -995,7 +995,7 @@ RETURN b AS NodeB";
             // CREATE a-[r:REL]->b
             // RETURN r
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .AddStartPoint("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)2)
@@ -1016,7 +1016,7 @@ RETURN b AS NodeB";
             //CREATE a-[r:REL {name : a.name + '<->' + b.name }]->b
             //RETURN r
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .AddStartPoint("a", (NodeReference)1)
                 .AddStartPoint("b", (NodeReference)2)
@@ -1037,7 +1037,7 @@ RETURN b AS NodeB";
             // MATCH n-[r]-()
             // DELETE n, r
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Match("n-[r]-()")
@@ -1056,7 +1056,7 @@ RETURN b AS NodeB";
             //DELETE andres.age
             //RETURN andres
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("andres", (NodeReference)3)
                 .Delete("andres.age")
@@ -1070,7 +1070,7 @@ RETURN b AS NodeB";
         [Test]
         public void DeleteIdentifier()
         {
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Delete("n")
@@ -1088,7 +1088,7 @@ RETURN b AS NodeB";
             // MATCH (a)-[:KNOWS]->(b)-[:KNOWS]->(c), (a)-[:BLOCKS]-(d)-[:KNOWS]-(c)
             // RETURN a,b,c,d
 
-            var client = Substitute.For<IGraphClient>();
+            var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("a", (NodeReference)3)
                 .Match(

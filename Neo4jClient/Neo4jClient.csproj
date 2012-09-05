@@ -66,6 +66,7 @@
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="IHttpClient.cs" />
+    <Compile Include="IRawGraphClient.cs" />
     <Compile Include="JTokenExtensions.cs" />
     <Compile Include="RelationshipReference`TData.cs" />
     <Compile Include="Cypher\CypherFluentQuery`Return.cs" />
