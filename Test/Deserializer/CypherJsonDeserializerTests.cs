@@ -483,6 +483,44 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        public void DeserializeShouldMapArrayOfStringsInSetMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<string[]>(client, CypherResultMode.Set);
+            var content = @"{
+                  'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
+                  'columns' : [ 'Names' ]
+                }".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray().First().ToArray();
+
+            // Assert
+            Assert.AreEqual("Ben Tu", results[0]);
+            Assert.AreEqual("Romiko Derbynew", results[1]);
+        }
+
+        [Test]
+        public void DeserializeShouldMapArrayOfIntegersInSetMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<int[]>(client, CypherResultMode.Set);
+            var content = @"{
+                  'data' : [ [ [ '666', '777' ] ] ],
+                  'columns' : [ 'Names' ]
+                }".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray().First().ToArray();
+
+            // Assert
+            Assert.AreEqual(666, results[0]);
+            Assert.AreEqual(777, results[1]);
+        }
+
+        [Test]
         public void DeserializeShouldMapIntegerInSetMode()
         {
             // Arrange

@@ -205,6 +205,12 @@ namespace Neo4jClient.Deserializer
                     instance = Convert.ChangeType(element.ToString(), type);
                 }
             }
+            else if(type.BaseType == typeof(Array)) //One Dimensional Only
+            {
+                var underlyingType = type.GetElementType();
+                var arrayType = typeof(ArrayList);
+                instance = BuildArray(arrayType, underlyingType, element.Children(), culture, typeMappings, nestingLevel + 1);
+            }
             else if (type == typeof(string))
             {
                 instance = element.ToString();
@@ -302,6 +308,34 @@ namespace Neo4jClient.Deserializer
                 }
             }
             return list;
+        }
+
+        public static Array BuildArray(Type type, Type itemType,  JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
+        {
+            typeMappings = typeMappings.ToArray();
+            var list = (ArrayList)Activator.CreateInstance(type);
+
+            foreach (var element in elements)
+            {
+                if (itemType.IsPrimitive)
+                {
+                    var value = element as JValue;
+                    if (value != null)
+                    {
+                        list.Add(Convert.ChangeType(value.Value, itemType));
+                    }
+                }
+                else if (itemType == typeof(string))
+                {
+                    list.Add(element.AsString());
+                }
+                else
+                {
+                    var item = CreateAndMap(itemType, element, culture, typeMappings, nestingLevel + 1);
+                    list.Add(item);
+                }
+            }
+            return list.ToArray(itemType);
         }
 
         public static IList BuildIEnumerable(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
