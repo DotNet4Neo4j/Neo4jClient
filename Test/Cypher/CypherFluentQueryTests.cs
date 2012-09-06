@@ -949,45 +949,6 @@ RETURN b AS NodeB";
         }
 
         [Test]
-        public void CreateNodeWithValuesViaRelate()
-        {
-            // http://docs.neo4j.org/chunked/1.8.M03/query-relate.html#relate-create-nodes-with-values
-            //START root=node(2)
-            //RELATE root-[:X]-(leaf {name:'D'} )
-            //RETURN leaf
-
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Start("root", (NodeReference)2)
-                .Relate("root-[:X]-(leaf {name:'D'} )")
-                .Return<object>("leaf")
-                .Query;
-
-            Assert.AreEqual("START root=node({p0})\r\nRELATE root-[:X]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
-            Assert.AreEqual(2, query.QueryParameters["p0"]);
-        }
-
-        [Test]
-        public void CreateNodeWithValuesViaRelateAfterMatch()
-        {
-            //START root=node(2)
-            //MATCH root-[:X]-foo
-            //RELATE foo-[:Y]-(leaf {name:'D'} )
-            //RETURN leaf
-
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Start("root", (NodeReference)2)
-                .Match("root-[:X]-foo")
-                .Relate("foo-[:Y]-(leaf {name:'D'} )")
-                .Return<object>("leaf")
-                .Query;
-
-            Assert.AreEqual("START root=node({p0})\r\nMATCH root-[:X]-foo\r\nRELATE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
-            Assert.AreEqual(2, query.QueryParameters["p0"]);
-        }
-
-        [Test]
         public void CreateRelationshipBetweenTwoNodes()
         {
             //http://docs.neo4j.org/chunked/1.8.M06/query-create.html#create-create-a-relationship-between-two-nodes
