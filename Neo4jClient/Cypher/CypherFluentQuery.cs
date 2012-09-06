@@ -61,7 +61,19 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryMatched Relate(string relateText)
         {
+            if (Client.ServerVersion >= new Version(1, 8))
+                throw new NotSupportedException("You're trying to use the RELATE keyword against a Neo4j instance ≥ 1.8. In Neo4j 1.8, it was renamed from RELATE to CREATE UNIQUE. You need to update your code to use our new CreateUnique method. (We didn't want to just plumb the Relate method to CREATE UNIQUE, because that would introduce a deviation between the .NET wrapper and the Cypher language.)\r\n\r\nSee https://github.com/systay/community/commit/c7dbbb929abfef600266a20f065d760e7a1fff2e for detail.");
+
             var newBuilder = Builder.SetRelateText(relateText);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
+        public ICypherFluentQueryMatched CreateUnique(string createUniqueText)
+        {
+            if (Client.ServerVersion < new Version(1, 8))
+                throw new NotSupportedException("The CREATE UNIQUE clause was only introduced in Neo4j 1.8, but you're querying against an older version of Neo4j. You'll want to upgrade Neo4j, or use the RELATE keyword instead. See https://github.com/systay/community/commit/c7dbbb929abfef600266a20f065d760e7a1fff2e for detail.");
+
+            var newBuilder = Builder.SetCreateUniqueText(createUniqueText);
             return new CypherFluentQuery(Client, newBuilder);
         }
 

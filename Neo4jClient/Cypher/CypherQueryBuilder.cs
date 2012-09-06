@@ -11,6 +11,7 @@ namespace Neo4jClient.Cypher
         IList<CypherStartBit> startBits = new List<CypherStartBit>();
         string matchText;
         string relateText;
+        string createUniqueText;
         string whereText;
         string createText;
         string deleteText;
@@ -30,6 +31,7 @@ namespace Neo4jClient.Cypher
                 deleteText = deleteText,
                 matchText = matchText,
                 relateText = relateText,
+                createUniqueText = createUniqueText,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -73,6 +75,13 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.relateText = text;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetCreateUniqueText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.createUniqueText = text;
             return newBuilder;
         }
 
@@ -160,6 +169,7 @@ namespace Neo4jClient.Cypher
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
             WriteRelateClause(queryTextBuilder);
+            WriteCreateUniqueClause(queryTextBuilder);
             WriteCreateClause(queryTextBuilder);
             WriteWhereClause(queryTextBuilder);
             WriteDeleteClause(queryTextBuilder);
@@ -212,6 +222,12 @@ namespace Neo4jClient.Cypher
         {
             if (relateText == null) return;
             target.AppendFormat("\r\nRELATE {0}", relateText);
+        }
+
+        void WriteCreateUniqueClause(StringBuilder target)
+        {
+            if (createUniqueText == null) return;
+            target.AppendFormat("\r\nCREATE UNIQUE {0}", createUniqueText);
         }
 
         void WriteCreateClause(StringBuilder target)

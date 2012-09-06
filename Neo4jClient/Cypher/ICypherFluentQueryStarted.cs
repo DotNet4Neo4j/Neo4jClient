@@ -7,6 +7,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryMatched Delete(string identities);
         ICypherFluentQueryMatched Match(params string[] matchText);
         ICypherFluentQueryMatched Relate(string relateText);
+        ICypherFluentQueryMatched CreateUnique(string relateText);
         ICypherFluentQueryMatched Create(string createText);
     }
 }
