@@ -559,6 +559,15 @@ namespace Neo4jClient
             get { return new GremlinClient(this); }
         }
 
+        public Version ServerVersion
+        {
+            get
+            {
+                CheckRoot();
+                return RootApiResponse.Version;
+            }
+        }
+
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();

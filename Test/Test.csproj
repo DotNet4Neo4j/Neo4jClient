@@ -69,6 +69,7 @@
     <Compile Include="Domain\Product.cs" />
     <Compile Include="Cypher\CypherFluentQueryResultsTests.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilderTests.cs" />
+    <Compile Include="GraphClientTests\ServerVersionTests.cs" />
     <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
     <Compile Include="MockRequest.cs" />
     <Compile Include="MockResponse.cs" />

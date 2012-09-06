@@ -63,5 +63,7 @@ namespace Neo4jClient
         ICypherFluentQueryPreStart Cypher { get; }
 
         IGremlinClient Gremlin { get; }
+
+        Version ServerVersion { get; }
     }
 }
