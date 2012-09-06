@@ -40,7 +40,7 @@ namespace Neo4jClient.Test.Cypher
             var query = new CypherFluentQuery(client)
                 .Start("root", (NodeReference)2)
                 .Match("root-[:X]-foo")
-                .Relate("foo-[:Y]-(leaf {name:'D'} )")
+                .CreateUnique("foo-[:Y]-(leaf {name:'D'} )")
                 .Return<object>("leaf")
                 .Query;
 
