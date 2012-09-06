@@ -44,7 +44,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("leaf")
                 .Query;
 
-            Assert.AreEqual("START root=node({p0})\r\nCREATE UNIQUE root-[:X]-foo\r\nRELATE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
+            Assert.AreEqual("START root=node({p0})\r\nMATCH root-[:X]-foo\r\nCREATE UNIQUE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
             Assert.AreEqual(2, query.QueryParameters["p0"]);
         }
 
