@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Neo4jClient.Cypher
     public class CypherQueryBuilder
     {
         IDictionary<string, object> queryParameters = new Dictionary<string, object>();
-        IList<CypherStartBit> startBits = new List<CypherStartBit>();
+        IList<object> startBits = new List<object>();
         string matchText;
         string relateText;
         string createUniqueText;
@@ -54,6 +55,13 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder AddStartBitWithNodeIndexLookup(string identity, string indexName, string key, object value)
+        {
+            var newBuilder = Clone();
+            newBuilder.startBits.Add(new CypherStartBitWithNodeIndexLookup(identity, indexName, key, value));
             return newBuilder;
         }
 
@@ -193,14 +201,33 @@ namespace Neo4jClient.Cypher
 
             var formattedStartBits = startBits.Select(bit =>
             {
-                var lookupIdParameterNames = bit
-                    .LookupIds
-                    .Select(i => CreateParameter(paramsDictionary, i))
-                    .ToArray();
+                var standardStartBit = bit as CypherStartBit;
+                if (standardStartBit != null)
+                {
+                    var lookupIdParameterNames = standardStartBit
+                        .LookupIds
+                        .Select(i => CreateParameter(paramsDictionary, i))
+                        .ToArray();
 
-                var lookupContent = string.Join(", ", lookupIdParameterNames);
+                    var lookupContent = string.Join(", ", lookupIdParameterNames);
+                    return string.Format("{0}={1}({2})",
+                        standardStartBit.Identifier,
+                        standardStartBit.LookupType,
+                        lookupContent);
+                }
 
-                return string.Format("{0}={1}({2})", bit.Identifier, bit.LookupType, lookupContent);
+                var startBithWithNodeIndexLookup = bit as CypherStartBitWithNodeIndexLookup;
+                if (startBithWithNodeIndexLookup != null)
+                {
+                    var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookup.Value);
+                    return string.Format("{0}=node:{1}({2} = {3})",
+                        startBithWithNodeIndexLookup.Identifier,
+                        startBithWithNodeIndexLookup.IndexName,
+                        startBithWithNodeIndexLookup.Key,
+                        valueParameter);
+                }
+
+                throw new NotSupportedException(string.Format("Start bit of type {0} is not supported.", bit.GetType().FullName));
             });
 
             target.Append(string.Join(", ", formattedStartBits));

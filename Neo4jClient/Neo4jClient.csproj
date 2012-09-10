@@ -62,6 +62,7 @@
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Cypher\CypherStartBitWithNodeIndexLookup.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />

@@ -4,5 +4,6 @@ namespace Neo4jClient.Cypher
     {
         ICypherFluentQueryStarted Start(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQueryStarted Start(string identity, params RelationshipReference[] relationshipReferences);
+        ICypherFluentQueryStarted StartWithNodeIndexLookup(string identity, string indexName, string key, object value);
     }
 }
