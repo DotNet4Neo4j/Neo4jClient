@@ -26,6 +26,7 @@ namespace Neo4jClient
         internal RootApiResponse RootApiResponse;
         RootNode rootNode;
         bool jsonStreamingAvailable;
+        readonly string userAgent;
 
         const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
 
@@ -50,7 +51,12 @@ namespace Neo4jClient
             RootUri = rootUri;
             this.httpClient = httpClient;
             UseJsonStreamingIfAvailable = true;
+
+            var assemblyVersion = GetType().Assembly.GetName().Version;
+            userAgent = string.Format("Neo4jClient/{0}", assemblyVersion);
         }
+
+        internal string UserAgent { get { return userAgent; } }
 
         Uri BuildUri(string relativeUri)
         {
@@ -111,6 +117,8 @@ namespace Neo4jClient
                 request.Headers.Remove("Accept");
                 request.Headers.Add("Accept", "application/json;stream=true");
             }
+
+            request.Headers.Add("User-Agent", userAgent);
 
             var requestTask = httpClient.SendAsync(request);
             requestTask.Wait();

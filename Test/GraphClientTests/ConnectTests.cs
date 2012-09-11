@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -102,6 +107,57 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
 
             Assert.That(graphClient.RootUri.OriginalString, Is.EqualTo("http://username:password@foo/db/data"));
+        }
+
+        [Test]
+        public void ShouldSendCustomUserAgent()
+        {
+            // Arrange
+            var httpClient = Substitute.For<IHttpClient>();
+            var graphClient = new GraphClient(new Uri("http://localhost"), httpClient);
+            var expectedUserAgent = graphClient.UserAgent;
+            httpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(message =>
+                {
+                    // Assert
+                    Assert.IsTrue(message.Headers.Contains("User-Agent"), "Contains User-Agent header");
+                    var userAgent = message.Headers.GetValues("User-Agent").Single();
+                    Assert.AreEqual(expectedUserAgent, userAgent, "User-Agent header value is correct");
+                }))
+                .Returns(ci => {
+                    var response = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(@"{
+                            'cypher' : 'http://foo/db/data/cypher',
+                            'batch' : 'http://foo/db/data/batch',
+                            'node' : 'http://foo/db/data/node',
+                            'node_index' : 'http://foo/db/data/index/node',
+                            'relationship_index' : 'http://foo/db/data/index/relationship',
+                            'reference_node' : 'http://foo/db/data/node/123',
+                            'neo4j_version' : '1.5.M02',
+                            'extensions_info' : 'http://foo/db/data/ext',
+                            'extensions' : {
+                                'GremlinPlugin' : {
+                                    'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+                                }
+                            }
+                        }")
+                    };
+                    var task = new Task<HttpResponseMessage>(() => response);
+                    task.Start();
+                    return task;
+                });
+
+            // Act
+            graphClient.Connect();
+        }
+
+        [Test]
+        public void ShouldFormatUserAgentCorrectly()
+        {
+            var graphClient = new GraphClient(new Uri("http://localhost"));
+            var userAgent = graphClient.UserAgent;
+            Assert.IsTrue(Regex.IsMatch(userAgent, @"Neo4jClient/\d+\.\d+\.\d+\.\d+"), "User agent should be in format Neo4jClient/1.2.3.4");
         }
     }
 }
