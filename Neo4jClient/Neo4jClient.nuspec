@@ -10,12 +10,12 @@
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
     <tags>neo4j REST nosql</tags>
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="[4.0.8]" />
-      <dependency id="RestSharp" version="[102.7]" />
+      <dependency id="Microsoft.Net.Http" />
+      <dependency id="Newtonsoft.Json" version="4.5.9" />
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\Neo4jClient.dll" target="lib" />
-    <file src="bin\Release\Neo4jClient.pdb" target="lib" />
+    <file src="bin\Release\Neo4jClient.dll" target="lib\net40" />
+    <file src="bin\Release\Neo4jClient.pdb" target="lib\net40" />
   </files>
 </package>

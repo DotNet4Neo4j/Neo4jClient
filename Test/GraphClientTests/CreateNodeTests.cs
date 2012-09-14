@@ -2,41 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Net.Http;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Gremlin;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
 {
     [TestFixture]
     public class CreateNodeTests
     {
-        readonly string rootResponse = @"{
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
-                'neo4j_version' : '1.5.M02',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                }
-            }"
-            .Replace('\'', '"');
-
-        readonly string pre15M02RootResponse = @"{
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                }
-            }"
-            .Replace('\'', '"');
-
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowArgumentNullExceptionForNullNode()
@@ -67,21 +42,15 @@ namespace Neo4jClient.Test.GraphClientTests
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportExceptionForPre15M02Database()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = pre15M02RootResponse
-                    }
+                    MockRequest.Get(""),
+                    MockResponse.NeoRootPre15M02()
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 new object(),
@@ -106,29 +75,18 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = pre15M02RootResponse
-                    }
+                    MockRequest.Get(""),
+                    MockResponse.NeoRootPre15M02()
                 },
                 {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -148,15 +106,112 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(testNode, null, null);
+
+            testHarness.AssertAllRequestsWereReceived();
+        }
+
+        [Test]
+        public void ShouldSerializeAllProperties()
+        {
+            var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostJson("/batch",
+                        @"[{
+                          'method': 'POST', 'to' : '/node',
+                          'body': {
+                            'Foo': 'foo',
+                            'Bar': 'bar',
+                            'Baz': 'baz'
+                          },
+                          'id': 0
+                        }]"
+                    ),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                          'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
+                          'data' : {
+                            'Foo' : 'foo',
+                            'Bar' : 'bar',
+                            'Baz' : 'baz'
+                          },
+                          'traverse' : 'http://foo/db/data/node/760/traverse/{returnType}',
+                          'all_typed_relationships' : 'http://foo/db/data/node/760/relationships/all/{-list|&|types}',
+                          'self' : 'http://foo/db/data/node/760',
+                          'property' : 'http://foo/db/data/node/760/properties/{key}',
+                          'outgoing_typed_relationships' : 'http://foo/db/data/node/760/relationships/out/{-list|&|types}',
+                          'properties' : 'http://foo/db/data/node/760/properties',
+                          'incoming_relationships' : 'http://foo/db/data/node/760/relationships/in',
+                          'extensions' : {
+                          },
+                          'create_relationship' : 'http://foo/db/data/node/760/relationships',
+                          'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                          'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
+                          'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
+                        },'from':'/node'}]"
+                    )
+                }
+            };
+
+            var graphClient = testHarness.CreateAndConnectGraphClient();
+
+            graphClient.Create(new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" });
+
+            testHarness.AssertAllRequestsWereReceived();
+        }
+
+        [Test]
+        public void ShouldPreserveUnicodeCharactersInStringProperties()
+        {
+            var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostJson("/batch",
+                        @"[{
+                            'method': 'POST', 'to' : '/node',
+                            'body': { 'Foo': 'foo東京', 'Bar': 'bar', 'Baz': 'baz' },
+                            'id': 0
+                        }]"
+                    ),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                          'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
+                          'data' : {
+                            'Foo' : 'foo',
+                            'Bar' : 'bar',
+                            'Baz' : 'baz'
+                          },
+                          'traverse' : 'http://foo/db/data/node/760/traverse/{returnType}',
+                          'all_typed_relationships' : 'http://foo/db/data/node/760/relationships/all/{-list|&|types}',
+                          'self' : 'http://foo/db/data/node/760',
+                          'property' : 'http://foo/db/data/node/760/properties/{key}',
+                          'outgoing_typed_relationships' : 'http://foo/db/data/node/760/relationships/out/{-list|&|types}',
+                          'properties' : 'http://foo/db/data/node/760/properties',
+                          'incoming_relationships' : 'http://foo/db/data/node/760/relationships/in',
+                          'extensions' : {
+                          },
+                          'create_relationship' : 'http://foo/db/data/node/760/relationships',
+                          'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                          'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
+                          'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
+                        },'from':'/node'}]"
+                    )
+                }
+            };
+
+            var graphClient = testHarness.CreateAndConnectGraphClient();
+
+            graphClient.Create(new TestNode { Foo = "foo東京", Bar = "bar", Baz = "baz" });
+
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
@@ -164,24 +219,14 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -201,17 +246,17 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             var node = graphClient.Create(testNode);
 
             Assert.AreEqual(760, node.Id);
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
@@ -219,24 +264,14 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node", testNode);
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -256,13 +291,12 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://foo/db/data/node/760/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://foo/db/data/node/760/relationships/all',
                           'incoming_typed_relationships' : 'http://foo/db/data/node/760/relationships/in/{-list|&|types}'
-                        },'from':'/node'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/node'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             var node = graphClient.Create(testNode);
 
@@ -275,26 +309,16 @@ namespace Neo4jClient.Test.GraphClientTests
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var testRelationshipPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "{0}/relationships",
+            batch.Add(HttpMethod.Post, "/node", testNode);
+            batch.Add(HttpMethod.Post, "{0}/relationships",
                 new RelationshipTemplate { To = "/node/789", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -328,19 +352,18 @@ namespace Neo4jClient.Test.GraphClientTests
                           'extensions' : {
                           },
                           'end' : 'http://foo/db/data/node/789'
-                        },'from':'http://foo/db/data/node/761/relationships'}]".Replace('\'', '\"')
-                    }
+                        },'from':'http://foo/db/data/node/761/relationships'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 
-            Assert.Inconclusive("Not actually asserting that the relationship was created");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         [Test]
@@ -348,26 +371,16 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
-            batch.Add(Method.POST, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
+            batch.Add(HttpMethod.Post, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/index/node/my_index", new { key = "key", value = "value", uri = "{0}" });
+            batch.Add(HttpMethod.Post, "/index/node/my_index", new { key = "key3", value = "value3", uri = "{0}" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://localhost:20001/db/data/node/763','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://localhost:20001/db/data/node/763','body':{
                           'outgoing_relationships' : 'http://localhost:20001/db/data/node/763/relationships/out',
                           'data' : {
                             'Baz' : 'baz',
@@ -408,13 +421,12 @@ namespace Neo4jClient.Test.GraphClientTests
                           'paged_traverse' : 'http://localhost:20001/db/data/node/763/paged/traverse/{returnType}{?pageSize,leaseTime}',
                           'all_relationships' : 'http://localhost:20001/db/data/node/763/relationships/all',
                           'incoming_typed_relationships' : 'http://localhost:20001/db/data/node/763/relationships/in/{-list|&|types}'
-                        },'from':'/index/node/my_index/key/value'}]".Replace('\'', '\"')
-                    }
+                        },'from':'/index/node/my_index/key/value'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 testNode,
@@ -440,26 +452,16 @@ namespace Neo4jClient.Test.GraphClientTests
             var testNode = new TestNode2 { Foo = "foo", Bar = "bar" };
             var testRelationshipPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
             var batch = new List<BatchStep>();
-            batch.Add(Method.POST, "/node", testNode);
-            batch.Add(Method.POST, "/node/789/relationships",
+            batch.Add(HttpMethod.Post, "/node", testNode);
+            batch.Add(HttpMethod.Post, "/node/789/relationships",
                 new RelationshipTemplate { To = "{0}", Data = testRelationshipPayload, Type = "TEST_RELATIONSHIP" });
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse { StatusCode = HttpStatusCode.OK, ContentType = "application/json", TestContent = rootResponse }
-                },
-                {
-                    new RestRequest {
-                        Resource = "/batch",
-                        Method = Method.POST,
-                        RequestFormat = DataFormat.Json
-                    }.AddBody(batch),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/760','body':{
                           'outgoing_relationships' : 'http://foo/db/data/node/760/relationships/out',
                           'data' : {
                             'Foo' : 'foo',
@@ -493,19 +495,18 @@ namespace Neo4jClient.Test.GraphClientTests
                           'extensions' : {
                           },
                           'end' : 'http://foo/db/data/node/789'
-                        },'from':'http://foo/db/data/node/761/relationships'}]".Replace('\'', '\"')
-                    }
+                        },'from':'http://foo/db/data/node/761/relationships'}]"
+                    )
                 }
-            });
+            };
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            var graphClient = testHarness.CreateAndConnectGraphClient();
 
             graphClient.Create(
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 
-            Assert.Inconclusive("Not actually asserting that the relationship was created");
+            testHarness.AssertAllRequestsWereReceived();
         }
 
         public class TestNode

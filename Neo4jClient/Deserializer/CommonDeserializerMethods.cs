@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RestSharp.Extensions;
 
 namespace Neo4jClient.Deserializer
 {
@@ -26,17 +25,32 @@ namespace Neo4jClient.Deserializer
 
         public static DateTimeOffset? ParseDateTimeOffset(JToken value)
         {
+            var jValue = value as JValue;
+            if (jValue != null)
+            {
+                if (jValue.Value == null)
+                    return null;
+
+                if (jValue.Value is DateTimeOffset)
+                    return jValue.Value<DateTimeOffset>();
+            }
+
             var rawValue = value.AsString();
 
             if (string.IsNullOrWhiteSpace(rawValue))
                 return null;
 
             rawValue = rawValue.Replace("NeoDate", "Date");
+
             if (!DateRegex.IsMatch(rawValue))
-                return null;
+            {
+                DateTimeOffset parsed;
+                if (!DateTimeOffset.TryParse(rawValue, out parsed))
+                    return null;
+            }
 
             var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
-            var reader = new JsonTextReader(new StringReader(text));
+            var reader = new JsonTextReader(new StringReader(text)) {DateParseHandling = DateParseHandling.DateTimeOffset};
             reader.Read(); // JsonToken.StartObject
             reader.Read(); // JsonToken.PropertyName
             return reader.ReadAsDateTimeOffset();
@@ -68,8 +82,9 @@ namespace Neo4jClient.Deserializer
             {
                 // no primitives can contain quotes so we can safely remove them
                 // allows converting a json value like {"index": "1"} to an int
-                var tmpVal = value.AsString().Replace("\"", string.Empty);
-                propertyInfo.SetValue(targetObject, tmpVal.ChangeType(propertyType), null);
+                object tmpVal = value.AsString().Replace("\"", string.Empty);
+                tmpVal = Convert.ChangeType(tmpVal, propertyType);
+                propertyInfo.SetValue(targetObject, tmpVal, null);
             }
             else if (propertyType.IsEnum)
             {
@@ -102,6 +117,12 @@ namespace Neo4jClient.Deserializer
             {
                 var dec = Decimal.Parse(value.AsString(), culture);
                 propertyInfo.SetValue(targetObject, dec, null);
+            }
+            else if (propertyType == typeof(TimeSpan))
+            {
+                var valueString = value.ToString();
+                var timeSpan = TimeSpan.Parse(valueString);
+                propertyInfo.SetValue(targetObject, timeSpan, null);
             }
             else if (propertyType == typeof(Guid))
             {
@@ -171,7 +192,24 @@ namespace Neo4jClient.Deserializer
             }
             else if (type.IsValueType)
             {
-                instance = Convert.ChangeType(element.ToString(), type);
+                if (type == typeof(Guid))
+                {
+                    instance = Guid.Parse(element.ToString());
+                }
+                else if(type.BaseType == typeof(Enum))
+                {
+                    instance = Enum.Parse(type, element.ToString(), false);
+                }
+                else
+                {
+                    instance = Convert.ChangeType(element.ToString(), type);
+                }
+            }
+            else if(type.BaseType == typeof(Array)) //One Dimensional Only
+            {
+                var underlyingType = type.GetElementType();
+                var arrayType = typeof(ArrayList);
+                instance = BuildArray(arrayType, underlyingType, element.Children(), culture, typeMappings, nestingLevel + 1);
             }
             else if (type == typeof(string))
             {
@@ -256,7 +294,7 @@ namespace Neo4jClient.Deserializer
                     var value = element as JValue;
                     if (value != null)
                     {
-                        list.Add(value.Value.ChangeType(itemType));
+                        list.Add(Convert.ChangeType(value.Value, itemType));
                     }
                 }
                 else if (itemType == typeof(string))
@@ -270,6 +308,34 @@ namespace Neo4jClient.Deserializer
                 }
             }
             return list;
+        }
+
+        public static Array BuildArray(Type type, Type itemType,  JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
+        {
+            typeMappings = typeMappings.ToArray();
+            var list = (ArrayList)Activator.CreateInstance(type);
+
+            foreach (var element in elements)
+            {
+                if (itemType.IsPrimitive)
+                {
+                    var value = element as JValue;
+                    if (value != null)
+                    {
+                        list.Add(Convert.ChangeType(value.Value, itemType));
+                    }
+                }
+                else if (itemType == typeof(string))
+                {
+                    list.Add(element.AsString());
+                }
+                else
+                {
+                    var item = CreateAndMap(itemType, element, culture, typeMappings, nestingLevel + 1);
+                    list.Add(item);
+                }
+            }
+            return list.ToArray(itemType);
         }
 
         public static IList BuildIEnumerable(Type type, JEnumerable<JToken> elements, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
@@ -286,7 +352,7 @@ namespace Neo4jClient.Deserializer
                     var value = element as JValue;
                     if (value != null)
                     {
-                        list.Add(value.Value.ChangeType(itemType));
+                        list.Add(Convert.ChangeType(value.Value, itemType));
                     }
                 }
                 else if (itemType == typeof (string))
@@ -325,7 +391,7 @@ namespace Neo4jClient.Deserializer
                             (JsonPropertyAttribute[])p.GetCustomAttributes(typeof(JsonPropertyAttribute), true);
                         return new
                         {
-                            Name = attributes.Any() ? attributes.Single().PropertyName : p.Name,
+                            Name = attributes.Any() && attributes.Single().PropertyName  != null ? attributes.Single().PropertyName : p.Name,
                             Property = p
                         };
                     });

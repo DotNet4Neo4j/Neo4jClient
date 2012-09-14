@@ -321,8 +321,7 @@ namespace Neo4jClient.Test.Gremlin
         [Test]
         public void ShouldCombineMultiStepEqualQuery()
         {
-            var query = NodeReference
-                .RootNode
+            var query = new NodeReference(0)
                 .OutE("E_FOO")
                 .InV<Foo>(new List<Filter> { new Filter { PropertyName = "Foo", Value = "Bar", ExpressionType = ExpressionType.Equal } }, StringComparison.Ordinal)
                 .InE("E_BAR")

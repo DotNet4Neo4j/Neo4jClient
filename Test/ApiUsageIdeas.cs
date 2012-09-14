@@ -56,7 +56,7 @@ namespace Neo4jClient.Test
             graph.Create(
                 new StorageLocation {Name = "Auxillary Store"},
                 new StoredIn(wheel),
-                new OwnedBy(NodeReference.RootNode));
+                new OwnedBy(graph.RootNode));
         }
     }
 }

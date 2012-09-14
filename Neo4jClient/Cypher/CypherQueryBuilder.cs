@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -8,10 +9,12 @@ namespace Neo4jClient.Cypher
     public class CypherQueryBuilder
     {
         IDictionary<string, object> queryParameters = new Dictionary<string, object>();
-        IList<CypherStartBit> startBits = new List<CypherStartBit>();
+        IList<object> startBits = new List<object>();
         string matchText;
         string relateText;
+        string createUniqueText;
         string whereText;
+        string createText;
         string deleteText;
         string returnText;
         bool returnDistinct;
@@ -25,9 +28,11 @@ namespace Neo4jClient.Cypher
             return new CypherQueryBuilder
             {
                 queryParameters = queryParameters,
+                createText = createText,
                 deleteText = deleteText,
                 matchText = matchText,
                 relateText = relateText,
+                createUniqueText = createUniqueText,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -53,6 +58,13 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        public CypherQueryBuilder AddStartBitWithNodeIndexLookup(string identity, string indexName, string key, object value)
+        {
+            var newBuilder = Clone();
+            newBuilder.startBits.Add(new CypherStartBitWithNodeIndexLookup(identity, indexName, key, value));
+            return newBuilder;
+        }
+
         public CypherQueryBuilder SetDeleteText(string text)
         {
             var newBuilder = Clone();
@@ -71,6 +83,20 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.relateText = text;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetCreateUniqueText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.createUniqueText = text;
+            return newBuilder;
+        }
+
+        public CypherQueryBuilder SetCreateText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.createText = text;
             return newBuilder;
         }
 
@@ -151,12 +177,14 @@ namespace Neo4jClient.Cypher
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
             WriteRelateClause(queryTextBuilder);
+            WriteCreateUniqueClause(queryTextBuilder);
+            WriteCreateClause(queryTextBuilder);
             WriteWhereClause(queryTextBuilder);
+            WriteDeleteClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
             WriteLimitClause(queryTextBuilder, queryParameters);
-            WriteDeleteClause(queryTextBuilder);
             return new CypherQuery(queryTextBuilder.ToString(), queryParameters, resultMode);
         }
 
@@ -173,14 +201,33 @@ namespace Neo4jClient.Cypher
 
             var formattedStartBits = startBits.Select(bit =>
             {
-                var lookupIdParameterNames = bit
-                    .LookupIds
-                    .Select(i => CreateParameter(paramsDictionary, i))
-                    .ToArray();
+                var standardStartBit = bit as CypherStartBit;
+                if (standardStartBit != null)
+                {
+                    var lookupIdParameterNames = standardStartBit
+                        .LookupIds
+                        .Select(i => CreateParameter(paramsDictionary, i))
+                        .ToArray();
 
-                var lookupContent = string.Join(", ", lookupIdParameterNames);
+                    var lookupContent = string.Join(", ", lookupIdParameterNames);
+                    return string.Format("{0}={1}({2})",
+                        standardStartBit.Identifier,
+                        standardStartBit.LookupType,
+                        lookupContent);
+                }
 
-                return string.Format("{0}={1}({2})", bit.Identifier, bit.LookupType, lookupContent);
+                var startBithWithNodeIndexLookup = bit as CypherStartBitWithNodeIndexLookup;
+                if (startBithWithNodeIndexLookup != null)
+                {
+                    var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookup.Value);
+                    return string.Format("{0}=node:{1}({2} = {3})",
+                        startBithWithNodeIndexLookup.Identifier,
+                        startBithWithNodeIndexLookup.IndexName,
+                        startBithWithNodeIndexLookup.Key,
+                        valueParameter);
+                }
+
+                throw new NotSupportedException(string.Format("Start bit of type {0} is not supported.", bit.GetType().FullName));
             });
 
             target.Append(string.Join(", ", formattedStartBits));
@@ -202,6 +249,18 @@ namespace Neo4jClient.Cypher
         {
             if (relateText == null) return;
             target.AppendFormat("\r\nRELATE {0}", relateText);
+        }
+
+        void WriteCreateUniqueClause(StringBuilder target)
+        {
+            if (createUniqueText == null) return;
+            target.AppendFormat("\r\nCREATE UNIQUE {0}", createUniqueText);
+        }
+
+        void WriteCreateClause(StringBuilder target)
+        {
+            if (createText == null) return;
+            target.AppendFormat("\r\nCREATE {0}", createText);
         }
 
         void WriteWhereClause(StringBuilder target)

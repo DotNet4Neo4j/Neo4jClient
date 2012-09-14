@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RestSharp;
-using RestSharp.Extensions;
 
 namespace Neo4jClient.Deserializer
 {
@@ -16,20 +16,23 @@ namespace Neo4jClient.Deserializer
         readonly IGraphClient client;
         readonly CypherResultMode resultMode;
 
-        public CultureInfo Culture { get; set; }
+        readonly CultureInfo culture = CultureInfo.InvariantCulture;
 
         public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode)
         {
             this.client = client;
             this.resultMode = resultMode;
-            Culture = CultureInfo.InvariantCulture;
         }
 
-        public IEnumerable<TResult> Deserialize(RestResponse response)
+        public IEnumerable<TResult> Deserialize(string content)
         {
-            response.Content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(response.Content);
-            var content = response.Content;
-            var root = JObject.Parse(content).Root;
+            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+
+            var reader = new JsonTextReader(new StringReader(content))
+            {
+                DateParseHandling = DateParseHandling.DateTimeOffset
+            };
+            var root = JToken.ReadFrom(reader).Root;
 
             var columnsArray = (JArray)root["columns"];
             var columnNames = columnsArray
@@ -81,16 +84,21 @@ namespace Neo4jClient.Deserializer
                     });
                     return ParseInProjectionMode(root, columnNames, jsonTypeMappings.ToArray());
                 default:
-                    throw new ArgumentException("Unrecognised mode.", "mode");
+                    throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
             }
         }
 
+// ReSharper disable UnusedParameter.Local
         IEnumerable<TResult> ParseInSingleColumnMode(JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+// ReSharper restore UnusedParameter.Local
         {
             if (columnNames.Count() != 1)
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
 
-            var resultType = typeof (TResult);
+            var resultType = typeof(TResult);
+            var isResultTypeANodeOrRelationshipInstance = resultType.IsGenericType &&
+                                       (resultType.GetGenericTypeDefinition() == typeof(Node<>) ||
+                                        resultType.GetGenericTypeDefinition() == typeof(RelationshipInstance<>));
             var mapping = jsonTypeMappings.SingleOrDefault(m => m.ShouldTriggerForPropertyType(0, resultType));
             var newType = mapping == null ? resultType : mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(resultType);
 
@@ -105,7 +113,23 @@ namespace Neo4jClient.Deserializer
                 if (rowAsArray.Count != 1)
                     throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
 
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, row[0], Culture, jsonTypeMappings, 0);
+                var elementToParse = row[0];
+                if (elementToParse is JObject)
+                {
+                    var propertyNames = ((JObject) elementToParse)
+                        .Properties()
+                        .Select(p => p.Name)
+                        .ToArray();
+                    var dataElementLooksLikeANodeOrRelationshipInstance =
+                        new[] {"data", "self", "traverse", "properties"}.All(propertyNames.Contains);
+                    if (!isResultTypeANodeOrRelationshipInstance &&
+                        dataElementLooksLikeANodeOrRelationshipInstance)
+                    {
+                        elementToParse = elementToParse["data"];
+                    }
+                }
+
+                var parsed = CommonDeserializerMethods.CreateAndMap(newType, elementToParse, culture, jsonTypeMappings, 0);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
@@ -140,7 +164,7 @@ namespace Neo4jClient.Deserializer
         TResult ReadProjectionRow(
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
-            string[] columnNames,
+            IList<string> columnNames,
             TypeMapping[] jsonTypeMappings)
         {
             var result = Activator.CreateInstance<TResult>();
@@ -153,7 +177,7 @@ namespace Neo4jClient.Deserializer
                 if (property.ToString().Contains("System.Collections.Generic.IEnumerable") &&
                    string.IsNullOrEmpty(cell.First().ToString()) && string.IsNullOrEmpty(cell.Last().ToString())) 
                     continue;
-                CommonDeserializerMethods.SetPropertyValue(result, property, cell, Culture, jsonTypeMappings, 0);
+                CommonDeserializerMethods.SetPropertyValue(result, property, cell, culture, jsonTypeMappings, 0);
                 cellIndex++;
             }
 

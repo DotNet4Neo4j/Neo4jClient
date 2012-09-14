@@ -2,100 +2,56 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
-using Neo4jClient.Serializer;
-using Newtonsoft.Json;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
 {
     [TestFixture]
     public class ReIndexTests
     {
-        readonly string rootResponse = @"{
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
-                'neo4j_version' : '1.5.M02',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                }
-            }"
-            .Replace('\'', '"');
-
-        readonly string pre15M02RootResponse = @"{
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/0',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                }
-            }"
-            .Replace('\'', '"');
-
         [Test]
         public void ShouldReindexNodeWithIndexEntryContainingSpace()
         {
             //Arrange
             var indexEntries = new List<IndexEntry>
-            {
-                new IndexEntry
                 {
-                    Name = "my_nodes",
-                    KeyValues = new Dictionary<string, object>
+                    new IndexEntry
+                        {
+                            Name = "my_nodes",
+                            KeyValues = new Dictionary<string, object>
+                                {
+                                    {"FooKey", "the_value with space"}
+                                },
+                        }
+                };
+
+            using (var testHarness = new RestTestHarness
+                {
                     {
-                        { "FooKey", "the_value with space" }
+                        MockRequest.PostObjectAsJson("/index/node/my_nodes",
+                                                     new
+                                                         {
+                                                             key = "FooKey",
+                                                             value = "the_value with space",
+                                                             uri = "http://foo/db/data/node/123"
+                                                         }),
+                        MockResponse.Json(HttpStatusCode.Created,
+                                          @"Location: http://foo/db/data/index/node/my_nodes/FooKey/the_value%20with%20space/123")
                     },
-                }
-            };
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+                    {
+                        MockRequest.Delete("/index/node/my_nodes/123"),
+                        MockResponse.Http((int) HttpStatusCode.NoContent)
+                    }
+                })
             {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = rootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest("/index/node/my_nodes", Method.POST)
-                    {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-                    }
-                    .AddBody(new { key="FooKey", value="the_value with space", uri="http://foo/db/data/node/123"}),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                        TestContent = "Location: http://foo/db/data/index/node/my_nodes/FooKey/the_value%20with%20space/123"
-                    }
-                },
-                {
-                   new RestRequest("/index/node/my_nodes/123", Method.DELETE) {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-                        },
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.NoContent,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            var nodeReference = new NodeReference<TestNode>(123);
-            graphClient.ReIndex(nodeReference, indexEntries);
+                //Act
+                var nodeReference = new NodeReference<TestNode>(123);
+                graphClient.ReIndex(nodeReference, indexEntries);
 
-            // Assert
-            Assert.Pass("Success.");
+                // Assert
+                Assert.Pass("Success.");
+            }
         }
 
         [Test]
@@ -103,61 +59,45 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             //Arrange
             var indexEntries = new List<IndexEntry>
-            {
-                new IndexEntry
                 {
-                    Name = "my_nodes",
-                    KeyValues = new Dictionary<string, object>
+                    new IndexEntry
+                        {
+                            Name = "my_nodes",
+                            KeyValues = new Dictionary<string, object>
+                                {
+                                    {"FooKey", new DateTimeOffset(1000, new TimeSpan(0))}
+                                },
+                        }
+                };
+
+            using (var testHarness = new RestTestHarness
+                {
                     {
-                        { "FooKey", new DateTimeOffset(1000, new TimeSpan(0)) }
+                        MockRequest.PostObjectAsJson("/index/node/my_nodes",
+                                                     new
+                                                         {
+                                                             key = "FooKey",
+                                                             value = "1000",
+                                                             uri = "http://foo/db/data/node/123"
+                                                         }),
+                        MockResponse.Json(HttpStatusCode.Created,
+                                          @"Location: http://foo/db/data/index/node/my_nodes/FooKey/someDateValue/123")
                     },
-                }
-            };
-
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+                    {
+                        MockRequest.Delete("/index/node/my_nodes/123"),
+                        MockResponse.Http((int) HttpStatusCode.NoContent)
+                    }
+                })
             {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = rootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest("/index/node/my_nodes", Method.POST)
-                    {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-                    }
-                    .AddBody(new { key="FooKey", value="1000", uri="http://foo/db/data/node/123"}),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                        TestContent = "Location: http://foo/db/data/index/node/my_nodes/FooKey/the_value%20with%20space/123"
-                    }
-                },
-                {
-                   new RestRequest("/index/node/my_nodes/123", Method.DELETE) {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-                        },
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.NoContent,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            var nodeReference = new NodeReference<TestNode>(123);
-            graphClient.ReIndex(nodeReference, indexEntries);
+                //Act
+                var nodeReference = new NodeReference<TestNode>(123);
+                graphClient.ReIndex(nodeReference, indexEntries);
 
-            // Assert
-            Assert.Pass("Success.");
+                // Assert
+                Assert.Pass("Success.");
+            }
         }
 
         [Test]
@@ -165,62 +105,46 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
-            {
-                {"FooKey", "foo?bar"}
-            };
+                {
+                    {"FooKey", "foo?bar"}
+                };
             var indexEntries = new List<IndexEntry>
-            {
-                new IndexEntry
                 {
-                    Name = "my_nodes",
-                    KeyValues = indexKeyValues,
-                }
-            };
+                    new IndexEntry
+                        {
+                            Name = "my_nodes",
+                            KeyValues = indexKeyValues,
+                        }
+                };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
+            using (var testHarness = new RestTestHarness
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
                     {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = rootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest("/index/node/my_nodes", Method.POST)
+                        MockRequest.PostObjectAsJson("/index/node/my_nodes",
+                                                     new
+                                                         {
+                                                             key = "FooKey",
+                                                             value = "foo?bar",
+                                                             uri = "http://foo/db/data/node/123"
+                                                         }),
+                        MockResponse.Json(HttpStatusCode.Created,
+                                          @"Location: http://foo/db/data/index/node/my_nodes/FooKey/%3f/123")
+                    },
                     {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                        MockRequest.Delete("/index/node/my_nodes/123"),
+                        MockResponse.Http((int) HttpStatusCode.NoContent)
                     }
-                    .AddBody(new { key="FooKey", value="foo?bar", uri="http://foo/db/data/node/123"}),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                        TestContent = "Location: http://foo/db/data/index/node/my_nodes/FooKey/%3F/123"
-                    }
-                },
-                {
-                   new RestRequest("/index/node/my_nodes/123", Method.DELETE) {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-                        },
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.NoContent,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            var nodeReference = new NodeReference<TestNode>(123);
-            graphClient.ReIndex(nodeReference, indexEntries);
+                //Act
+                var nodeReference = new NodeReference<TestNode>(123);
+                graphClient.ReIndex(nodeReference, indexEntries);
 
-            // Assert
-            Assert.Pass("Success.");
+                // Assert
+                Assert.Pass("Success.");
+            }
         }
 
         [Test]
@@ -228,93 +152,75 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
-            {
-                {"FooKey", "abc/def"}
-            };
+                {
+                    {"FooKey", "abc/def"}
+                };
             var indexEntries = new List<IndexEntry>
-            {
-                new IndexEntry
                 {
-                    Name = "my_nodes",
-                    KeyValues = indexKeyValues,
-                }
-            };
+                    new IndexEntry
+                        {
+                            Name = "my_nodes",
+                            KeyValues = indexKeyValues,
+                        }
+                };
 
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
+            using (var testHarness = new RestTestHarness
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
                     {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = rootResponse.Replace('\'', '"')
-                    }
-                },
-                {
-                    new RestRequest("/index/node/my_nodes", Method.POST)
+                        MockRequest.PostObjectAsJson("/index/node/my_nodes",
+                                                     new
+                                                         {
+                                                             key = "FooKey",
+                                                             value = "abc/def",
+                                                             uri = "http://foo/db/data/node/123"
+                                                         }),
+                        MockResponse.Json(HttpStatusCode.Created,
+                                          @"Location: http://foo/db/data/index/node/my_nodes/FooKey/abc-def/123")
+                    },
                     {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
+                        MockRequest.Delete("/index/node/my_nodes/123"),
+                        MockResponse.Http((int) HttpStatusCode.NoContent)
                     }
-                    .AddBody(new { key = "FooKey", value ="abc/def", uri = "http://foo/db/data/node/123"}),
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.Created,
-                        ContentType = "application/json",
-                        TestContent = "Location: http://foo/db/data/index/node/my_nodes/FooKey/abc-def/123"
-                    }
-                },
-                {
-                   new RestRequest("/index/node/my_nodes/123", Method.DELETE) {
-                        RequestFormat = DataFormat.Json,
-                        JsonSerializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore }
-                        },
-                    new NeoHttpResponse {
-                        StatusCode = HttpStatusCode.NoContent,
-                        ContentType = "application/json",
-                    }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            //Act
-            var nodeReference = new NodeReference<TestNode>(123);
-            graphClient.ReIndex(nodeReference, indexEntries);
+                //Act
+                var nodeReference = new NodeReference<TestNode>(123);
+                graphClient.ReIndex(nodeReference, indexEntries);
 
-            // Assert
-            Assert.Pass("Success.");
+                // Assert
+                Assert.Pass("Success.");
+            }
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
+        [ExpectedException(typeof (NotSupportedException))]
         public void ShouldThrowNotSupportExceptionForPre15M02Database()
         {
             //Arrange
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
-            {
+
+            using (var testHarness = new RestTestHarness
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
                     {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = pre15M02RootResponse.Replace('\'', '"')
+                        MockRequest.Get(""),
+                        MockResponse.NeoRootPre15M02()
                     }
-                }
-            });
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+                })
+            {
 
-            //Act
-            var nodeReference = new NodeReference<TestNode>(123);
-            graphClient.ReIndex(nodeReference, new IndexEntry[0]);
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                //Act
+                var nodeReference = new NodeReference<TestNode>(123);
+                graphClient.ReIndex(nodeReference, new IndexEntry[0]);
+            }
         }
-    }
 
-    public class TestNode
-    {
-        public string FooKey { get; set; }
-    }
+        public class TestNode
+        {
+            public string FooKey { get; set; }
+        }
 
+    }
 }

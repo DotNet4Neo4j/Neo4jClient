@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Newtonsoft.Json;
-using RestSharp.Serializers;
+using Newtonsoft.Json.Converters;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Neo4jClient.Serializer
 {
-    public class CustomJsonSerializer : ISerializer
+    public class CustomJsonSerializer
     {
         public string ContentType { get; set; }
         public string DateFormat { get; set; }
@@ -30,6 +31,7 @@ namespace Neo4jClient.Serializer
             };
             serializer2.Converters.Add(new EnumValueConverter());
             serializer2.Converters.Add(new TimeZoneInfoConverter());
+            serializer2.Converters.Add(new NullableEnumValueConverter());
             var serializer = serializer2;
             using (var writer = new StringWriter())
             using (var writer2 = new JsonTextWriter(writer))

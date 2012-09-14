@@ -1,8 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 
 namespace Neo4jClient.Test.GraphClientTests
 {
@@ -10,207 +13,151 @@ namespace Neo4jClient.Test.GraphClientTests
     public class ConnectTests
     {
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 Internal Server Error")]
+        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.InternalServerError,
-                        StatusDescription = "Internal Server Error"
-                    }
+                    MockRequest.Get(""),
+                    MockResponse.Http(500)
                 }
-            });
-
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
+            })
+            {
+                testHarness.CreateAndConnectGraphClient();
+            }
         }
 
         [Test]
         public void ShouldRetrieveApiEndpoints()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness())
+            {
+                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
+
+                Assert.AreEqual("/node", graphClient.RootApiResponse.Node);
+                Assert.AreEqual("/index/node", graphClient.RootApiResponse.NodeIndex);
+                Assert.AreEqual("/index/relationship", graphClient.RootApiResponse.RelationshipIndex);
+                Assert.AreEqual("http://foo/db/data/node/123", graphClient.RootApiResponse.ReferenceNode);
+                Assert.AreEqual("/ext", graphClient.RootApiResponse.ExtensionsInfo);
+            }
+        }
+
+        [Test]
+        [ExpectedException(ExpectedMessage = "The graph client is not connected to the server. Call the Connect method first.")]
+        public void RootNode_ShouldThrowInvalidOperationException_WhenNotConnectedYet()
+        {
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
+// ReSharper disable ReturnValueOfPureMethodIsNotUsed
+            graphClient.RootNode.ToString();
+// ReSharper restore ReturnValueOfPureMethodIsNotUsed
+        }
+
+        [Test]
+        public void RootNode_ShouldReturnReferenceNode()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                Assert.IsNotNull(graphClient.RootNode);
+                Assert.AreEqual(123, graphClient.RootNode.Id);
+            }
+        }
+
+        [Test]
+        public void RootNode_ShouldReturnNullReferenceNode_WhenNoReferenceNodeDefined()
+        {
+            using (var testHarness = new RestTestHarness
             {
                 {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
+                    MockRequest.Get(""),
+                    MockResponse.Json(HttpStatusCode.OK, @"{
+                        'batch' : 'http://foo/db/data/batch',
+                        'node' : 'http://foo/db/data/node',
+                        'node_index' : 'http://foo/db/data/index/node',
+                        'relationship_index' : 'http://foo/db/data/index/relationship',
+                        'extensions_info' : 'http://foo/db/data/ext',
+                        'extensions' : {
+                        }
+                    }")
                 }
-            });
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-
-            Assert.AreEqual("/node", graphClient.RootApiResponse.Node);
-            Assert.AreEqual("/index/node", graphClient.RootApiResponse.NodeIndex);
-            Assert.AreEqual("/index/relationship", graphClient.RootApiResponse.RelationshipIndex);
-            Assert.AreEqual("/node/0", graphClient.RootApiResponse.ReferenceNode);
-            Assert.AreEqual("/ext", graphClient.RootApiResponse.ExtensionsInfo);
+                Assert.IsNull(graphClient.RootNode);
+            }
         }
 
         [Test]
         public void ShouldParse15M02Version()
         {
-            var httpFactory = MockHttpFactory.Generate("http://foo/db/data", new Dictionary<IRestRequest, IHttpResponse>
+            using (var testHarness = new RestTestHarness())
             {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'neo4j_version' : '1.5.M02',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
-                }
-            });
+                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpFactory);
-            graphClient.Connect();
-
-            Assert.AreEqual("1.5.0.2", graphClient.RootApiResponse.Version.ToString());
+                Assert.AreEqual("1.5.0.2", graphClient.RootApiResponse.Version.ToString());
+            }
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 401 Unauthorized")]
-        public void DisableSupportForNeo4jOnHerokuWhenRequiredThrow401UnAuthroized()
-        {
-            const string httpFooDbData = "http://foo/db/data";
-
-            var httpFactory = MockHttpFactory.Generate(httpFooDbData, new Dictionary<IRestRequest, IHttpResponse>
-            {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.Unauthorized,
-                        StatusDescription = "Unauthorized"
-                    }
-                }
-            });
-
-            var graphClient = new GraphClient(new Uri(httpFooDbData), httpFactory) { EnableSupportForNeo4jOnHeroku = false };
-
-            graphClient.Connect();
-        }
-
-        [Test]
-        public void DisableSupportForNeo4jOnHerokuShouldNotChangeResource()
-        {
-            const string httpFooDbData = "http://foo/db/data";
-
-            var httpFactory = MockHttpFactory.Generate(httpFooDbData, new Dictionary<IRestRequest, IHttpResponse>
-            {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'neo4j_version' : '1.5.M02',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
-                }
-            });
-
-            var graphClient = new GraphClient(new Uri(httpFooDbData), httpFactory) { EnableSupportForNeo4jOnHeroku = false };
-
-            graphClient.Connect();
-
-            Assert.Pass("The constructed URL matched {0} and did not have a trailing slash", httpFooDbData);
-        }
-
-        [Test]
-        public void EnableSupportForNeo4jOnHerokuShouldChangeResource()
-        {
-            const string httpFooDbData = "http://foo/db/data/";
-
-            var httpFactory = MockHttpFactory.Generate(httpFooDbData, new Dictionary<IRestRequest, IHttpResponse>
-            {
-                {
-                    new RestRequest { Resource = "", Method = Method.GET },
-                    new NeoHttpResponse
-                    {
-                        StatusCode = HttpStatusCode.OK,
-                        ContentType = "application/json",
-                        TestContent = @"{
-                          'batch' : 'http://foo/db/data/batch',
-                          'node' : 'http://foo/db/data/node',
-                          'node_index' : 'http://foo/db/data/index/node',
-                          'relationship_index' : 'http://foo/db/data/index/relationship',
-                          'reference_node' : 'http://foo/db/data/node/0',
-                          'neo4j_version' : '1.5.M02',
-                          'extensions_info' : 'http://foo/db/data/ext',
-                          'extensions' : {
-                          }
-                        }".Replace('\'', '"')
-                    }
-                }
-            });
-
-            var graphClient = new GraphClient(new Uri(httpFooDbData), httpFactory) { EnableSupportForNeo4jOnHeroku = true };
-
-            graphClient.Connect();
-
-            Assert.Pass("The constructed URL matched {0} and did have a trailing slash", httpFooDbData);
-        }
-
-        [Test]
-        public void BasicAuthenticatorNotUsedWhenNoUserInfoSupplied()
-        {
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"));
-
-            Assert.IsNull(graphClient.Authenticator);
-        }
-
-        [Test]
-        public void BasicAuthenticatorUsedWhenUserInfoSupplied()
+        public void UserInfoPreservedInRootUri()
         {
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
 
-            Assert.That(graphClient.Authenticator, Is.TypeOf<HttpBasicAuthenticator>());
+            Assert.That(graphClient.RootUri.OriginalString, Is.EqualTo("http://username:password@foo/db/data"));
         }
 
         [Test]
-        public void UserInfoRemovedFromRootUri()
+        public void ShouldSendCustomUserAgent()
         {
-            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"));
+            // Arrange
+            var httpClient = Substitute.For<IHttpClient>();
+            var graphClient = new GraphClient(new Uri("http://localhost"), httpClient);
+            var expectedUserAgent = graphClient.UserAgent;
+            httpClient
+                .SendAsync(Arg.Do<HttpRequestMessage>(message =>
+                {
+                    // Assert
+                    Assert.IsTrue(message.Headers.Contains("User-Agent"), "Contains User-Agent header");
+                    var userAgent = message.Headers.GetValues("User-Agent").Single();
+                    Assert.AreEqual(expectedUserAgent, userAgent, "User-Agent header value is correct");
+                }))
+                .Returns(ci => {
+                    var response = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(@"{
+                            'cypher' : 'http://foo/db/data/cypher',
+                            'batch' : 'http://foo/db/data/batch',
+                            'node' : 'http://foo/db/data/node',
+                            'node_index' : 'http://foo/db/data/index/node',
+                            'relationship_index' : 'http://foo/db/data/index/relationship',
+                            'reference_node' : 'http://foo/db/data/node/123',
+                            'neo4j_version' : '1.5.M02',
+                            'extensions_info' : 'http://foo/db/data/ext',
+                            'extensions' : {
+                                'GremlinPlugin' : {
+                                    'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+                                }
+                            }
+                        }")
+                    };
+                    var task = new Task<HttpResponseMessage>(() => response);
+                    task.Start();
+                    return task;
+                });
 
-            Assert.That(graphClient.RootUri.OriginalString, Is.EqualTo("http://foo/db/data"));
+            // Act
+            graphClient.Connect();
+        }
+
+        [Test]
+        public void ShouldFormatUserAgentCorrectly()
+        {
+            var graphClient = new GraphClient(new Uri("http://localhost"));
+            var userAgent = graphClient.UserAgent;
+            Assert.IsTrue(Regex.IsMatch(userAgent, @"Neo4jClient/\d+\.\d+\.\d+\.\d+"), "User agent should be in format Neo4jClient/1.2.3.4");
         }
     }
 }
