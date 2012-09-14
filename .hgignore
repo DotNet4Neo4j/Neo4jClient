@@ -8,3 +8,4 @@ TestResults
 Neo4jClient.*.nupkg
 .docstates
 .crunchsolution.cache
+packages
