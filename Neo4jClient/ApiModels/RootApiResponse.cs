@@ -40,6 +40,11 @@ namespace Neo4jClient.ApiModels
                 if (string.IsNullOrEmpty(neo4j_version))
                     return new Version();
 
+                switch (neo4j_version)
+                {
+                    case "1.8.RC1": return new Version(1,8,0,8);
+                }
+
                 var numericalVersionString = Regex.Replace(
                     neo4j_version,
                     @"(?<major>\d*)[.](?<minor>\d*)[.]?M(?<build>\d*).*",
