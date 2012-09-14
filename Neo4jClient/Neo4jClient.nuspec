@@ -11,7 +11,7 @@
     <tags>neo4j REST nosql</tags>
     <dependencies>
       <dependency id="Microsoft.Net.Http" />
-      <dependency id="Newtonsoft.Json" version="4.5.8" />
+      <dependency id="Newtonsoft.Json" version="4.5.9" />
     </dependencies>
   </metadata>
   <files>
