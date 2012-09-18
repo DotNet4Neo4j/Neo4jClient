@@ -11,5 +11,6 @@ namespace Neo4jClient
     public interface IRawGraphClient : IGraphClient
     {
         IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
+        void ExecuteCypher(CypherQuery query);
     }
 }

@@ -663,6 +663,27 @@ namespace Neo4jClient
             return results;
         }
 
+        void IRawGraphClient.ExecuteCypher(CypherQuery query)
+        {
+            CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            SendHttpRequest(
+                HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
+                string.Format("The query was: {0}", query.QueryText),
+                HttpStatusCode.OK);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.QueryText,
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
+        }
+
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
         {
             return ExecuteGetAllRelationshipsGremlin<object>(query, parameters);
