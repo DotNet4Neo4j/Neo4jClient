@@ -8,17 +8,32 @@ namespace Neo4jClient.Test
     public class NodeReferenceTests
     {
         [Test]
-        public void ShouldImplicitlyCastFromInt()
+        public void ShouldImplicitlyCastFromIntToUntypedReference()
         {
             NodeReference nodeReference = 3;
             Assert.AreEqual(3, nodeReference.Id);
         }
 
         [Test]
-        public void ShouldExplicitlyCastFromInt()
+        public void ShouldImplicitlyCastFromIntToTypedReference()
+        {
+            NodeReference<object> nodeReference = 3;
+            Assert.AreEqual(3, nodeReference.Id);
+        }
+
+        [Test]
+        public void ShouldExplicitlyCastFromIntToUntypedReference()
         {
             var nodeReference = (NodeReference)3;
             Assert.IsInstanceOf(typeof(NodeReference), nodeReference);
+            Assert.AreEqual(3, nodeReference.Id);
+        }
+
+        [Test]
+        public void ShouldExplicitlyCastFromIntToTypedReference()
+        {
+            var nodeReference = (NodeReference<object>)3;
+            Assert.IsInstanceOf(typeof(NodeReference<object>), nodeReference);
             Assert.AreEqual(3, nodeReference.Id);
         }
 

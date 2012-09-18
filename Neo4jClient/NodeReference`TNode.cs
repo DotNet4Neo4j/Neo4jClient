@@ -34,5 +34,10 @@ namespace Neo4jClient
         {
             get { return typeof (TNode); }
         }
+
+        public static implicit operator NodeReference<TNode>(int nodeId)
+        {
+            return new NodeReference<TNode>(nodeId);
+        }
     }
 }
