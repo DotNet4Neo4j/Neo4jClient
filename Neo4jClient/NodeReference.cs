@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
@@ -82,6 +83,13 @@ namespace Neo4jClient
         IList<string> IGremlinQuery.QueryDeclarations
         {
             get { return new List<string>(); }
+        }
+
+        public ICypherFluentQueryStarted StartCypher(string identity)
+        {
+            var query = new CypherFluentQuery(client)
+                .AddStartPoint(identity, this);
+            return query;
         }
     }
 }

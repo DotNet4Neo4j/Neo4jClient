@@ -1,4 +1,5 @@
 ﻿using System;
+using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Gremlin;
 
@@ -151,6 +152,16 @@ namespace Neo4jClient.Test
             var reference = new NodeReference(123);
             var query = ((IGremlinQuery) reference);
             Assert.AreEqual("g.v(p0)", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void CypherShouldStartQueryFromCurrentNodeReference()
+        {
+            var graphClient = Substitute.For<IRawGraphClient>();
+            var reference = new NodeReference(123, graphClient);
+            var query = reference.StartCypher("foo").Query;
+            Assert.AreEqual("START foo=node({p0})", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
         }
     }
