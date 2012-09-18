@@ -103,6 +103,11 @@ namespace Neo4jClient.Cypher
             get { return Builder.ToQuery(); }
         }
 
+        public void ExecuteWithoutResults()
+        {
+            Client.ExecuteCypher(Query);
+        }
+
         IGraphClient IAttachedReference.Client
         {
             get { return Client; }
