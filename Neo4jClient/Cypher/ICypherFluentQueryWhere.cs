@@ -5,6 +5,7 @@ namespace Neo4jClient.Cypher
 {
     public interface ICypherFluentQueryWhere : ICypherFluentQuery, ICypherFluentQueryReturnable
     {
+        ICypherFluentQueryMatched CreateUnique(string createUniqueText);
         ICypherFluentQueryWhere And();
         ICypherFluentQueryWhere Or();
         ICypherFluentQueryWhere Where(string text);
