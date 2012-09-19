@@ -78,6 +78,7 @@
     <Compile Include="GraphClientTests\Cypher\ExecuteCypherTests.cs" />
     <Compile Include="GraphClientTests\ServerVersionTests.cs" />
     <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
+    <Compile Include="IndexEntryTests.cs" />
     <Compile Include="MockRequest.cs" />
     <Compile Include="MockResponse.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
