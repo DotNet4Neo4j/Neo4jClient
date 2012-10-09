@@ -196,13 +196,13 @@ namespace Neo4jClient
             IEnumerable<IndexEntry> indexEntries)
             where TNode : class
         {
-            var genericTypeDefinition = typeof (TNode).IsGenericType
-                ? typeof (TNode).GetGenericTypeDefinition()
-                : null;
-            if (genericTypeDefinition == typeof(Node<>))
+            if (typeof(TNode).IsGenericType &&
+                typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>))
             {
-                var message = string.Format("You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.", typeof(TNode).GetGenericArguments()[0].Name);
-                throw new ArgumentException(message, "node");
+                throw new ArgumentException(string.Format(
+                    "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
+                    typeof(TNode).GetGenericArguments()[0].Name),
+                    "node");
             }
 
             if (node == null)
