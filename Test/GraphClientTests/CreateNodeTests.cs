@@ -39,6 +39,14 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "You're trying to pass in a Node<TestNode> instance. Just pass the TestNode instance instead.\r\nParameter name: node")]
+        public void ShouldThrowArgumentExceptionForPreemptivelyWrappedNode()
+        {
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
+            graphClient.Create((Node<TestNode>)null);
+        }
+
+        [Test]
         [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportExceptionForPre15M02Database()
         {
