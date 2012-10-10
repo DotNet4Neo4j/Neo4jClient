@@ -5,6 +5,8 @@ namespace Neo4jClient.Cypher
 {
     public interface ICypherFluentQueryReturnable
     {
+        ICypherFluentQueryMatched Delete(string identities);
+
         ICypherFluentQueryReturned<TResult> Return<TResult>(string identity);
 
         ICypherFluentQueryReturned<TResult> Return<TResult>(string identity, CypherResultMode resultMode);

@@ -80,5 +80,20 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node({p0})\r\nDELETE n", executedQuery.QueryText);
             Assert.AreEqual(3, executedQuery.QueryParameters["p0"]);
         }
+
+        [Test]
+        public void AllowDeleteClauseAfterWhere()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)3)
+                .Where("...")
+                .Delete("n")
+                .Query;
+
+            // Assert
+            Assert.AreEqual("START n=node({p0})\r\nWHERE (...)\r\nDELETE n", query.QueryText);
+            Assert.AreEqual(3, query.QueryParameters["p0"]);
+        }
     }
 }
