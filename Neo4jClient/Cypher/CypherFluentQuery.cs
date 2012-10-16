@@ -48,6 +48,13 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
+        public ICypherFluentQueryStarted StartWithNodeIndexLookup(string identity, string indexName, string parameter)
+        {
+            var newBuilder = new CypherQueryBuilder();
+            newBuilder.AddStartBitWithNodeIndexLookup(identity, indexName, parameter);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
         public ICypherFluentQueryStarted AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
             var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);

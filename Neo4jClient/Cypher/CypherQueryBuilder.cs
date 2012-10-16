@@ -58,6 +58,13 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        public CypherQueryBuilder AddStartBitWithNodeIndexLookup(string identity, string indexName, string parameterText)
+        {
+            var newBuilder = Clone();
+            newBuilder.startBits.Add(new CypherStartBitWithNodeIndexLookupWithSingleParameter(identity, indexName, parameterText));
+            return newBuilder;
+        }
+
         public CypherQueryBuilder AddStartBitWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
             var newBuilder = Clone();
@@ -225,6 +232,15 @@ namespace Neo4jClient.Cypher
                         startBithWithNodeIndexLookup.IndexName,
                         startBithWithNodeIndexLookup.Key,
                         valueParameter);
+                }
+
+                var startBithWithNodeIndexLookupSingleParameter = bit as CypherStartBitWithNodeIndexLookupWithSingleParameter;
+                if (startBithWithNodeIndexLookupSingleParameter != null) {
+                   var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookupSingleParameter.Parameter);
+                   return string.Format("{0}=node:{1}({2})",
+                       startBithWithNodeIndexLookupSingleParameter.Identifier,
+                       startBithWithNodeIndexLookupSingleParameter.IndexName,
+                       valueParameter);
                 }
 
                 throw new NotSupportedException(string.Format("Start bit of type {0} is not supported.", bit.GetType().FullName));

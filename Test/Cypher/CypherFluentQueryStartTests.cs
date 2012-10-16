@@ -100,5 +100,22 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(1, query.QueryParameters["p0"]);
             Assert.AreEqual("B", query.QueryParameters["p1"]);
         }
+
+        [Test]
+        public void NodeByIndexLookupWithSingleParameter()
+        {
+            // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
+            //START n=node:nodes("*:*")
+            //RETURN n
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .StartWithNodeIndexLookup("n", "nodes", "*.*")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node:nodes({p0})\r\nRETURN n", query.QueryText);
+            Assert.AreEqual("*.*", query.QueryParameters["p0"]);
+        }
     }
 }
