@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.ApiModels.Gremlin;
@@ -109,7 +110,28 @@ namespace Neo4jClient
             return SendHttpRequest(request, null, expectedStatusCodes);
         }
 
+        Task<HttpResponseMessage> SendHttpRequestAsync(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
+        {
+            return SendHttpRequestAsync(request, null, expectedStatusCodes);
+        }
+
         HttpResponseMessage SendHttpRequest(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        {
+            var task = SendHttpRequestAsync(request, commandDescription, expectedStatusCodes);
+            try
+            {
+                Task.WaitAll(task);
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerExceptions.Count() == 1)
+                    throw ex.InnerExceptions.Single();
+                throw;
+            }
+            return task.Result;
+        }
+
+        Task<HttpResponseMessage> SendHttpRequestAsync(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
         {
             if (UseJsonStreamingIfAvailable && jsonStreamingAvailable)
             {
@@ -120,11 +142,14 @@ namespace Neo4jClient
 
             request.Headers.Add("User-Agent", userAgent);
 
-            var requestTask = httpClient.SendAsync(request);
-            requestTask.Wait();
-            var response = requestTask.Result;
-            response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
-            return response;
+            var baseTask = httpClient.SendAsync(request);
+            var continuationTask = baseTask.ContinueWith(requestTask =>
+            {
+                var response = requestTask.Result;
+                response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
+                return response;
+            });
+            return continuationTask;
         }
 
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes) where T : new()
@@ -393,20 +418,30 @@ namespace Neo4jClient
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
         {
+            var task = GetAsync<TNode>(reference);
+            Task.WaitAll(task);
+            return task.Result;
+        }
+
+        public virtual Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
+        {
             CheckRoot();
 
             var nodeEndpoint = ResolveEndpoint(reference);
-            var response = SendHttpRequest(
-                HttpGet(nodeEndpoint),
-                HttpStatusCode.OK, HttpStatusCode.NotFound);
+            return
+                SendHttpRequestAsync(HttpGet(nodeEndpoint), HttpStatusCode.OK, HttpStatusCode.NotFound)
+                .ContinueWith(responseTask =>
+                {
+                    var response = responseTask.Result;
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
-                return null;
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                        return (Node<TNode>)null;
 
-            return response
-                .Content
-                .ReadAsJson<NodeApiResponse<TNode>>()
-                .ToNode(this);
+                    return response
+                        .Content
+                        .ReadAsJson<NodeApiResponse<TNode>>()
+                        .ToNode(this);
+                });
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
