@@ -20,7 +20,7 @@ using Neo4jClient.Serializer;
 
 namespace Neo4jClient
 {
-    public class GraphClient : IGraphClient, IRawGraphClient
+    public class GraphClient : IRawGraphClient
     {
         internal readonly Uri RootUri;
         readonly IHttpClient httpClient;
