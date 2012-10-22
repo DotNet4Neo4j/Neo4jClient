@@ -681,30 +681,41 @@ namespace Neo4jClient
 
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
+            var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
+            Task.WaitAll(task);
+            return task.Result;
+        }
+
+        Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsAsync<TResult>(CypherQuery query)
+        {
             CheckRoot();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var response = SendHttpRequest(
-                HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
-                string.Format("The query was: {0}", query.QueryText),
-                HttpStatusCode.OK);
+            return
+                SendHttpRequestAsync(
+                    HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
+                    string.Format("The query was: {0}", query.QueryText),
+                    HttpStatusCode.OK)
+                .ContinueWith(responseTask =>
+                {
+                    var response = responseTask.Result;
+                    var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
+                    var results = deserializer
+                        .Deserialize(response.Content.ReadAsString())
+                        .ToList();
 
-            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
-            var results = deserializer
-                .Deserialize(response.Content.ReadAsString())
-                .ToList();
+                    stopwatch.Stop();
+                    OnOperationCompleted(new OperationCompletedEventArgs
+                    {
+                        QueryText = query.QueryText,
+                        ResourcesReturned = results.Count(),
+                        TimeTaken = stopwatch.Elapsed
+                    });
 
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query.QueryText,
-                ResourcesReturned = results.Count(),
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return results;
+                    return (IEnumerable<TResult>)results;
+                });
         }
 
         void IRawGraphClient.ExecuteCypher(CypherQuery query)
