@@ -25,9 +25,9 @@ namespace Neo4jClient.ApiModels
 
         public RelationshipInstance<TData> ToRelationshipInstance(IGraphClient client)
         {
-            var relationshipId = int.Parse(GetLastPathSegment(Self));
-            var startNodeId = int.Parse(GetLastPathSegment(Start));
-            var endNodeId = int.Parse(GetLastPathSegment(End));
+            var relationshipId = long.Parse(GetLastPathSegment(Self));
+            var startNodeId = long.Parse(GetLastPathSegment(Start));
+            var endNodeId = long.Parse(GetLastPathSegment(End));
 
             return new RelationshipInstance<TData>(
                 new RelationshipReference<TData>(relationshipId, client),
