@@ -52,6 +52,42 @@ namespace Neo4jClient.Test.GraphClientTests
                 Assert.AreEqual("baz", node.Data.Baz);
             }
         }
+        [Test]
+        public void ShouldReturnNodeDataForLongId()
+        {
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get("/node/21484836470"),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"{ 'self': 'http://foo/db/data/node/21484836470',
+                          'data': { 'Foo': 'foo',
+                                    'Bar': 'bar',
+                                    'Baz': 'baz'
+                          },
+                          'create_relationship': 'http://foo/db/data/node/21484836470/relationships',
+                          'all_relationships': 'http://foo/db/data/node/21484836470/relationships/all',
+                          'all_typed relationships': 'http://foo/db/data/node/21484836470/relationships/all/{-list|&|types}',
+                          'incoming_relationships': 'http://foo/db/data/node/21484836470/relationships/in',
+                          'incoming_typed relationships': 'http://foo/db/data/node/21484836470/relationships/in/{-list|&|types}',
+                          'outgoing_relationships': 'http://foo/db/data/node/21484836470/relationships/out',
+                          'outgoing_typed relationships': 'http://foo/db/data/node/21484836470/relationships/out/{-list|&|types}',
+                          'properties': 'http://foo/db/data/node/21484836470/properties',
+                          'property': 'http://foo/db/data/node/21484836470/property/{key}',
+                          'traverse': 'http://foo/db/data/node/21484836470/traverse/{returnType}'
+                        }")
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var node = graphClient.Get<TestNode>(21484836470);
+
+                Assert.AreEqual(21484836470, node.Reference.Id);
+                Assert.AreEqual("foo", node.Data.Foo);
+                Assert.AreEqual("bar", node.Data.Bar);
+                Assert.AreEqual("baz", node.Data.Baz);
+            }
+        }
 
         [Test]
         public void ShouldReturnNodeDataAndDeserializeToEnumType()
