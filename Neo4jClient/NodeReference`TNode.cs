@@ -6,13 +6,13 @@ namespace Neo4jClient
     [DebuggerDisplay("Node {Id}")]
     public class NodeReference<TNode> : NodeReference, ITypedNodeReference
     {
-        public NodeReference(int id)
+        public NodeReference(long id)
             : base(id)
         {
             CheckTNode();
         }
 
-        public NodeReference(int id, IGraphClient client)
+        public NodeReference(long id, IGraphClient client)
             : base(id, client)
         {
             CheckTNode();
@@ -35,7 +35,7 @@ namespace Neo4jClient
             get { return typeof (TNode); }
         }
 
-        public static implicit operator NodeReference<TNode>(int nodeId)
+        public static implicit operator NodeReference<TNode>(long nodeId)
         {
             return new NodeReference<TNode>(nodeId);
         }

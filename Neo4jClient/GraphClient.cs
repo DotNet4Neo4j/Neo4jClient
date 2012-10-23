@@ -192,7 +192,7 @@ namespace Neo4jClient
 
             rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
                 ? null
-                : new RootNode(int.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
+                : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
             jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);

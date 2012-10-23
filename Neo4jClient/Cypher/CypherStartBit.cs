@@ -6,9 +6,9 @@ namespace Neo4jClient.Cypher
     {
         readonly string identifier;
         readonly string lookupType;
-        readonly IEnumerable<int> lookupIds;
+        readonly IEnumerable<long> lookupIds;
 
-        public CypherStartBit(string identifier, string lookupType, IEnumerable<int> lookupIds)
+        public CypherStartBit(string identifier, string lookupType, IEnumerable<long> lookupIds)
         {
             this.identifier = identifier;
             this.lookupType = lookupType;
@@ -25,7 +25,7 @@ namespace Neo4jClient.Cypher
             get { return lookupType; }
         }
 
-        public IEnumerable<int> LookupIds
+        public IEnumerable<long> LookupIds
         {
             get { return lookupIds; }
         }

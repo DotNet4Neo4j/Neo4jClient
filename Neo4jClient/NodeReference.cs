@@ -12,18 +12,18 @@ namespace Neo4jClient
         [Obsolete("You need to retrieve this via GraphClient.RootNode instead. This member will be removed in future builds.", true)]
         public static readonly RootNode RootNode = null;
 
-        readonly int id;
+        readonly long id;
         readonly IGraphClient client;
 
-        public NodeReference(int id) : this(id, null) {}
+        public NodeReference(long id) : this(id, null) {}
 
-        public NodeReference(int id, IGraphClient client)
+        public NodeReference(long id, IGraphClient client)
         {
             this.id = id;
             this.client = client;
         }
 
-        public int Id { get { return id; } }
+        public long Id { get { return id; } }
 
         public Type NodeType
         {
@@ -34,7 +34,7 @@ namespace Neo4jClient
             }
         }
 
-        public static implicit operator NodeReference(int nodeId)
+        public static implicit operator NodeReference(long nodeId)
         {
             return new NodeReference(nodeId);
         }
@@ -62,7 +62,7 @@ namespace Neo4jClient
 
         public override int GetHashCode()
         {
-            return id;
+            return id.GetHashCode();
         }
 
         IGraphClient IAttachedReference.Client

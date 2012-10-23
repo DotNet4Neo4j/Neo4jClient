@@ -19,7 +19,7 @@ namespace Neo4jClient
             this.reference = reference;
         }
 
-        public Node(TNode data, int id, IGraphClient client)
+        public Node(TNode data, long id, IGraphClient client)
         {
             this.data = data;
             reference = new NodeReference<TNode>(id, client);
@@ -86,7 +86,7 @@ namespace Neo4jClient
 
         public override int GetHashCode()
         {
-            return Reference.Id;
+            return Reference.Id.GetHashCode();
         }
     }
 }
