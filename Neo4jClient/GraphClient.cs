@@ -316,7 +316,7 @@ namespace Neo4jClient
             var batchResponse = ExecuteBatch(batchSteps);
 
             var createResponse = batchResponse[createNodeStep];
-            var nodeId = int.Parse(GetLastPathSegment(createResponse.Location));
+            var nodeId = long.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
 
             stopwatch.Stop();
