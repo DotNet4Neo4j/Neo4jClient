@@ -94,5 +94,28 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
         }
+
+        [Test]
+        public void Issue42()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("me", (NodeReference)123)
+                .AddStartPoint("viewer", (NodeReference)456)
+                .Match("me-[:FRIEND]-common-[:FRIEND]-viewer")
+                .Return<Node<object>>("common")
+                .Limit(5)
+                .OrderBy("common.FirstName")
+                .Query;
+
+            Assert.AreEqual(@"START me=node({p0}), viewer=node({p1})
+MATCH me-[:FRIEND]-common-[:FRIEND]-viewer
+RETURN common
+ORDER BY common.FirstName
+LIMIT {p2}", query.QueryText);
+            Assert.AreEqual(123, query.QueryParameters["p0"]);
+            Assert.AreEqual(456, query.QueryParameters["p1"]);
+            Assert.AreEqual(5, query.QueryParameters["p2"]);
+        }
     }
 }
