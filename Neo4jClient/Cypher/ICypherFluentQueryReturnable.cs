@@ -7,6 +7,8 @@ namespace Neo4jClient.Cypher
     {
         ICypherFluentQueryMatched Delete(string identities);
 
+        ICypherFluentQueryMatched Set(string setText);
+
         ICypherFluentQueryReturned<TResult> Return<TResult>(string identity);
 
         ICypherFluentQueryReturned<TResult> Return<TResult>(string identity, CypherResultMode resultMode);

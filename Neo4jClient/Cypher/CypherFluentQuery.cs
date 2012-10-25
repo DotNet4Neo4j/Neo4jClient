@@ -111,6 +111,12 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
+        public ICypherFluentQueryMatched Set(string setText)
+        {
+            var newBuilder = Builder.SetSetText(setText);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
         public CypherQuery Query
         {
             get { return Builder.ToQuery(); }
