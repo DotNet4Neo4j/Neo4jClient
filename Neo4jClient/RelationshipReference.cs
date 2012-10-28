@@ -7,20 +7,20 @@ namespace Neo4jClient
     [DebuggerDisplay("Relationship {id}")]
     public class RelationshipReference : IGremlinQuery, IAttachedReference
     {
-        readonly int id;
+        readonly long id;
         readonly IGraphClient client;
 
-        public RelationshipReference(int id) : this(id, null) {}
+        public RelationshipReference(long id) : this(id, null) {}
 
-        public RelationshipReference(int id, IGraphClient client)
+        public RelationshipReference(long id, IGraphClient client)
         {
             this.id = id;
             this.client = client;
         }
 
-        public int Id { get { return id; } }
+        public long Id { get { return id; } }
 
-        public static implicit operator RelationshipReference(int relationshipId)
+        public static implicit operator RelationshipReference(long relationshipId)
         {
             return new RelationshipReference(relationshipId);
         }
@@ -48,7 +48,7 @@ namespace Neo4jClient
 
         public override int GetHashCode()
         {
-            return id;
+            return id.GetHashCode();
         }
 
         IGraphClient IAttachedReference.Client

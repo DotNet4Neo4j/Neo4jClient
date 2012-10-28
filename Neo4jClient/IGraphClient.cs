@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
@@ -14,6 +15,8 @@ namespace Neo4jClient
             where TNode : class;
 
         Node<TNode> Get<TNode>(NodeReference reference);
+
+        Task<Node<TNode>> GetAsync<TNode>(NodeReference reference);
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 

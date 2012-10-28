@@ -268,6 +268,51 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void ShouldReturnReferenceToCreatedNodeWithLongId()
+        {
+            var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+            var batch = new List<BatchStep>();
+            batch.Add(HttpMethod.Post, "/node", testNode);
+
+            var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/batch", batch),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"[{'id':0,'location':'http://foo/db/data/node/2157483647','body':{
+                          'outgoing_relationships' : 'http://foo/db/data/node/2157483647/relationships/out',
+                          'data' : {
+                            'Foo' : 'foo',
+                            'Bar' : 'bar',
+                            'Baz' : 'baz'
+                          },
+                          'traverse' : 'http://foo/db/data/node/2157483647/traverse/{returnType}',
+                          'all_typed_relationships' : 'http://foo/db/data/node/2157483647/relationships/all/{-list|&|types}',
+                          'self' : 'http://foo/db/data/node/2157483647',
+                          'property' : 'http://foo/db/data/node/2157483647/properties/{key}',
+                          'outgoing_typed_relationships' : 'http://foo/db/data/node/2157483647/relationships/out/{-list|&|types}',
+                          'properties' : 'http://foo/db/data/node/2157483647/properties',
+                          'incoming_relationships' : 'http://foo/db/data/node/2157483647/relationships/in',
+                          'extensions' : {
+                          },
+                          'create_relationship' : 'http://foo/db/data/node/2157483647/relationships',
+                          'paged_traverse' : 'http://foo/db/data/node/2157483647/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                          'all_relationships' : 'http://foo/db/data/node/2157483647/relationships/all',
+                          'incoming_typed_relationships' : 'http://foo/db/data/node/2157483647/relationships/in/{-list|&|types}'
+                        },'from':'/node'}]"
+                    )
+                }
+            };
+
+            var graphClient = testHarness.CreateAndConnectGraphClient();
+
+            var node = graphClient.Create(testNode);
+
+            Assert.AreEqual(2157483647, node.Id);
+            testHarness.AssertAllRequestsWereReceived();
+        }
+
+        [Test]
         public void ShouldReturnAttachedNodeReference()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };

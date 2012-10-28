@@ -22,6 +22,7 @@ namespace Neo4jClient.Cypher
         int? limit;
         int? skip;
         string orderBy;
+        string setText;
 
         CypherQueryBuilder Clone()
         {
@@ -40,7 +41,8 @@ namespace Neo4jClient.Cypher
                 limit = limit,
                 skip = skip,
                 startBits = startBits,
-                orderBy = orderBy
+                orderBy = orderBy,
+                setText = setText
             };
         }
 
@@ -178,6 +180,13 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        public CypherQueryBuilder SetSetText(string text)
+        {
+            var newBuilder = Clone();
+            newBuilder.setText = text;
+            return newBuilder;
+        }
+
         public CypherQuery ToQuery()
         {
             var queryTextBuilder = new StringBuilder();
@@ -188,6 +197,7 @@ namespace Neo4jClient.Cypher
             WriteCreateClause(queryTextBuilder);
             WriteWhereClause(queryTextBuilder);
             WriteDeleteClause(queryTextBuilder);
+            WriteSetClause(queryTextBuilder);
             WriteReturnClause(queryTextBuilder);
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
@@ -325,6 +335,12 @@ namespace Neo4jClient.Cypher
         {
             if (string.IsNullOrEmpty(orderBy)) return;
             target.AppendFormat("\r\nORDER BY {0}",  orderBy);
+        }
+
+        void WriteSetClause(StringBuilder target)
+        {
+            if (setText == null) return;
+            target.AppendFormat("\r\nSET {0}", setText);
         }
     }
 }

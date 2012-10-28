@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
 {
-    public interface ICypherFluentQueryReturned<out TResult> : ICypherFluentQuery
+    public interface ICypherFluentQueryReturned<TResult> : ICypherFluentQuery
     {
         ICypherFluentQueryReturned<TResult> Limit(int? limit);
         ICypherFluentQueryReturned<TResult> Skip(int? skip);
@@ -10,5 +11,6 @@ namespace Neo4jClient.Cypher
         ICypherFluentQueryReturned<TResult> OrderByDescending(params string[] properties);
 
         IEnumerable<TResult> Results { get; }
+        Task<IEnumerable<TResult>> ResultsAsync { get; }
     }
 }

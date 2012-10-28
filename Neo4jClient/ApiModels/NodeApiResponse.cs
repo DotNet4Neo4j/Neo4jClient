@@ -15,7 +15,7 @@ namespace Neo4jClient.ApiModels
 
         public Node<TNode> ToNode(IGraphClient client)
         {
-            var nodeId = int.Parse(GetLastPathSegment(Self));
+            var nodeId = long.Parse(GetLastPathSegment(Self));
             return new Node<TNode>(Data, new NodeReference<TNode>(nodeId, client));
         }
 

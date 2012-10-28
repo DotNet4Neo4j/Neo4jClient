@@ -345,7 +345,7 @@ namespace Neo4jClient.Test.Gremlin
                 .ExecuteScalarGremlin(
                     "g.v(p0).count()",
                     Arg.Is<IDictionary<string, object>>(
-                        d => (int)d["p0"] == 123))
+                        d => (long)d["p0"] == 123))
                 .Returns("456");
             var node = new NodeReference(123, client);
             var result = node.GremlinCount();

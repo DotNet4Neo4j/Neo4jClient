@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.ApiModels.Gremlin;
@@ -19,7 +20,7 @@ using Neo4jClient.Serializer;
 
 namespace Neo4jClient
 {
-    public class GraphClient : IGraphClient, IRawGraphClient
+    public class GraphClient : IRawGraphClient
     {
         internal readonly Uri RootUri;
         readonly IHttpClient httpClient;
@@ -109,7 +110,28 @@ namespace Neo4jClient
             return SendHttpRequest(request, null, expectedStatusCodes);
         }
 
+        Task<HttpResponseMessage> SendHttpRequestAsync(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes)
+        {
+            return SendHttpRequestAsync(request, null, expectedStatusCodes);
+        }
+
         HttpResponseMessage SendHttpRequest(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        {
+            var task = SendHttpRequestAsync(request, commandDescription, expectedStatusCodes);
+            try
+            {
+                Task.WaitAll(task);
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerExceptions.Count() == 1)
+                    throw ex.InnerExceptions.Single();
+                throw;
+            }
+            return task.Result;
+        }
+
+        Task<HttpResponseMessage> SendHttpRequestAsync(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
         {
             if (UseJsonStreamingIfAvailable && jsonStreamingAvailable)
             {
@@ -120,11 +142,14 @@ namespace Neo4jClient
 
             request.Headers.Add("User-Agent", userAgent);
 
-            var requestTask = httpClient.SendAsync(request);
-            requestTask.Wait();
-            var response = requestTask.Result;
-            response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
-            return response;
+            var baseTask = httpClient.SendAsync(request);
+            var continuationTask = baseTask.ContinueWith(requestTask =>
+            {
+                var response = requestTask.Result;
+                response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
+                return response;
+            });
+            return continuationTask;
         }
 
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes) where T : new()
@@ -167,7 +192,7 @@ namespace Neo4jClient
 
             rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
                 ? null
-                : new RootNode(int.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
+                : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
             jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);
@@ -291,7 +316,7 @@ namespace Neo4jClient
             var batchResponse = ExecuteBatch(batchSteps);
 
             var createResponse = batchResponse[createNodeStep];
-            var nodeId = int.Parse(GetLastPathSegment(createResponse.Location));
+            var nodeId = long.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
 
             stopwatch.Stop();
@@ -393,20 +418,30 @@ namespace Neo4jClient
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)
         {
+            var task = GetAsync<TNode>(reference);
+            Task.WaitAll(task);
+            return task.Result;
+        }
+
+        public virtual Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
+        {
             CheckRoot();
 
             var nodeEndpoint = ResolveEndpoint(reference);
-            var response = SendHttpRequest(
-                HttpGet(nodeEndpoint),
-                HttpStatusCode.OK, HttpStatusCode.NotFound);
+            return
+                SendHttpRequestAsync(HttpGet(nodeEndpoint), HttpStatusCode.OK, HttpStatusCode.NotFound)
+                .ContinueWith(responseTask =>
+                {
+                    var response = responseTask.Result;
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
-                return null;
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                        return (Node<TNode>)null;
 
-            return response
-                .Content
-                .ReadAsJson<NodeApiResponse<TNode>>()
-                .ToNode(this);
+                    return response
+                        .Content
+                        .ReadAsJson<NodeApiResponse<TNode>>()
+                        .ToNode(this);
+                });
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
@@ -646,30 +681,41 @@ namespace Neo4jClient
 
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
+            var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
+            Task.WaitAll(task);
+            return task.Result;
+        }
+
+        Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsAsync<TResult>(CypherQuery query)
+        {
             CheckRoot();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var response = SendHttpRequest(
-                HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
-                string.Format("The query was: {0}", query.QueryText),
-                HttpStatusCode.OK);
+            return
+                SendHttpRequestAsync(
+                    HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
+                    string.Format("The query was: {0}", query.QueryText),
+                    HttpStatusCode.OK)
+                .ContinueWith(responseTask =>
+                {
+                    var response = responseTask.Result;
+                    var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
+                    var results = deserializer
+                        .Deserialize(response.Content.ReadAsString())
+                        .ToList();
 
-            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
-            var results = deserializer
-                .Deserialize(response.Content.ReadAsString())
-                .ToList();
+                    stopwatch.Stop();
+                    OnOperationCompleted(new OperationCompletedEventArgs
+                    {
+                        QueryText = query.QueryText,
+                        ResourcesReturned = results.Count(),
+                        TimeTaken = stopwatch.Elapsed
+                    });
 
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query.QueryText,
-                ResourcesReturned = results.Count(),
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return results;
+                    return (IEnumerable<TResult>)results;
+                });
         }
 
         void IRawGraphClient.ExecuteCypher(CypherQuery query)

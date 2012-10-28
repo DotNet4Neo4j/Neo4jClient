@@ -5,12 +5,12 @@ namespace Neo4jClient
     [DebuggerDisplay("Relationship {Id}")]
     public class RelationshipReference<TData> : RelationshipReference
     {
-        public RelationshipReference(int id)
+        public RelationshipReference(long id)
             : base(id)
         {
         }
 
-        public RelationshipReference(int id, IGraphClient client)
+        public RelationshipReference(long id, IGraphClient client)
             : base(id, client)
         {
         }
