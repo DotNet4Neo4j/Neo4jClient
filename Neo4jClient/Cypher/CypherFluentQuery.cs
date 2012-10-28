@@ -1,5 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Linq.Expressions;
+using Neo4jClient.Serializer;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Cypher
 {
@@ -102,6 +106,28 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQueryMatched Create(string createText)
         {
             var newBuilder = Builder.SetCreateText(createText);
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
+        public ICypherFluentQueryMatched Create<TNode>(string identity, TNode node)
+            where TNode : class 
+        {
+            if (typeof(TNode).IsGenericType &&
+                 typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>)) {
+               throw new ArgumentException(string.Format(
+                   "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
+                   typeof(TNode).GetGenericArguments()[0].Name),
+                   "node");
+            }
+            
+            if (node == null)
+                throw new ArgumentNullException("node");
+            
+            var validationContext = new ValidationContext(node, null, null);
+            Validator.ValidateObject(node, validationContext);
+            
+            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore, QuoteName = false};
+            var newBuilder = Builder.SetCreateText(string.Format("({0} {1})", identity, serializer.Serialize(node)));
             return new CypherFluentQuery(Client, newBuilder);
         }
 

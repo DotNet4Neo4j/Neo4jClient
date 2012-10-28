@@ -2,6 +2,7 @@
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
+using Neo4jClient.Test.GraphClientTests;
 
 namespace Neo4jClient.Test.Cypher
 {
@@ -967,6 +968,41 @@ RETURN b AS NodeB";
             Assert.AreEqual("START a=node({p0}), b=node({p1})\r\nCREATE a-[r:REL]->b\r\nRETURN r", query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
             Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void CreateNode()
+        {
+            //http://docs.neo4j.org/chunked/milestone/query-create.html#create-create-single-node-and-set-properties
+            // CREATE (a {Foo: 'foo', Bar: 'bar', Baz: 'baz'})
+            // RETURN a
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Create<CreateNodeTests.TestNode>("a", new CreateNodeTests.TestNode {Foo = "foo", Bar = "bar", Baz = "baz"})
+                .Return<object>("a")
+                .Query;
+            Assert.AreEqual("\r\nCREATE (a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})\r\nRETURN a", query.QueryText);
+        }
+
+        [Test]
+        public void CreateAFullPath() {
+            //http://docs.neo4j.org/chunked/milestone/query-create.html#create-create-a-full-path
+            // START n=node(1)
+            // CREATE n-[r:REL]->(a {Foo: 'foo', Bar: 'bar', Baz: 'baz'})-[r:REL]->(b {Foo: 'foo2', Bar: 'bar2', Baz: 'baz2'})
+            // RETURN a
+            
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)1)
+                .Create("n")
+                .Create("-[r:REL]->")
+                .Create<CreateNodeTests.TestNode>("a", new CreateNodeTests.TestNode { Foo = "foo", Bar = "bar", Baz = "baz" })
+                .Create("-[r:REL]->")
+                .Create<CreateNodeTests.TestNode>("b", new CreateNodeTests.TestNode { Foo = "foo2", Bar = "bar2", Baz = "baz2" })
+                .Return<CreateNodeTests.TestNode>("a")
+                .Query;
+            Assert.AreEqual("START n=node({p0})\r\nCREATE n-[r:REL]->(a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})-[r:REL]->(b {\r\n  Foo: \"foo2\",\r\n  Bar: \"bar2\",\r\n  Baz: \"baz2\"\r\n})\r\nRETURN a", query.QueryText);
         }
 
         [Test]
