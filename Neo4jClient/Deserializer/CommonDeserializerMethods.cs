@@ -56,8 +56,7 @@ namespace Neo4jClient.Deserializer
             return reader.ReadAsDateTimeOffset();
         }
 
-        public static void SetPropertyValue(
-            object targetObject,
+        public static object CoerceValue(
             PropertyInfo propertyInfo,
             JToken value,
             CultureInfo culture,
@@ -65,7 +64,7 @@ namespace Neo4jClient.Deserializer
             int nestingLevel)
         {
             if (value == null || value.Type == JTokenType.Null)
-                return;
+                return null;
 
             var propertyType = propertyInfo.PropertyType;
 
@@ -84,24 +83,24 @@ namespace Neo4jClient.Deserializer
                 // allows converting a json value like {"index": "1"} to an int
                 object tmpVal = value.AsString().Replace("\"", string.Empty);
                 tmpVal = Convert.ChangeType(tmpVal, propertyType);
-                propertyInfo.SetValue(targetObject, tmpVal, null);
+                return tmpVal;
             }
             else if (propertyType.IsEnum)
             {
                 var raw = value.AsString();
                 var converted = Enum.Parse(propertyType, raw, false);
-                propertyInfo.SetValue(targetObject, converted, null);
+                return converted;
             }
             else if (propertyType == typeof(Uri))
             {
                 var raw = value.AsString();
                 var uri = new Uri(raw, UriKind.RelativeOrAbsolute);
-                propertyInfo.SetValue(targetObject, uri, null);
+                return uri;
             }
             else if (propertyType == typeof(string))
             {
                 var raw = value.AsString();
-                propertyInfo.SetValue(targetObject, raw, null);
+                return raw;
             }
             else if (propertyType == typeof(DateTime))
             {
@@ -111,29 +110,30 @@ namespace Neo4jClient.Deserializer
             {
                 var dateTimeOffset = ParseDateTimeOffset(value);
                 if (dateTimeOffset.HasValue)
-                    propertyInfo.SetValue(targetObject, dateTimeOffset.Value, null);
+                    return dateTimeOffset.Value;
+                return null;
             }
             else if (propertyType == typeof(Decimal))
             {
                 var dec = Decimal.Parse(value.AsString(), culture);
-                propertyInfo.SetValue(targetObject, dec, null);
+                return dec;
             }
             else if (propertyType == typeof(TimeSpan))
             {
                 var valueString = value.ToString();
                 var timeSpan = TimeSpan.Parse(valueString);
-                propertyInfo.SetValue(targetObject, timeSpan, null);
+                return timeSpan;
             }
             else if (propertyType == typeof(Guid))
             {
                 var raw = value.AsString();
                 var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
-                propertyInfo.SetValue(targetObject, guid, null);
+                return guid;
             }
             else if (genericTypeDef == typeof(List<>))
             {
                 var list = BuildList(propertyType, value.Children(), culture, typeMappings, nestingLevel + 1);
-                propertyInfo.SetValue(targetObject, list, null);
+                return list;
             }
             else if (genericTypeDef == typeof(Dictionary<,>))
             {
@@ -143,7 +143,11 @@ namespace Neo4jClient.Deserializer
                 if (keyType == typeof(string))
                 {
                     var dict = BuildDictionary(propertyType, value.Children(), culture, typeMappings, nestingLevel + 1);
-                    propertyInfo.SetValue(targetObject, dict, null);
+                    return dict;
+                }
+                else
+                {
+                    throw new NotSupportedException("Value coersion only supports dictionaries with a key of type System.String");
                 }
             }
             else
@@ -151,8 +155,23 @@ namespace Neo4jClient.Deserializer
                 // nested objects
                 var mapping = typeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, propertyType));
                 var item = mapping != null ? MutateObject(value, culture, typeMappings, nestingLevel, mapping, propertyType) : CreateAndMap(propertyType, value, culture, typeMappings, nestingLevel + 1);
-                propertyInfo.SetValue(targetObject, item, null);
+                return item;
             }
+        }
+
+        public static void SetPropertyValue(
+            object targetObject,
+            PropertyInfo propertyInfo,
+            JToken value,
+            CultureInfo culture,
+            IEnumerable<TypeMapping> typeMappings,
+            int nestingLevel)
+        {
+            if (value == null || value.Type == JTokenType.Null)
+                return;
+
+            var coercedValue = CoerceValue(propertyInfo, value, culture, typeMappings, nestingLevel);
+            propertyInfo.SetValue(targetObject, coercedValue, null);
         }
 
         public static object CreateAndMap(Type type, JToken element, CultureInfo culture, IEnumerable<TypeMapping> typeMappings, int nestingLevel)

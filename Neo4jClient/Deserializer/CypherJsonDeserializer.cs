@@ -140,28 +140,85 @@ namespace Neo4jClient.Deserializer
         {
             var properties = typeof(TResult).GetProperties();
             var propertiesDictionary = properties
-                .Where(p => p.CanWrite)
                 .ToDictionary(p => p.Name);
 
-            var columnsWhichDontHaveSettableProperties = columnNames.Where(c => !propertiesDictionary.ContainsKey(c)).ToArray();
+
+            Func<JToken, TResult> getRow = null;
+
+            var columnsWhichDontHaveSettableProperties = columnNames.Where(c => !propertiesDictionary.ContainsKey(c) || !propertiesDictionary[c].CanWrite).ToArray();
             if (columnsWhichDontHaveSettableProperties.Any())
             {
-                var columnsWhichDontHaveSettablePropertiesCommaSeparated = string.Join(", ", columnsWhichDontHaveSettableProperties);
-                throw new ArgumentException(string.Format(
-                    "The query response contains columns {0} however {1} does not contain publically settable properties to receive this data.",
-                    columnsWhichDontHaveSettablePropertiesCommaSeparated,
-                    typeof(TResult).FullName),
-                    "columnNames");
+                // See if there is a constructor that is compatible with all property types,
+                // which is the case for anonymous types...
+                var ctor = typeof(TResult).GetConstructors().FirstOrDefault(info =>
+                    {
+                        var parameters = info.GetParameters();
+                        if (parameters.Length != columnNames.Length)
+                            return false;
+
+                        for (var i = 0; i < parameters.Length; i++)
+                        {
+                            var property = propertiesDictionary[columnNames[i]];
+                            if (!parameters[i].ParameterType.IsAssignableFrom(property.PropertyType))
+                                return false;
+                        }
+                        return true;
+                    });
+
+                if (ctor != null)
+                {
+                    getRow = (token) => ReadProjectionRowUsingCtor(token, propertiesDictionary, columnNames, jsonTypeMappings, ctor);
+                }
+                
+                if (getRow == null)
+                {
+                    // wasn't able to build TResult via constructor
+                    var columnsWhichDontHaveSettablePropertiesCommaSeparated = string.Join(", ", columnsWhichDontHaveSettableProperties);
+                    throw new ArgumentException(string.Format(
+                        "The query response contains columns {0} however {1} does not contain publically settable properties to receive this data.",
+                        columnsWhichDontHaveSettablePropertiesCommaSeparated,
+                        typeof(TResult).FullName),
+                        "columnNames");
+                }
+            }
+            else
+            {
+                getRow = (token) => ReadProjectionRowUsingProperties(token, propertiesDictionary, columnNames, jsonTypeMappings);
             }
 
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
-            var results = rows.Select(row => ReadProjectionRow(row, propertiesDictionary, columnNames, jsonTypeMappings));
+            var results = rows.Select(getRow);
 
             return results;
         }
 
-        TResult ReadProjectionRow(
+        TResult ReadProjectionRowUsingCtor(
+            JToken row,
+            IDictionary<string, PropertyInfo> propertiesDictionary,
+            IList<string> columnNames,
+            TypeMapping[] jsonTypeMappings,
+            ConstructorInfo ctor)
+        {
+
+            var i = 0;
+            var coercedValues =
+                (from cell in row.Children()
+                 let cellIndex = i++
+                 let columnName = columnNames[cellIndex]
+                 let property = propertiesDictionary[columnName]
+                 where !(property.ToString().Contains("System.Collections.Generic.IEnumerable") &&
+                         string.IsNullOrEmpty(cell.First().ToString()) && string.IsNullOrEmpty(cell.Last().ToString()))
+                 select CommonDeserializerMethods.CoerceValue(property, cell, culture, jsonTypeMappings, 0))
+                 .ToArray();
+
+            var result = (TResult)ctor.Invoke(coercedValues);
+
+            return result;
+        }
+
+
+        TResult ReadProjectionRowUsingProperties(
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
             IList<string> columnNames,
