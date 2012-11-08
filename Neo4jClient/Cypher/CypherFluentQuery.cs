@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 
