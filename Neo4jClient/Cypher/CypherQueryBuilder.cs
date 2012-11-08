@@ -46,6 +46,13 @@ namespace Neo4jClient.Cypher
             };
         }
 
+        public CypherQueryBuilder AddStartBit(string identity, string startText)
+        {
+            var newBuilder = Clone();
+            newBuilder.startBits.Add(new RawCypherStartBit(identity, startText));
+            return newBuilder;
+        }
+
         public CypherQueryBuilder AddStartBit(string identity, params NodeReference[] nodeReferences)
         {
             var newBuilder = Clone();
@@ -230,6 +237,12 @@ namespace Neo4jClient.Cypher
                             standardStartBit.Identifier,
                             standardStartBit.LookupType,
                             lookupContent);
+                    }
+
+                    var rawStartBit = bit as RawCypherStartBit;
+                    if (rawStartBit != null)
+                    {
+                        return string.Format("{0}={1}", rawStartBit.Identifier, rawStartBit.StartText);
                     }
                     
                     var startBithWithNodeIndexLookup = bit as CypherStartBitWithNodeIndexLookup;

@@ -117,5 +117,40 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node:nodes({p0})\r\nRETURN n", query.QueryText);
             Assert.AreEqual("*.*", query.QueryParameters["p0"]);
         }
+
+        [Test]
+        public void AllNodes()
+        {
+            // http://docs.neo4j.org/chunked/1.8/query-start.html#start-all-nodes
+            //START n=node(*)
+            //RETURN n
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", "node(*)")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node(*)\r\nRETURN n", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters.Count);
+        }
+
+        [Test]
+        public void AddAllNodes()
+        {
+            // http://docs.neo4j.org/chunked/1.8/query-start.html#start-all-nodes
+            //START n=node(*)
+            //RETURN n
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", "node(*)")
+                .AddStartPoint("b", "node(*)")
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("START n=node(*), b=node(*)\r\nRETURN n", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters.Count);
+        }
     }
 }

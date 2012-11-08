@@ -2,6 +2,7 @@ namespace Neo4jClient.Cypher
 {
     public interface ICypherFluentQueryStarted :  ICypherFluentQueryWhere
     {
+        ICypherFluentQueryStarted AddStartPoint(string identity, string startText);
         ICypherFluentQueryStarted AddStartPoint(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQueryStarted AddStartPoint(string identity, params RelationshipReference[] relationshipReferences);
         ICypherFluentQueryStarted AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value);
