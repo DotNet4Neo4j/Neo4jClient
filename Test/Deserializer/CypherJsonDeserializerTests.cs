@@ -577,7 +577,7 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
-        public void DeserializeShouldMapProjectionIntoAnonymousType()
+        public void DeserializeShouldPreserveUtf8Characters()
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
