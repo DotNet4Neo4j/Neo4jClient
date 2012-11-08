@@ -470,7 +470,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name! = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -495,7 +495,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.AgeLong < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.AgeLong < {p0}) AND (n.Name! = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -520,7 +520,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.AgeLongNullable? < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.AgeLongNullable? < {p0}) AND (n.Name! = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -548,7 +548,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -577,7 +577,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Id? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Id? = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -671,7 +671,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -696,7 +696,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Id? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Id? = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -719,7 +719,7 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name? = {p1})) OR (n.Name? != {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p3}, {p4})\r\nWHERE (((n.Age < {p0}) AND (n.Name! = {p1})) OR (n.Name? <> {p2}))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p3"]);
             Assert.AreEqual(1, query.QueryParameters["p4"]);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
@@ -753,17 +753,17 @@ RETURN b AS NodeB";
         {
             // http://docs.neo4j.org/chunked/1.6/query-where.html#where-property-exists
             // START n=node(3, 1)
-            // WHERE n.Belt
+            // WHERE has(n.Belt)
             // RETURN n
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where<FooData>(n => n.Name != null)
+                .Where("has(n.Belt)")
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name)\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (has(n.Belt))\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
         }
@@ -807,7 +807,7 @@ RETURN b AS NodeB";
                 .Return<object>("b")
                 .Query;
 
-            Assert.AreEqual("START a=node({p1}), b=node({p2}, {p3})\r\nMATCH a<-[r?]-b\r\nWHERE ((r.Name is null) AND (r.Id? = {p0}))\r\nRETURN b".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START a=node({p1}), b=node({p2}, {p3})\r\nMATCH a<-[r?]-b\r\nWHERE ((r.Name? is null) AND (r.Id! = {p0}))\r\nRETURN b".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
             Assert.AreEqual(3, query.QueryParameters["p2"]);
             Assert.AreEqual(2, query.QueryParameters["p3"]);
@@ -858,15 +858,16 @@ RETURN b AS NodeB";
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where<FooData>(n => n.Name != null)
+                .Where<FooData>(n => n.Name == "bob")
                 .And()
                 .Where("type(r) = \"HOSTS\"")
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name) AND (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Name! = {p0}) AND (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("bob", query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -875,15 +876,16 @@ RETURN b AS NodeB";
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where<FooData>(n => n.Name != null)
+                .Where<FooData>(n => n.Name == "bob")
                 .Or()
                 .Where("type(r) = \"HOSTS\"")
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name) OR (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-            Assert.AreEqual(1, query.QueryParameters["p1"]);
+            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Name! = {p0}) OR (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("bob", query.QueryParameters["p0"]);
+            Assert.AreEqual(3, query.QueryParameters["p1"]);
+            Assert.AreEqual(1, query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -892,7 +894,7 @@ RETURN b AS NodeB";
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where<FooData>(n => n.Name != null)
+                .Where<FooData>(n => n.Name == "Bob")
                 .Or()
                 .Where("type(r) = \"HOSTS\"")
                 .And()
@@ -900,10 +902,11 @@ RETURN b AS NodeB";
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p1}, {p2})\r\nWHERE (n.Name) OR (type(r) = 'HOSTS') AND (n.Id? = {p0})\r\nRETURN n".Replace("'", "\""), query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p1"]);
-            Assert.AreEqual(1, query.QueryParameters["p2"]);
-            Assert.AreEqual(10, query.QueryParameters["p0"]);
+            Assert.AreEqual("START n=node({p2}, {p3})\r\nWHERE (n.Name! = {p0}) OR (type(r) = 'HOSTS') AND (n.Id! = {p1})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("Bob", query.QueryParameters["p0"]);
+            Assert.AreEqual(10, query.QueryParameters["p1"]);
+            Assert.AreEqual(3, query.QueryParameters["p2"]);
+            Assert.AreEqual(1, query.QueryParameters["p3"]);
         }
 
         [Test]

@@ -8,7 +8,7 @@ namespace Neo4jClient.Cypher
 {
     public class CypherWhereExpressionVisitor : ExpressionVisitor
     {
-        const string NotEqual = " != ";
+        const string NotEqual = " <> ";
         const string Equal = " = ";
         readonly IDictionary<string, object> paramsDictionary;
         public StringBuilder TextOutput { get; private set; }
@@ -70,16 +70,22 @@ namespace Neo4jClient.Cypher
             if (node.Value == null && text.EndsWith(NotEqual))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(NotEqual, StringComparison.Ordinal), NotEqual.Length);
-                RemoveNullQualifier(TextOutput);
+                TextOutput.Append(" is not null");
                 return node;
             }
 
             if (node.Value == null && text.EndsWith(Equal))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
-                RemoveNullQualifier(TextOutput);
                 TextOutput.Append(" is null");
                 return node;
+            }
+
+            if (node.Value != null && text.EndsWith(Equal))
+            {
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
+                SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
+                TextOutput.Append(Equal);
             }
 
             var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, node.Value);
@@ -87,10 +93,12 @@ namespace Neo4jClient.Cypher
             return node;
         }
 
-        void RemoveNullQualifier(StringBuilder text)
+        void SwapNullQualifierFromDefaultTrueToDefaultFalse(StringBuilder text)
         {
-            if (text.ToString().EndsWith("?"))
-                TextOutput.Remove(TextOutput.ToString().LastIndexOf("?", StringComparison.Ordinal), 1);
+            if (!text.ToString().EndsWith("?"))
+                return;
+            TextOutput.Remove(TextOutput.Length - 1, 1);
+            TextOutput.Append("!");
         }
 
         protected override Expression VisitMember(MemberExpression node)
