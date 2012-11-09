@@ -18,7 +18,7 @@ namespace Neo4jClient.Cypher
 
             return new CypherQuery(
                 queryText,
-                queryParameters,
+                new Dictionary<string, object>(queryParameters),
                 CypherResultMode.Projection);
         }
 

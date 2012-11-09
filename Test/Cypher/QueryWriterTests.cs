@@ -55,6 +55,45 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ToCypherQueryShouldNotIncrementParamCountsWhenGeneratedTwice()
+        {
+            var writer = new QueryWriter();
+
+            writer.AppendClause("foo {0}", "bar");
+
+            var query1 = writer.ToCypherQuery();
+            Assert.AreEqual("foo {p0}", query1.QueryText);
+            Assert.AreEqual(1, query1.QueryParameters.Count);
+            Assert.AreEqual("bar", query1.QueryParameters["p0"]);
+
+            var query2 = writer.ToCypherQuery();
+            Assert.AreEqual("foo {p0}", query2.QueryText);
+            Assert.AreEqual(1, query2.QueryParameters.Count);
+            Assert.AreEqual("bar", query2.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void ToCypherQueryShouldNotLeakNewParamsIntoPreviouslyBuiltQuery()
+        {
+            var writer = new QueryWriter();
+
+            writer.AppendClause("foo {0}", "bar");
+            var query1 = writer.ToCypherQuery();
+
+            writer.AppendClause("baz {0}", "qak");
+            var query2 = writer.ToCypherQuery();
+
+            Assert.AreEqual("foo {p0}", query1.QueryText);
+            Assert.AreEqual(1, query1.QueryParameters.Count);
+            Assert.AreEqual("bar", query1.QueryParameters["p0"]);
+
+            Assert.AreEqual("foo {p0}\r\nbaz {p1}", query2.QueryText);
+            Assert.AreEqual(2, query2.QueryParameters.Count);
+            Assert.AreEqual("bar", query2.QueryParameters["p0"]);
+            Assert.AreEqual("qak", query2.QueryParameters["p1"]);
+        }
+
+        [Test]
         public void AppendClauseWithMultipleParameters()
         {
             var writer = new QueryWriter();
