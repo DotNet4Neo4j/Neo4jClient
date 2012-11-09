@@ -985,7 +985,7 @@ RETURN b AS NodeB";
                 .Create<CreateNodeTests.TestNode>("a", new CreateNodeTests.TestNode {Foo = "foo", Bar = "bar", Baz = "baz"})
                 .Return<object>("a")
                 .Query;
-            Assert.AreEqual("\r\nCREATE (a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})\r\nRETURN a", query.QueryText);
+            Assert.AreEqual("CREATE (a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})\r\nRETURN a", query.QueryText);
         }
 
         [Test]

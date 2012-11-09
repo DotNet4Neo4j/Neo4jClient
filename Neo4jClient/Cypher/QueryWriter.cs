@@ -47,6 +47,13 @@ namespace Neo4jClient.Cypher
                 clause = string.Format(clause, paramPlaceholders);
             }
 
+            // Only needed while migrating off CypherQueryBuilder
+            if (queryTextBuilder.Length > 0 &&
+                !queryTextBuilder.ToString().EndsWith(Environment.NewLine))
+            {
+                queryTextBuilder.AppendLine();
+            }
+
             queryTextBuilder.AppendLine(clause);
         }
 

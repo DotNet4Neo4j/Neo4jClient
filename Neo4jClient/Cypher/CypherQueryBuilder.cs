@@ -269,38 +269,42 @@ namespace Neo4jClient.Cypher
                 });
 
                 target.Append(string.Join(", ", formattedStartBits));
+                target.AppendLine();
             } 
         }
 
         void WriteMatchClause(StringBuilder target)
         {
             if (matchText == null) return;
-            target.AppendFormat("\r\nMATCH {0}", matchText);
+            target.AppendFormat("MATCH {0}", matchText);
+            target.AppendLine();
         }
 
         void WriteDeleteClause(StringBuilder target)
         {
             if (deleteText == null) return;
-            target.AppendFormat("\r\nDELETE {0}", deleteText);
+            target.AppendFormat("DELETE {0}", deleteText);
+            target.AppendLine();
         }
 
         void WriteRelateClause(StringBuilder target)
         {
             if (relateText == null) return;
-            target.AppendFormat("\r\nRELATE {0}", relateText);
+            target.AppendLine("RELATE " + relateText);
         }
 
         void WriteCreateUniqueClause(StringBuilder target)
         {
             if (createUniqueText == null) return;
-            target.AppendFormat("\r\nCREATE UNIQUE {0}", createUniqueText);
+            target.AppendFormat("CREATE UNIQUE {0}", createUniqueText);
+            target.AppendLine();
         }
 
         void WriteCreateClause(StringBuilder target)
         {
             if (createBits.Any())
             {
-                target.Append("\r\nCREATE ");
+                target.Append("CREATE ");
                 var formattedCreateBits = createBits.Select(bit =>
                 {
                     var createTextbit = bit as CypherCreateTextBit;
@@ -313,6 +317,7 @@ namespace Neo4jClient.Cypher
                 });
 
                 target.Append(string.Join("", formattedCreateBits));
+                target.AppendLine();
             }
         }
 
@@ -321,40 +326,45 @@ namespace Neo4jClient.Cypher
             if (whereText == null)
                 return;
 
-            target.Append("\r\nWHERE ");
-            target.Append(whereText);
+            target.Append("WHERE " + whereText);
+            target.AppendLine();
         }
 
         void WriteReturnClause(StringBuilder target)
         {
             if (returnText == null) return;
-            target.Append("\r\nRETURN ");
+            target.Append("RETURN ");
             if (returnDistinct) target.Append("distinct ");
             target.Append(returnText);
+            target.AppendLine();
         }
 
         void WriteLimitClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
             if (limit == null) return;
-            target.AppendFormat("\r\nLIMIT {0}", CreateParameter(paramsDictionary, limit));
+            target.AppendFormat("LIMIT {0}", CreateParameter(paramsDictionary, limit));
+            target.AppendLine();
         }
 
         void WriteSkipClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
             if (skip == null) return;
-            target.AppendFormat("\r\nSKIP {0}", CreateParameter(paramsDictionary, skip));
+            target.AppendFormat("SKIP {0}", CreateParameter(paramsDictionary, skip));
+            target.AppendLine();
         }
 
         void WriteOrderByClause(StringBuilder target )
         {
             if (string.IsNullOrEmpty(orderBy)) return;
-            target.AppendFormat("\r\nORDER BY {0}",  orderBy);
+            target.AppendFormat("ORDER BY {0}", orderBy);
+            target.AppendLine();
         }
 
         void WriteSetClause(StringBuilder target)
         {
             if (setText == null) return;
-            target.AppendFormat("\r\nSET {0}", setText);
+            target.AppendFormat("SET {0}", setText);
+            target.AppendLine();
         }
     }
 }
