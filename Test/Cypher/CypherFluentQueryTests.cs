@@ -10,6 +10,25 @@ namespace Neo4jClient.Test.Cypher
     public class CypherFluentQueryTests
     {
         [Test]
+        public void ShouldBuildQueriesAsImmutableStepsInsteadOfCorruptingPreviousOnes()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference)1)
+                .Return<object>("n");
+
+            var query1 = query.Query;
+            query = query.OrderBy("n.Foo");
+            var query2 = query.Query;
+
+            Assert.AreEqual("START n=node({p0})\r\nRETURN n", query1.QueryText);
+            Assert.AreEqual(1, query1.QueryParameters["p0"]);
+
+            Assert.AreEqual("START n=node({p0})\r\nRETURN n\r\nORDER BY n.Foo", query2.QueryText);
+            Assert.AreEqual(1, query2.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void StartAndReturnNodeById()
         {
             // http://docs.neo4j.org/chunked/1.6/query-start.html#start-node-by-id
