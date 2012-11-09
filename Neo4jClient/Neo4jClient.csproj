@@ -67,6 +67,7 @@
     <Compile Include="Cypher\CypherCreateTextBit.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookupWithSingleParameter.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookup.cs" />
+    <Compile Include="Cypher\QueryWriter.cs" />
     <Compile Include="Cypher\RawCypherStartBit.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
