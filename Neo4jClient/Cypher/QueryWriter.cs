@@ -16,6 +16,7 @@ namespace Neo4jClient.Cypher
             queryParameters = new Dictionary<string, object>();
         }
 
+        [Obsolete]
         internal QueryWriter(
             StringBuilder queryTextBuilder,
             IDictionary<string, object> queryParameters)
