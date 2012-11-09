@@ -601,7 +601,7 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public ICypherFluentQueryPreStart Cypher
+        public ICypherFluentQuery Cypher
         {
             get {return new CypherFluentQuery(this); }
         }

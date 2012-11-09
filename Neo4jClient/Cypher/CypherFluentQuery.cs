@@ -8,9 +8,7 @@ namespace Neo4jClient.Cypher
 {
     [DebuggerDisplay("{Query.DebugQueryText}")]
     public partial class CypherFluentQuery :
-        ICypherFluentQueryPreStart,
-        ICypherFluentQueryStarted,
-        ICypherFluentQueryMatched,
+        ICypherFluentQuery,
         IAttachedReference
     {
         protected readonly IRawGraphClient Client;
@@ -30,72 +28,72 @@ namespace Neo4jClient.Cypher
             Builder = builder;
         }
 
-        public ICypherFluentQueryStarted Start(string identity, string startText)
+        public ICypherFluentQuery Start(string identity, string startText)
         {
             var newBuilder = new CypherQueryBuilder();
             newBuilder.AddStartBit(identity, startText);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted Start(string identity, params NodeReference[] nodeReferences)
+        public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
         {
             var newBuilder = new CypherQueryBuilder();
             newBuilder.AddStartBit(identity, nodeReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted Start(string identity, params RelationshipReference[] relationshipReferences)
+        public ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences)
         {
             var newBuilder = new CypherQueryBuilder();
             newBuilder.AddStartBit(identity, relationshipReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
+        public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
             var newBuilder = new CypherQueryBuilder();
             newBuilder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted StartWithNodeIndexLookup(string identity, string indexName, string parameter)
+        public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)
         {
             var newBuilder = new CypherQueryBuilder();
             newBuilder.AddStartBitWithNodeIndexLookup(identity, indexName, parameter);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted AddStartPoint(string identity, string startText)
+        public ICypherFluentQuery AddStartPoint(string identity, string startText)
         {
             var newBuilder = Builder.AddStartBit(identity, startText);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
+        public ICypherFluentQuery AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
             var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted AddStartPoint(string identity, params NodeReference[] nodeReferences)
+        public ICypherFluentQuery AddStartPoint(string identity, params NodeReference[] nodeReferences)
         {
             var newBuilder = Builder.AddStartBit(identity, nodeReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryStarted AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
+        public ICypherFluentQuery AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
         {
             var newBuilder = Builder.AddStartBit(identity, relationshipReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Match(params string[] matchText)
+        public ICypherFluentQuery Match(params string[] matchText)
         {
             var newBuilder = Builder.SetMatchText(string.Join(", ", matchText));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Relate(string relateText)
+        public ICypherFluentQuery Relate(string relateText)
         {
             if (Client.ServerVersion == new Version(1, 8) ||
                 Client.ServerVersion >= new Version(1, 8, 0, 7))
@@ -105,7 +103,7 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched CreateUnique(string createUniqueText)
+        public ICypherFluentQuery CreateUnique(string createUniqueText)
         {
             if (Client.ServerVersion < new Version(1, 8) ||
                 (Client.ServerVersion >= new Version(1, 8, 0, 1) && Client.ServerVersion <= new Version(1, 8, 0, 6)))
@@ -115,13 +113,13 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Create(string createText)
+        public ICypherFluentQuery Create(string createText)
         {
             var newBuilder = Builder.SetCreateText(createText);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Create<TNode>(string identity, TNode node)
+        public ICypherFluentQuery Create<TNode>(string identity, TNode node)
             where TNode : class 
         {
             if (typeof(TNode).IsGenericType &&
@@ -143,13 +141,13 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Delete(string identities)
+        public ICypherFluentQuery Delete(string identities)
         {
             var newBuilder = Builder.SetDeleteText(identities);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQueryMatched Set(string setText)
+        public ICypherFluentQuery Set(string setText)
         {
             var newBuilder = Builder.SetSetText(setText);
             return new CypherFluentQuery(Client, newBuilder);
