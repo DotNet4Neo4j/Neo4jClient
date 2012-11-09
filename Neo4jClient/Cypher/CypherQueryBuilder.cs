@@ -197,6 +197,7 @@ namespace Neo4jClient.Cypher
         public CypherQuery ToQuery()
         {
             var queryTextBuilder = new StringBuilder();
+            var queryWriter = new QueryWriter(queryTextBuilder, queryParameters);
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
             WriteRelateClause(queryTextBuilder);
@@ -209,7 +210,7 @@ namespace Neo4jClient.Cypher
             WriteOrderByClause(queryTextBuilder);
             WriteSkipClause(queryTextBuilder, queryParameters);
             WriteLimitClause(queryTextBuilder, queryParameters);
-            return new CypherQuery(queryTextBuilder.ToString(), queryParameters, resultMode);
+            return queryWriter.ToCypherQuery(resultMode);
         }
 
         public static string CreateParameter(IDictionary<string, object> parameters, object paramValue)

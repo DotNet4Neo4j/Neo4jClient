@@ -7,10 +7,24 @@ namespace Neo4jClient.Cypher
 {
     public class QueryWriter
     {
-        readonly IDictionary<string, object> queryParameters = new Dictionary<string, object>();
-        readonly StringBuilder queryTextBuilder = new StringBuilder();
+        readonly StringBuilder queryTextBuilder;
+        readonly IDictionary<string, object> queryParameters;
 
-        public CypherQuery ToCypherQuery()
+        public QueryWriter()
+        {
+            queryTextBuilder = new StringBuilder();
+            queryParameters = new Dictionary<string, object>();
+        }
+
+        internal QueryWriter(
+            StringBuilder queryTextBuilder,
+            IDictionary<string, object> queryParameters)
+        {
+            this.queryTextBuilder = queryTextBuilder;
+            this.queryParameters = queryParameters;
+        }
+
+        public CypherQuery ToCypherQuery(CypherResultMode resultMode = CypherResultMode.Projection)
         {
             var queryText = queryTextBuilder
                 .ToString()
@@ -19,7 +33,7 @@ namespace Neo4jClient.Cypher
             return new CypherQuery(
                 queryText,
                 new Dictionary<string, object>(queryParameters),
-                CypherResultMode.Projection);
+                resultMode);
         }
 
         public void AppendClause(string clause, params object[] paramValues)
