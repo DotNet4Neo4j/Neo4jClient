@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
@@ -9,10 +10,12 @@ namespace Neo4jClient.Cypher
         void ExecuteWithoutResults();
 
         ICypherFluentQuery Start(string identity, string startText);
+        ICypherFluentQuery Start(IEnumerable<RawCypherStartBit> startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences);
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value);
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameterText);
+        [Obsolete("Call Start with multiple components instead", true)]
         ICypherFluentQuery AddStartPoint(string identity, string startText);
         ICypherFluentQuery AddStartPoint(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQuery AddStartPoint(string identity, params RelationshipReference[] relationshipReferences);

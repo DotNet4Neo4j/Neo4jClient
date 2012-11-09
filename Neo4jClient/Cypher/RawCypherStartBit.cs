@@ -1,6 +1,6 @@
 namespace Neo4jClient.Cypher
 {
-    internal class RawCypherStartBit
+    public class RawCypherStartBit
     {
         readonly string identifier;
         readonly string startText;

@@ -72,6 +72,7 @@ namespace Neo4jClient.Cypher
         public CypherQueryBuilder AddStartBit(string identity, string startText)
         {
             var newBuilder = Clone();
+            //newBuilder.queryWriter.AppendClause(string.Format("START {0}={1}", identity, startText));
             newBuilder.startBits.Add(new RawCypherStartBit(identity, startText));
             return newBuilder;
         }
@@ -386,6 +387,13 @@ namespace Neo4jClient.Cypher
             if (setText == null) return;
             target.AppendFormat("SET {0}", setText);
             target.AppendLine();
+        }
+
+        public CypherQueryBuilder CallWriter(Action<QueryWriter> callback)
+        {
+            var newBuilder = Clone();
+            callback(newBuilder.queryWriter);
+            return newBuilder;
         }
     }
 }

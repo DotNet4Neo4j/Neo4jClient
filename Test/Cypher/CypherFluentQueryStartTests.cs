@@ -136,16 +136,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void AddAllNodes()
+        public void AllNodesMultipleTimes()
         {
             // http://docs.neo4j.org/chunked/1.8/query-start.html#start-all-nodes
-            //START n=node(*)
+            //START n=node(*), b=node(*)
             //RETURN n
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", "node(*)")
-                .AddStartPoint("b", "node(*)")
+                .Start(new[]
+                {
+                    new RawCypherStartBit("n", "node(*)"),
+                    new RawCypherStartBit("b", "node(*)")
+                })
                 .Return<object>("n")
                 .Query;
 

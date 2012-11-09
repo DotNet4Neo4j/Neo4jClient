@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
@@ -44,7 +45,19 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Start(string identity, string startText)
         {
-            var newBuilder = Builder.AddStartBit(identity, startText);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("START {0}={1}", identity, startText)));
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
+        public ICypherFluentQuery Start(IEnumerable<RawCypherStartBit> startBits)
+        {
+            var startBitsText = startBits
+                .Select(b => string.Format("{0}={1}", b.Identifier, b.StartText))
+                .ToArray();
+            var startText = string.Join(", ", startBitsText);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause("START " + startText));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
@@ -72,10 +85,10 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
+        [Obsolete("Call Start with multiple components instead", true)]
         public ICypherFluentQuery AddStartPoint(string identity, string startText)
         {
-            var newBuilder = Builder.AddStartBit(identity, startText);
-            return new CypherFluentQuery(Client, newBuilder);
+            throw new NotSupportedException();
         }
 
         public ICypherFluentQuery AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
