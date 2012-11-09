@@ -1,5 +1,4 @@
-﻿using System;
-using NSubstitute;
+﻿using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 using Neo4jClient.Test.GraphClientTests;
@@ -26,6 +25,30 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("START n=node({p0})\r\nRETURN n\r\nORDER BY n.Foo", query2.QueryText);
             Assert.AreEqual(1, query2.QueryParameters["p0"]);
+        }
+
+
+        [Test]
+        public void AddingStartBitsToDifferentQueriesShouldntCorruptEachOther()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var cypher = new CypherFluentQuery(client);
+
+            var query1 = cypher
+                .Start("a", (NodeReference)1)
+                .Query;
+
+            var query2 = cypher
+                .Start("b", (NodeReference)2)
+                .Query;
+
+            Assert.AreEqual("START a=node({p0})", query1.QueryText);
+            Assert.AreEqual(1, query1.QueryParameters.Count);
+            Assert.AreEqual(1, query1.QueryParameters["p0"]);
+
+            Assert.AreEqual("START b=node({p0})", query2.QueryText);
+            Assert.AreEqual(1, query2.QueryParameters.Count);
+            Assert.AreEqual(2, query2.QueryParameters["p0"]);
         }
 
         [Test]

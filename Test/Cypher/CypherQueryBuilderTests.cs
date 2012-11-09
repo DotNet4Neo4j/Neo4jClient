@@ -11,8 +11,8 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ShouldBuildSingleStartBitWithSingleNode()
         {
-            var builder = new CypherQueryBuilder();
-            builder.AddStartBit("n", (NodeReference)1);
+            var builder = new CypherQueryBuilder()
+                .AddStartBit("n", (NodeReference)1);
 
             var query = builder.ToQuery();
 
@@ -23,8 +23,8 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ShouldBuildSingleStartBitWithSingleRelationship()
         {
-            var builder = new CypherQueryBuilder();
-            builder.AddStartBit("r", (RelationshipReference)1);
+            var builder = new CypherQueryBuilder()
+                .AddStartBit("r", (RelationshipReference)1);
 
             var query = builder.ToQuery();
 
@@ -35,8 +35,8 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ShouldBuildSingleStartBitWithMultipleNodes()
         {
-            var builder = new CypherQueryBuilder();
-            builder.AddStartBit("n", (NodeReference)1, (NodeReference)2, (NodeReference)3);
+            var builder = new CypherQueryBuilder()
+                .AddStartBit("n", (NodeReference)1, (NodeReference)2, (NodeReference)3);
 
             var query = builder.ToQuery();
 
@@ -49,9 +49,9 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void ShouldBuildMultipleStartPoints()
         {
-            var builder = new CypherQueryBuilder();
-            builder.AddStartBit("a", (NodeReference)1);
-            builder.AddStartBit("b", (NodeReference)2);
+            var builder = new CypherQueryBuilder()
+                .AddStartBit("a", (NodeReference)1)
+                .AddStartBit("b", (NodeReference)2);
 
             var query = builder.ToQuery();
 

@@ -153,20 +153,21 @@ namespace Neo4jClient.Test.Cypher
                 .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
 
             var cypher = new CypherFluentQuery(client);
-            var results = cypher
+            var query1 = cypher
                 .Start("a", (NodeReference)1)
                 .Return<object>("a.Name")
-                .Results
-                .Count();
+                .Query;
 
-            results += cypher
-                .Start("a", (NodeReference)1)
+            Assert.AreEqual(1, query1.QueryParameters.Count());
+            Assert.AreEqual(1, query1.QueryParameters["p0"]);
+
+            var query2 = cypher
+                .Start("b", (NodeReference)2)
                 .Return<object>("a.Name")
-                .Results
-                .Count();
+                .Query;
 
-            Assert.AreEqual(0, cypher.Query.QueryParameters.Count());
-            Assert.AreEqual(0, results);
+            Assert.AreEqual(1, query2.QueryParameters.Count());
+            Assert.AreEqual(2, query2.QueryParameters["p0"]);
         }
 
         public enum MyType {Type1, Type2}

@@ -8,7 +8,10 @@ namespace Neo4jClient.Cypher
 {
     public class CypherQueryBuilder
     {
-        IDictionary<string, object> queryParameters = new Dictionary<string, object>();
+        readonly QueryWriter queryWriter;
+        readonly StringBuilder queryTextBuilder;
+        readonly IDictionary<string, object> queryParameters;
+
         IList<object> startBits = new List<object>();
         string matchText;
         string relateText;
@@ -24,11 +27,31 @@ namespace Neo4jClient.Cypher
         string orderBy;
         string setText;
 
+        public CypherQueryBuilder()
+        {
+            queryTextBuilder = new StringBuilder();
+            queryParameters = new Dictionary<string, object>();
+            queryWriter = new QueryWriter(queryTextBuilder, queryParameters);
+        }
+
+        public CypherQueryBuilder(
+            QueryWriter queryWriter,
+            StringBuilder queryTextBuilder,
+            IDictionary<string, object> queryParameters)
+        {
+            this.queryWriter = queryWriter;
+            this.queryTextBuilder = queryTextBuilder;
+            this.queryParameters = queryParameters;
+        }
+
         CypherQueryBuilder Clone()
         {
-            return new CypherQueryBuilder
+            return new CypherQueryBuilder(
+                queryWriter,
+                queryTextBuilder,
+                queryParameters
+            )
             {
-                queryParameters = queryParameters,
                 createBits = createBits,
                 deleteText = deleteText,
                 matchText = matchText,
@@ -40,7 +63,7 @@ namespace Neo4jClient.Cypher
                 resultMode = resultMode,
                 limit = limit,
                 skip = skip,
-                startBits = startBits,
+                startBits = new List<object>(startBits),
                 orderBy = orderBy,
                 setText = setText
             };
@@ -196,22 +219,24 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery ToQuery()
         {
-            var queryTextBuilder = new StringBuilder();
+            var textBuilder = new StringBuilder(queryTextBuilder.ToString());
             var parameters = new Dictionary<string, object>(queryParameters);
-            var queryWriter = new QueryWriter(queryTextBuilder, parameters);
-            WriteStartClause(queryTextBuilder, parameters);
-            WriteMatchClause(queryTextBuilder);
-            WriteRelateClause(queryWriter);
-            WriteCreateUniqueClause(queryTextBuilder);
-            WriteCreateClause(queryTextBuilder);
-            WriteWhereClause(queryTextBuilder);
-            WriteDeleteClause(queryTextBuilder);
-            WriteSetClause(queryTextBuilder);
-            WriteReturnClause(queryTextBuilder);
-            WriteOrderByClause(queryTextBuilder);
-            WriteSkipClause(queryTextBuilder, parameters);
-            WriteLimitClause(queryTextBuilder, parameters);
-            return queryWriter.ToCypherQuery(resultMode);
+            var writer = new QueryWriter(textBuilder, parameters);
+
+            WriteStartClause(textBuilder, parameters);
+            WriteMatchClause(textBuilder);
+            WriteRelateClause(writer);
+            WriteCreateUniqueClause(textBuilder);
+            WriteCreateClause(textBuilder);
+            WriteWhereClause(textBuilder);
+            WriteDeleteClause(textBuilder);
+            WriteSetClause(textBuilder);
+            WriteReturnClause(textBuilder);
+            WriteOrderByClause(textBuilder);
+            WriteSkipClause(textBuilder, parameters);
+            WriteLimitClause(textBuilder, parameters);
+
+            return writer.ToCypherQuery(resultMode);
         }
 
         public static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
@@ -287,10 +312,10 @@ namespace Neo4jClient.Cypher
             target.AppendLine();
         }
 
-        void WriteRelateClause(QueryWriter queryWriter)
+        void WriteRelateClause(QueryWriter writer)
         {
             if (relateText == null) return;
-            queryWriter.AppendClause("RELATE " + relateText);
+            writer.AppendClause("RELATE " + relateText);
         }
 
         void WriteCreateUniqueClause(StringBuilder target)

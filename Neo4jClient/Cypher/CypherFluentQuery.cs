@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Text;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 
@@ -14,9 +16,21 @@ namespace Neo4jClient.Cypher
         protected readonly IRawGraphClient Client;
         protected readonly CypherQueryBuilder Builder;
 
+        readonly StringBuilder queryTextBuilder;
+        readonly IDictionary<string, object> queryParameters;
+        readonly QueryWriter queryWriter;
+
         public CypherFluentQuery(IGraphClient client)
-            : this(client, new CypherQueryBuilder())
         {
+            if (!(client is IRawGraphClient))
+                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
+
+            Client = (IRawGraphClient)client;
+
+            queryTextBuilder = new StringBuilder();
+            queryParameters = new Dictionary<string,object>();
+            queryWriter = new QueryWriter(queryTextBuilder, queryParameters);
+            Builder = new CypherQueryBuilder(queryWriter, queryTextBuilder, queryParameters);
         }
 
         protected CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
@@ -30,36 +44,31 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Start(string identity, string startText)
         {
-            var newBuilder = new CypherQueryBuilder();
-            newBuilder.AddStartBit(identity, startText);
+            var newBuilder = Builder.AddStartBit(identity, startText);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
         {
-            var newBuilder = new CypherQueryBuilder();
-            newBuilder.AddStartBit(identity, nodeReferences);
+            var newBuilder = Builder.AddStartBit(identity, nodeReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences)
         {
-            var newBuilder = new CypherQueryBuilder();
-            newBuilder.AddStartBit(identity, relationshipReferences);
+            var newBuilder = Builder.AddStartBit(identity, relationshipReferences);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
-            var newBuilder = new CypherQueryBuilder();
-            newBuilder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);
+            var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)
         {
-            var newBuilder = new CypherQueryBuilder();
-            newBuilder.AddStartBitWithNodeIndexLookup(identity, indexName, parameter);
+            var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, parameter);
             return new CypherFluentQuery(Client, newBuilder);
         }
 
