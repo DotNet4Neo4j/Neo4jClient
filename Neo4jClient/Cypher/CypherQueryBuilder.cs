@@ -200,7 +200,7 @@ namespace Neo4jClient.Cypher
             var queryWriter = new QueryWriter(queryTextBuilder, queryParameters);
             WriteStartClause(queryTextBuilder, queryParameters);
             WriteMatchClause(queryTextBuilder);
-            WriteRelateClause(queryTextBuilder);
+            WriteRelateClause(queryWriter);
             WriteCreateUniqueClause(queryTextBuilder);
             WriteCreateClause(queryTextBuilder);
             WriteWhereClause(queryTextBuilder);
@@ -287,10 +287,10 @@ namespace Neo4jClient.Cypher
             target.AppendLine();
         }
 
-        void WriteRelateClause(StringBuilder target)
+        void WriteRelateClause(QueryWriter queryWriter)
         {
             if (relateText == null) return;
-            target.AppendLine("RELATE " + relateText);
+            queryWriter.AppendClause("RELATE " + relateText);
         }
 
         void WriteCreateUniqueClause(StringBuilder target)
