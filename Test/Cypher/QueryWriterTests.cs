@@ -46,9 +46,7 @@ namespace Neo4jClient.Test.Cypher
         {
             var writer = new QueryWriter();
 
-            writer.AppendClause(
-                "foo {0}",
-                "bar");
+            writer.AppendClause("foo {0}", "bar");
 
             var query = writer.ToCypherQuery();
             Assert.AreEqual("foo {p0}", query.QueryText);
@@ -61,16 +59,32 @@ namespace Neo4jClient.Test.Cypher
         {
             var writer = new QueryWriter();
 
-            writer.AppendClause(
-                "foo {0} bar {1}",
-                "baz",
-                "qak");
+            writer.AppendClause("foo {0} bar {1}", "baz", "qak");
 
             var query = writer.ToCypherQuery();
             Assert.AreEqual("foo {p0} bar {p1}", query.QueryText);
             Assert.AreEqual(2, query.QueryParameters.Count);
             Assert.AreEqual("baz", query.QueryParameters["p0"]);
             Assert.AreEqual("qak", query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void AppendMultipleClausesWithMultipleParameters()
+        {
+            var writer = new QueryWriter();
+
+            writer.AppendClause("foo {0} bar {1}", "baz", "qak");
+            writer.AppendClause("{0} qoo {1} zoo", "abc", "xyz");
+
+            var query = writer.ToCypherQuery();
+            const string expectedText = @"foo {p0} bar {p1}
+{p2} qoo {p3} zoo";
+            Assert.AreEqual(expectedText, query.QueryText);
+            Assert.AreEqual(4, query.QueryParameters.Count);
+            Assert.AreEqual("baz", query.QueryParameters["p0"]);
+            Assert.AreEqual("qak", query.QueryParameters["p1"]);
+            Assert.AreEqual("abc", query.QueryParameters["p2"]);
+            Assert.AreEqual("xyz", query.QueryParameters["p3"]);
         }
     }
 }
