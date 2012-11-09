@@ -222,55 +222,54 @@ namespace Neo4jClient.Cypher
 
         void WriteStartClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
         {
-            if (startBits.Any()) {
-                target.Append("START ");
+            if (!startBits.Any()) return;
 
-                var formattedStartBits = startBits.Select(bit => {
-                    var standardStartBit = bit as CypherStartBit;
-                    if (standardStartBit != null) {
-                        var lookupIdParameterNames = standardStartBit
-                            .LookupIds
-                            .Select(i => CreateParameter(paramsDictionary, i))
-                            .ToArray();
+            target.Append("START ");
+            var formattedStartBits = startBits.Select(bit => {
+                var standardStartBit = bit as CypherStartBit;
+                if (standardStartBit != null) {
+                    var lookupIdParameterNames = standardStartBit
+                        .LookupIds
+                        .Select(i => CreateParameter(paramsDictionary, i))
+                        .ToArray();
                         
-                        var lookupContent = string.Join(", ", lookupIdParameterNames);
-                        return string.Format("{0}={1}({2})",
-                            standardStartBit.Identifier,
-                            standardStartBit.LookupType,
-                            lookupContent);
-                    }
+                    var lookupContent = string.Join(", ", lookupIdParameterNames);
+                    return string.Format("{0}={1}({2})",
+                        standardStartBit.Identifier,
+                        standardStartBit.LookupType,
+                        lookupContent);
+                }
 
-                    var rawStartBit = bit as RawCypherStartBit;
-                    if (rawStartBit != null)
-                    {
-                        return string.Format("{0}={1}", rawStartBit.Identifier, rawStartBit.StartText);
-                    }
+                var rawStartBit = bit as RawCypherStartBit;
+                if (rawStartBit != null)
+                {
+                    return string.Format("{0}={1}", rawStartBit.Identifier, rawStartBit.StartText);
+                }
                     
-                    var startBithWithNodeIndexLookup = bit as CypherStartBitWithNodeIndexLookup;
-                    if (startBithWithNodeIndexLookup != null) {
-                        var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookup.Value);
-                        return string.Format("{0}=node:{1}({2} = {3})",
-                            startBithWithNodeIndexLookup.Identifier,
-                            startBithWithNodeIndexLookup.IndexName,
-                            startBithWithNodeIndexLookup.Key,
-                            valueParameter);
-                    }
+                var startBithWithNodeIndexLookup = bit as CypherStartBitWithNodeIndexLookup;
+                if (startBithWithNodeIndexLookup != null) {
+                    var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookup.Value);
+                    return string.Format("{0}=node:{1}({2} = {3})",
+                        startBithWithNodeIndexLookup.Identifier,
+                        startBithWithNodeIndexLookup.IndexName,
+                        startBithWithNodeIndexLookup.Key,
+                        valueParameter);
+                }
                     
-                    var startBithWithNodeIndexLookupSingleParameter = bit as CypherStartBitWithNodeIndexLookupWithSingleParameter;
-                    if (startBithWithNodeIndexLookupSingleParameter != null) {
-                        var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookupSingleParameter.Parameter);
-                        return string.Format("{0}=node:{1}({2})",
-                            startBithWithNodeIndexLookupSingleParameter.Identifier,
-                            startBithWithNodeIndexLookupSingleParameter.IndexName,
-                            valueParameter);
-                    }
+                var startBithWithNodeIndexLookupSingleParameter = bit as CypherStartBitWithNodeIndexLookupWithSingleParameter;
+                if (startBithWithNodeIndexLookupSingleParameter != null) {
+                    var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookupSingleParameter.Parameter);
+                    return string.Format("{0}=node:{1}({2})",
+                        startBithWithNodeIndexLookupSingleParameter.Identifier,
+                        startBithWithNodeIndexLookupSingleParameter.IndexName,
+                        valueParameter);
+                }
                     
-                    throw new NotSupportedException(string.Format("Start bit of type {0} is not supported.", bit.GetType().FullName));
-                });
+                throw new NotSupportedException(string.Format("Start bit of type {0} is not supported.", bit.GetType().FullName));
+            });
 
-                target.Append(string.Join(", ", formattedStartBits));
-                target.AppendLine();
-            } 
+            target.Append(string.Join(", ", formattedStartBits));
+            target.AppendLine();
         }
 
         void WriteMatchClause(StringBuilder target)
@@ -302,30 +301,26 @@ namespace Neo4jClient.Cypher
 
         void WriteCreateClause(StringBuilder target)
         {
-            if (createBits.Any())
+            if (!createBits.Any()) return;
+            target.Append("CREATE ");
+            var formattedCreateBits = createBits.Select(bit =>
             {
-                target.Append("CREATE ");
-                var formattedCreateBits = createBits.Select(bit =>
+                var createTextbit = bit as CypherCreateTextBit;
+                if (createTextbit != null)
                 {
-                    var createTextbit = bit as CypherCreateTextBit;
-                    if (createTextbit != null)
-                    {
-                        return createTextbit.CreateText;
-                    }
+                    return createTextbit.CreateText;
+                }
 
-                    throw new NotSupportedException(string.Format("Create bit of type {0} is not supported.", bit.GetType().FullName));
-                });
+                throw new NotSupportedException(string.Format("Create bit of type {0} is not supported.", bit.GetType().FullName));
+            });
 
-                target.Append(string.Join("", formattedCreateBits));
-                target.AppendLine();
-            }
+            target.Append(string.Join("", formattedCreateBits));
+            target.AppendLine();
         }
 
         void WriteWhereClause(StringBuilder target)
         {
-            if (whereText == null)
-                return;
-
+            if (whereText == null) return;
             target.Append("WHERE " + whereText);
             target.AppendLine();
         }
