@@ -12,7 +12,6 @@ namespace Neo4jClient.Cypher
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
 
-        IList<object> startBits = new List<object>();
         string matchText;
         string relateText;
         string createUniqueText;
@@ -66,46 +65,9 @@ namespace Neo4jClient.Cypher
                 resultMode = resultMode,
                 limit = limit,
                 skip = skip,
-                startBits = new List<object>(startBits),
                 orderBy = orderBy,
                 setText = setText
             };
-        }
-
-        public CypherQueryBuilder AddStartBit(string identity, string startText)
-        {
-            var newBuilder = Clone();
-            //newBuilder.queryWriter.AppendClause(string.Format("START {0}={1}", identity, startText));
-            newBuilder.startBits.Add(new RawCypherStartBit(identity, startText));
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder AddStartBit(string identity, params NodeReference[] nodeReferences)
-        {
-            var newBuilder = Clone();
-            newBuilder.startBits.Add(new CypherStartBit(identity, "node", nodeReferences.Select(r => r.Id).ToArray()));
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder AddStartBit(string identity, params RelationshipReference[] relationshipReferences)
-        {
-            var newBuilder = Clone();
-            newBuilder.startBits.Add(new CypherStartBit(identity, "relationship", relationshipReferences.Select(r => r.Id).ToArray()));
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder AddStartBitWithNodeIndexLookup(string identity, string indexName, string parameterText)
-        {
-            var newBuilder = Clone();
-            newBuilder.startBits.Add(new CypherStartBitWithNodeIndexLookupWithSingleParameter(identity, indexName, parameterText));
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder AddStartBitWithNodeIndexLookup(string identity, string indexName, string key, object value)
-        {
-            var newBuilder = Clone();
-            newBuilder.startBits.Add(new CypherStartBitWithNodeIndexLookup(identity, indexName, key, value));
-            return newBuilder;
         }
 
         public CypherQueryBuilder SetDeleteText(string text)
