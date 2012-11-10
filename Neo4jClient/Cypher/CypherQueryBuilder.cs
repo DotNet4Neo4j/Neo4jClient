@@ -256,20 +256,6 @@ namespace Neo4jClient.Cypher
 
             target.Append("START ");
             var formattedStartBits = startBits.Select(bit => {
-                var standardStartBit = bit as CypherStartBit;
-                if (standardStartBit != null) {
-                    var lookupIdParameterNames = standardStartBit
-                        .LookupIds
-                        .Select(i => CreateParameter(paramsDictionary, i))
-                        .ToArray();
-                        
-                    var lookupContent = string.Join(", ", lookupIdParameterNames);
-                    return string.Format("{0}={1}({2})",
-                        standardStartBit.Identifier,
-                        standardStartBit.LookupType,
-                        lookupContent);
-                }
-
                 var rawStartBit = bit as RawCypherStartBit;
                 if (rawStartBit != null)
                 {
