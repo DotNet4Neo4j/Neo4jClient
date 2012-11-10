@@ -10,15 +10,18 @@ namespace Neo4jClient.Cypher
         void ExecuteWithoutResults();
 
         ICypherFluentQuery Start(string identity, string startText);
-        ICypherFluentQuery Start(IEnumerable<RawCypherStartBit> startBits);
+        ICypherFluentQuery Start(params ICypherStartBit[] startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences);
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value);
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameterText);
         [Obsolete("Call Start with multiple components instead", true)]
         ICypherFluentQuery AddStartPoint(string identity, string startText);
+        [Obsolete("Call Start with multiple components instead", true)]
         ICypherFluentQuery AddStartPoint(string identity, params NodeReference[] nodeReferences);
+        [Obsolete("Call Start with multiple components instead", true)]
         ICypherFluentQuery AddStartPoint(string identity, params RelationshipReference[] relationshipReferences);
+        [Obsolete("Call Start with multiple components instead", true)]
         ICypherFluentQuery AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value);
         ICypherFluentQuery Match(params string[] matchText);
         ICypherFluentQuery Relate(string relateText);

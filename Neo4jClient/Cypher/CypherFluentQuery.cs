@@ -50,21 +50,24 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQuery Start(IEnumerable<RawCypherStartBit> startBits)
+        public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
-            var startBitsText = startBits
-                .Select(b => string.Format("{0}={1}", b.Identifier, b.StartText))
-                .ToArray();
-            var startText = string.Join(", ", startBitsText);
-            var newBuilder = Builder.CallWriter(w =>
-                w.AppendClause("START " + startText));
+            var newBuilder = Builder.CallWriter((writer, createParameterCallback) => {
+                var startBitsText = startBits
+                    .Select(b => b.ToCypherText(createParameterCallback))
+                    .ToArray();
+                var startText = string.Join(", ", startBitsText);
+                writer.AppendClause("START " + startText);
+            });
             return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
         {
-            var newBuilder = Builder.AddStartBit(identity, nodeReferences);
-            return new CypherFluentQuery(Client, newBuilder);
+            return Start(new[]
+            {
+                new CypherStartBit(identity, nodeReferences)
+            });
         }
 
         public ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences)
@@ -91,22 +94,22 @@ namespace Neo4jClient.Cypher
             throw new NotSupportedException();
         }
 
+        [Obsolete("Call Start with multiple components instead", true)]
         public ICypherFluentQuery AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
-            var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);
-            return new CypherFluentQuery(Client, newBuilder);
+            throw new NotSupportedException();
         }
 
+        [Obsolete("Call Start with multiple components instead", true)]
         public ICypherFluentQuery AddStartPoint(string identity, params NodeReference[] nodeReferences)
         {
-            var newBuilder = Builder.AddStartBit(identity, nodeReferences);
-            return new CypherFluentQuery(Client, newBuilder);
+            throw new NotSupportedException();
         }
 
+        [Obsolete("Call Start with multiple components instead", true)]
         public ICypherFluentQuery AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
         {
-            var newBuilder = Builder.AddStartBit(identity, relationshipReferences);
-            return new CypherFluentQuery(Client, newBuilder);
+            throw new NotSupportedException();
         }
 
         public ICypherFluentQuery Match(params string[] matchText)

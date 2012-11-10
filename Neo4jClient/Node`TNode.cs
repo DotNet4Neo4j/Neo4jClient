@@ -39,7 +39,7 @@ namespace Neo4jClient
         {
             var client = ((IAttachedReference) this).Client;
             var query = new CypherFluentQuery(client)
-                .AddStartPoint(identity, Reference);
+                .Start(identity, Reference);
             return query;
         }
 

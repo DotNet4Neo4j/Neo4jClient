@@ -32,8 +32,10 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .StartWithNodeIndexLookup("a", "nodes", "name", "A")
-                .AddStartPointWithNodeIndexLookup("b", "nodes", "name", "B")
+                .Start(
+                    new CypherStartBitWithNodeIndexLookup("a", "nodes", "name", "A"),
+                    new CypherStartBitWithNodeIndexLookup("b", "nodes", "name", "B")
+                )
                 .Return<object>("a")
                 .Query;
 
@@ -51,8 +53,10 @@ namespace Neo4jClient.Test.Cypher
             
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .StartWithNodeIndexLookup("a", "nodes", "name", "A")
-                .AddStartPoint("b", (NodeReference)2)
+                .Start(
+                    new CypherStartBitWithNodeIndexLookup("a", "nodes", "name", "A"),
+                    new CypherStartBit("b", (NodeReference)2)
+                )
                 .Return<object>("a")
                 .Query;
             
@@ -70,9 +74,11 @@ namespace Neo4jClient.Test.Cypher
             
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .StartWithNodeIndexLookup("a", "nodes", "name", "A")
-                .AddStartPoint("b", (NodeReference)2)
-                .AddStartPointWithNodeIndexLookup("c", "nodes", "name", "C")
+                .Start(
+                    new CypherStartBitWithNodeIndexLookup("a", "nodes", "name", "A"),
+                    new CypherStartBit("b", (NodeReference)2),
+                    new CypherStartBitWithNodeIndexLookup("c", "nodes", "name", "C")
+                )
                 .Return<object>("a")
                 .Query;
             
@@ -91,8 +97,10 @@ namespace Neo4jClient.Test.Cypher
             
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
-                .AddStartPointWithNodeIndexLookup("b", "nodes", "name", "B")
+                .Start(
+                    new CypherStartBit("a", (NodeReference)1),
+                    new CypherStartBitWithNodeIndexLookup("b", "nodes", "name", "B")
+                )
                 .Return<object>("a")
                 .Query;
             

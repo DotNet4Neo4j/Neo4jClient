@@ -46,10 +46,13 @@ namespace Neo4jClient.Cypher
 
         CypherQueryBuilder Clone()
         {
+            var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
+            var clonedParameters = new Dictionary<string, object>(queryParameters);
+            var clonedWriter = new QueryWriter(clonedQueryTextBuilder, clonedParameters);
             return new CypherQueryBuilder(
-                queryWriter,
-                queryTextBuilder,
-                queryParameters
+                clonedWriter,
+                clonedQueryTextBuilder,
+                clonedParameters
             )
             {
                 createBits = createBits,
@@ -150,7 +153,7 @@ namespace Neo4jClient.Cypher
         public CypherQueryBuilder SetWhere(LambdaExpression expression)
         {
             var newBuilder = Clone();
-            newBuilder.whereText += whereText = CypherWhereExpressionBuilder.BuildText(expression, queryParameters);
+            newBuilder.whereText += whereText = CypherWhereExpressionBuilder.BuildText(expression, newBuilder.queryParameters);
             return newBuilder;
         }
 
@@ -391,8 +394,15 @@ namespace Neo4jClient.Cypher
 
         public CypherQueryBuilder CallWriter(Action<QueryWriter> callback)
         {
+            return CallWriter((w, cp) => callback(w));
+        }
+
+        public CypherQueryBuilder CallWriter(Action<QueryWriter, Func<object, string>> callback)
+        {
             var newBuilder = Clone();
-            callback(newBuilder.queryWriter);
+            callback(
+                newBuilder.queryWriter,
+                v => CreateParameter(newBuilder.queryParameters, v));
             return newBuilder;
         }
     }
