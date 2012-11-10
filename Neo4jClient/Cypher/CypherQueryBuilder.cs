@@ -227,7 +227,6 @@ namespace Neo4jClient.Cypher
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteStartClause(textBuilder, parameters);
             WriteMatchClause(textBuilder);
             WriteRelateClause(writer);
             WriteCreateUniqueClause(textBuilder);
@@ -248,28 +247,6 @@ namespace Neo4jClient.Cypher
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
             return "{" + paramName + "}";
-        }
-
-        void WriteStartClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
-        {
-            if (!startBits.Any()) return;
-
-            target.Append("START ");
-            var formattedStartBits = startBits.Select(bit => {
-                var startBithWithNodeIndexLookupSingleParameter = bit as CypherStartBitWithNodeIndexLookupWithSingleParameter;
-                if (startBithWithNodeIndexLookupSingleParameter != null) {
-                    var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookupSingleParameter.Parameter);
-                    return string.Format("{0}=node:{1}({2})",
-                        startBithWithNodeIndexLookupSingleParameter.Identifier,
-                        startBithWithNodeIndexLookupSingleParameter.IndexName,
-                        valueParameter);
-                }
-                    
-                throw new NotSupportedException(string.Format("Start bit of type {0} is not supported.", bit.GetType().FullName));
-            });
-
-            target.Append(string.Join(", ", formattedStartBits));
-            target.AppendLine();
         }
 
         void WriteMatchClause(StringBuilder target)

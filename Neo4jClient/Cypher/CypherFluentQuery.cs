@@ -82,8 +82,7 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)
         {
-            var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, parameter);
-            return new CypherFluentQuery(Client, newBuilder);
+            return Start(new CypherStartBitWithNodeIndexLookupWithSingleParameter(identity, indexName, parameter));
         }
 
         [Obsolete("Call Start with multiple components instead", true)]
