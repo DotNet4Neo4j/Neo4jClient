@@ -133,7 +133,8 @@ namespace Neo4jClient.Cypher
                 (Client.ServerVersion >= new Version(1, 8, 0, 1) && Client.ServerVersion <= new Version(1, 8, 0, 6)))
                 throw new NotSupportedException("The CREATE UNIQUE clause was only introduced in Neo4j 1.8M07, but you're querying against an older version of Neo4j. You'll want to upgrade Neo4j, or use the RELATE keyword instead. See https://github.com/systay/community/commit/c7dbbb929abfef600266a20f065d760e7a1fff2e for detail.");
 
-            var newBuilder = Builder.SetCreateUniqueText(createUniqueText);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause("CREATE UNIQUE " + createUniqueText));
             return new CypherFluentQuery(Client, newBuilder);
         }
 

@@ -12,7 +12,6 @@ namespace Neo4jClient.Cypher
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
 
-        string createUniqueText;
         string whereText;
         IList<object> createBits = new List<object>();
         string deleteText;
@@ -54,7 +53,6 @@ namespace Neo4jClient.Cypher
             {
                 createBits = createBits,
                 deleteText = deleteText,
-                createUniqueText = createUniqueText,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -70,13 +68,6 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.deleteText = text;
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder SetCreateUniqueText(string text)
-        {
-            var newBuilder = Clone();
-            newBuilder.createUniqueText = text;
             return newBuilder;
         }
 
@@ -171,7 +162,6 @@ namespace Neo4jClient.Cypher
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteCreateUniqueClause(textBuilder);
             WriteCreateClause(textBuilder);
             WriteWhereClause(textBuilder);
             WriteDeleteClause(textBuilder);
@@ -195,13 +185,6 @@ namespace Neo4jClient.Cypher
         {
             if (deleteText == null) return;
             target.AppendFormat("DELETE {0}", deleteText);
-            target.AppendLine();
-        }
-
-        void WriteCreateUniqueClause(StringBuilder target)
-        {
-            if (createUniqueText == null) return;
-            target.AppendFormat("CREATE UNIQUE {0}", createUniqueText);
             target.AppendLine();
         }
 
