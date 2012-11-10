@@ -77,8 +77,7 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
-            var newBuilder = Builder.AddStartBitWithNodeIndexLookup(identity, indexName, key, value);
-            return new CypherFluentQuery(Client, newBuilder);
+            return Start(new CypherStartBitWithNodeIndexLookup(identity, indexName, key, value));
         }
 
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)

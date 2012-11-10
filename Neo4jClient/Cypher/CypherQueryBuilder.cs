@@ -256,22 +256,6 @@ namespace Neo4jClient.Cypher
 
             target.Append("START ");
             var formattedStartBits = startBits.Select(bit => {
-                var rawStartBit = bit as RawCypherStartBit;
-                if (rawStartBit != null)
-                {
-                    return string.Format("{0}={1}", rawStartBit.Identifier, rawStartBit.StartText);
-                }
-                    
-                var startBithWithNodeIndexLookup = bit as CypherStartBitWithNodeIndexLookup;
-                if (startBithWithNodeIndexLookup != null) {
-                    var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookup.Value);
-                    return string.Format("{0}=node:{1}({2} = {3})",
-                        startBithWithNodeIndexLookup.Identifier,
-                        startBithWithNodeIndexLookup.IndexName,
-                        startBithWithNodeIndexLookup.Key,
-                        valueParameter);
-                }
-                    
                 var startBithWithNodeIndexLookupSingleParameter = bit as CypherStartBitWithNodeIndexLookupWithSingleParameter;
                 if (startBithWithNodeIndexLookupSingleParameter != null) {
                     var valueParameter = CreateParameter(paramsDictionary, startBithWithNodeIndexLookupSingleParameter.Parameter);
