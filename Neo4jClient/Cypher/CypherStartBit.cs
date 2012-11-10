@@ -29,6 +29,18 @@ namespace Neo4jClient.Cypher
             lookupIds = nodeReferences.Select(r => r.Id).ToArray();
         }
 
+        public CypherStartBit(string identifier, params RelationshipReference[] relationshipReferences)
+            : this(identifier, (IEnumerable<RelationshipReference>)relationshipReferences)
+        {
+        }
+
+        public CypherStartBit(string identifier, IEnumerable<RelationshipReference> relationshipReferences)
+        {
+            this.identifier = identifier;
+            lookupType = "relationship";
+            lookupIds = relationshipReferences.Select(r => r.Id).ToArray();
+        }
+
         public string Identifier
         {
             get { return identifier; }
