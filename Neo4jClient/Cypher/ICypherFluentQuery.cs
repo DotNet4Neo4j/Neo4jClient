@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
@@ -26,8 +25,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Match(params string[] matchText);
         ICypherFluentQuery Relate(string relateText);
         ICypherFluentQuery CreateUnique(string createUniqueText);
-        ICypherFluentQuery Create(string createText);
-        ICypherFluentQuery Create<TNode>(string identity, TNode node) where TNode : class;
+        ICypherFluentQuery Create(string createText, params object[] objects);
         ICypherFluentQuery Delete(string identities);
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery And();

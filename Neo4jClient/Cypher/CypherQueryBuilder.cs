@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -13,7 +12,6 @@ namespace Neo4jClient.Cypher
         readonly IDictionary<string, object> queryParameters;
 
         string whereText;
-        IList<object> createBits = new List<object>();
         string deleteText;
         string returnText;
         bool returnDistinct;
@@ -51,7 +49,6 @@ namespace Neo4jClient.Cypher
                 clonedParameters
             )
             {
-                createBits = createBits,
                 deleteText = deleteText,
                 whereText = whereText,
                 returnText = returnText,
@@ -68,13 +65,6 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.deleteText = text;
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder SetCreateText(string text)
-        {
-            var newBuilder = Clone();
-            newBuilder.createBits.Add(new CypherCreateTextBit(text));
             return newBuilder;
         }
 
@@ -162,7 +152,6 @@ namespace Neo4jClient.Cypher
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteCreateClause(textBuilder);
             WriteWhereClause(textBuilder);
             WriteDeleteClause(textBuilder);
             WriteSetClause(textBuilder);
@@ -185,25 +174,6 @@ namespace Neo4jClient.Cypher
         {
             if (deleteText == null) return;
             target.AppendFormat("DELETE {0}", deleteText);
-            target.AppendLine();
-        }
-
-        void WriteCreateClause(StringBuilder target)
-        {
-            if (!createBits.Any()) return;
-            target.Append("CREATE ");
-            var formattedCreateBits = createBits.Select(bit =>
-            {
-                var createTextbit = bit as CypherCreateTextBit;
-                if (createTextbit != null)
-                {
-                    return createTextbit.CreateText;
-                }
-
-                throw new NotSupportedException(string.Format("Create bit of type {0} is not supported.", bit.GetType().FullName));
-            });
-
-            target.Append(string.Join("", formattedCreateBits));
             target.AppendLine();
         }
 

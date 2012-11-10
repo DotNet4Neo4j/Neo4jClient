@@ -138,9 +138,36 @@ namespace Neo4jClient.Cypher
             return new CypherFluentQuery(Client, newBuilder);
         }
 
-        public ICypherFluentQuery Create(string createText)
+        public ICypherFluentQuery Create(string createText, params object[] objects)
         {
-            var newBuilder = Builder.SetCreateText(createText);
+            objects
+                .Select((o, i) =>
+                {
+                    if (o == null)
+                        throw new ArgumentException("Array includes a null entry", "objects");
+
+                    var objectType = o.GetType();
+                    if (objectType.IsGenericType &&
+                        objectType.GetGenericTypeDefinition() == typeof(Node<>))
+                    {
+                        throw new ArgumentException(string.Format(
+                            "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
+                            objectType.GetGenericArguments()[0].Name),
+                            "objects");
+                    }
+
+                    var validationContext = new ValidationContext(o, null, null);
+                    Validator.ValidateObject(o, validationContext);
+
+                    var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore, QuoteName = false };
+                    var objectText = serializer.Serialize(o);
+                    return new KeyValuePair<string, string>("{" + i + "}", objectText);
+                })
+                .ToList()
+                .ForEach(kv => createText = createText.Replace(kv.Key, kv.Value));
+
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause("CREATE " + createText));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
@@ -148,8 +175,8 @@ namespace Neo4jClient.Cypher
             where TNode : class 
         {
             if (typeof(TNode).IsGenericType &&
-                 typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>)) {
-               throw new ArgumentException(string.Format(
+                typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>)) {
+                throw new ArgumentException(string.Format(
                    "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
                    typeof(TNode).GetGenericArguments()[0].Name),
                    "node");
@@ -162,7 +189,8 @@ namespace Neo4jClient.Cypher
             Validator.ValidateObject(node, validationContext);
             
             var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore, QuoteName = false};
-            var newBuilder = Builder.SetCreateText(string.Format("({0} {1})", identity, serializer.Serialize(node)));
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("CREATE ({0} {1})", identity, serializer.Serialize(node))));
             return new CypherFluentQuery(Client, newBuilder);
         }
 

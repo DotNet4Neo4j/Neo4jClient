@@ -1066,11 +1066,11 @@ RETURN b AS NodeB";
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)1)
-                .Create("n")
-                .Create("-[r:REL]->")
-                .Create("a", new CreateNodeTests.TestNode { Foo = "foo", Bar = "bar", Baz = "baz" })
-                .Create("-[r:REL]->")
-                .Create("b", new CreateNodeTests.TestNode { Foo = "foo2", Bar = "bar2", Baz = "baz2" })
+                .Create(
+                    "n-[r:REL]->(a {0})-[r:REL]->(b {1})",
+                    new CreateNodeTests.TestNode { Foo = "foo", Bar = "bar", Baz = "baz" },
+                    new CreateNodeTests.TestNode { Foo = "foo2", Bar = "bar2", Baz = "baz2" }
+                )
                 .Return<CreateNodeTests.TestNode>("a")
                 .Query;
             Assert.AreEqual("START n=node({p0})\r\nCREATE n-[r:REL]->(a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})-[r:REL]->(b {\r\n  Foo: \"foo2\",\r\n  Bar: \"bar2\",\r\n  Baz: \"baz2\"\r\n})\r\nRETURN a", query.QueryText);
