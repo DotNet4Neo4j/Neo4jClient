@@ -12,7 +12,6 @@ namespace Neo4jClient.Cypher
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
 
-        string matchText;
         string relateText;
         string createUniqueText;
         string whereText;
@@ -56,7 +55,6 @@ namespace Neo4jClient.Cypher
             {
                 createBits = createBits,
                 deleteText = deleteText,
-                matchText = matchText,
                 relateText = relateText,
                 createUniqueText = createUniqueText,
                 whereText = whereText,
@@ -74,13 +72,6 @@ namespace Neo4jClient.Cypher
         {
             var newBuilder = Clone();
             newBuilder.deleteText = text;
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder SetMatchText(string text)
-        {
-            var newBuilder = Clone();
-            newBuilder.matchText = text;
             return newBuilder;
         }
 
@@ -189,7 +180,6 @@ namespace Neo4jClient.Cypher
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteMatchClause(textBuilder);
             WriteRelateClause(writer);
             WriteCreateUniqueClause(textBuilder);
             WriteCreateClause(textBuilder);
@@ -209,13 +199,6 @@ namespace Neo4jClient.Cypher
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
             return "{" + paramName + "}";
-        }
-
-        void WriteMatchClause(StringBuilder target)
-        {
-            if (matchText == null) return;
-            target.AppendFormat("MATCH {0}", matchText);
-            target.AppendLine();
         }
 
         void WriteDeleteClause(StringBuilder target)

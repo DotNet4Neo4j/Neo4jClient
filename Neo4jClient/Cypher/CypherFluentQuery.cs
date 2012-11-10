@@ -111,7 +111,8 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Match(params string[] matchText)
         {
-            var newBuilder = Builder.SetMatchText(string.Join(", ", matchText));
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause("MATCH " + string.Join(", ", matchText)));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
