@@ -2,7 +2,7 @@ using System;
 
 namespace Neo4jClient.Cypher
 {
-    internal class CypherStartBitWithNodeIndexLookup : ICypherStartBit
+    public class CypherStartBitWithNodeIndexLookup : ICypherStartBit
     {
         readonly string identifier;
         readonly string indexName;
