@@ -253,6 +253,10 @@ namespace Neo4jClient.Deserializer
             typeMappings = typeMappings.ToArray();
             var objType = targetObject.GetType();
             var props = GetPropertiesForType(objType);
+            IDictionary<string, JToken> dictionary = parentJsonToken as JObject;
+            if (dictionary != null && props.Keys.All(dictionary.ContainsKey) == false && dictionary.ContainsKey("data")) {
+               parentJsonToken = parentJsonToken["data"];
+            }
 
             foreach (var propertyName in props.Keys)
             {

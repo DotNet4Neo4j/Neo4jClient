@@ -424,6 +424,132 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        public void DeserializeShouldMapIEnumerableOfNodesReturnedByCollectInColumnInProjectionMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ProjectionFeedItem>(client, CypherResultMode.Projection);
+            
+            //The sample query that generated this data:
+            /*
+             START me=node:node_auto_index(UserIdentifier='USER0')
+             MATCH me-[rels:FOLLOWS*0..1]-myfriend
+             WITH myfriend
+             MATCH myfriend-[:POSTED*]-statusupdates<-[r?:LIKE]-likers
+             WHERE myfriend <> statusupdates
+             RETURN distinct statusupdates, FILTER (x in collect(distinct likers) : x <> null), myfriend
+             ORDER BY statusupdates.PostTime DESC
+             LIMIT 25; 
+             */
+            //The data below is copied from the return from the above query. You will notice that the second column of data (Likers) is actually an array
+            //of items. This means the deserializer has to be able to deal with columns that are returning a list of items.
+            var content = @"{
+             'columns':['Post','Likers','User'],
+             'data':[[
+             {
+                 'extensions':{},
+                 'paged_traverse':'http://localhost:7474/db/data/node/189/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                 'outgoing_relationships':'http://localhost:7474/db/data/node/189/relationships/out',
+                 'traverse':'http://localhost:7474/db/data/node/189/traverse/{returnType}',
+                 'all_typed_relationships':'http://localhost:7474/db/data/node/189/relationships/all/{-list|&|types}',
+                 'property':'http://localhost:7474/db/data/node/189/properties/{key}',
+                 'all_relationships':'http://localhost:7474/db/data/node/189/relationships/all',
+                 'self':'http://localhost:7474/db/data/node/189',
+                 'properties':'http://localhost:7474/db/data/node/189/properties',
+                 'outgoing_typed_relationships':'http://localhost:7474/db/data/node/189/relationships/out/{-list|&|types}',
+                 'incoming_relationships':'http://localhost:7474/db/data/node/189/relationships/in',
+                 'incoming_typed_relationships':'http://localhost:7474/db/data/node/189/relationships/in/{-list|&|types}',
+                 'create_relationship':'http://localhost:7474/db/data/node/189/relationships',
+                 'data':{
+                      'PostTime':634881866575852740,
+                      'PostIdentifier':'USER1POST0',
+                      'Comment':'Here is a post statement 0 posted by user 1',
+                      'Content':'Blah blah blah'
+                 }
+             },
+             [{
+                  'extensions':{},
+                  'paged_traverse':'http://localhost:7474/db/data/node/188/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                  'outgoing_relationships':'http://localhost:7474/db/data/node/188/relationships/out',
+                  'traverse':'http://localhost:7474/db/data/node/188/traverse/{returnType}',
+                  'all_typed_relationships':'http://localhost:7474/db/data/node/188/relationships/all/{-list|&|types}',
+                  'property':'http://localhost:7474/db/data/node/188/properties/{key}',
+                  'all_relationships':'http://localhost:7474/db/data/node/188/relationships/all',
+                  'self':'http://localhost:7474/db/data/node/188',
+                  'properties':'http://localhost:7474/db/data/node/188/properties',
+                  'outgoing_typed_relationships':'http://localhost:7474/db/data/node/188/relationships/out/{-list|&|types}',
+                  'incoming_relationships':'http://localhost:7474/db/data/node/188/relationships/in',
+                  'incoming_typed_relationships':'http://localhost:7474/db/data/node/188/relationships/in/{-list|&|types}',
+                  'create_relationship':'http://localhost:7474/db/data/node/188/relationships',
+                  'data':{
+                       'UserIdentifier':'USER1',
+                       'Email':'someoneelse@something.net',
+                       'FamilyName':'Jones',
+                       'GivenName':'bob'
+                  }
+             },
+             {
+                  'extensions':{},
+                  'paged_traverse':'http://localhost:7474/db/data/node/197/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                  'outgoing_relationships':'http://localhost:7474/db/data/node/197/relationships/out',
+                  'traverse':'http://localhost:7474/db/data/node/197/traverse/{returnType}',
+                  'all_typed_relationships':'http://localhost:7474/db/data/node/197/relationships/all/{-list|&|types}',
+                  'property':'http://localhost:7474/db/data/node/197/properties/{key}',
+                  'all_relationships':'http://localhost:7474/db/data/node/197/relationships/all',
+                  'self':'http://localhost:7474/db/data/node/197',
+                  'properties':'http://localhost:7474/db/data/node/197/properties',
+                  'outgoing_typed_relationships':'http://localhost:7474/db/data/node/197/relationships/out/{-list|&|types}',
+                  'incoming_relationships':'http://localhost:7474/db/data/node/197/relationships/in',
+                  'incoming_typed_relationships':'http://localhost:7474/db/data/node/197/relationships/in/{-list|&|types}',
+                  'create_relationship':'http://localhost:7474/db/data/node/197/relationships',
+                  'data':{
+                       'UserIdentifier':'USER2',
+                       'Email':'someone@someotheraddress.net',
+                       'FamilyName':'Bob',
+                       'GivenName':'Jimmy'
+                  }
+             }],
+             {
+                  'extensions':{},
+                  'paged_traverse':'http://localhost:7474/db/data/node/188/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                  'outgoing_relationships':'http://localhost:7474/db/data/node/188/relationships/out',
+                  'traverse':'http://localhost:7474/db/data/node/188/traverse/{returnType}',
+                  'all_typed_relationships':'http://localhost:7474/db/data/node/188/relationships/all/{-list|&|types}',
+                  'property':'http://localhost:7474/db/data/node/188/properties/{key}',
+                  'all_relationships':'http://localhost:7474/db/data/node/188/relationships/all',
+                  'self':'http://localhost:7474/db/data/node/188',
+                  'properties':'http://localhost:7474/db/data/node/188/properties',
+                  'outgoing_typed_relationships':'http://localhost:7474/db/data/node/188/relationships/out/{-list|&|types}',
+                  'incoming_relationships':'http://localhost:7474/db/data/node/188/relationships/in',
+                  'incoming_typed_relationships':'http://localhost:7474/db/data/node/188/relationships/in/{-list|&|types}',
+                  'create_relationship':'http://localhost:7474/db/data/node/188/relationships',
+                  'data':{
+                       'UserIdentifier':'USER1',
+                       'Email':'someoneelse@something.net',
+                       'FamilyName':'Jones',
+                       'GivenName':'bob'}
+                   }
+            ]]}".Replace('\'', '"');
+            
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+            
+            Assert.AreEqual(1, results.Count());
+            Assert.IsNotNull(results[0].Post);
+            Assert.IsNotNull(results[0].User);
+            Assert.IsNotNull(results[0].Likers);
+            
+            Assert.IsInstanceOf<IEnumerable<User>>(results[0].Likers);
+            
+            Assert.AreEqual(2, results[0].Likers.Count());
+            Assert.AreEqual("USER1", results[0].User.UserIdentifier);
+            Assert.AreEqual("USER1POST0", results[0].Post.PostIdentifier);
+            //and make sure the likers properties have been set
+            Assert.AreEqual("USER1", results[0].Likers.ToArray()[0].UserIdentifier);
+            Assert.AreEqual("USER2", results[0].Likers.ToArray()[1].UserIdentifier);
+        }
+
+        [Test]
         public void DeserializeShouldMapNullIEnumerableOfNodesReturnedByCollectInInAProjectionMode()
         {
 
@@ -537,6 +663,29 @@ namespace Neo4jClient.Test.Deserializer
             // Assert
             Assert.AreEqual(666, results.First());
 
+        }
+
+        public class Post 
+        {
+            public String Content { get; set; }
+            public String Comment { get; set; }
+            public String PostIdentifier { get; set; }
+            public long PostTime { get; set; }
+        }
+
+        public class User 
+        {
+            public string GivenName { get; set; }
+            public string FamilyName { get; set; }
+            public string Email { get; set; }
+            public string UserIdentifier { get; set; }
+        }
+
+        public class ProjectionFeedItem 
+        {
+            public Post Post { get; set; }
+            public User User { get; set; }
+            public IEnumerable<User> Likers { get; set; }
         }
 
         public class FooData
