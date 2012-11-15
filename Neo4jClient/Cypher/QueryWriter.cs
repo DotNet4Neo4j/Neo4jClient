@@ -8,7 +8,7 @@ namespace Neo4jClient.Cypher
     public class QueryWriter
     {
         readonly StringBuilder queryTextBuilder;
-        readonly IDictionary<string, object> queryParameters;
+        internal readonly IDictionary<string, object> queryParameters;
 
         public QueryWriter()
         {

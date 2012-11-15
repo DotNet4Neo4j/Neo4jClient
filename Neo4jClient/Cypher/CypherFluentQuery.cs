@@ -196,7 +196,15 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Delete(string identities)
         {
-            var newBuilder = Builder.SetDeleteText(identities);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("DELETE {0}", identities)));
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
+        public ICypherFluentQuery With(string withText)
+        {
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("WITH {0}", withText)));
             return new CypherFluentQuery(Client, newBuilder);
         }
 

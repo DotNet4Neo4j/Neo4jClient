@@ -49,7 +49,6 @@ namespace Neo4jClient.Cypher
                 clonedParameters
             )
             {
-                deleteText = deleteText,
                 whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
@@ -59,27 +58,6 @@ namespace Neo4jClient.Cypher
                 orderBy = orderBy,
                 setText = setText
             };
-        }
-
-        public CypherQueryBuilder SetDeleteText(string text)
-        {
-            var newBuilder = Clone();
-            newBuilder.deleteText = text;
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder SetWhere(string text)
-        {
-            var newBuilder = Clone();
-            newBuilder.whereText += string.Format("({0})", text);
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder SetWhere(LambdaExpression expression)
-        {
-            var newBuilder = Clone();
-            newBuilder.whereText += whereText = CypherWhereExpressionBuilder.BuildText(expression, newBuilder.queryParameters);
-            return newBuilder;
         }
 
         public CypherQueryBuilder SetAnd()
@@ -152,8 +130,6 @@ namespace Neo4jClient.Cypher
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteWhereClause(textBuilder);
-            WriteDeleteClause(textBuilder);
             WriteSetClause(textBuilder);
             WriteReturnClause(textBuilder);
             WriteOrderByClause(textBuilder);
@@ -168,20 +144,6 @@ namespace Neo4jClient.Cypher
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
             return "{" + paramName + "}";
-        }
-
-        void WriteDeleteClause(StringBuilder target)
-        {
-            if (deleteText == null) return;
-            target.AppendFormat("DELETE {0}", deleteText);
-            target.AppendLine();
-        }
-
-        void WriteWhereClause(StringBuilder target)
-        {
-            if (whereText == null) return;
-            target.Append("WHERE " + whereText);
-            target.AppendLine();
         }
 
         void WriteReturnClause(StringBuilder target)

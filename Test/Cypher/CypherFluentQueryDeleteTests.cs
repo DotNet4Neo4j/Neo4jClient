@@ -87,7 +87,7 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
-                .Where("...")
+                .Where("(...)")
                 .Delete("n")
                 .Query;
 

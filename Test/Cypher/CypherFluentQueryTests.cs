@@ -816,7 +816,7 @@ RETURN b AS NodeB";
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where("has(n.Belt)")
+                .Where("(has(n.Belt))")
                 .Return<object>("n")
                 .Query;
 
@@ -906,7 +906,7 @@ RETURN b AS NodeB";
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Match("(n)-[r]->()")
-                .Where("type(r) = \"HOSTS\"")
+                .Where("(type(r) = \"HOSTS\")")
                 .Return<object>("n")
                 .Query;
 
@@ -921,12 +921,11 @@ RETURN b AS NodeB";
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name == "bob")
-                .And()
-                .Where("type(r) = \"HOSTS\"")
+                .AndWhere("(type(r) = \"HOSTS\")")
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name! = {p2}) AND (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name! = {p2})\r\nAND (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters.Count);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
@@ -940,12 +939,11 @@ RETURN b AS NodeB";
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name == "bob")
-                .Or()
-                .Where("type(r) = \"HOSTS\"")
+                .OrWhere("(type(r) = \"HOSTS\")")
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name! = {p2}) OR (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name! = {p2})\r\nOR (type(r) = 'HOSTS')\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(3, query.QueryParameters.Count);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
@@ -959,14 +957,12 @@ RETURN b AS NodeB";
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
                 .Where<FooData>(n => n.Name == "Bob")
-                .Or()
-                .Where("type(r) = \"HOSTS\"")
-                .And()
-                .Where<FooData>(n => n.Id == 10)
+                .OrWhere("(type(r) = \"HOSTS\")")
+                .AndWhere<FooData>(n => n.Id == 10)
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name! = {p2}) OR (type(r) = 'HOSTS') AND (n.Id! = {p3})\r\nRETURN n".Replace("'", "\""), query.QueryText);
+            Assert.AreEqual("START n=node({p0}, {p1})\r\nWHERE (n.Name! = {p2})\r\nOR (type(r) = 'HOSTS')\r\nAND (n.Id! = {p3})\r\nRETURN n".Replace("'", "\""), query.QueryText);
             Assert.AreEqual(4, query.QueryParameters.Count);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(1, query.QueryParameters["p1"]);
@@ -988,7 +984,7 @@ RETURN b AS NodeB";
                     new CypherStartBit("a", (NodeReference)1),
                     new CypherStartBit("b", (NodeReference)3,(NodeReference)2)
                 )
-                .Where("a<--b")
+                .Where("(a<--b)")
                 .Return<object>("b")
                 .Query;
 
@@ -1009,7 +1005,7 @@ RETURN b AS NodeB";
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3, (NodeReference)1)
-                .Where("n.Name =~ /Tob.*/")
+                .Where("(n.Name =~ /Tob.*/)")
                 .Return<object>("n")
                 .Query;
 
