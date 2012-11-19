@@ -29,6 +29,10 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Delete(string identities);
         ICypherFluentQuery With(string withText);
         ICypherFluentQuery Set(string setText);
+        [Obsolete("Call AndWhere instead", true)]
+        ICypherFluentQuery And();
+        [Obsolete("Call OrWhere instead", true)]
+        ICypherFluentQuery Or();
         ICypherFluentQuery Where(string text);
         ICypherFluentQuery Where<T1>(Expression<Func<T1, bool>> expression);
         ICypherFluentQuery Where<T1, T2>(Expression<Func<T1, T2, bool>> expression);
