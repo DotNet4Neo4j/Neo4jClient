@@ -85,25 +85,25 @@ namespace Neo4jClient.Cypher
             return Start(new CypherStartBitWithNodeIndexLookupWithSingleParameter(identity, indexName, parameter));
         }
 
-        [Obsolete("Call Start with multiple components instead", true)]
+        [Obsolete("Call Start(new RawCypherStartBit(identity, startText)) instead. Supply multiple start bit parameters as needed.", true)]
         public ICypherFluentQuery AddStartPoint(string identity, string startText)
         {
             throw new NotSupportedException();
         }
 
-        [Obsolete("Call Start with multiple components instead", true)]
+        [Obsolete("Call Start(new CypherStartBitWithNodeIndexLookup(identity, ...)) instead. Supply multiple start bit parameters as needed.", true)]
         public ICypherFluentQuery AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
             throw new NotSupportedException();
         }
 
-        [Obsolete("Call Start with multiple components instead", true)]
+        [Obsolete("Call Start(new CypherStartBit(identity, ...)) instead. Supply multiple start bit parameters as needed.", true)]
         public ICypherFluentQuery AddStartPoint(string identity, params NodeReference[] nodeReferences)
         {
             throw new NotSupportedException();
         }
 
-        [Obsolete("Call Start with multiple components instead", true)]
+        [Obsolete("Call Start(new CypherStartBit(identity, ...)) instead. Supply multiple start bit parameters as needed.", true)]
         public ICypherFluentQuery AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
         {
             throw new NotSupportedException();
