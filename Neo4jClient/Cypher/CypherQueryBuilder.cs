@@ -11,8 +11,6 @@ namespace Neo4jClient.Cypher
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
 
-        string whereText;
-        string deleteText;
         string returnText;
         bool returnDistinct;
         CypherResultMode resultMode;
@@ -49,7 +47,6 @@ namespace Neo4jClient.Cypher
                 clonedParameters
             )
             {
-                whereText = whereText,
                 returnText = returnText,
                 returnDistinct = returnDistinct,
                 resultMode = resultMode,
@@ -58,20 +55,6 @@ namespace Neo4jClient.Cypher
                 orderBy = orderBy,
                 setText = setText
             };
-        }
-
-        public CypherQueryBuilder SetAnd()
-        {
-            var newBuilder = Clone();
-            newBuilder.whereText += " AND ";
-            return newBuilder;
-        }
-
-        public CypherQueryBuilder SetOr()
-        {
-            var newBuilder = Clone();
-            newBuilder.whereText += " OR ";
-            return newBuilder;
         }
 
         public CypherQueryBuilder SetReturn(string identity, bool distinct, CypherResultMode mode = CypherResultMode.Set)
