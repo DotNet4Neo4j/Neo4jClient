@@ -590,6 +590,24 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        public void DeserializeShouldMapIEnumerableOfStringsThatAreEmptyInAProjectionMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection);
+            var content = @"{
+                  'data' : [ [ [ ] ] ],
+                  'columns' : [ 'Names' ]
+                }".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.IsNull(results.First().Names);
+        }
+
+        [Test]
         public void DeserializeShouldMapIEnumerableOfStringsInSetMode()
         {
             // Arrange
