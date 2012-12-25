@@ -210,7 +210,8 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Set(string setText)
         {
-            var newBuilder = Builder.SetSetText(setText);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("SET {0}", setText)));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
