@@ -29,13 +29,19 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery<TResult> Return<TResult>(LambdaExpression expression)
         {
-            var newBuilder = Builder.SetReturn(expression, false);
+            var statement = CypherReturnExpressionBuilder.BuildText(expression);
+            var newBuilder = Builder
+                .SetResultMode(CypherResultMode.Projection)
+                .CallWriter(w => w.AppendClause(string.Format("RETURN {0}", statement)));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
         {
-            var newBuilder = Builder.SetReturn(expression, true);
+            var statement = CypherReturnExpressionBuilder.BuildText(expression);
+            var newBuilder = Builder
+                .SetResultMode(CypherResultMode.Projection)
+                .CallWriter(w => w.AppendClause(string.Format("RETURN distinct {0}", statement)));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 

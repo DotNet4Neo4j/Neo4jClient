@@ -62,15 +62,6 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
-        public CypherQueryBuilder SetReturn(LambdaExpression expression, bool distinct)
-        {
-            var newBuilder = Clone();
-            newBuilder.returnText = CypherReturnExpressionBuilder.BuildText(expression);
-            newBuilder.returnDistinct = distinct;
-            newBuilder.resultMode = CypherResultMode.Projection;
-            return newBuilder;
-        }
-
         public CypherQueryBuilder SetLimit(int? count)
         {
             var newBuilder = Clone();

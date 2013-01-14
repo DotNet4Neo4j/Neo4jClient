@@ -130,5 +130,16 @@ LIMIT {p2}", query.QueryText);
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
         }
+
+        [Test]
+        public void ShouldUseProjectionResultModeForLambdaBasedReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(a => new { Foo = a.As<object>() })
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
     }
 }
