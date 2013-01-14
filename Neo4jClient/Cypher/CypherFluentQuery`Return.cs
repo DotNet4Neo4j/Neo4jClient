@@ -7,19 +7,23 @@ namespace Neo4jClient.Cypher
     {
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
-            var newBuilder = Builder.SetReturn(identity, false);
+            var newBuilder = Builder
+                .CallWriter(w => w.AppendClause(string.Format("RETURN {0}", identity)));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
         {
-            var newBuilder = Builder.SetReturn(statement, false, resultMode);
+            var newBuilder = Builder
+                .SetResultMode(resultMode)
+                .CallWriter(w => w.AppendClause(string.Format("RETURN {0}", statement)));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity)
         {
-            var newBuilder = Builder.SetReturn(identity, true);
+            var newBuilder = Builder
+                .CallWriter(w => w.AppendClause(string.Format("RETURN distinct {0}", identity)));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 

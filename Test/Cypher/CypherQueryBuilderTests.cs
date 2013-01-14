@@ -2,22 +2,13 @@
 using Neo4jClient.Cypher;
 using System.Linq.Expressions;
 using System;
+using NSubstitute;
 
 namespace Neo4jClient.Test.Cypher
 {
     [TestFixture]
     public class CypherQueryBuilderTests
     {
-        [Test]
-        public void ShouldUseSetResultModeForIdentityBasedReturn()
-        {
-            var query = new CypherQueryBuilder()
-                .SetReturn("foo", false)
-                .ToQuery();
-
-            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
-        }
-
         [Test]
         public void ShouldUseProjectionResultModeForLambdaBasedReturn()
         {

@@ -119,5 +119,16 @@ LIMIT {p2}", query.QueryText);
             Assert.AreEqual(456, query.QueryParameters["p1"]);
             Assert.AreEqual(5, query.QueryParameters["p2"]);
         }
+
+        [Test]
+        public void ShouldUseSetResultModeForIdentityBasedReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return<object>("foo")
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
     }
 }
