@@ -35,11 +35,11 @@ namespace Neo4jClient
             get { return data; }
         }
 
-        public ICypherFluentQueryStarted StartCypher(string identity)
+        public ICypherFluentQuery StartCypher(string identity)
         {
             var client = ((IAttachedReference) this).Client;
             var query = new CypherFluentQuery(client)
-                .AddStartPoint(identity, Reference);
+                .Start(identity, Reference);
             return query;
         }
 

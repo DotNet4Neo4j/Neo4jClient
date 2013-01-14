@@ -14,7 +14,7 @@ namespace Neo4jClient.Cypher
         public StringBuilder TextOutput { get; private set; }
         public CypherWhereExpressionVisitor(IDictionary<string, object> paramsDictionary)
         {
-            this.paramsDictionary = paramsDictionary ?? new Dictionary<string, object>();
+            this.paramsDictionary = paramsDictionary;
             TextOutput = new StringBuilder();
         }
 

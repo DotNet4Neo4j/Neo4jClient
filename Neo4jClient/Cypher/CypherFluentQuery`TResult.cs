@@ -7,31 +7,31 @@ namespace Neo4jClient.Cypher
     [DebuggerDisplay("{Query.DebugQueryText}")]
     public class CypherFluentQuery<TResult> :
         CypherFluentQuery,
-        ICypherFluentQueryReturned<TResult>
+        ICypherFluentQuery<TResult>
     {
         public CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
             : base(client, builder)
         {}
 
-        public ICypherFluentQueryReturned<TResult> Limit(int? limit)
+        public ICypherFluentQuery<TResult> Limit(int? limit)
         {
             var newBuilder = Builder.SetLimit(limit);
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> Skip(int? skip)
+        public ICypherFluentQuery<TResult> Skip(int? skip)
         {
             var newBuilder = Builder.SetSkip(skip);
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> OrderBy(params string[] properties)
+        public ICypherFluentQuery<TResult> OrderBy(params string[] properties)
         {
             var newBuilder = Builder.SetOrderBy(OrderByType.Ascending, properties);
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> OrderByDescending(params string[] properties)
+        public ICypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
             var newBuilder = Builder.SetOrderBy(OrderByType.Descending, properties);
             return new CypherFluentQuery<TResult>(Client, newBuilder);
