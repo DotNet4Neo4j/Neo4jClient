@@ -11,8 +11,6 @@ namespace Neo4jClient.Cypher
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
 
-        string returnText;
-        bool returnDistinct;
         CypherResultMode resultMode;
         int? limit;
         int? skip;
@@ -46,8 +44,6 @@ namespace Neo4jClient.Cypher
                 clonedParameters
             )
             {
-                returnText = returnText,
-                returnDistinct = returnDistinct,
                 resultMode = resultMode,
                 limit = limit,
                 skip = skip,
@@ -93,7 +89,6 @@ namespace Neo4jClient.Cypher
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteReturnClause(textBuilder);
             WriteOrderByClause(textBuilder);
             WriteSkipClause(textBuilder, parameters);
             WriteLimitClause(textBuilder, parameters);
@@ -106,15 +101,6 @@ namespace Neo4jClient.Cypher
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
             return "{" + paramName + "}";
-        }
-
-        void WriteReturnClause(StringBuilder target)
-        {
-            if (returnText == null) return;
-            target.Append("RETURN ");
-            if (returnDistinct) target.Append("distinct ");
-            target.Append(returnText);
-            target.AppendLine();
         }
 
         void WriteLimitClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
