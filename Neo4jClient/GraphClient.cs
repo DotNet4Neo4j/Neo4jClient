@@ -404,6 +404,9 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             var relationshipEndpoint = ResolveEndpoint(reference);
             var response = SendHttpRequest(
                 HttpDelete(relationshipEndpoint),
@@ -414,6 +417,14 @@ namespace Neo4jClient
                     "Unable to delete the relationship. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.ReasonPhrase));
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = "Delete Relationship " + reference.Id,
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference reference)

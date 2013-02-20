@@ -134,11 +134,133 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             }
         }
 
+        [Test]
+        public void ShouldDeserializeArrayOfNodesInPropertyAsResultOfCollectFunctionInCypherQuery()
+        {
+            // Arrange
+            var cypherQuery = new CypherQuery(
+                @"START root=node(0) MATCH root-[:HAS_COMPANIES]->()-[:HAS_COMPANY]->company, company--foo RETURN company, collect(foo) as Bar",
+                new Dictionary<string, object>(),
+                CypherResultMode.Projection);
+
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+                {
+                    {
+                        MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                        MockResponse.Json(HttpStatusCode.OK, @"{
+  'columns' : [ 'ColumnA', 'ColumnBFromCollect' ],
+  'data' : [ [ {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/358/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/358/relationships/out',
+    'data' : {
+      'Bar' : 'BHP',
+      'Baz' : '1'
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/358/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/358/traverse/{returnType}',
+    'self' : 'http://localhost:8000/db/data/node/358',
+    'property' : 'http://localhost:8000/db/data/node/358/properties/{key}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/358/relationships/all',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/358/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/358/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/358/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/358/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/358/relationships'
+  }, [ {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/362/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/362/relationships/out',
+    'data' : {
+      'OpportunityType' : 'Board',
+      'Description' : 'Foo'
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/362/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/362/traverse/{returnType}',
+    'self' : 'http://localhost:8000/db/data/node/362',
+    'property' : 'http://localhost:8000/db/data/node/362/properties/{key}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/362/relationships/all',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/362/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/362/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/362/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/362/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/362/relationships'
+  }, {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/359/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/359/relationships/out',
+    'data' : {
+      'OpportunityType' : 'Executive',
+      'Description' : 'Bar'
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/359/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/359/traverse/{returnType}',
+    'self' : 'http://localhost:8000/db/data/node/359',
+    'property' : 'http://localhost:8000/db/data/node/359/properties/{key}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/359/relationships/all',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/359/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/359/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/359/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/359/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/359/relationships'
+  } ] ] ]
+}")
+                    }
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                //Act
+                var results = graphClient.ExecuteGetCypherResults<CollectResult>(cypherQuery);
+
+                //Assert
+                Assert.IsInstanceOf<IEnumerable<CollectResult>>(results);
+
+                var resultsArray = results.ToArray();
+                Assert.AreEqual(1, resultsArray.Count());
+
+                var firstResult = resultsArray[0];
+                Assert.AreEqual(358, firstResult.ColumnA.Reference.Id);
+                Assert.AreEqual("BHP", firstResult.ColumnA.Data.Bar);
+                Assert.AreEqual("1", firstResult.ColumnA.Data.Baz);
+
+                var collectedResults = firstResult.ColumnBFromCollect.ToArray();
+                Assert.AreEqual(2, collectedResults.Count());
+
+                var firstCollectedResult = collectedResults[0];
+                Assert.AreEqual(362, firstCollectedResult.Reference.Id);
+                Assert.AreEqual("Board", firstCollectedResult.Data.OpportunityType);
+                Assert.AreEqual("Foo", firstCollectedResult.Data.Description);
+
+                var secondCollectedResult = collectedResults[1];
+                Assert.AreEqual(359, secondCollectedResult.Reference.Id);
+                Assert.AreEqual("Executive", secondCollectedResult.Data.OpportunityType);
+                Assert.AreEqual("Bar", secondCollectedResult.Data.Description);
+            }
+        }
+
         public class FooData
         {
             public string Bar { get; set; }
             public string Baz { get; set; }
             public DateTimeOffset? Date { get; set; }
+        }
+
+        public class CollectResult
+        {
+            public Node<FooData> ColumnA { get; set; }
+            public IEnumerable<Node<BarData>> ColumnBFromCollect { get; set; }
+        }
+
+        public class BarData
+        {
+            public string OpportunityType { get; set; }
+            public string Description { get; set; }
         }
 
         public class ResultWithNodeDto

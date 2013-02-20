@@ -162,7 +162,7 @@ namespace Neo4jClient.Test.Cypher
             // RETURN collect(a)
 
             Expression<Func<ICypherResultItem, object>> expression =
-                (a) => new
+                a => new
                 {
                     Foo = a.CollectAs<Foo>()
                 };
