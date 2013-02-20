@@ -9,29 +9,39 @@ namespace Neo4jClient.Cypher
     {
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
+        CypherResultMode resultMode;
 
         public QueryWriter()
         {
             queryTextBuilder = new StringBuilder();
             queryParameters = new Dictionary<string, object>();
+            resultMode = CypherResultMode.Set;
         }
 
         QueryWriter(
             StringBuilder queryTextBuilder,
-            IDictionary<string, object> queryParameters)
+            IDictionary<string, object> queryParameters,
+            CypherResultMode resultMode)
         {
             this.queryTextBuilder = queryTextBuilder;
             this.queryParameters = queryParameters;
+            this.resultMode = resultMode;
+        }
+
+        public CypherResultMode ResultMode
+        {
+            get { return resultMode; }
+            set { resultMode = value; }
         }
 
         public QueryWriter Clone()
         {
             var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
             var clonedParameters = new Dictionary<string, object>(queryParameters);
-            return new QueryWriter(clonedQueryTextBuilder, clonedParameters);
+            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode);
         }
 
-        public CypherQuery ToCypherQuery(CypherResultMode resultMode = CypherResultMode.Projection)
+        public CypherQuery ToCypherQuery()
         {
             var queryText = queryTextBuilder
                 .ToString()

@@ -15,8 +15,10 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
         {
             var newBuilder = Builder
-                .SetResultMode(resultMode)
-                .CallWriter(w => w.AppendClause(string.Format("RETURN {0}", statement)));
+                .CallWriter(w => {
+                    w.ResultMode = resultMode;
+                    w.AppendClause(string.Format("RETURN {0}", statement));
+                });
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
@@ -31,8 +33,10 @@ namespace Neo4jClient.Cypher
         {
             var statement = CypherReturnExpressionBuilder.BuildText(expression);
             var newBuilder = Builder
-                .SetResultMode(CypherResultMode.Projection)
-                .CallWriter(w => w.AppendClause(string.Format("RETURN {0}", statement)));
+                .CallWriter(w => {
+                    w.ResultMode = CypherResultMode.Projection;
+                    w.AppendClause(string.Format("RETURN {0}", statement));
+                });
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
@@ -40,8 +44,10 @@ namespace Neo4jClient.Cypher
         {
             var statement = CypherReturnExpressionBuilder.BuildText(expression);
             var newBuilder = Builder
-                .SetResultMode(CypherResultMode.Projection)
-                .CallWriter(w => w.AppendClause(string.Format("RETURN distinct {0}", statement)));
+                .CallWriter(w => {
+                    w.ResultMode = CypherResultMode.Projection;
+                    w.AppendClause(string.Format("RETURN distinct {0}", statement));
+                });
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 

@@ -8,8 +8,6 @@ namespace Neo4jClient.Cypher
     {
         readonly QueryWriter queryWriter;
 
-        CypherResultMode resultMode;
-
         public CypherQueryBuilder()
             : this(new QueryWriter())
         {
@@ -20,25 +18,20 @@ namespace Neo4jClient.Cypher
             this.queryWriter = queryWriter;
         }
 
+        public QueryWriter QueryWriter
+        {
+            get { return queryWriter; }
+        }
+
         CypherQueryBuilder Clone()
         {
             var clonedWriter = queryWriter.Clone();
-            return new CypherQueryBuilder(clonedWriter)
-            {
-                resultMode = resultMode,
-            };
-        }
-
-        public CypherQueryBuilder SetResultMode(CypherResultMode resultMode)
-        {
-            var newBuilder = Clone();
-            newBuilder.resultMode = resultMode;
-            return newBuilder;
+            return new CypherQueryBuilder(clonedWriter);
         }
 
         public CypherQuery ToQuery()
         {
-            return queryWriter.ToCypherQuery(resultMode);
+            return queryWriter.ToCypherQuery();
         }
 
         [Obsolete("This wierd helper method needs to die")]

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 
@@ -35,6 +34,7 @@ namespace Neo4jClient.Cypher
             if (!(client is IRawGraphClient))
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
 
+            queryWriter = builder.QueryWriter;
             Client = (IRawGraphClient)client;
             Builder = builder;
         }
@@ -44,6 +44,7 @@ namespace Neo4jClient.Cypher
             if (!(client is IRawGraphClient))
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
 
+            this.queryWriter = queryWriter;
             Client = (IRawGraphClient)client;
             Builder = new CypherQueryBuilder(queryWriter);
         }
@@ -222,7 +223,7 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery Query
         {
-            get { return Builder.ToQuery(); }
+            get { return queryWriter.ToCypherQuery(); }
         }
 
         public void ExecuteWithoutResults()
