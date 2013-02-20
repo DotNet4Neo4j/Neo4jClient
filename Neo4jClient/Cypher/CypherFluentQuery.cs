@@ -73,7 +73,7 @@ namespace Neo4jClient.Cypher
         {
             return Start(new[]
             {
-                new CypherStartBit(identity, nodeReferences)
+                (ICypherStartBit)(new CypherStartBit(identity, nodeReferences))
             });
         }
 
