@@ -1115,6 +1115,57 @@ RETURN b AS NodeB";
             Assert.AreEqual(3, query.QueryParameters["p0"]);
         }
 
+        [Test(Description = "Issue 45")]
+        public void SupportsFlexibleOrderOfClauses()
+        {
+            // https://bitbucket.org/Readify/neo4jclient/issue/45/cyper-should-allow-for-flexible-order-of
+            // START me=node:node_auto_index(name='Bob')
+            // MATCH me-[r?:STATUS]-secondlatestupdate
+            // DELETE r
+            // WITH me, secondlatestupdate
+            // CREATE me-[:STATUS]->(latest_update{text:'Status',date:123})
+            // WITH latest_update,secondlatestupdate
+            // CREATE latest_update-[:NEXT]-secondlatestupdate
+            // WHERE secondlatestupdate <> null
+            // RETURN latest_update.text as new_status
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start(new CypherStartBitWithNodeIndexLookup("me", "node_auto_index", "name", "Bob"))
+                .Match("me-[r?:STATUS]-secondlatestupdate")
+                .Delete("r")
+                .With("me, secondlatestupdate")
+                .Create("me-[:STATUS]->(latest_update {0})", new { text = "Status", date = 123 })
+                .With("latest_update,secondlatestupdate")
+                .Create("latest_update-[:NEXT]-secondlatestupdate")
+                .Where("secondlatestupdate <> null")
+// ReSharper disable InconsistentNaming
+                .Return(latest_update => new { new_status = latest_update.As<UpdateData>().text })
+// ReSharper restore InconsistentNaming
+                .Query;
+
+            Assert.AreEqual(@"START me=node:node_auto_index(name = {p0})
+MATCH me-[r?:STATUS]-secondlatestupdate
+DELETE r
+WITH me, secondlatestupdate
+CREATE me-[:STATUS]->(latest_update {
+  text: ""Status"",
+  date: 123
+})
+WITH latest_update,secondlatestupdate
+CREATE latest_update-[:NEXT]-secondlatestupdate
+WHERE secondlatestupdate <> null
+RETURN latest_update.text? AS new_status", query.QueryText);
+            Assert.AreEqual("Bob", query.QueryParameters["p0"]);
+        }
+
+        public class UpdateData
+        {
+// ReSharper disable InconsistentNaming
+            public string text { get; set; }
+// ReSharper restore InconsistentNaming
+        }
+
         public class FooData
         {
             public int Age { get; set; }
