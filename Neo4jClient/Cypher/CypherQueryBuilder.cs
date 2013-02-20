@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Neo4jClient.Cypher
 {
@@ -8,38 +7,23 @@ namespace Neo4jClient.Cypher
     public class CypherQueryBuilder
     {
         readonly QueryWriter queryWriter;
-        readonly StringBuilder queryTextBuilder;
-        readonly IDictionary<string, object> queryParameters;
 
         CypherResultMode resultMode;
 
         public CypherQueryBuilder()
+            : this(new QueryWriter())
         {
-            queryTextBuilder = new StringBuilder();
-            queryParameters = new Dictionary<string, object>();
-            queryWriter = new QueryWriter(queryTextBuilder, queryParameters);
         }
 
-        public CypherQueryBuilder(
-            QueryWriter queryWriter,
-            StringBuilder queryTextBuilder,
-            IDictionary<string, object> queryParameters)
+        public CypherQueryBuilder(QueryWriter queryWriter)
         {
             this.queryWriter = queryWriter;
-            this.queryTextBuilder = queryTextBuilder;
-            this.queryParameters = queryParameters;
         }
 
         CypherQueryBuilder Clone()
         {
-            var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
-            var clonedParameters = new Dictionary<string, object>(queryParameters);
-            var clonedWriter = new QueryWriter(clonedQueryTextBuilder, clonedParameters);
-            return new CypherQueryBuilder(
-                clonedWriter,
-                clonedQueryTextBuilder,
-                clonedParameters
-            )
+            var clonedWriter = queryWriter.Clone();
+            return new CypherQueryBuilder(clonedWriter)
             {
                 resultMode = resultMode,
             };
@@ -54,13 +38,10 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery ToQuery()
         {
-            var textBuilder = new StringBuilder(queryTextBuilder.ToString());
-            var parameters = new Dictionary<string, object>(queryParameters);
-            var writer = new QueryWriter(textBuilder, parameters);
-
-            return writer.ToCypherQuery(resultMode);
+            return queryWriter.ToCypherQuery(resultMode);
         }
 
+        [Obsolete("This wierd helper method needs to die")]
         public static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
         {
             var paramName = string.Format("p{0}", parameters.Count);
@@ -78,7 +59,7 @@ namespace Neo4jClient.Cypher
             var newBuilder = Clone();
             callback(
                 newBuilder.queryWriter,
-                v => CreateParameter(newBuilder.queryParameters, v));
+                v => newBuilder.queryWriter.CreateParameter(v));
             return newBuilder;
         }
     }

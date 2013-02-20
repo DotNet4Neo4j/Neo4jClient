@@ -8,7 +8,7 @@ namespace Neo4jClient.Cypher
         internal ICypherFluentQuery Where(LambdaExpression expression)
         {
             var newBuilder = Builder.CallWriter(w =>
-                w.AppendClause(string.Format("WHERE {0}", CypherWhereExpressionBuilder.BuildText(expression, w.queryParameters))));
+                w.AppendClause(string.Format("WHERE {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter))));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
@@ -21,7 +21,7 @@ namespace Neo4jClient.Cypher
         internal ICypherFluentQuery AndWhere(LambdaExpression expression)
         {
             var newBuilder = Builder.CallWriter(w =>
-                w.AppendClause(string.Format("AND {0}", CypherWhereExpressionBuilder.BuildText(expression, w.queryParameters))));
+                w.AppendClause(string.Format("AND {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter))));
             return new CypherFluentQuery(Client, newBuilder);
         }
 
@@ -34,7 +34,7 @@ namespace Neo4jClient.Cypher
         internal ICypherFluentQuery OrWhere(LambdaExpression expression)
         {
             var newBuilder = Builder.CallWriter(w =>
-                w.AppendClause(string.Format("OR {0}", CypherWhereExpressionBuilder.BuildText(expression, w.queryParameters))));
+                w.AppendClause(string.Format("OR {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter))));
             return new CypherFluentQuery(Client, newBuilder);
         }
 

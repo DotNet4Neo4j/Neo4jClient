@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Neo4jClient.Cypher;
 
 namespace Neo4jClient.Test.Cypher
@@ -126,29 +124,6 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("qak", query.QueryParameters["p1"]);
             Assert.AreEqual("abc", query.QueryParameters["p2"]);
             Assert.AreEqual("xyz", query.QueryParameters["p3"]);
-        }
-
-        [Test]
-        public void AppendClauseShouldPlayNicelyWithAnExternalClassModifyingTheSameUnderlyingState()
-        {
-            var queryTextBuilder = new StringBuilder();
-            var queryParameters = new Dictionary<string, object>();
-            var writer = new QueryWriter(queryTextBuilder, queryParameters);
-
-            writer.AppendClause("foo {0}", "bar");
-            queryParameters.Add("p1", "qak");
-            queryTextBuilder.AppendLine("bar {p1}");
-            writer.AppendClause("qoo {0}", "zoo");
-
-            var query = writer.ToCypherQuery();
-            const string expectedText = @"foo {p0}
-bar {p1}
-qoo {p2}";
-            Assert.AreEqual(expectedText, query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters.Count);
-            Assert.AreEqual("bar", query.QueryParameters["p0"]);
-            Assert.AreEqual("qak", query.QueryParameters["p1"]);
-            Assert.AreEqual("zoo", query.QueryParameters["p2"]);
         }
     }
 }

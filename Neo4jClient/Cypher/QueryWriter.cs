@@ -8,7 +8,7 @@ namespace Neo4jClient.Cypher
     public class QueryWriter
     {
         readonly StringBuilder queryTextBuilder;
-        internal readonly IDictionary<string, object> queryParameters;
+        readonly IDictionary<string, object> queryParameters;
 
         public QueryWriter()
         {
@@ -16,13 +16,19 @@ namespace Neo4jClient.Cypher
             queryParameters = new Dictionary<string, object>();
         }
 
-        [Obsolete]
-        internal QueryWriter(
+        QueryWriter(
             StringBuilder queryTextBuilder,
             IDictionary<string, object> queryParameters)
         {
             this.queryTextBuilder = queryTextBuilder;
             this.queryParameters = queryParameters;
+        }
+
+        public QueryWriter Clone()
+        {
+            var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
+            var clonedParameters = new Dictionary<string, object>(queryParameters);
+            return new QueryWriter(clonedQueryTextBuilder, clonedParameters);
         }
 
         public CypherQuery ToCypherQuery(CypherResultMode resultMode = CypherResultMode.Projection)
@@ -37,7 +43,14 @@ namespace Neo4jClient.Cypher
                 resultMode);
         }
 
-        public void AppendClause(string clause, params object[] paramValues)
+        public string CreateParameter(object paramValue)
+        {
+            var paramName = string.Format("p{0}", queryParameters.Count);
+            queryParameters.Add(paramName, paramValue);
+            return "{" + paramName + "}";
+        }
+
+        public QueryWriter AppendClause(string clause, params object[] paramValues)
         {
             if (paramValues.Any())
             {
@@ -56,6 +69,8 @@ namespace Neo4jClient.Cypher
             }
 
             queryTextBuilder.AppendLine(clause);
+
+            return this;
         }
 
         string CreateParameterAndReturnPlaceholder(object paramValue)
