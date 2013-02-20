@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Neo4jClient.Cypher
 {
@@ -26,15 +25,8 @@ namespace Neo4jClient.Cypher
 
         public CypherQueryBuilder CallWriter(Action<QueryWriter> callback)
         {
-            return CallWriter((w, cp) => callback(w));
-        }
-
-        public CypherQueryBuilder CallWriter(Action<QueryWriter, Func<object, string>> callback)
-        {
             var newBuilder = Clone();
-            callback(
-                newBuilder.queryWriter,
-                v => newBuilder.queryWriter.CreateParameter(v));
+            callback(newBuilder.queryWriter);
             return newBuilder;
         }
     }

@@ -58,14 +58,15 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
-            var newBuilder = Builder.CallWriter((writer, createParameterCallback) => {
-                var startBitsText = startBits
-                    .Select(b => b.ToCypherText(createParameterCallback))
-                    .ToArray();
-                var startText = string.Join(", ", startBitsText);
-                writer.AppendClause("START " + startText);
-            });
-            return new CypherFluentQuery(Client, newBuilder);
+            var writer = queryWriter.Clone();
+
+            var startBitsText = startBits
+                .Select(b => b.ToCypherText(writer.CreateParameter))
+                .ToArray();
+            var startText = string.Join(", ", startBitsText);
+            writer.AppendClause("START " + startText);
+
+            return new CypherFluentQuery(Client, writer);
         }
 
         public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
