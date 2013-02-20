@@ -47,8 +47,7 @@ namespace Neo4jClient.Cypher
             {
                 resultMode = resultMode,
                 limit = limit,
-                skip = skip,
-                orderBy = orderBy
+                skip = skip
             };
         }
 
@@ -75,25 +74,12 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
-        [Obsolete]
-        public CypherQueryBuilder SetOrderBy(OrderByType orderByType, params string[] properties)
-        {
-            var newBuilder = Clone();
-            newBuilder.orderBy = string.Join(", ", properties);
-
-            if (orderByType == OrderByType.Descending)
-                newBuilder.orderBy += " DESC";
-
-            return newBuilder;
-        }
-
         public CypherQuery ToQuery()
         {
             var textBuilder = new StringBuilder(queryTextBuilder.ToString());
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteOrderByClause(textBuilder);
             WriteSkipClause(textBuilder, parameters);
             WriteLimitClause(textBuilder, parameters);
 
@@ -118,13 +104,6 @@ namespace Neo4jClient.Cypher
         {
             if (skip == null) return;
             target.AppendFormat("SKIP {0}", CreateParameter(paramsDictionary, skip));
-            target.AppendLine();
-        }
-
-        void WriteOrderByClause(StringBuilder target )
-        {
-            if (string.IsNullOrEmpty(orderBy)) return;
-            target.AppendFormat("ORDER BY {0}", orderBy);
             target.AppendLine();
         }
 

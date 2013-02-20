@@ -27,13 +27,15 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery<TResult> OrderBy(params string[] properties)
         {
-            var newBuilder = Builder.SetOrderBy(OrderByType.Ascending, properties);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
-            var newBuilder = Builder.SetOrderBy(OrderByType.Descending, properties);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(", ", properties))));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
