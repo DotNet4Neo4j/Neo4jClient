@@ -8,11 +8,6 @@ namespace Neo4jClient.Cypher
     {
         readonly QueryWriter queryWriter;
 
-        public CypherQueryBuilder()
-            : this(new QueryWriter())
-        {
-        }
-
         public CypherQueryBuilder(QueryWriter queryWriter)
         {
             this.queryWriter = queryWriter;
@@ -27,11 +22,6 @@ namespace Neo4jClient.Cypher
         {
             var clonedWriter = queryWriter.Clone();
             return new CypherQueryBuilder(clonedWriter);
-        }
-
-        public CypherQuery ToQuery()
-        {
-            return queryWriter.ToCypherQuery();
         }
 
         [Obsolete("This wierd helper method needs to die")]
