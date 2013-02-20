@@ -12,7 +12,6 @@ namespace Neo4jClient.Cypher
         readonly IDictionary<string, object> queryParameters;
 
         CypherResultMode resultMode;
-        int? limit;
 
         public CypherQueryBuilder()
         {
@@ -43,7 +42,6 @@ namespace Neo4jClient.Cypher
             )
             {
                 resultMode = resultMode,
-                limit = limit,
             };
         }
 
@@ -54,21 +52,11 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
-        [Obsolete]
-        public CypherQueryBuilder SetLimit(int? count)
-        {
-            var newBuilder = Clone();
-            newBuilder.limit = count;
-            return newBuilder;
-        }
-
         public CypherQuery ToQuery()
         {
             var textBuilder = new StringBuilder(queryTextBuilder.ToString());
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
-
-            WriteLimitClause(textBuilder, parameters);
 
             return writer.ToCypherQuery(resultMode);
         }
@@ -78,13 +66,6 @@ namespace Neo4jClient.Cypher
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
             return "{" + paramName + "}";
-        }
-
-        void WriteLimitClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
-        {
-            if (limit == null) return;
-            target.AppendFormat("LIMIT {0}", CreateParameter(paramsDictionary, limit));
-            target.AppendLine();
         }
 
         public CypherQueryBuilder CallWriter(Action<QueryWriter> callback)

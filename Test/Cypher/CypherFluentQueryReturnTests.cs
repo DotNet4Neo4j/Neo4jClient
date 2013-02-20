@@ -113,8 +113,8 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(@"START me=node({p0}), viewer=node({p1})
 MATCH me-[:FRIEND]-common-[:FRIEND]-viewer
 RETURN common
-ORDER BY common.FirstName
-LIMIT {p2}", query.QueryText);
+LIMIT {p2}
+ORDER BY common.FirstName", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(456, query.QueryParameters["p1"]);
             Assert.AreEqual(5, query.QueryParameters["p2"]);
