@@ -152,11 +152,10 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new[]
-                {
+                .Start(
                     new RawCypherStartBit("n", "node(*)"),
                     new RawCypherStartBit("b", "node(*)")
-                })
+                )
                 .Return<object>("n")
                 .Query;
 
