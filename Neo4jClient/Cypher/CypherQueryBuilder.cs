@@ -24,14 +24,6 @@ namespace Neo4jClient.Cypher
             return new CypherQueryBuilder(clonedWriter);
         }
 
-        [Obsolete("This wierd helper method needs to die")]
-        public static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
-        {
-            var paramName = string.Format("p{0}", parameters.Count);
-            parameters.Add(paramName, paramValue);
-            return "{" + paramName + "}";
-        }
-
         public CypherQueryBuilder CallWriter(Action<QueryWriter> callback)
         {
             return CallWriter((w, cp) => callback(w));
