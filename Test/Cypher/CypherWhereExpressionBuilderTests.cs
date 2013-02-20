@@ -8,11 +8,15 @@ namespace Neo4jClient.Test.Cypher
 {
     public class CypherWhereExpressionBuilderTests
     {
+        // ReSharper disable ClassNeverInstantiated.Local
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
         class Foo
         {
             public int Bar { get; set; }
             public int? NullableBar { get; set; }
         }
+        // ReSharper restore ClassNeverInstantiated.Local
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
 
         // This must be a public static field, that's not a constant
         public static int BazField = 123;
