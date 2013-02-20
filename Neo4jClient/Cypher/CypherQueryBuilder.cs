@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Neo4jClient.Cypher
 {
+    [Obsolete("Use QueryWriter instead")]
     public class CypherQueryBuilder
     {
         readonly QueryWriter queryWriter;
@@ -58,6 +59,7 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        [Obsolete]
         public CypherQueryBuilder SetLimit(int? count)
         {
             var newBuilder = Clone();
@@ -65,6 +67,7 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        [Obsolete]
         public CypherQueryBuilder SetSkip(int? count)
         {
             var newBuilder = Clone();
@@ -72,6 +75,7 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
+        [Obsolete]
         public CypherQueryBuilder SetOrderBy(OrderByType orderByType, params string[] properties)
         {
             var newBuilder = Clone();
