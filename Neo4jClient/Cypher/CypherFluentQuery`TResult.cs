@@ -7,33 +7,37 @@ namespace Neo4jClient.Cypher
     [DebuggerDisplay("{Query.DebugQueryText}")]
     public class CypherFluentQuery<TResult> :
         CypherFluentQuery,
-        ICypherFluentQueryReturned<TResult>
+        ICypherFluentQuery<TResult>
     {
         public CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
             : base(client, builder)
         {}
 
-        public ICypherFluentQueryReturned<TResult> Limit(int? limit)
+        public ICypherFluentQuery<TResult> Limit(int? limit)
         {
-            var newBuilder = Builder.SetLimit(limit);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause("LIMIT {0}", limit));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> Skip(int? skip)
+        public ICypherFluentQuery<TResult> Skip(int? skip)
         {
-            var newBuilder = Builder.SetSkip(skip);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause("SKIP {0}", skip));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> OrderBy(params string[] properties)
+        public ICypherFluentQuery<TResult> OrderBy(params string[] properties)
         {
-            var newBuilder = Builder.SetOrderBy(OrderByType.Ascending, properties);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
-        public ICypherFluentQueryReturned<TResult> OrderByDescending(params string[] properties)
+        public ICypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
-            var newBuilder = Builder.SetOrderBy(OrderByType.Descending, properties);
+            var newBuilder = Builder.CallWriter(w =>
+                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(", ", properties))));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 

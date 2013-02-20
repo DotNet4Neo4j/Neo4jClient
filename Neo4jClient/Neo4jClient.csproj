@@ -67,6 +67,8 @@
     <Compile Include="Cypher\CypherCreateTextBit.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookupWithSingleParameter.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookup.cs" />
+    <Compile Include="Cypher\ICypherStartBit.cs" />
+    <Compile Include="Cypher\QueryWriter.cs" />
     <Compile Include="Cypher\RawCypherStartBit.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
@@ -80,7 +82,6 @@
     <Compile Include="Cypher\CypherResultMode.cs" />
     <Compile Include="Cypher\CypherWhereExpressionBuilder.cs" />
     <Compile Include="Cypher\CypherWhereExpressionVisitor.cs" />
-    <Compile Include="Cypher\ICypherFluentQueryWhere.cs" />
     <Compile Include="Cypher\OrderByType.cs" />
     <Compile Include="Deserializer\CommonDeserializerMethods.cs" />
     <Compile Include="Deserializer\CypherJsonDeserializer.cs" />
@@ -91,11 +92,7 @@
     <Compile Include="Cypher\CypherStartBit.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />
     <Compile Include="Cypher\ICypherFluentQuery.cs" />
-    <Compile Include="Cypher\ICypherFluentQueryMatched.cs" />
-    <Compile Include="Cypher\ICypherFluentQueryPreStart.cs" />
-    <Compile Include="Cypher\ICypherFluentQueryReturnable.cs" />
-    <Compile Include="Cypher\ICypherFluentQueryReturned.cs" />
-    <Compile Include="Cypher\ICypherFluentQueryStarted.cs" />
+    <Compile Include="Cypher\ICypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\ICypherResultItem.cs" />
     <Compile Include="Deserializer\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />

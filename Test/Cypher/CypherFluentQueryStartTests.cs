@@ -32,8 +32,10 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .StartWithNodeIndexLookup("a", "nodes", "name", "A")
-                .AddStartPointWithNodeIndexLookup("b", "nodes", "name", "B")
+                .Start(
+                    new CypherStartBitWithNodeIndexLookup("a", "nodes", "name", "A"),
+                    new CypherStartBitWithNodeIndexLookup("b", "nodes", "name", "B")
+                )
                 .Return<object>("a")
                 .Query;
 
@@ -51,8 +53,10 @@ namespace Neo4jClient.Test.Cypher
             
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .StartWithNodeIndexLookup("a", "nodes", "name", "A")
-                .AddStartPoint("b", (NodeReference)2)
+                .Start(
+                    new CypherStartBitWithNodeIndexLookup("a", "nodes", "name", "A"),
+                    new CypherStartBit("b", (NodeReference)2)
+                )
                 .Return<object>("a")
                 .Query;
             
@@ -70,9 +74,11 @@ namespace Neo4jClient.Test.Cypher
             
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .StartWithNodeIndexLookup("a", "nodes", "name", "A")
-                .AddStartPoint("b", (NodeReference)2)
-                .AddStartPointWithNodeIndexLookup("c", "nodes", "name", "C")
+                .Start(
+                    new CypherStartBitWithNodeIndexLookup("a", "nodes", "name", "A"),
+                    new CypherStartBit("b", (NodeReference)2),
+                    new CypherStartBitWithNodeIndexLookup("c", "nodes", "name", "C")
+                )
                 .Return<object>("a")
                 .Query;
             
@@ -91,8 +97,10 @@ namespace Neo4jClient.Test.Cypher
             
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
-                .AddStartPointWithNodeIndexLookup("b", "nodes", "name", "B")
+                .Start(
+                    new CypherStartBit("a", (NodeReference)1),
+                    new CypherStartBitWithNodeIndexLookup("b", "nodes", "name", "B")
+                )
                 .Return<object>("a")
                 .Query;
             
@@ -136,21 +144,60 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void AddAllNodes()
+        public void AllNodesMultipleTimes()
         {
             // http://docs.neo4j.org/chunked/1.8/query-start.html#start-all-nodes
-            //START n=node(*)
+            //START n=node(*), b=node(*)
             //RETURN n
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", "node(*)")
-                .AddStartPoint("b", "node(*)")
+                .Start(
+                    new RawCypherStartBit("n", "node(*)"),
+                    new RawCypherStartBit("b", "node(*)")
+                )
                 .Return<object>("n")
                 .Query;
 
             Assert.AreEqual("START n=node(*), b=node(*)\r\nRETURN n", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count);
+        }
+
+        [Test(Description = "Issue 56")]
+        public void NodeByAutoIndexLookup()
+        {
+            // https://bitbucket.org/Readify/neo4jclient/issue/56/cypher-fluent-api-node-auto-index-start
+            // http://stackoverflow.com/questions/14882562/cypher-query-return-related-nodes-as-children/14986114
+            // start s=node:node_auto_index(StartType='JobTypes')
+            // match s-[:starts]->t, t-[:SubTypes]->ts
+            // return {Id: t.Id, Name: t.Name, JobSpecialties: ts}
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start(new CypherStartBitWithNodeIndexLookup("s", "node_auto_index", "StartType", "JobTypes"))
+                .Match("s-[:starts]->t", "t-[:SubTypes]->ts")
+                .Return((t, ts) => new
+                {
+                    t.As<JobType>().Id,
+                    t.As<JobType>().Name,
+                    JobSpecialties = ts.CollectAs<JobSpecialty>()
+                })
+                .Query;
+
+            Assert.AreEqual(@"START s=node:node_auto_index(StartType = {p0})
+MATCH s-[:starts]->t, t-[:SubTypes]->ts
+RETURN t.Id? AS Id, t.Name? AS Name, collect(ts) AS JobSpecialties", query.QueryText);
+            Assert.AreEqual("JobTypes", query.QueryParameters["p0"]);
+        }
+
+        public class JobType
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        public class JobSpecialty
+        {
         }
     }
 }

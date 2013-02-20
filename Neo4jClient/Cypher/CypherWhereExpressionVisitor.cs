@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -10,11 +9,12 @@ namespace Neo4jClient.Cypher
     {
         const string NotEqual = " <> ";
         const string Equal = " = ";
-        readonly IDictionary<string, object> paramsDictionary;
+        readonly Func<object, string> createParameterCallback;
         public StringBuilder TextOutput { get; private set; }
-        public CypherWhereExpressionVisitor(IDictionary<string, object> paramsDictionary)
+
+        public CypherWhereExpressionVisitor(Func<object, string> createParameterCallback)
         {
-            this.paramsDictionary = paramsDictionary ?? new Dictionary<string, object>();
+            this.createParameterCallback = createParameterCallback;
             TextOutput = new StringBuilder();
         }
 
@@ -88,7 +88,7 @@ namespace Neo4jClient.Cypher
                 TextOutput.Append(Equal);
             }
 
-            var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, node.Value);
+            var nextParameterName = createParameterCallback(node.Value);
             TextOutput.Append(nextParameterName);
             return node;
         }
@@ -120,7 +120,7 @@ namespace Neo4jClient.Cypher
                         throw new NotImplementedException(string.Format("We haven't implemented support for reading static {0} yet", node.Member.MemberType));
                 }
 
-                var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, value);
+                var nextParameterName = createParameterCallback(value);
                 TextOutput.Append(string.Format("{0}", nextParameterName));
 
                 return node;
@@ -156,7 +156,7 @@ namespace Neo4jClient.Cypher
 
                 var value = node.Expression.NodeType == ExpressionType.Constant ? data : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
 
-                var nextParameterName = CypherQueryBuilder.CreateParameter(paramsDictionary, value);
+                var nextParameterName = createParameterCallback(value);
                 TextOutput.Append(string.Format("{0}", nextParameterName));
             }
             else

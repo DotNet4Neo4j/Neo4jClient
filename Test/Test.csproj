@@ -70,8 +70,8 @@
     <Compile Include="Cypher\CypherFluentQueryStartTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryCreateUniqueTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryRelateTests.cs" />
-    <Compile Include="Cypher\CypherQueryBuilderTests.cs" />
     <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
+    <Compile Include="Cypher\QueryWriterTests.cs" />
     <Compile Include="Deserializer\CypherJsonDeserializerTests.cs" />
     <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />

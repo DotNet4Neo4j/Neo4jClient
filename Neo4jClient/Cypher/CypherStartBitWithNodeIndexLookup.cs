@@ -1,6 +1,8 @@
+using System;
+
 namespace Neo4jClient.Cypher
 {
-    internal class CypherStartBitWithNodeIndexLookup
+    public class CypherStartBitWithNodeIndexLookup : ICypherStartBit
     {
         readonly string identifier;
         readonly string indexName;
@@ -19,5 +21,15 @@ namespace Neo4jClient.Cypher
         public string IndexName { get { return indexName; } }
         public string Key { get { return key; } }
         public object Value { get { return value; } }
+
+        public string ToCypherText(Func<object, string> createParameterCallback)
+        {
+            var valueParameter = createParameterCallback(value);
+            return string.Format("{0}=node:{1}({2} = {3})",
+                identifier,
+                indexName,
+                key,
+                valueParameter);
+        }
     }
 }

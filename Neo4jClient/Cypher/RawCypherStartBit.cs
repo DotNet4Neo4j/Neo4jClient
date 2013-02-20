@@ -1,6 +1,8 @@
+using System;
+
 namespace Neo4jClient.Cypher
 {
-    internal class RawCypherStartBit
+    public class RawCypherStartBit : ICypherStartBit
     {
         readonly string identifier;
         readonly string startText;
@@ -19,6 +21,11 @@ namespace Neo4jClient.Cypher
         public string StartText
         {
             get { return startText; }
+        }
+
+        public string ToCypherText(Func<object, string> createParameterCallback)
+        {
+            return identifier + "=" + startText;
         }
     }
 }

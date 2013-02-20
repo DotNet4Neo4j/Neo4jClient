@@ -100,8 +100,10 @@ namespace Neo4jClient.Test.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("me", (NodeReference)123)
-                .AddStartPoint("viewer", (NodeReference)456)
+                .Start(
+                    new CypherStartBit("me", (NodeReference)123),
+                    new CypherStartBit("viewer", (NodeReference)456)
+                )
                 .Match("me-[:FRIEND]-common-[:FRIEND]-viewer")
                 .Return<Node<object>>("common")
                 .Limit(5)
@@ -111,11 +113,33 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(@"START me=node({p0}), viewer=node({p1})
 MATCH me-[:FRIEND]-common-[:FRIEND]-viewer
 RETURN common
-ORDER BY common.FirstName
-LIMIT {p2}", query.QueryText);
+LIMIT {p2}
+ORDER BY common.FirstName", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(456, query.QueryParameters["p1"]);
             Assert.AreEqual(5, query.QueryParameters["p2"]);
+        }
+
+        [Test]
+        public void ShouldUseSetResultModeForIdentityBasedReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return<object>("foo")
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseProjectionResultModeForLambdaBasedReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(a => new { Foo = a.As<object>() })
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
         }
     }
 }
