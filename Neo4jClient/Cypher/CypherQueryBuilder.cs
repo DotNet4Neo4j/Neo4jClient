@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace Neo4jClient.Cypher
@@ -14,8 +13,6 @@ namespace Neo4jClient.Cypher
 
         CypherResultMode resultMode;
         int? limit;
-        int? skip;
-        string orderBy;
 
         public CypherQueryBuilder()
         {
@@ -47,7 +44,6 @@ namespace Neo4jClient.Cypher
             {
                 resultMode = resultMode,
                 limit = limit,
-                skip = skip
             };
         }
 
@@ -66,21 +62,12 @@ namespace Neo4jClient.Cypher
             return newBuilder;
         }
 
-        [Obsolete]
-        public CypherQueryBuilder SetSkip(int? count)
-        {
-            var newBuilder = Clone();
-            newBuilder.skip = count;
-            return newBuilder;
-        }
-
         public CypherQuery ToQuery()
         {
             var textBuilder = new StringBuilder(queryTextBuilder.ToString());
             var parameters = new Dictionary<string, object>(queryParameters);
             var writer = new QueryWriter(textBuilder, parameters);
 
-            WriteSkipClause(textBuilder, parameters);
             WriteLimitClause(textBuilder, parameters);
 
             return writer.ToCypherQuery(resultMode);
@@ -97,13 +84,6 @@ namespace Neo4jClient.Cypher
         {
             if (limit == null) return;
             target.AppendFormat("LIMIT {0}", CreateParameter(paramsDictionary, limit));
-            target.AppendLine();
-        }
-
-        void WriteSkipClause(StringBuilder target, IDictionary<string, object> paramsDictionary)
-        {
-            if (skip == null) return;
-            target.AppendFormat("SKIP {0}", CreateParameter(paramsDictionary, skip));
             target.AppendLine();
         }
 
