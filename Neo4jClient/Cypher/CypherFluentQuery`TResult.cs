@@ -24,6 +24,8 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery<TResult> Skip(int? skip)
         {
+            if (!skip.HasValue) return this;
+
             var newBuilder = Builder.CallWriter(w =>
                 w.AppendClause("SKIP {0}", skip));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
