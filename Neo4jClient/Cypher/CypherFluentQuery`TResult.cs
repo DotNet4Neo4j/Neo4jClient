@@ -15,6 +15,8 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery<TResult> Limit(int? limit)
         {
+            if (!limit.HasValue) return this;
+
             var newBuilder = Builder.CallWriter(w =>
                 w.AppendClause("LIMIT {0}", limit));
             return new CypherFluentQuery<TResult>(Client, newBuilder);
