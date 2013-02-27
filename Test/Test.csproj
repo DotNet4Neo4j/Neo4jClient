@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="ApiModels\RootApiResponseTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryWithTests.cs" />
     <Compile Include="Cypher\CypherFluentQuerySkipTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryLimitTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryDeleteTests.cs" />
