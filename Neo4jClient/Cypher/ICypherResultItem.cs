@@ -6,6 +6,7 @@ namespace Neo4jClient.Cypher
     {
         T As<T>();
         IEnumerable<Node<T>> CollectAs<T>();
+        IEnumerable<Node<T>> CollectAsDistinct<T>();
         Node<T> Node<T>();
     }
 }

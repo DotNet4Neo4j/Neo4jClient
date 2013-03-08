@@ -147,6 +147,9 @@ namespace Neo4jClient.Cypher
 
             if (expression.Method.Name.Equals("CollectAs"))
                 return string.Format("collect({0}) AS {1}", targetObject.Name, targetMember.Name);
+
+            if (expression.Method.Name.Equals("CollectAsDistinct"))
+                return string.Format("collect(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
             
             return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, targetMember.Name);
         }
