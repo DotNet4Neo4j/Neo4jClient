@@ -604,7 +604,7 @@ namespace Neo4jClient.Test.Deserializer
             var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
-            Assert.IsNull(results.First().Names);
+            Assert.AreEqual(0, results.First().Names.Count());
         }
 
         [Test]
