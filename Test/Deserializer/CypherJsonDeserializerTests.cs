@@ -683,6 +683,50 @@ namespace Neo4jClient.Test.Deserializer
 
         }
 
+        [Test]
+        public void Issue63_DeserializeShouldMapEmptyCollectResultsWithOtherProperties()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection);
+            var content = @"{
+  'columns' : [ 'Fans', 'Thing' ],
+  'data' : [ [ [ null ], {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/740/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out',
+    'data' : {
+      'Description' : 'frrtrtr',
+      'Confidential' : false,
+      'DateCreated' : '2013-03-19T10:15:36.6806417+00:00',
+      'BuyOrSell' : 'Buy',
+      'SellingPoints' : [ 'rekj', 'kjkj', 'kjkj' ],
+      'UniqueId' : 7,
+      'Title' : 'rkjrekj'
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/740/traverse/{returnType}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all',
+    'self' : 'http://localhost:8000/db/data/node/740',
+    'property' : 'http://localhost:8000/db/data/node/740/properties/{key}',
+    'properties' : 'http://localhost:8000/db/data/node/740/properties',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out/{-list|&|types}',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/740/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/740/relationships'
+  } ] ]
+}".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(1, results.Count());
+            Assert.AreEqual("Lame", results[0].Thing);
+            Assert.AreEqual(null, results[0].Fans);
+        }
+
         public class Post 
         {
             public String Content { get; set; }
@@ -741,6 +785,12 @@ namespace Neo4jClient.Test.Deserializer
         {
             public IEnumerable<RelationshipInstance<Payload>> Relationships { get; set; }
             public Node<City> Node { get; set; }
+        }
+
+        public class ModelWithCollect
+        {
+            public Node<object> Thing { get; set; }
+            public IEnumerable<Node<object>> Fans { get; set; }
         }
 
         [Test]
