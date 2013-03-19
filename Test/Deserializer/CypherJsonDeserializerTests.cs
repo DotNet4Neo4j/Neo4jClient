@@ -690,18 +690,12 @@ namespace Neo4jClient.Test.Deserializer
             var client = Substitute.For<IGraphClient>();
             var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection);
             var content = @"{
-  'columns' : [ 'Fans', 'Thing' ],
+  'columns' : [ 'Fans', 'Poster' ],
   'data' : [ [ [ null ], {
     'paged_traverse' : 'http://localhost:8000/db/data/node/740/paged/traverse/{returnType}{?pageSize,leaseTime}',
     'outgoing_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out',
     'data' : {
-      'Description' : 'frrtrtr',
-      'Confidential' : false,
-      'DateCreated' : '2013-03-19T10:15:36.6806417+00:00',
-      'BuyOrSell' : 'Buy',
-      'SellingPoints' : [ 'rekj', 'kjkj', 'kjkj' ],
-      'UniqueId' : 7,
-      'Title' : 'rkjrekj'
+      'GivenName' : 'Bob'
     },
     'all_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all/{-list|&|types}',
     'traverse' : 'http://localhost:8000/db/data/node/740/traverse/{returnType}',
@@ -723,8 +717,10 @@ namespace Neo4jClient.Test.Deserializer
 
             // Assert
             Assert.AreEqual(1, results.Count());
-            Assert.AreEqual("Lame", results[0].Thing);
             Assert.AreEqual(null, results[0].Fans);
+            Assert.IsInstanceOf<Node<User>>(results[0].Poster);
+            Assert.AreEqual(740, results[0].Poster.Reference.Id);
+            Assert.AreEqual("Bob", results[0].Poster.Data.GivenName);
         }
 
         public class Post 
@@ -789,7 +785,7 @@ namespace Neo4jClient.Test.Deserializer
 
         public class ModelWithCollect
         {
-            public Node<object> Thing { get; set; }
+            public Node<User> Poster { get; set; }
             public IEnumerable<Node<object>> Fans { get; set; }
         }
 
