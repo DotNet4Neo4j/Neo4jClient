@@ -604,7 +604,7 @@ namespace Neo4jClient.Test.Deserializer
             var results = deserializer.Deserialize(content).ToArray();
 
             // Assert
-            Assert.IsNull(results.First().Names);
+            Assert.AreEqual(0, results.First().Names.Count());
         }
 
         [Test]
@@ -683,6 +683,46 @@ namespace Neo4jClient.Test.Deserializer
 
         }
 
+        [Test]
+        public void Issue63_DeserializeShouldMapEmptyCollectResultsWithOtherProperties()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection);
+            var content = @"{
+  'columns' : [ 'Fans', 'Poster' ],
+  'data' : [ [ [ null ], {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/740/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out',
+    'data' : {
+      'GivenName' : 'Bob'
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/740/traverse/{returnType}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all',
+    'self' : 'http://localhost:8000/db/data/node/740',
+    'property' : 'http://localhost:8000/db/data/node/740/properties/{key}',
+    'properties' : 'http://localhost:8000/db/data/node/740/properties',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out/{-list|&|types}',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/740/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/740/relationships'
+  } ] ]
+}".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(1, results.Count());
+            Assert.AreEqual(null, results[0].Fans);
+            Assert.IsInstanceOf<Node<User>>(results[0].Poster);
+            Assert.AreEqual(740, results[0].Poster.Reference.Id);
+            Assert.AreEqual("Bob", results[0].Poster.Data.GivenName);
+        }
+
         public class Post 
         {
             public String Content { get; set; }
@@ -741,6 +781,12 @@ namespace Neo4jClient.Test.Deserializer
         {
             public IEnumerable<RelationshipInstance<Payload>> Relationships { get; set; }
             public Node<City> Node { get; set; }
+        }
+
+        public class ModelWithCollect
+        {
+            public Node<User> Poster { get; set; }
+            public IEnumerable<Node<object>> Fans { get; set; }
         }
 
         [Test]

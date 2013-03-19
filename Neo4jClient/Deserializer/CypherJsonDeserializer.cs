@@ -173,13 +173,20 @@ namespace Neo4jClient.Deserializer
             foreach(var cell in row.Children())
             {
                 var columnName = columnNames[cellIndex];
-                var property = propertiesDictionary[columnName];
-                if (property.ToString().Contains("System.Collections.Generic.IEnumerable") &&
-                   ( cell.FirstOrDefault() == null || string.IsNullOrEmpty(cell.First().ToString()) )
-                   && ( cell.LastOrDefault() == null || string.IsNullOrEmpty(cell.Last().ToString())))
-                    continue;
-                CommonDeserializerMethods.SetPropertyValue(result, property, cell, culture, jsonTypeMappings, 0);
                 cellIndex++;
+
+                var property = propertiesDictionary[columnName];
+                var propertyType = property.PropertyType;
+                var cellChildren = cell.Children().ToArray();
+                if (propertyType.IsGenericType &&
+                    propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>) &&
+                    cell.Type == JTokenType.Array &&
+                    cellChildren.Count() == 1 &&
+                    cellChildren.Single() != null &&
+                    cellChildren.Single().Type == JTokenType.Null)
+                    continue;
+
+                CommonDeserializerMethods.SetPropertyValue(result, property, cell, culture, jsonTypeMappings, 0);
             }
 
             return result;
