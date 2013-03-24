@@ -190,6 +190,31 @@ RETURN t.Id? AS Id, t.Name? AS Name, collect(ts) AS JobSpecialties", query.Query
             Assert.AreEqual("JobTypes", query.QueryParameters["p0"]);
         }
 
+        [Test]
+        public void MutipleNodesByReference()
+        {
+            // https://bitbucket.org/Readify/neo4jclient/issue/64/cypher-query-with-multiple-starts
+            // START n1=node(1), n2=node(2)
+            // MATCH n1-[:KNOWS]->n2
+            // RETURN count(*)
+
+            var referenceA = (NodeReference)1;
+            var referenceB = (NodeReference)2;
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start(
+                    new CypherStartBit("n1", referenceA),
+                    new CypherStartBit("n2", referenceB)
+                )
+                .Query;
+
+            Assert.AreEqual("START n1=node({p0}), n2=node({p1})", query.QueryText);
+            Assert.AreEqual(2, query.QueryParameters.Count);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
         public class JobType
         {
             public string Id { get; set; }
