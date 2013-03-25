@@ -724,6 +724,47 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual("Bob", results[0].Poster.Data.GivenName);
         }
 
+        [Test]
+        public void DeserializeShouldMapProjectionIntoAnonymousType()
+        {
+            DeserializeShouldMapProjectionIntoAnonymousType(new { Name = "", Population = 0 });
+        }
+
+// ReSharper disable UnusedParameter.Local
+        static void DeserializeShouldMapProjectionIntoAnonymousType<TAnon>(TAnon dummy)
+// ReSharper restore UnusedParameter.Local
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection);
+            var content = @"{
+                'data' : [
+                    [ 'Tokyo', 13000000 ],
+                    [ 'London', 8000000 ],
+                    [ 'Sydney', 4000000 ]
+                ],
+                'columns' : [ 'Name', 'Population' ]
+            }".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(3, results.Count());
+
+            dynamic city = results.ElementAt(0);
+            Assert.AreEqual("Tokyo", city.Name);
+            Assert.AreEqual(13000000, city.Population);
+
+            city = results.ElementAt(1);
+            Assert.AreEqual("London", city.Name);
+            Assert.AreEqual(8000000, city.Population);
+
+            city = results.ElementAt(2);
+            Assert.AreEqual("Sydney", city.Name);
+            Assert.AreEqual(4000000, city.Population);
+        }
+
         public class Post 
         {
             public String Content { get; set; }
