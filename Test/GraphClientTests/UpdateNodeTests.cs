@@ -91,12 +91,12 @@ namespace Neo4jClient.Test.GraphClientTests
                         MockResponse.Http((int)HttpStatusCode.NoContent)
                     },
                     {
-                        MockRequest.PostObjectAsJson("/index/node/foo", new { key="foo", value="bar", uri="http://foo/db/data/node/456"}),
-                        MockResponse.Json(HttpStatusCode.Created, "Location: http://foo/db/data/index/node/foo/bar/456")
-                    },
-                    {
                         MockRequest.Delete("/index/node/foo/456"),
                         MockResponse.Http((int)HttpStatusCode.NoContent)
+                    },
+                    {
+                        MockRequest.PostObjectAsJson("/index/node/foo", new { key="foo", value="bar", uri="http://foo/db/data/node/456"}),
+                        MockResponse.Json(HttpStatusCode.Created, "Location: http://foo/db/data/index/node/foo/bar/456")
                     }
                 })
             {
