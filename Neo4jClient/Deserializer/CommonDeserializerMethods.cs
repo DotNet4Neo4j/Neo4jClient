@@ -85,78 +85,84 @@ namespace Neo4jClient.Deserializer
                 tmpVal = Convert.ChangeType(tmpVal, propertyType);
                 return tmpVal;
             }
-            else if (propertyType.IsEnum)
+
+            if (propertyType.IsEnum)
             {
                 var raw = value.AsString();
                 var converted = Enum.Parse(propertyType, raw, false);
                 return converted;
             }
-            else if (propertyType == typeof(Uri))
+
+            if (propertyType == typeof(Uri))
             {
                 var raw = value.AsString();
                 var uri = new Uri(raw, UriKind.RelativeOrAbsolute);
                 return uri;
             }
-            else if (propertyType == typeof(string))
+
+            if (propertyType == typeof(string))
             {
                 var raw = value.AsString();
                 return raw;
             }
-            else if (propertyType == typeof(DateTime))
+
+            if (propertyType == typeof(DateTime))
             {
                 throw new NotSupportedException("DateTime values are not supported. Use DateTimeOffset instead.");
             }
-            else if (propertyType == typeof(DateTimeOffset))
+
+            if (propertyType == typeof(DateTimeOffset))
             {
                 var dateTimeOffset = ParseDateTimeOffset(value);
                 if (dateTimeOffset.HasValue)
                     return dateTimeOffset.Value;
                 return null;
             }
-            else if (propertyType == typeof(Decimal))
+
+            if (propertyType == typeof(Decimal))
             {
                 var dec = Decimal.Parse(value.AsString(), culture);
                 return dec;
             }
-            else if (propertyType == typeof(TimeSpan))
+
+            if (propertyType == typeof(TimeSpan))
             {
                 var valueString = value.ToString();
                 var timeSpan = TimeSpan.Parse(valueString);
                 return timeSpan;
             }
-            else if (propertyType == typeof(Guid))
+
+            if (propertyType == typeof(Guid))
             {
                 var raw = value.AsString();
                 var guid = string.IsNullOrEmpty(raw) ? Guid.Empty : new Guid(raw);
                 return guid;
             }
-            else if (genericTypeDef == typeof(List<>))
+
+            if (genericTypeDef == typeof(List<>))
             {
                 var list = BuildList(propertyType, value.Children(), culture, typeMappings, nestingLevel + 1);
                 return list;
             }
-            else if (genericTypeDef == typeof(Dictionary<,>))
+
+            if (genericTypeDef == typeof(Dictionary<,>))
             {
                 var keyType = propertyType.GetGenericArguments()[0];
 
                 // only supports Dict<string, T>()
-                if (keyType == typeof(string))
-                {
-                    var dict = BuildDictionary(propertyType, value.Children(), culture, typeMappings, nestingLevel + 1);
-                    return dict;
-                }
-                else
+                if (keyType != typeof (string))
                 {
                     throw new NotSupportedException("Value coersion only supports dictionaries with a key of type System.String");
                 }
+
+                var dict = BuildDictionary(propertyType, value.Children(), culture, typeMappings, nestingLevel + 1);
+                return dict;
             }
-            else
-            {
-                // nested objects
-                var mapping = typeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, propertyType));
-                var item = mapping != null ? MutateObject(value, culture, typeMappings, nestingLevel, mapping, propertyType) : CreateAndMap(propertyType, value, culture, typeMappings, nestingLevel + 1);
-                return item;
-            }
+
+            // nested objects
+            var mapping = typeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, propertyType));
+            var item = mapping != null ? MutateObject(value, culture, typeMappings, nestingLevel, mapping, propertyType) : CreateAndMap(propertyType, value, culture, typeMappings, nestingLevel + 1);
+            return item;
         }
 
         public static void SetPropertyValue(
