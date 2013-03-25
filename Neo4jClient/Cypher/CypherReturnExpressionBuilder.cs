@@ -7,7 +7,7 @@ namespace Neo4jClient.Cypher
 {
     public class CypherReturnExpressionBuilder
     {
-        internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Result(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
+        internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
 
         // Terminology used in this file:
         //
