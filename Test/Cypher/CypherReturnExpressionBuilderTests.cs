@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
@@ -189,6 +190,22 @@ namespace Neo4jClient.Test.Cypher
             var text = CypherReturnExpressionBuilder.BuildText(expression);
 
             Assert.AreEqual("collect(distinct a) AS Foo", text);
+        }
+
+        [Test]
+        public void ThrowNiceErrorForChainedMethods()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new
+                {
+                    Foo = a
+                        .CollectAs<Foo>()
+                        .Select(f => f.Data)
+                        .ToList()
+                };
+
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            Assert.AreEqual(CypherReturnExpressionBuilder.ReturnExpressionCannotBeSerializedToCypherExceptionMessage, ex.Message);
         }
 
         public class Foo
