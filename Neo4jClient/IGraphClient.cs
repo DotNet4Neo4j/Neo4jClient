@@ -20,6 +20,14 @@ namespace Neo4jClient
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 
+        /// <summary>
+        /// Retrieves the specified node, gives you an opportunity to mutate it in the callback, then persists the final object back to Neo4j. Results in two calls over the wire: one to retrieve, one to set.
+        /// </summary>
+        /// <typeparam name="TNode">POCO type that represents the structure of the node's data</typeparam>
+        /// <param name="nodeReference">The node to retrieve and update</param>
+        /// <param name="updateCallback">A callback to mutate the values between retrieval and persistence</param>
+        /// <param name="indexEntriesCallback">A callback to return new index entries that should also be persisted</param>
+        /// <param name="changeCallback">A callback to respond to the resulting property changes</param>
         void Update<TNode>(NodeReference<TNode> nodeReference,
                            Action<TNode> updateCallback,
                            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
