@@ -736,7 +736,7 @@ namespace Neo4jClient.Test.Deserializer
             var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Set);
             var content = @"{
                 'data' : [
-                    [ '東京', 13000000 ],
+                    [ 'Tokyo', 13000000 ],
                     [ 'London', 8000000 ],
                     [ 'Sydney', 4000000 ]
                 ],
@@ -750,7 +750,7 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual(3, results.Count());
 
             dynamic city = results.ElementAt(0);
-            Assert.AreEqual("東京", city.Name);
+            Assert.AreEqual("Tokyo", city.Name);
             Assert.AreEqual(13000000, city.Population);
 
             city = results.ElementAt(1);
