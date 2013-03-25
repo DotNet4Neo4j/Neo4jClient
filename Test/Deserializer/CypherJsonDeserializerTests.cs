@@ -729,7 +729,9 @@ namespace Neo4jClient.Test.Deserializer
             DeserializeShouldMapProjectionIntoAnonymousType(new { Name = "", Population = 0 });
         }
 
+// ReSharper disable UnusedParameter.Local
         static void DeserializeShouldMapProjectionIntoAnonymousType<TAnon>(TAnon dummy)
+// ReSharper restore UnusedParameter.Local
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
