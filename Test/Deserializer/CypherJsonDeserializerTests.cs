@@ -736,7 +736,7 @@ namespace Neo4jClient.Test.Deserializer
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection);
             var content = @"{
                 'data' : [
                     [ 'Tokyo', 13000000 ],
