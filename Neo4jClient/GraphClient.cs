@@ -460,6 +460,37 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
+        public void Update<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
+        {
+            CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var allIndexEntries = indexEntries == null
+                ? new IndexEntry[0]
+                : indexEntries.ToArray();
+
+            if (allIndexEntries.Any())
+                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+
+            var nodePropertiesEndpoint = ResolveEndpoint(nodeReference) + "/properties";
+            SendHttpRequest(
+                HttpPutAsJson(nodePropertiesEndpoint, replacementData),
+                HttpStatusCode.NoContent);
+
+            if (allIndexEntries.Any())
+                ReIndex(nodeReference, allIndexEntries);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
+        }
+
         public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback,
             Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
             Action<IEnumerable<FieldChange>> changeCallback = null)

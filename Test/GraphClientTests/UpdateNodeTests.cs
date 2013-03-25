@@ -231,6 +231,66 @@ namespace Neo4jClient.Test.GraphClientTests
             }
         }
 
+        [Test]
+        public void ShouldReplaceNode()
+        {
+            var newData = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PutObjectAsJson("/node/456/properties", newData),
+                    MockResponse.Http((int)HttpStatusCode.NoContent)
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                //Act
+                var pocoReference = new NodeReference<TestNode>(456);
+                graphClient.Update(pocoReference, newData);
+            }
+        }
+
+        [Test]
+        public void ShouldReplaceNodeWithIndexEntries()
+        {
+            var newData = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PutObjectAsJson("/node/456/properties", newData),
+                    MockResponse.Http((int)HttpStatusCode.NoContent)
+                },
+                {
+                    MockRequest.Delete("/index/node/foo/456"),
+                    MockResponse.Http((int)HttpStatusCode.NoContent)
+                },
+                {
+                    MockRequest.PostObjectAsJson("/index/node/foo", new { key="foo", value="bar", uri="http://foo/db/data/node/456"}),
+                    MockResponse.Json(HttpStatusCode.Created, "Location: http://foo/db/data/index/node/foo/bar/456")
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                // Act
+                var pocoReference = new NodeReference<TestNode>(456);
+                graphClient.Update(
+                    pocoReference,
+                    newData,
+                    new []
+                    {
+                        new IndexEntry
+                        {
+                            Name = "foo",
+                            KeyValues = new Dictionary<string, object> {{"foo", "bar"}},
+                        }
+                    });
+            }
+        }
+
         public class TestNode
         {
             public int Id { get; set; }
