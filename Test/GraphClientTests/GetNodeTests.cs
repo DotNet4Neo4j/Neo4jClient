@@ -52,6 +52,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 Assert.AreEqual("baz", node.Data.Baz);
             }
         }
+
         [Test]
         public void ShouldReturnNodeDataForLongId()
         {
