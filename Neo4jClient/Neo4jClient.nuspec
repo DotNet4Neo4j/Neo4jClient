@@ -3,7 +3,7 @@
   <metadata>
     <id>Neo4jClient</id>
     <version>0.0.0.0</version>
-    <authors>Tatham Oddie, Romiko Derbynew and contributors</authors>
+    <authors>Tatham Oddie, Romiko Derbynew, contributors</authors>
     <owners>Tatham Oddie</owners>
     <licenseUrl>http://hg.readify.net/neo4jclient/src/tip/LICENSE</licenseUrl>
     <projectUrl>http://hg.readify.net/neo4jclient</projectUrl>
