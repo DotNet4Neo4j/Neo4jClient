@@ -60,6 +60,16 @@ namespace Neo4jClient.Cypher
             return "{" + paramName + "}";
         }
 
+        public void CreateParameter(string key, object value)
+        {
+            queryParameters.Add(key, value);
+        }
+
+        public bool ContainsParameterWithKey(string key)
+        {
+            return queryParameters.ContainsKey(key);
+        }
+
         public QueryWriter AppendClause(string clause, params object[] paramValues)
         {
             if (paramValues.Any())

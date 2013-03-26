@@ -49,6 +49,15 @@ namespace Neo4jClient.Cypher
             Builder = new CypherQueryBuilder(queryWriter);
         }
 
+        public ICypherFluentQuery WithParam(string key, object value)
+        {
+            if (Builder.QueryWriter.ContainsParameterWithKey(key))
+                throw new ArgumentException("A parameter with the given key is already defined in the query.", "key");
+            var newBuilder = Builder.CallWriter(w =>
+                w.CreateParameter(key, value));
+            return new CypherFluentQuery(Client, newBuilder);
+        }
+
         public ICypherFluentQuery Start(string identity, string startText)
         {
             var newBuilder = Builder.CallWriter(w =>
