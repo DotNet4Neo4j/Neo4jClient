@@ -8,6 +8,8 @@ namespace Neo4jClient.Cypher
         CypherQuery Query { get; }
         void ExecuteWithoutResults();
 
+        ICypherFluentQuery WithParam(string key, object value);
+
         ICypherFluentQuery Start(string identity, string startText);
         ICypherFluentQuery Start(params ICypherStartBit[] startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
