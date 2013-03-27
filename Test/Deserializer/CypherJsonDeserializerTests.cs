@@ -725,6 +725,47 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/67")]
+        public void DeserializeShouldMapNullCollectResultsWithOtherProperties_Test2()
+        {
+            // START app=node(0) MATCH app<-[?:Alternative]-alternatives RETURN app AS App, collect(alternatives) AS Alternatives;
+
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<AppAlternatives>(client, CypherResultMode.Projection);
+            var content = @"{
+  'columns' : [ 'Application', 'Alternatives' ],
+  'data' : [ [ {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/123/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/123/relationships/out',
+    'data' : {
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/123/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/123/traverse/{returnType}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/123/relationships/all',
+    'property' : 'http://localhost:8000/db/data/node/123/properties/{key}',
+    'self' : 'http://localhost:8000/db/data/node/123',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/123/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/123/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/123/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/123/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/123/relationships'
+  }, [ null ] ] ]
+}".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(1, results.Count());
+            Assert.IsNull(results[0].Alternatives);
+            Assert.IsInstanceOf<Node<App>>(results[0].Application);
+            Assert.AreEqual(123, results[0].Application.Reference.Id);
+        }
+
+        [Test]
         public void DeserializeShouldMapProjectionIntoAnonymousType()
         {
             DeserializeShouldMapProjectionIntoAnonymousType(new { Name = "", Population = 0 });
@@ -763,6 +804,16 @@ namespace Neo4jClient.Test.Deserializer
             city = results.ElementAt(2);
             Assert.AreEqual("Sydney", city.Name);
             Assert.AreEqual(4000000, city.Population);
+        }
+
+        public class App
+        {
+        }
+
+        public class AppAlternatives
+        {
+            public Node<App> Application { get; set; }
+            public IEnumerable<Node<App>> Alternatives { get; set; }
         }
 
         public class Post 
