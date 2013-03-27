@@ -685,7 +685,7 @@ namespace Neo4jClient.Test.Deserializer
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/63")]
-        public void DeserializeShouldMapEmptyCollectResultsWithOtherProperties()
+        public void DeserializeShouldMapNullCollectResultsWithOtherProperties()
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
