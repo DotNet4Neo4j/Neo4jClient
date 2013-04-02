@@ -154,8 +154,10 @@ namespace Neo4jClient.Cypher
                     value = ((PropertyInfo) node.Member).GetValue(null, null);
                     break;
                 default:
-                    throw new NotImplementedException(string.Format(
-                        "We haven't implemented support for reading static {0} yet", node.Member.MemberType));
+                    throw new NotSupportedException(string.Format(
+                        "Unhandled member type {0} in static member expression: {1}",
+                        node.Member.MemberType,
+                        node));
             }
 
             var valueWrappedInParameter = createParameterCallback(value);
