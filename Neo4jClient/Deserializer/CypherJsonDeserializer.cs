@@ -28,7 +28,10 @@ namespace Neo4jClient.Deserializer
         {
             try
             {
-                return DeserializeInternal(content);
+                // Force the deserialization to happen now, not later, as there's
+                // not much value to deferred execution here and we'd like to know
+                // about any errors now
+                return DeserializeInternal(content).ToArray();
             }
             catch (Exception ex)
             {
