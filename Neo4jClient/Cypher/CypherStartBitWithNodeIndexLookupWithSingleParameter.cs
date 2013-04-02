@@ -15,10 +15,6 @@ namespace Neo4jClient.Cypher
             this.parameter = parameter;
         }
 
-        public string Identifier { get { return identifier; } }
-        public string IndexName { get { return indexName; } }
-        public string Parameter { get { return parameter; } }
-
         public string ToCypherText(Func<object, string> createParameterCallback)
         {
             var valueParameter = createParameterCallback(parameter);

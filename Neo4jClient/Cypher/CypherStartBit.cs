@@ -41,21 +41,6 @@ namespace Neo4jClient.Cypher
             lookupIds = relationshipReferences.Select(r => r.Id).ToArray();
         }
 
-        public string Identifier
-        {
-            get { return identifier; }
-        }
-
-        public string LookupType
-        {
-            get { return lookupType; }
-        }
-
-        public IEnumerable<long> LookupIds
-        {
-            get { return lookupIds; }
-        }
-
         public string ToCypherText(Func<object, string> createParameterCallback)
         {
             var lookupIdParameterNames = lookupIds
