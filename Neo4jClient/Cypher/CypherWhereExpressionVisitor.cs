@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -126,9 +127,24 @@ namespace Neo4jClient.Cypher
                 return node;
             }
 
-            if (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Parameter)
+            var isParameterExpression =
+                node.NodeType == ExpressionType.MemberAccess &&
+                node.Expression.NodeType == ExpressionType.Parameter;
+            var isParameterExpressionWrappedInConvert =
+                node.NodeType == ExpressionType.MemberAccess &&
+                node.Expression.NodeType == ExpressionType.Convert &&
+                ((UnaryExpression)node.Expression).Operand.NodeType == ExpressionType.Parameter;
+
+            if (isParameterExpression ||
+                isParameterExpressionWrappedInConvert)
             {
-                var parameter = ((ParameterExpression)node.Expression);
+                var identityExpression = node.Expression as ParameterExpression;
+                if (identityExpression == null &&
+                    node.Expression.NodeType == ExpressionType.Convert)
+                    identityExpression = ((UnaryExpression) node.Expression).Operand as ParameterExpression;
+                if (identityExpression == null)
+                    throw new InvalidOperationException("Failed to extract identity name from expression " + node);
+                var identity = identityExpression.Name;
 
                 var nullIdentifier = string.Empty;
 
@@ -142,7 +158,7 @@ namespace Neo4jClient.Cypher
                     )
                     nullIdentifier = "?";
 
-                TextOutput.Append(string.Format("{0}.{1}{2}", parameter.Name, node.Member.Name, nullIdentifier));
+                TextOutput.Append(string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier));
             }
             else if (
                 (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Constant)
