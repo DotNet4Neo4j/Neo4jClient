@@ -167,7 +167,7 @@ namespace Neo4jClient.Deserializer
 
                 if (ctor != null)
                 {
-                    getRow = (token) => ReadProjectionRowUsingCtor(token, propertiesDictionary, columnNames, jsonTypeMappings, ctor);
+                    getRow = token => ReadProjectionRowUsingCtor(token, propertiesDictionary, columnNames, jsonTypeMappings, ctor);
                 }
                 
                 if (getRow == null)
@@ -183,7 +183,7 @@ namespace Neo4jClient.Deserializer
             }
             else
             {
-                getRow = (token) => ReadProjectionRowUsingProperties(token, propertiesDictionary, columnNames, jsonTypeMappings);
+                getRow = token => ReadProjectionRowUsingProperties(token, propertiesDictionary, columnNames, jsonTypeMappings);
             }
 
             var dataArray = (JArray)root["data"];
@@ -197,7 +197,7 @@ namespace Neo4jClient.Deserializer
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
             IList<string> columnNames,
-            TypeMapping[] jsonTypeMappings,
+            IEnumerable<TypeMapping> jsonTypeMappings,
             ConstructorInfo ctor)
         {
 
