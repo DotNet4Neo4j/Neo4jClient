@@ -97,6 +97,36 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("(foo.NullableBar? is not null)", result);
         }
 
+        [Test]
+        public void ShouldComparePropertiesAcrossEntities()
+        {
+            // http://stackoverflow.com/questions/15718916/neo4jclient-where-clause-not-putting-in-parameters
+            // Where<TSourceNode, TSourceNode>((otherStartNodes, startNode) => otherStartNodes.Id != startNode.Id)
+
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, Foo, bool>> expression =
+                (p1, p2) => p1.Bar == p2.Bar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(p1.Bar = p2.Bar)", result);
+        }
+
+        [Test]
+        public void ShouldComparePropertiesAcrossEntitiesNotEqual()
+        {
+            // http://stackoverflow.com/questions/15718916/neo4jclient-where-clause-not-putting-in-parameters
+            // Where<TSourceNode, TSourceNode>((otherStartNodes, startNode) => otherStartNodes.Id != startNode.Id)
+
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, Foo, bool>> expression =
+                (p1, p2) => p1.Bar != p2.Bar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(p1.Bar <> p2.Bar)", result);
+        }
+
         static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
         {
             var paramName = string.Format("p{0}", parameters.Count);
