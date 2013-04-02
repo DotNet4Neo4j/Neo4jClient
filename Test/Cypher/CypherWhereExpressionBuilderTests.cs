@@ -27,6 +27,11 @@ namespace Neo4jClient.Test.Cypher
             get { return 456; }
         }
 
+        interface IFoo
+        {
+            int Bar { get; set; }
+        }
+
         [Test]
         public void AccessStaticField()
         {
@@ -125,6 +130,39 @@ namespace Neo4jClient.Test.Cypher
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
             Assert.AreEqual("(p1.Bar <> p2.Bar)", result);
+        }
+
+        [Test]
+        public void ShouldComparePropertiesAcrossInterfaces()
+        {
+            // http://stackoverflow.com/questions/15718916/neo4jclient-where-clause-not-putting-in-parameters
+            // Where<TSourceNode, TSourceNode>((otherStartNodes, startNode) => otherStartNodes.Id != startNode.Id)
+
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<IFoo, IFoo, bool>> expression =
+                (p1, p2) => p1.Bar == p2.Bar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(p1.Bar = p2.Bar)", result);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/73/where-clause-not-building-correctly-with")]
+        public void ShouldComparePropertiesAcrossInterfacesViaGenerics()
+        {
+            TestShouldComparePropertiesAcrossInterfacesViaGenerics<IFoo>();
+        }
+
+        static void TestShouldComparePropertiesAcrossInterfacesViaGenerics<TNode>() where TNode : IFoo
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<TNode, TNode, bool>> expression =
+                (p1, p2) => p1.Bar == p2.Bar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(p1.Bar = p2.Bar)", result);
         }
 
         static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
