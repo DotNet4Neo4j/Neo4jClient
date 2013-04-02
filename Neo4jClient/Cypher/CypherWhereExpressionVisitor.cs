@@ -102,21 +102,21 @@ namespace Neo4jClient.Cypher
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            var isStaticMember =
-                node.NodeType == ExpressionType.MemberAccess &&
-                node.Expression == null;
+            if (node.NodeType != ExpressionType.MemberAccess)
+                throw new InvalidOperationException(string.Format(
+                    "Node was a MemberExpression but NodeType was {0} instead of MemberAccess (expected). Full node was: {1}",
+                    node.NodeType,
+                    node));
 
+            var isStaticMember = node.Expression == null;
             if (isStaticMember)
             {
                 VisitStaticMember(node);
                 return node;
             }
 
-            var isParameterExpression =
-                node.NodeType == ExpressionType.MemberAccess &&
-                node.Expression.NodeType == ExpressionType.Parameter;
+            var isParameterExpression = node.Expression.NodeType == ExpressionType.Parameter;
             var isParameterExpressionWrappedInConvert =
-                node.NodeType == ExpressionType.MemberAccess &&
                 node.Expression.NodeType == ExpressionType.Convert &&
                 ((UnaryExpression)node.Expression).Operand.NodeType == ExpressionType.Parameter;
 
@@ -127,11 +127,8 @@ namespace Neo4jClient.Cypher
                 return node;
             }
 
-            var isConstantExpression =
-                node.NodeType == ExpressionType.MemberAccess &&
-                node.Expression.NodeType == ExpressionType.Constant;
+            var isConstantExpression = node.Expression.NodeType == ExpressionType.Constant;
             var isConstantExpressionWrappedInMemberAccess =
-                node.NodeType == ExpressionType.MemberAccess &&
                 node.Expression.NodeType == ExpressionType.MemberAccess &&
                 ((MemberExpression) node.Expression).Expression.NodeType == ExpressionType.Constant;
 
