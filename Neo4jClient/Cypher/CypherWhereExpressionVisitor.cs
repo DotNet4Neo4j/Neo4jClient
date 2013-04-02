@@ -139,9 +139,7 @@ namespace Neo4jClient.Cypher
                 return node;
             }
 
-            TextOutput.Append(node.Member.Name);
-
-            return node;
+            throw new NotSupportedException(string.Format("Unhandled node type {0} in MemberExpression: {1}", node.NodeType, node));
         }
 
         void VisitStaticMember(MemberExpression node)
