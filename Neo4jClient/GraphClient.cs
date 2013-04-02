@@ -714,7 +714,7 @@ namespace Neo4jClient
             return results;
         }
 
-        [Obsolete("This method is for use by the framework internally. You should really be using GraphClient.Cypher instead. If you really really want to use this method, you'll have to access it via an explicit interface implementation on IRawGraphClient instead. This hurdle is for your own protection.", true)]
+        [Obsolete("This method is for use by the framework internally. Use IGraphClient.Cypher instead, and read the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher. If you really really want to call this method directly, and you accept the fact that YOU WILL LIKELY INTRODUCE A RUNTIME SECURITY RISK if you do so, then it shouldn't take you too long to find the correct explicit interface implementation that you have to call. This hurdle is for your own protection. You really really should not do it. This signature may be removed or renamed at any time.", true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
