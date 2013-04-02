@@ -982,6 +982,31 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual(1, secondResult.UniqueId);
         }
 
+        [Test]
+        public void BadJsonShouldThrowExceptionThatIncludesJson()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
+            const string content = @"xyz-json-zyx";
+
+            var ex = Assert.Throws<ArgumentException>(() =>
+                deserializer.Deserialize(content)
+            );
+            StringAssert.Contains(content, ex.Message);
+        }
+
+        [Test]
+        public void BadJsonShouldThrowExceptionThatIncludesFullNameOfTargetType()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
+
+            var ex = Assert.Throws<ArgumentException>(() =>
+                deserializer.Deserialize("xyz-json-zyx")
+            );
+            StringAssert.Contains(typeof(Asset).FullName, ex.Message);
+        }
+
         public class Asset
         {
             public long UniqueId { get; set; }

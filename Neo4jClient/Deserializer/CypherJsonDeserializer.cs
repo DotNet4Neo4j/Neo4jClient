@@ -26,6 +26,33 @@ namespace Neo4jClient.Deserializer
 
         public IEnumerable<TResult> Deserialize(string content)
         {
+            try
+            {
+                return DeserializeInternal(content);
+            }
+            catch (JsonException ex)
+            {
+                const string messageTemplate =
+                    @"Neo4jClient encountered an exception while deserializing the response from the server. This is likely a bug in Neo4jClient.
+
+Please open an issue at https://bitbucket.org/Readify/neo4jclient/issues/new
+
+To get a reply, and track your issue, ensure you are logged in on BitBucket before submitting.
+
+Include the full text of this exception, including this message, the stack trace, and all of the inner exception details.
+
+Include the full type definition of {0}.
+
+Include this raw JSON, with any sensitive values replaced with non-sensitive equivalents:
+
+{1}";
+                var message = string.Format(messageTemplate, typeof (TResult).FullName, content);
+                throw new ArgumentException(message, "content", ex);
+            }
+        }
+
+        IEnumerable<TResult> DeserializeInternal(string content)
+        {
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
