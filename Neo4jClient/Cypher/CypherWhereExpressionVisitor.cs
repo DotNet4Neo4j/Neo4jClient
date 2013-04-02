@@ -89,8 +89,8 @@ namespace Neo4jClient.Cypher
                 TextOutput.Append(Equal);
             }
 
-            var nextParameterName = createParameterCallback(node.Value);
-            TextOutput.Append(nextParameterName);
+            var valueWrappedInParameter = createParameterCallback(node.Value);
+            TextOutput.Append(valueWrappedInParameter);
             return node;
         }
 
@@ -121,8 +121,8 @@ namespace Neo4jClient.Cypher
                         throw new NotImplementedException(string.Format("We haven't implemented support for reading static {0} yet", node.Member.MemberType));
                 }
 
-                var nextParameterName = createParameterCallback(value);
-                TextOutput.Append(string.Format("{0}", nextParameterName));
+                var valueWrappedInParameter = createParameterCallback(value);
+                TextOutput.Append(valueWrappedInParameter);
 
                 return node;
             }
@@ -172,12 +172,12 @@ namespace Neo4jClient.Cypher
 
                 var value = node.Expression.NodeType == ExpressionType.Constant ? data : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
 
-                var nextParameterName = createParameterCallback(value);
-                TextOutput.Append(string.Format("{0}", nextParameterName));
+                var valueWrappedInParameter = createParameterCallback(value);
+                TextOutput.Append(valueWrappedInParameter);
             }
             else
             {
-                TextOutput.Append(string.Format("{0}", node.Member.Name));
+                TextOutput.Append(node.Member.Name);
             }
 
             return node;
