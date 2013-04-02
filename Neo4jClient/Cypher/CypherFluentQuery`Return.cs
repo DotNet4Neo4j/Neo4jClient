@@ -12,10 +12,11 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
         {
-            var newWriter = queryWriter.Clone();
-            newWriter.ResultMode = resultMode;
-            newWriter.AppendClause("RETURN " + statement);
-            return new CypherFluentQuery<TResult>(Client, newWriter);
+            return Mutate<TResult>(w =>
+            {
+                w.ResultMode = resultMode;
+                w.AppendClause("RETURN " + statement);
+            });
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity)
@@ -27,22 +28,22 @@ namespace Neo4jClient.Cypher
         {
             var statement = CypherReturnExpressionBuilder.BuildText(expression);
 
-            var newWriter = queryWriter.Clone();
-            newWriter.ResultMode = CypherResultMode.Projection;
-            newWriter.AppendClause("RETURN " + statement);
-
-            return new CypherFluentQuery<TResult>(Client, newWriter);
+            return Mutate<TResult>(w =>
+            {
+                w.ResultMode = CypherResultMode.Projection;
+                w.AppendClause("RETURN " + statement);
+            });
         }
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
         {
             var statement = CypherReturnExpressionBuilder.BuildText(expression);
 
-            var newWriter = queryWriter.Clone();
-            newWriter.ResultMode = CypherResultMode.Projection;
-            newWriter.AppendClause("RETURN distinct " + statement);
-
-            return new CypherFluentQuery<TResult>(Client, newWriter);
+            return Mutate<TResult>(w =>
+            {
+                w.ResultMode = CypherResultMode.Projection;
+                w.AppendClause("RETURN distinct " + statement);
+            });
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
