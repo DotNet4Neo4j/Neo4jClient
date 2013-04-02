@@ -150,13 +150,25 @@ namespace Neo4jClient.Cypher
 
             var optionalIndicator = isNullable ? "?" : "";
 
-            if (expression.Method.Name.Equals("CollectAs"))
-                return string.Format("collect({0}) AS {1}", targetObject.Name, targetMember.Name);
-
-            if (expression.Method.Name.Equals("CollectAsDistinct"))
-                return string.Format("collect(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
-            
-            return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, targetMember.Name);
+            var methodName = expression.Method.Name;
+            switch (methodName)
+            {
+                case "As":
+                case "Node":
+                    return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, targetMember.Name);
+                case "CollectAs":
+                    return string.Format("collect({0}) AS {1}", targetObject.Name, targetMember.Name);
+                case "CollectAsDistinct":
+                    return string.Format("collect(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
+                case "Id":
+                    return string.Format("id({0}) AS {1}", targetObject.Name, targetMember.Name);
+                case "Length":
+                    return string.Format("length({0}) AS {1}", targetObject.Name, targetMember.Name);
+                case "Type":
+                    return string.Format("type({0}) AS {1}", targetObject.Name, targetMember.Name);
+                default:
+                    throw new InvalidOperationException("Unexpected ICypherResultItem method definition, ICypherResultItem." + methodName);
+            }
         }
 
         static Expression UnwrapImplicitCasts(Expression expression)

@@ -16,14 +16,32 @@ namespace Neo4jClient.Cypher
 
         /// <summary>
         /// Equivalent to <code>RETURN collect(foo)</code>
-        /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-collect
+        /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#aggregation-collect
         /// </summary>
         IEnumerable<Node<T>> CollectAs<T>();
 
         /// <summary>
         /// Equivalent to <code>RETURN collect(distinct foo)</code>
-        /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-collect
+        /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#aggregation-collect
         /// </summary>
         IEnumerable<Node<T>> CollectAsDistinct<T>();
+
+        /// <summary>
+        /// Equivalent to <code>RETURN length(foo)</code>
+        /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-length
+        /// </summary>
+        long Length();
+
+        /// <summary>
+        /// Equivalent to <code>RETURN type(foo)</code>
+        /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-type
+        /// </summary>
+        string Type();
+
+        /// <summary>
+        /// Equivalent to <code>RETURN id(foo)</code>
+        /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-id
+        /// </summary>
+        long Id();
     }
 }
