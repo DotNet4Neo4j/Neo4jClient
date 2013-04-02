@@ -17,5 +17,6 @@
   <files>
     <file src="bin\Release\Neo4jClient.dll" target="lib\net40" />
     <file src="bin\Release\Neo4jClient.pdb" target="lib\net40" />
+    <file src="bin\Release\Neo4jClient.xml" target="lib\net40" />
   </files>
 </package>
