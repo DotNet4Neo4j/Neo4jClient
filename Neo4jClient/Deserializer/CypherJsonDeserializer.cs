@@ -247,7 +247,6 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             return result;
         }
 
-
         TResult ReadProjectionRowUsingProperties(
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
