@@ -102,26 +102,13 @@ namespace Neo4jClient.Cypher
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            if (node.NodeType == ExpressionType.MemberAccess &&
-                node.Expression == null)
-                // It's a static member
+            var isStaticMember =
+                node.NodeType == ExpressionType.MemberAccess &&
+                node.Expression == null;
+
+            if (isStaticMember)
             {
-                object value;
-                switch (node.Member.MemberType)
-                {
-                    case MemberTypes.Field:
-                        value = ((FieldInfo)node.Member).GetValue(null);
-                        break;
-                    case MemberTypes.Property:
-                        value = ((PropertyInfo)node.Member).GetValue(null, null);
-                        break;
-                    default:
-                        throw new NotImplementedException(string.Format("We haven't implemented support for reading static {0} yet", node.Member.MemberType));
-                }
-
-                var valueWrappedInParameter = createParameterCallback(value);
-                TextOutput.Append(valueWrappedInParameter);
-
+                VisitStaticMember(node);
                 return node;
             }
 
@@ -136,49 +123,87 @@ namespace Neo4jClient.Cypher
             if (isParameterExpression ||
                 isParameterExpressionWrappedInConvert)
             {
-                var identityExpression = node.Expression as ParameterExpression;
-                if (identityExpression == null &&
-                    node.Expression.NodeType == ExpressionType.Convert)
-                    identityExpression = ((UnaryExpression) node.Expression).Operand as ParameterExpression;
-                if (identityExpression == null)
-                    throw new InvalidOperationException("Failed to extract identity name from expression " + node);
-                var identity = identityExpression.Name;
-
-                var nullIdentifier = string.Empty;
-
-                var propertyParent = node.Member.ReflectedType;
-                var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
-
-                if (
-                    (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>)) 
-                    ||
-                    (propertyType == typeof(string))
-                    )
-                    nullIdentifier = "?";
-
-                TextOutput.Append(string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier));
+                VisitParameterMember(node);
+                return node;
             }
-            else if (
-                (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.Constant)
-                || 
-                (node.NodeType == ExpressionType.MemberAccess && node.Expression.NodeType == ExpressionType.MemberAccess
-                && ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant))
+
+            var isConstantExpression =
+                node.NodeType == ExpressionType.MemberAccess &&
+                node.Expression.NodeType == ExpressionType.Constant;
+            var isConstantExpressionWrappedInMemberAccess =
+                node.NodeType == ExpressionType.MemberAccess &&
+                node.Expression.NodeType == ExpressionType.MemberAccess &&
+                ((MemberExpression) node.Expression).Expression.NodeType == ExpressionType.Constant;
+
+            if (isConstantExpression ||
+                isConstantExpressionWrappedInMemberAccess)
             {
-
-                var data = node.Expression.NodeType == ExpressionType.Constant ? ParseValueFromExpression(node) :
-                ParseValueFromExpression(node.Expression);
-
-                var value = node.Expression.NodeType == ExpressionType.Constant ? data : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
-
-                var valueWrappedInParameter = createParameterCallback(value);
-                TextOutput.Append(valueWrappedInParameter);
+                VisitConstantMember(node);
+                return node;
             }
-            else
-            {
-                TextOutput.Append(node.Member.Name);
-            }
+
+            TextOutput.Append(node.Member.Name);
 
             return node;
+        }
+
+        void VisitStaticMember(MemberExpression node)
+        {
+            object value;
+            switch (node.Member.MemberType)
+            {
+                case MemberTypes.Field:
+                    value = ((FieldInfo) node.Member).GetValue(null);
+                    break;
+                case MemberTypes.Property:
+                    value = ((PropertyInfo) node.Member).GetValue(null, null);
+                    break;
+                default:
+                    throw new NotImplementedException(string.Format(
+                        "We haven't implemented support for reading static {0} yet", node.Member.MemberType));
+            }
+
+            var valueWrappedInParameter = createParameterCallback(value);
+            TextOutput.Append(valueWrappedInParameter);
+        }
+
+        void VisitParameterMember(MemberExpression node)
+        {
+            var identityExpression = node.Expression as ParameterExpression;
+            if (identityExpression == null &&
+                node.Expression.NodeType == ExpressionType.Convert)
+                identityExpression = ((UnaryExpression) node.Expression).Operand as ParameterExpression;
+            if (identityExpression == null)
+                throw new InvalidOperationException("Failed to extract identity name from expression " + node);
+            var identity = identityExpression.Name;
+
+            var nullIdentifier = string.Empty;
+
+            var propertyParent = node.Member.ReflectedType;
+            var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
+
+            if (
+                (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
+                ||
+                (propertyType == typeof (string))
+                )
+                nullIdentifier = "?";
+
+            TextOutput.Append(string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier));
+        }
+
+        void VisitConstantMember(MemberExpression node)
+        {
+            var data = node.Expression.NodeType == ExpressionType.Constant
+                ? ParseValueFromExpression(node)
+                : ParseValueFromExpression(node.Expression);
+
+            var value = node.Expression.NodeType == ExpressionType.Constant
+                ? data
+                : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
+
+            var valueWrappedInParameter = createParameterCallback(value);
+            TextOutput.Append(valueWrappedInParameter);
         }
 
         static object ParseValueFromExpression(Expression expression)
