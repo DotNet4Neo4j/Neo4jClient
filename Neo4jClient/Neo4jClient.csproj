@@ -86,7 +86,6 @@
     <Compile Include="Deserializer\CypherJsonDeserializer.cs" />
     <Compile Include="Cypher\CypherFluentQuery.cs" />
     <Compile Include="Cypher\CypherFluentQuery`TResult.cs" />
-    <Compile Include="Cypher\CypherQueryBuilder.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilder.cs" />
     <Compile Include="Cypher\CypherStartBit.cs" />
     <Compile Include="Cypher\CypherQuery.cs" />

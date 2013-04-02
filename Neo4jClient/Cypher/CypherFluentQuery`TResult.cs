@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -10,11 +9,6 @@ namespace Neo4jClient.Cypher
         CypherFluentQuery,
         ICypherFluentQuery<TResult>
     {
-        [Obsolete("Use the QueryWriter overload instead")]
-        public CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
-            : base(client, builder)
-        {}
-
         public CypherFluentQuery(IGraphClient client, QueryWriter writer)
             : base(client, writer)
         {}

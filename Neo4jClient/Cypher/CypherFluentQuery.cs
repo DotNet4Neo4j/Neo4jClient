@@ -14,7 +14,6 @@ namespace Neo4jClient.Cypher
         IAttachedReference
     {
         protected readonly IRawGraphClient Client;
-        protected readonly CypherQueryBuilder Builder;
         protected readonly QueryWriter queryWriter;
 
         public CypherFluentQuery(IGraphClient client)
@@ -25,17 +24,6 @@ namespace Neo4jClient.Cypher
             Client = (IRawGraphClient)client;
 
             queryWriter = new QueryWriter();
-            Builder = new CypherQueryBuilder(queryWriter);
-        }
-
-        protected CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
-        {
-            if (!(client is IRawGraphClient))
-                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
-
-            queryWriter = builder.QueryWriter;
-            Client = (IRawGraphClient)client;
-            Builder = builder;
         }
 
         protected CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
@@ -45,7 +33,6 @@ namespace Neo4jClient.Cypher
 
             this.queryWriter = queryWriter;
             Client = (IRawGraphClient)client;
-            Builder = new CypherQueryBuilder(queryWriter);
         }
 
         ICypherFluentQuery Mutate(Action<QueryWriter> callback)
