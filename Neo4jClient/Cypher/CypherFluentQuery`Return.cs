@@ -10,6 +10,7 @@ namespace Neo4jClient.Cypher
             return Mutate<TResult>(w => w.AppendClause("RETURN " + identity));
         }
 
+        [Obsolete("This overload will be removed in future versions because the result mode should all be managed automatically. If there's a specific reason for why you are using this, raise an issue at https://bitbucket.org/Readify/neo4jclient/issues/new so we can fix it before we remove this overload.")]
         public ICypherFluentQuery<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
         {
             return Mutate<TResult>(w =>
