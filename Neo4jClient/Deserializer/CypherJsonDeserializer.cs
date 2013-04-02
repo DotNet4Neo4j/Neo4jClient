@@ -30,7 +30,7 @@ namespace Neo4jClient.Deserializer
             {
                 return DeserializeInternal(content);
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
                 const string messageTemplate =
                     @"Neo4jClient encountered an exception while deserializing the response from the server. This is likely a bug in Neo4jClient.
