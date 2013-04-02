@@ -263,20 +263,31 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 cellIndex++;
 
                 var property = propertiesDictionary[columnName];
-                var propertyType = property.PropertyType;
-                var cellChildren = cell.Children().ToArray();
-                if (propertyType.IsGenericType &&
-                    propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>) &&
-                    cell.Type == JTokenType.Array &&
-                    cellChildren.Count() == 1 &&
-                    cellChildren.Single() != null &&
-                    cellChildren.Single().Type == JTokenType.Null)
-                    continue;
+
+                var isNullArray = IsNullArray(property, cell);
+                if (isNullArray) continue;
 
                 CommonDeserializerMethods.SetPropertyValue(result, property, cell, culture, jsonTypeMappings, 0);
             }
 
             return result;
+        }
+
+        static bool IsNullArray(PropertyInfo property, JToken cell)
+        {
+            // Empty arrays in Cypher tables come back as things like [null] or [null,null]
+            // instead of just [] or null. We detect these scenarios and convert them to just
+            // null.
+
+            var propertyType = property.PropertyType;
+            var cellChildren = cell.Children().ToArray();
+            var isNullArray =
+                propertyType.IsGenericType &&
+                propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>) &&
+                cell.Type == JTokenType.Array &&
+                cellChildren.Any() &&
+                cellChildren.All(c => c.Type == JTokenType.Null);
+            return isNullArray;
         }
     }
 }

@@ -766,6 +766,23 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/67")]
+        public void DeserializeShouldMapNullCollectResultsWithOtherProperties_Test3()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection);
+            var content = @"{'columns':['Fans'],'data':[[[null,null]]]}".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(1, results.Count());
+            Assert.IsNull(results[0].Fans);
+        }
+
+        [Test]
         public void DeserializeShouldMapProjectionIntoAnonymousType()
         {
             DeserializeShouldMapProjectionIntoAnonymousType(new { Name = "", Population = 0 });
