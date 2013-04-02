@@ -15,8 +15,7 @@ namespace Neo4jClient.Cypher
     {
         protected readonly IRawGraphClient Client;
         protected readonly CypherQueryBuilder Builder;
-
-        readonly QueryWriter queryWriter;
+        protected readonly QueryWriter queryWriter;
 
         public CypherFluentQuery(IGraphClient client)
         {
@@ -49,33 +48,44 @@ namespace Neo4jClient.Cypher
             Builder = new CypherQueryBuilder(queryWriter);
         }
 
+        ICypherFluentQuery Mutate(Action<QueryWriter> callback)
+        {
+            var newWriter = queryWriter.Clone();
+            callback(newWriter);
+            return new CypherFluentQuery(Client, newWriter);
+        }
+
+        protected ICypherFluentQuery<TResult> Mutate<TResult>(Action<QueryWriter> callback)
+        {
+            var newWriter = queryWriter.Clone();
+            callback(newWriter);
+            return new CypherFluentQuery<TResult>(Client, newWriter);
+        }
+
         public ICypherFluentQuery WithParam(string key, object value)
         {
-            if (Builder.QueryWriter.ContainsParameterWithKey(key))
+            if (queryWriter.ContainsParameterWithKey(key))
                 throw new ArgumentException("A parameter with the given key is already defined in the query.", "key");
-            var newBuilder = Builder.CallWriter(w =>
-                w.CreateParameter(key, value));
-            return new CypherFluentQuery(Client, newBuilder);
+            return Mutate(w => w.CreateParameter(key, value));
         }
 
         public ICypherFluentQuery Start(string identity, string startText)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause(string.Format("START {0}={1}", identity, startText)));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
-            var writer = queryWriter.Clone();
+            return Mutate(w =>
+            {
+                var startBitsText = startBits
+                    .Select(b => b.ToCypherText(w.CreateParameter))
+                    .ToArray();
+                var startText = "START " + string.Join(", ", startBitsText);
 
-            var startBitsText = startBits
-                .Select(b => b.ToCypherText(writer.CreateParameter))
-                .ToArray();
-            var startText = string.Join(", ", startBitsText);
-            writer.AppendClause("START " + startText);
-
-            return new CypherFluentQuery(Client, writer);
+                w.AppendClause(startText);
+            });
         }
 
         public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
@@ -127,9 +137,8 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Match(params string[] matchText)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause("MATCH " + string.Join(", ", matchText)));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Relate(string relateText)
@@ -138,9 +147,8 @@ namespace Neo4jClient.Cypher
                 Client.ServerVersion >= new Version(1, 8, 0, 7))
                 throw new NotSupportedException("You're trying to use the RELATE keyword against a Neo4j instance ≥ 1.8M07. In Neo4j 1.8M07, it was renamed from RELATE to CREATE UNIQUE. You need to update your code to use our new CreateUnique method. (We didn't want to just plumb the Relate method to CREATE UNIQUE, because that would introduce a deviation between the .NET wrapper and the Cypher language.)\r\n\r\nSee https://github.com/systay/community/commit/c7dbbb929abfef600266a20f065d760e7a1fff2e for detail.");
 
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause("RELATE " + relateText));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery CreateUnique(string createUniqueText)
@@ -149,9 +157,8 @@ namespace Neo4jClient.Cypher
                 (Client.ServerVersion >= new Version(1, 8, 0, 1) && Client.ServerVersion <= new Version(1, 8, 0, 6)))
                 throw new NotSupportedException("The CREATE UNIQUE clause was only introduced in Neo4j 1.8M07, but you're querying against an older version of Neo4j. You'll want to upgrade Neo4j, or use the RELATE keyword instead. See https://github.com/systay/community/commit/c7dbbb929abfef600266a20f065d760e7a1fff2e for detail.");
 
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause("CREATE UNIQUE " + createUniqueText));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Create(string createText, params object[] objects)
@@ -182,9 +189,8 @@ namespace Neo4jClient.Cypher
                 .ToList()
                 .ForEach(kv => createText = createText.Replace(kv.Key, kv.Value));
 
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause("CREATE " + createText));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)
@@ -205,30 +211,26 @@ namespace Neo4jClient.Cypher
             Validator.ValidateObject(node, validationContext);
             
             var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore, QuoteName = false};
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause(string.Format("CREATE ({0} {1})", identity, serializer.Serialize(node))));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Delete(string identities)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause(string.Format("DELETE {0}", identities)));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery With(string withText)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause(string.Format("WITH {0}", withText)));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public ICypherFluentQuery Set(string setText)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate(w =>
                 w.AppendClause(string.Format("SET {0}", setText)));
-            return new CypherFluentQuery(Client, newBuilder);
         }
 
         public CypherQuery Query

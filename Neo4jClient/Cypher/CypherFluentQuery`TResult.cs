@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -9,40 +10,39 @@ namespace Neo4jClient.Cypher
         CypherFluentQuery,
         ICypherFluentQuery<TResult>
     {
+        [Obsolete("Use the QueryWriter overload instead")]
         public CypherFluentQuery(IGraphClient client, CypherQueryBuilder builder)
             : base(client, builder)
         {}
 
+        public CypherFluentQuery(IGraphClient client, QueryWriter writer)
+            : base(client, writer)
+        {}
+
         public ICypherFluentQuery<TResult> Limit(int? limit)
         {
-            if (!limit.HasValue) return this;
-
-            var newBuilder = Builder.CallWriter(w =>
-                w.AppendClause("LIMIT {0}", limit));
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+            return limit.HasValue
+                ? Mutate<TResult>(w => w.AppendClause("LIMIT {0}", limit))
+                : this;
         }
 
         public ICypherFluentQuery<TResult> Skip(int? skip)
         {
-            if (!skip.HasValue) return this;
-
-            var newBuilder = Builder.CallWriter(w =>
-                w.AppendClause("SKIP {0}", skip));
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+            return skip.HasValue
+                ? Mutate<TResult>(w => w.AppendClause("SKIP {0}", skip))
+                : this;
         }
 
         public ICypherFluentQuery<TResult> OrderBy(params string[] properties)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate<TResult>(w =>
                 w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public ICypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
-            var newBuilder = Builder.CallWriter(w =>
+            return Mutate<TResult>(w =>
                 w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(", ", properties))));
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
         }
 
         public IEnumerable<TResult> Results

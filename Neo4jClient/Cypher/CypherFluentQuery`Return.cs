@@ -7,48 +7,42 @@ namespace Neo4jClient.Cypher
     {
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
-            var newBuilder = Builder
-                .CallWriter(w => w.AppendClause(string.Format("RETURN {0}", identity)));
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+            return Mutate<TResult>(w => w.AppendClause("RETURN " + identity));
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
         {
-            var newBuilder = Builder
-                .CallWriter(w => {
-                    w.ResultMode = resultMode;
-                    w.AppendClause(string.Format("RETURN {0}", statement));
-                });
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+            var newWriter = queryWriter.Clone();
+            newWriter.ResultMode = resultMode;
+            newWriter.AppendClause("RETURN " + statement);
+            return new CypherFluentQuery<TResult>(Client, newWriter);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity)
         {
-            var newBuilder = Builder
-                .CallWriter(w => w.AppendClause(string.Format("RETURN distinct {0}", identity)));
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+            return Mutate<TResult>(w => w.AppendClause("RETURN distinct " + identity));
         }
 
         ICypherFluentQuery<TResult> Return<TResult>(LambdaExpression expression)
         {
             var statement = CypherReturnExpressionBuilder.BuildText(expression);
-            var newBuilder = Builder
-                .CallWriter(w => {
-                    w.ResultMode = CypherResultMode.Projection;
-                    w.AppendClause(string.Format("RETURN {0}", statement));
-                });
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+
+            var newWriter = queryWriter.Clone();
+            newWriter.ResultMode = CypherResultMode.Projection;
+            newWriter.AppendClause("RETURN " + statement);
+
+            return new CypherFluentQuery<TResult>(Client, newWriter);
         }
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
         {
             var statement = CypherReturnExpressionBuilder.BuildText(expression);
-            var newBuilder = Builder
-                .CallWriter(w => {
-                    w.ResultMode = CypherResultMode.Projection;
-                    w.AppendClause(string.Format("RETURN distinct {0}", statement));
-                });
-            return new CypherFluentQuery<TResult>(Client, newBuilder);
+
+            var newWriter = queryWriter.Clone();
+            newWriter.ResultMode = CypherResultMode.Projection;
+            newWriter.AppendClause("RETURN distinct " + statement);
+
+            return new CypherFluentQuery<TResult>(Client, newWriter);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)

@@ -16,18 +16,5 @@ namespace Neo4jClient.Cypher
         {
             get { return queryWriter; }
         }
-
-        CypherQueryBuilder Clone()
-        {
-            var clonedWriter = queryWriter.Clone();
-            return new CypherQueryBuilder(clonedWriter);
-        }
-
-        public CypherQueryBuilder CallWriter(Action<QueryWriter> callback)
-        {
-            var newBuilder = Clone();
-            callback(newBuilder.queryWriter);
-            return newBuilder;
-        }
     }
 }
