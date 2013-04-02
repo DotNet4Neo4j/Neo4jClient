@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -35,7 +34,6 @@ namespace Neo4jClient.Cypher
                 case ExpressionType.Not:
                     TextOutput.Append(" NOT ");
                     break;
-
                 case ExpressionType.LessThanOrEqual:
                     TextOutput.Append(" <= ");
                     break;
@@ -54,7 +52,6 @@ namespace Neo4jClient.Cypher
                 case ExpressionType.NotEqual:
                     TextOutput.Append(NotEqual);
                     break;
-
                 default:
                     throw new NotSupportedException(string.Format("Expression type {0} is not supported.", node.NodeType));
             }
@@ -91,6 +88,7 @@ namespace Neo4jClient.Cypher
 
             var valueWrappedInParameter = createParameterCallback(node.Value);
             TextOutput.Append(valueWrappedInParameter);
+
             return node;
         }
 
