@@ -14,7 +14,7 @@ namespace Neo4jClient.Cypher
         IAttachedReference
     {
         protected readonly IRawGraphClient Client;
-        protected readonly QueryWriter queryWriter;
+        protected readonly QueryWriter QueryWriter;
 
         public CypherFluentQuery(IGraphClient client)
         {
@@ -22,8 +22,7 @@ namespace Neo4jClient.Cypher
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
 
             Client = (IRawGraphClient)client;
-
-            queryWriter = new QueryWriter();
+            QueryWriter = new QueryWriter();
         }
 
         protected CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
@@ -31,27 +30,27 @@ namespace Neo4jClient.Cypher
             if (!(client is IRawGraphClient))
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
 
-            this.queryWriter = queryWriter;
             Client = (IRawGraphClient)client;
+            QueryWriter = queryWriter;
         }
 
         ICypherFluentQuery Mutate(Action<QueryWriter> callback)
         {
-            var newWriter = queryWriter.Clone();
+            var newWriter = QueryWriter.Clone();
             callback(newWriter);
             return new CypherFluentQuery(Client, newWriter);
         }
 
         protected ICypherFluentQuery<TResult> Mutate<TResult>(Action<QueryWriter> callback)
         {
-            var newWriter = queryWriter.Clone();
+            var newWriter = QueryWriter.Clone();
             callback(newWriter);
             return new CypherFluentQuery<TResult>(Client, newWriter);
         }
 
         public ICypherFluentQuery WithParam(string key, object value)
         {
-            if (queryWriter.ContainsParameterWithKey(key))
+            if (QueryWriter.ContainsParameterWithKey(key))
                 throw new ArgumentException("A parameter with the given key is already defined in the query.", "key");
             return Mutate(w => w.CreateParameter(key, value));
         }
@@ -222,7 +221,7 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery Query
         {
-            get { return queryWriter.ToCypherQuery(); }
+            get { return QueryWriter.ToCypherQuery(); }
         }
 
         public void ExecuteWithoutResults()
