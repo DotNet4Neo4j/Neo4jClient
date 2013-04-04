@@ -107,7 +107,7 @@ namespace Neo4jClient.Test.Cypher
 
         [Test]
         [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-index-lookup")]
-        public void NodeIndexByLookup()
+        public void NodeByIndexLookup()
         {
             var cypher = ToCypher(new
             {
