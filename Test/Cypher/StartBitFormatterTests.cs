@@ -9,10 +9,9 @@ namespace Neo4jClient.Test.Cypher
     public class StartBitFormatterTests
     {
         [Test]
+        [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id")]
         public void SingleNodeReference()
         {
-            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id
-
             var cypher = ToCypher(new
             {
                 n1 = (NodeReference) 1
@@ -24,10 +23,9 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id")]
         public void MultipleNodeReferences()
         {
-            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id
-
             var cypher = ToCypher(new
             {
                 n1 = (NodeReference)1,
@@ -41,10 +39,9 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-multiple-nodes-by-id")]
         public void ArrayOfNodeReferences()
         {
-            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-multiple-nodes-by-id
-
             var cypher = ToCypher(new
             {
                 n1 = new NodeReference[] { 1, 2 }
@@ -84,10 +81,9 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-all-nodes")]
         public void AllNodes()
         {
-            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-all-nodes
-
             var cypher = ToCypher(new
             {
                 n = All.Nodes
