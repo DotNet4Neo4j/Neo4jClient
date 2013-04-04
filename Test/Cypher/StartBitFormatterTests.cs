@@ -11,6 +11,8 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void SingleNodeReference()
         {
+            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id
+
             var cypher = ToCypher(new
             {
                 n1 = (NodeReference) 1
@@ -24,6 +26,8 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void MultipleNodeReferences()
         {
+            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id
+
             var cypher = ToCypher(new
             {
                 n1 = (NodeReference)1,
