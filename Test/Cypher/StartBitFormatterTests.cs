@@ -148,6 +148,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void RelationshipByIndexQuery()
+        {
+            var cypher = ToCypher(new
+            {
+                r = Relationship.ByIndexQuery("someIndex", "name:A")
+            });
+
+            Assert.AreEqual("r=relationship:someIndex({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual("name:A", cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void Mixed()
         {
             var cypher = ToCypher(new

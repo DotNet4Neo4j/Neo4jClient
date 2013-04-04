@@ -20,5 +20,14 @@ namespace Neo4jClient
                     propertyName,
                     createParameterCallback(value)));
         }
+
+        public static StartBit ByIndexQuery(string indexName, string query)
+        {
+            return new StartBit(createParameterCallback =>
+                string.Format(
+                    "relationship:{0}({1})",
+                    indexName,
+                    createParameterCallback(query)));
+        }
     }
 }
