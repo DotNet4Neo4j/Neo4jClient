@@ -52,6 +52,10 @@ namespace Neo4jClient.Cypher
                 (value, callback) => FormatValue((NodeReference)value, callback)
             },
             {
+                typeof(NodeReference[]),
+                (value, callback) => FormatValue((NodeReference[])value, callback)
+            },
+            {
                 typeof(RelationshipReference),
                 (value, callback) => FormatValue((RelationshipReference)value, callback)
             }
@@ -60,6 +64,15 @@ namespace Neo4jClient.Cypher
         static string FormatValue(NodeReference value, CreateParameterCallback createParameterCallback)
         {
             return string.Format("node({0})", createParameterCallback(value.Id));
+        }
+
+        static string FormatValue(NodeReference[] value, CreateParameterCallback createParameterCallback)
+        {
+            var paramNames = value
+                .Select(v => createParameterCallback(v.Id))
+                .ToArray();
+
+            return string.Format("node({0})", string.Join(", ", paramNames));
         }
 
         static string FormatValue(RelationshipReference value, CreateParameterCallback createParameterCallback)

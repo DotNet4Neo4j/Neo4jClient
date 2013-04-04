@@ -37,6 +37,22 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ArrayOfNodeReferences()
+        {
+            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-multiple-nodes-by-id
+
+            var cypher = ToCypher(new
+            {
+                n1 = new NodeReference[] { 1, 2 }
+            });
+
+            Assert.AreEqual("n1=node({p0}, {p1})", cypher.QueryText);
+            Assert.AreEqual(2, cypher.QueryParameters.Count);
+            Assert.AreEqual(1, cypher.QueryParameters["p0"]);
+            Assert.AreEqual(2, cypher.QueryParameters["p1"]);
+        }
+
+        [Test]
         public void SingleRelationshipReference()
         {
             var cypher = ToCypher(new
