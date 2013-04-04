@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System;
+using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 
@@ -7,6 +8,7 @@ namespace Neo4jClient.Test.Cypher
     public class CypherFluentQueryStartTests
     {
         [Test]
+        [Obsolete]
         public void NodeByIndexLookup()
         {
             // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
@@ -24,6 +26,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Obsolete]
         public void NodeByIndexLookupMultipleIndexedStartPoints() 
         {
             // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
@@ -45,6 +48,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Obsolete]
         public void NodeByIndexLookupWithAdditionalStartPoint() 
         {
             // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
@@ -66,6 +70,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Obsolete]
         public void NodeByIndexLookupWithAdditionalStartPointAndExtraIndexedStartPoint() 
         {
             // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
@@ -89,6 +94,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Obsolete]
         public void StartThenNodeByIndexLookup() 
         {
             // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
@@ -110,6 +116,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Obsolete]
         public void NodeByIndexLookupWithSingleParameter()
         {
             // http://docs.neo4j.org/chunked/1.8.M07/query-start.html#start-node-by-index-lookup
@@ -164,10 +171,10 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(0, query.QueryParameters.Count);
         }
 
-        [Test(Description = "Issue 56")]
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/56/cypher-fluent-api-node-auto-index-start")]
         public void NodeByAutoIndexLookup()
         {
-            // https://bitbucket.org/Readify/neo4jclient/issue/56/cypher-fluent-api-node-auto-index-start
             // http://stackoverflow.com/questions/14882562/cypher-query-return-related-nodes-as-children/14986114
             // start s=node:node_auto_index(StartType='JobTypes')
             // match s-[:starts]->t, t-[:SubTypes]->ts
@@ -175,7 +182,7 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new CypherStartBitWithNodeIndexLookup("s", "node_auto_index", "StartType", "JobTypes"))
+                .Start(new { s = Node.ByIndexLookup("node_auto_index", "StartType", "JobTypes") })
                 .Match("s-[:starts]->t", "t-[:SubTypes]->ts")
                 .Return((t, ts) => new
                 {
@@ -217,6 +224,7 @@ RETURN t.Id? AS Id, t.Name? AS Name, collect(ts) AS JobSpecialties", query.Query
         }
 
         [Test]
+        [Obsolete]
         public void MutipleNodesByReferenceObsolete()
         {
             // https://bitbucket.org/Readify/neo4jclient/issue/64/cypher-query-with-multiple-starts

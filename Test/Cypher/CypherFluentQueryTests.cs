@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System;
+using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 using Neo4jClient.Test.GraphClientTests;
@@ -90,6 +91,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Obsolete]
         public void MultipleStartPointsObsolete()
         {
             // http://docs.neo4j.org/chunked/1.6/query-start.html#start-multiple-start-points
@@ -1136,10 +1138,10 @@ RETURN b AS NodeB";
             Assert.AreEqual(3, query.QueryParameters["p0"]);
         }
 
-        [Test(Description = "Issue 45")]
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/45/cyper-should-allow-for-flexible-order-of")]
         public void SupportsFlexibleOrderOfClauses()
         {
-            // https://bitbucket.org/Readify/neo4jclient/issue/45/cyper-should-allow-for-flexible-order-of
             // START me=node:node_auto_index(name='Bob')
             // MATCH me-[r?:STATUS]-secondlatestupdate
             // DELETE r
@@ -1152,7 +1154,7 @@ RETURN b AS NodeB";
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new CypherStartBitWithNodeIndexLookup("me", "node_auto_index", "name", "Bob"))
+                .Start(new { me = Node.ByIndexLookup("node_auto_index", "name", "Bob") })
                 .Match("me-[r?:STATUS]-secondlatestupdate")
                 .Delete("r")
                 .With("me, secondlatestupdate")

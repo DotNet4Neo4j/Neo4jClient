@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using NUnit.Framework;
 
@@ -8,6 +9,7 @@ namespace Neo4jClient.Test.GraphClientTests
     public class QueryNodeIndexTests
     {
         [Test]
+        [Obsolete]
         public void ShouldReturnQueryResults()
         {
             //Arrange
