@@ -823,6 +823,38 @@ namespace Neo4jClient.Test.Deserializer
             Assert.AreEqual(4000000, city.Population);
         }
 
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/67/cypher-deserialization-error-when-using")]
+        public void DeserializeShouldMapProjectionIntoAnonymousTypeWithNullCollectResult()
+        {
+            DeserializeShouldMapProjectionIntoAnonymousTypeWithNullCollectResult(new { Name = "", Friends = new object[0] });
+        }
+
+        // ReSharper disable UnusedParameter.Local
+        static void DeserializeShouldMapProjectionIntoAnonymousTypeWithNullCollectResult<TAnon>(TAnon dummy)
+        // ReSharper restore UnusedParameter.Local
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection);
+            var content = @"{
+                'data' : [
+                    [ 'Jim', [null] ]
+                ],
+                'columns' : [ 'Name', 'Friends' ]
+            }".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(1, results.Count());
+
+            dynamic person = results.ElementAt(0);
+            Assert.AreEqual("Jim", person.Name);
+            Assert.AreEqual(null, person.Friends);
+        }
+
         public class App
         {
         }
