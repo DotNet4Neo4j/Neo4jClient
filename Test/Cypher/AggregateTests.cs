@@ -35,7 +35,7 @@ namespace Neo4jClient.Test.Cypher
                 })
                 .Query;
 
-            Assert.AreEqual("RETURN count(*) AS Foo, bar AS Baz", query.QueryText);
+            Assert.AreEqual("RETURN count(*) AS Foo, collect(bar) AS Baz", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
         }
     }
