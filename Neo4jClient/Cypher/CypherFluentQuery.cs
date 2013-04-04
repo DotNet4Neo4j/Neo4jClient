@@ -85,7 +85,6 @@ namespace Neo4jClient.Cypher
             });
         }
 
-        [Obsolete("Use Start(new { foo = new[] { nodeRef1, nodeRef2 } }) instead")]
         public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
         {
             return Start(new[]
@@ -94,7 +93,6 @@ namespace Neo4jClient.Cypher
             });
         }
 
-        [Obsolete("Use Start(new { foo = new[] { relRef1, relRef2 } }) instead")]
         public ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences)
         {
             return Start(new CypherStartBit(identity, relationshipReferences));
