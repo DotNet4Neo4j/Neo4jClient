@@ -187,7 +187,9 @@
     <None Include="Diagrams\GraphClientCore.cd" />
     <None Include="Diagrams\Responses.cd" />
     <None Include="Indexing.cd" />
-    <None Include="Neo4jClient.nuspec" />
+    <None Include="Neo4jClient.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
