@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
@@ -10,6 +11,8 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery WithParam(string key, object value);
 
+        ICypherFluentQuery Start(object startBits);
+        ICypherFluentQuery Start(IDictionary<string, object> startBits);
         ICypherFluentQuery Start(string identity, string startText);
         ICypherFluentQuery Start(params ICypherStartBit[] startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
