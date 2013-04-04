@@ -47,6 +47,11 @@ namespace Neo4jClient.Cypher
             });
         }
 
+        public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<TResult>> expression)
+        {
+            return Return<TResult>((LambdaExpression)expression);
+        }
+
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
         {
             return Return<TResult>((LambdaExpression)expression);
