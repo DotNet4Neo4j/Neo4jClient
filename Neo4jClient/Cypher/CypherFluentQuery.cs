@@ -55,7 +55,7 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.CreateParameter(key, value));
         }
 
-        [Obsolete("Use Start(new { identity = startText }) instead")]
+        [Obsolete("Use Start(new { identity = startText }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         public ICypherFluentQuery Start(string identity, string startText)
         {
             return Mutate(w =>
@@ -82,7 +82,7 @@ namespace Neo4jClient.Cypher
             });
         }
 
-        [Obsolete("Use Start(new { foo = nodeRef1, bar = All.Nodes }) instead")]
+        [Obsolete("Use Start(new { foo = nodeRef1, bar = All.Nodes }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
             return Mutate(w =>
@@ -112,7 +112,7 @@ namespace Neo4jClient.Cypher
             });
         }
 
-        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(…) }) instead")]
+        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
             return Start(new Dictionary<string, object>
@@ -121,7 +121,7 @@ namespace Neo4jClient.Cypher
             });
         }
 
-        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead")]
+        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)
         {
             return Start(new Dictionary<string, object>
