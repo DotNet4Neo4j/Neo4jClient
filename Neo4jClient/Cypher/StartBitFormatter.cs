@@ -7,19 +7,34 @@ namespace Neo4jClient.Cypher
 {
     internal static class StartBitFormatter
     {
-        internal static string FormatAsCypherText(object startBits, CreateParameterCallback createParameterCallback)
+        internal static string FormatAsCypherText(
+            object startBits,
+            CreateParameterCallback createParameterCallback)
         {
-            var cypherTextBits = startBits
+            var startBitsAsDictionary = startBits
                 .GetType()
                 .GetProperties()
                 .Select(property =>
                 {
                     var getMethod = property.GetGetMethod();
                     var value = getMethod.Invoke(startBits, new object[0]);
+                    return new {Identity = property.Name, Value = value};
+                })
+                .ToDictionary(k => k.Identity, k=> k.Value);
 
-                    var identity = property.Name;
+            return FormatAsCypherText(startBitsAsDictionary, createParameterCallback);
+        }
+
+        internal static string FormatAsCypherText(
+            IDictionary<string, object> startBits,
+            CreateParameterCallback createParameterCallback)
+        {
+            var cypherTextBits = startBits
+                .Keys
+                .Select(identity =>
+                {
+                    var value = startBits[identity];
                     var cypherText = FormatBitAsCypherText(identity, value, createParameterCallback);
-
                     return identity + "=" + cypherText;
                 })
                 .ToArray();
@@ -58,6 +73,10 @@ namespace Neo4jClient.Cypher
             {
                 typeof(RelationshipReference),
                 (value, callback) => FormatValue((RelationshipReference)value, callback)
+            },
+            {
+                typeof(RelationshipReference[]),
+                (value, callback) => FormatValue((RelationshipReference[])value, callback)
             }
         };
 
@@ -78,6 +97,15 @@ namespace Neo4jClient.Cypher
         static string FormatValue(RelationshipReference value, CreateParameterCallback createParameterCallback)
         {
             return string.Format("relationship({0})", createParameterCallback(value.Id));
+        }
+
+        static string FormatValue(RelationshipReference[] value, CreateParameterCallback createParameterCallback)
+        {
+            var paramNames = value
+                .Select(v => createParameterCallback(v.Id))
+                .ToArray();
+
+            return string.Format("relationship({0})", string.Join(", ", paramNames));
         }
     }
 }

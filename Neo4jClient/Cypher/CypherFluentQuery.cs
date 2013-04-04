@@ -71,6 +71,16 @@ namespace Neo4jClient.Cypher
             });
         }
 
+        public ICypherFluentQuery Start(IDictionary<string, object> startBits)
+        {
+            return Mutate(w =>
+            {
+                var startBitsText = StartBitFormatter.FormatAsCypherText(startBits, w.CreateParameter);
+                var startText = "START " + startBitsText;
+                w.AppendClause(startText);
+            });
+        }
+
         [Obsolete("Use Start(new { foo = nodeRef1, bar = All.Nodes }) instead")]
         public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
@@ -87,15 +97,18 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
         {
-            return Start(new[]
+            return Start(new Dictionary<string, object>
             {
-                (ICypherStartBit)(new CypherStartBit(identity, nodeReferences))
+                { identity, nodeReferences }
             });
         }
 
         public ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences)
         {
-            return Start(new CypherStartBit(identity, relationshipReferences));
+            return Start(new Dictionary<string, object>
+            {
+                { identity, relationshipReferences }
+            });
         }
 
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
