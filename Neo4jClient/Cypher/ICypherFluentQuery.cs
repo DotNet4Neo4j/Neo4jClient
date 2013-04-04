@@ -30,6 +30,8 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Delete(string identities);
         ICypherFluentQuery With(string withText);
         ICypherFluentQuery Set(string setText);
+        ICypherFluentQuery Union();
+        ICypherFluentQuery UnionAll();
         [Obsolete("Call AndWhere instead", true)]
         ICypherFluentQuery And();
         [Obsolete("Call OrWhere instead", true)]

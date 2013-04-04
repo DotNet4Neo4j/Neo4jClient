@@ -228,6 +228,16 @@ namespace Neo4jClient.Cypher
                 w.AppendClause(string.Format("SET {0}", setText)));
         }
 
+        public ICypherFluentQuery Union()
+        {
+            return Mutate(w => w.AppendClause("UNION"));
+        }
+
+        public ICypherFluentQuery UnionAll()
+        {
+            return Mutate(w => w.AppendClause("UNION ALL"));
+        }
+
         public CypherQuery Query
         {
             get { return QueryWriter.ToCypherQuery(); }
