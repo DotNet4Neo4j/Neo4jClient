@@ -63,6 +63,10 @@ namespace Neo4jClient.Cypher
                 (value, callback) => (string)value
             },
             {
+                typeof(StartBit),
+                (value, callback) => FormatValue((StartBit)value, callback)
+            },
+            {
                 typeof(NodeReference),
                 (value, callback) => FormatValue((NodeReference)value, callback)
             },
@@ -79,6 +83,11 @@ namespace Neo4jClient.Cypher
                 (value, callback) => FormatValue((RelationshipReference[])value, callback)
             }
         };
+
+        static string FormatValue(StartBit value, CreateParameterCallback createParameterCallback)
+        {
+            return value.ToCypherText(createParameterCallback);
+        }
 
         static string FormatValue(NodeReference value, CreateParameterCallback createParameterCallback)
         {

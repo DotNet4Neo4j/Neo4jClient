@@ -110,6 +110,20 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-index-lookup")]
+        public void NodeIndexByLookup()
+        {
+            var cypher = ToCypher(new
+            {
+                n = Node.ByIndexLookup("someIndex", "name", "A")
+            });
+
+            Assert.AreEqual("n=node:someIndex(name = {p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual("A", cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void Mixed()
         {
             var cypher = ToCypher(new
