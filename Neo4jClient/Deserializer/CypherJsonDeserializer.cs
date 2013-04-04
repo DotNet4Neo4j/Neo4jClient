@@ -230,20 +230,18 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             IEnumerable<TypeMapping> jsonTypeMappings,
             ConstructorInfo ctor)
         {
-
             var i = 0;
             var coercedValues =
-                (from cell in row.Children()
-                 let cellIndex = i++
-                 let columnName = columnNames[cellIndex]
-                 let property = propertiesDictionary[columnName]
-                 let isNullArray = IsNullArray(property, cell)
-                 select isNullArray
-                    ? null
-                    : CommonDeserializerMethods.CoerceValue(property, cell, culture, jsonTypeMappings, 0))
-                 .ToArray();
+                from cell in row.Children()
+                let cellIndex = i++
+                let columnName = columnNames[cellIndex]
+                let property = propertiesDictionary[columnName]
+                let isNullArray = IsNullArray(property, cell)
+                select isNullArray
+                ? null
+                : CommonDeserializerMethods.CoerceValue(property, cell, culture, jsonTypeMappings, 0);
 
-            var result = (TResult)ctor.Invoke(coercedValues);
+            var result = (TResult)ctor.Invoke(coercedValues.ToArray());
 
             return result;
         }
