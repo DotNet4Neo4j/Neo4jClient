@@ -31,7 +31,12 @@ namespace Neo4jClient.Cypher
         {
             var valueType = value.GetType();
             if (!Formatters.ContainsKey(valueType))
-                throw new NotSupportedException();
+                throw new NotSupportedException(string.Format(
+                    "The start expression for {0} is not a supported type. We were expecting one of: {1}. It was an instance of {2}.",
+                    identity,
+                    string.Join(", ", Formatters.Keys.Select(k => k.Name).ToArray()),
+                    valueType.FullName
+                ));
 
             return Formatters[valueType](value, createParameterCallback);
         }
