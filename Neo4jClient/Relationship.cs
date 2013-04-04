@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Neo4jClient
 {
-    public abstract class Relationship
+    public abstract partial class Relationship
     {
         readonly object data;
         readonly NodeReference otherNode;
