@@ -11,24 +11,12 @@ namespace Neo4jClient.Cypher
                 w.AppendClause("WHERE " + CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter)));
         }
 
-        [Obsolete("Call AndWhere instead", true)]
-        ICypherFluentQuery ICypherFluentQuery.And()
-        {
-            throw new NotSupportedException();
-        }
-
         internal ICypherFluentQuery AndWhere(LambdaExpression expression)
         {
             return Mutate(w =>
                 w.AppendClause(string.Format("AND {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter))));
         }
 
-        [Obsolete("Call OrWhere instead", true)]
-        ICypherFluentQuery ICypherFluentQuery.Or()
-        {
-            throw new NotSupportedException();
-        }
-       
         internal ICypherFluentQuery OrWhere(LambdaExpression expression)
         {
             return Mutate(w =>
