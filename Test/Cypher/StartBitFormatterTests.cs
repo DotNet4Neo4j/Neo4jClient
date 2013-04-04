@@ -37,6 +37,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void SingleRelationshipReference()
+        {
+            var cypher = ToCypher(new
+            {
+                r1 = (RelationshipReference)1
+            });
+
+            Assert.AreEqual("r1=relationship({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(1, cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void CustomString()
         {
             var cypher = ToCypher(new
@@ -54,12 +67,14 @@ namespace Neo4jClient.Test.Cypher
             var cypher = ToCypher(new
             {
                 n1 = "foo",
-                n2 = (NodeReference)2
+                n2 = (NodeReference)2,
+                r1 = (RelationshipReference)3
             });
 
-            Assert.AreEqual("n1=foo, n2=node({p0})", cypher.QueryText);
-            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual("n1=foo, n2=node({p0}), r1=relationship({p1})", cypher.QueryText);
+            Assert.AreEqual(2, cypher.QueryParameters.Count);
             Assert.AreEqual(2, cypher.QueryParameters["p0"]);
+            Assert.AreEqual(3, cypher.QueryParameters["p1"]);
         }
 
         [Test]

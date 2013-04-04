@@ -50,12 +50,21 @@ namespace Neo4jClient.Cypher
             {
                 typeof(NodeReference),
                 (value, callback) => FormatValue((NodeReference)value, callback)
+            },
+            {
+                typeof(RelationshipReference),
+                (value, callback) => FormatValue((RelationshipReference)value, callback)
             }
         };
 
         static string FormatValue(NodeReference value, CreateParameterCallback createParameterCallback)
         {
             return string.Format("node({0})", createParameterCallback(value.Id));
+        }
+
+        static string FormatValue(RelationshipReference value, CreateParameterCallback createParameterCallback)
+        {
+            return string.Format("relationship({0})", createParameterCallback(value.Id));
         }
     }
 }
