@@ -230,6 +230,25 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ThrowArgumentExceptionForEmptyObject()
+        {
+            var emptyObject = new {};
+            var ex = Assert.Throws<ArgumentException>(
+                () => StartBitFormatter.FormatAsCypherText(emptyObject, null)
+            );
+            Assert.AreEqual("startBits", ex.ParamName);
+        }
+
+        [Test]
+        public void DontThrowArgumentExceptionForEmptyDictionary()
+        {
+            var emptyDictionary = new Dictionary<string, object>();
+            Assert.DoesNotThrow(
+                () => StartBitFormatter.FormatAsCypherText(emptyDictionary, null)
+            );
+        }
+
+        [Test]
         public void ThrowNotSupportedExceptionForUnknownType()
         {
             var badObject = new { n1 = new StartBitFormatterTests() };

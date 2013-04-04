@@ -22,6 +22,9 @@ namespace Neo4jClient.Cypher
                 })
                 .ToDictionary(k => k.Identity, k=> k.Value);
 
+            if (!startBitsAsDictionary.Keys.Any())
+                throw new ArgumentException("The start object you supplied didn't have any properties on it, resulting in an empty START clause. Consult the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher if you're unsure about how to use this overload.", "startBits");
+
             return FormatAsCypherText(startBitsAsDictionary, createParameterCallback);
         }
 
