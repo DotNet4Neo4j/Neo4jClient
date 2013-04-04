@@ -13,7 +13,9 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery Start(object startBits);
         ICypherFluentQuery Start(IDictionary<string, object> startBits);
+        [Obsolete("Use Start(new { identity = startText }) instead")]
         ICypherFluentQuery Start(string identity, string startText);
+        [Obsolete("Use Start(new { foo = nodeRef1, bar = All.Nodes }) instead")]
         ICypherFluentQuery Start(params ICypherStartBit[] startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences);

@@ -55,6 +55,7 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.CreateParameter(key, value));
         }
 
+        [Obsolete("Use Start(new { identity = startText }) instead")]
         public ICypherFluentQuery Start(string identity, string startText)
         {
             return Mutate(w =>
