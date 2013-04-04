@@ -135,7 +135,7 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", "node(*)")
+                .Start(new { n = All.Nodes })
                 .Return<object>("n")
                 .Query;
 
@@ -152,10 +152,11 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(
-                    new RawCypherStartBit("n", "node(*)"),
-                    new RawCypherStartBit("b", "node(*)")
-                )
+                .Start(new
+                {
+                    n = All.Nodes,
+                    b = All.Nodes
+                })
                 .Return<object>("n")
                 .Query;
 
@@ -191,7 +192,32 @@ RETURN t.Id? AS Id, t.Name? AS Name, collect(ts) AS JobSpecialties", query.Query
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/64/cypher-query-with-multiple-starts")]
         public void MutipleNodesByReference()
+        {
+            // START n1=node(1), n2=node(2)
+            // MATCH n1-[:KNOWS]->n2
+            // RETURN count(*)
+
+            var referenceA = (NodeReference)1;
+            var referenceB = (NodeReference)2;
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start(new {
+                    n1 = referenceA,
+                    n2 = referenceB
+                })
+                .Query;
+
+            Assert.AreEqual("START n1=node({p0}), n2=node({p1})", query.QueryText);
+            Assert.AreEqual(2, query.QueryParameters.Count);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void MutipleNodesByReferenceObsolete()
         {
             // https://bitbucket.org/Readify/neo4jclient/issue/64/cypher-query-with-multiple-starts
             // START n1=node(1), n2=node(2)

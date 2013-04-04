@@ -77,6 +77,27 @@ namespace Neo4jClient.Test.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
+                .Start(new
+                {
+                    a = (NodeReference)1,
+                    b = (NodeReference)2
+                })
+                .Query;
+
+            Assert.AreEqual("START a=node({p0}), b=node({p1})", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+            Assert.AreEqual(2, query.QueryParameters["p1"]);
+        }
+
+        [Test]
+        public void MultipleStartPointsObsolete()
+        {
+            // http://docs.neo4j.org/chunked/1.6/query-start.html#start-multiple-start-points
+            // START a=node(1), b=node(2)
+            // RETURN a,b
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
                 .Start(
                     new CypherStartBit("a", (NodeReference)1),
                     new CypherStartBit("b", (NodeReference)2)
@@ -858,10 +879,10 @@ RETURN b AS NodeB";
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(
-                    new CypherStartBit("a", (NodeReference)1),
-                    new CypherStartBit("b", (NodeReference)3, (NodeReference)2)
-                )
+                .Start(new {
+                    a = (NodeReference)1,
+                    b = new[] { (NodeReference)3, (NodeReference)2 }
+                })
                 .Match("a<-[r?]-b")
                 .Where<FooData>(r => r.Name == null && r.Id == 100)
                 .Return<object>("b")
@@ -980,10 +1001,10 @@ RETURN b AS NodeB";
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(
-                    new CypherStartBit("a", (NodeReference)1),
-                    new CypherStartBit("b", (NodeReference)3,(NodeReference)2)
-                )
+                .Start(new {
+                    a = (NodeReference)1,
+                    b = new [] { (NodeReference)3,(NodeReference)2 }
+                })
                 .Where("(a<--b)")
                 .Return<object>("b")
                 .Query;
@@ -1024,10 +1045,10 @@ RETURN b AS NodeB";
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(
-                    new CypherStartBit("a", (NodeReference)1),
-                    new CypherStartBit("b", (NodeReference)2)
-                )
+                .Start(new {
+                    a = (NodeReference)1,
+                    b = (NodeReference)2
+                })
                 .Create("a-[r:REL]->b")
                 .Return<object>("r")
                 .Query;
@@ -1082,10 +1103,10 @@ RETURN b AS NodeB";
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(
-                    new CypherStartBit("a", (NodeReference)1),
-                    new CypherStartBit("b", (NodeReference)2)
-                )
+                .Start(new {
+                    a = (NodeReference)1,
+                    b = (NodeReference)2
+                })
                 .Create("a-[r:REL {name : a.name + '<->' + b.name }]->b")
                 .Return<object>("r")
                 .Query;

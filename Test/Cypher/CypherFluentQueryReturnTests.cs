@@ -104,10 +104,11 @@ namespace Neo4jClient.Test.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(
-                    new CypherStartBit("me", (NodeReference)123),
-                    new CypherStartBit("viewer", (NodeReference)456)
-                )
+                .Start(new
+                {
+                    me = (NodeReference)123,
+                    viewer = (NodeReference)456
+                })
                 .Match("me-[:FRIEND]-common-[:FRIEND]-viewer")
                 .Return<Node<object>>("common")
                 .Limit(5)
