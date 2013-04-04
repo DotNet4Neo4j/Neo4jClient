@@ -255,42 +255,6 @@ ORDER BY common.FirstName", query.QueryText);
             }
         }
 
-        [Test]
-        public void Length()
-        {
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Return(n => new { Foo = n.Length() })
-                .Query;
-
-            Assert.AreEqual("RETURN length(n) AS Foo", query.QueryText);
-            Assert.AreEqual(0, query.QueryParameters.Count());
-        }
-
-        [Test]
-        public void Type()
-        {
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Return(n => new { Foo = n.Type() })
-                .Query;
-
-            Assert.AreEqual("RETURN type(n) AS Foo", query.QueryText);
-            Assert.AreEqual(0, query.QueryParameters.Count());
-        }
-
-        [Test]
-        public void Id()
-        {
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Return(n => new { Foo = n.Id() })
-                .Query;
-
-            Assert.AreEqual("RETURN id(n) AS Foo", query.QueryText);
-            Assert.AreEqual(0, query.QueryParameters.Count());
-        }
-
         public class Commodity
         {
             public string Name { get; set; }
