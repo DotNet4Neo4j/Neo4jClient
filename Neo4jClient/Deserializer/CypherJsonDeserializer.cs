@@ -237,9 +237,10 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                  let cellIndex = i++
                  let columnName = columnNames[cellIndex]
                  let property = propertiesDictionary[columnName]
-                 where !(property.ToString().Contains("System.Collections.Generic.IEnumerable") &&
-                         string.IsNullOrEmpty(cell.First().ToString()) && string.IsNullOrEmpty(cell.Last().ToString()))
-                 select CommonDeserializerMethods.CoerceValue(property, cell, culture, jsonTypeMappings, 0))
+                 let isNullArray = IsNullArray(property, cell)
+                 select isNullArray
+                    ? null
+                    : CommonDeserializerMethods.CoerceValue(property, cell, culture, jsonTypeMappings, 0))
                  .ToArray();
 
             var result = (TResult)ctor.Invoke(coercedValues);
@@ -279,14 +280,27 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             // null.
 
             var propertyType = property.PropertyType;
-            var cellChildren = cell.Children().ToArray();
-            var isNullArray =
+
+            var isEnumerable =
                 propertyType.IsGenericType &&
-                propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>) &&
-                cell.Type == JTokenType.Array &&
+                propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>);
+
+            var isArrayOrEnumerable =
+                isEnumerable ||
+                propertyType.IsArray;
+
+            if (!isArrayOrEnumerable)
+                return false;
+
+            if (cell.Type != JTokenType.Array)
+                return false;
+
+            var cellChildren = cell.Children().ToArray();
+            var hasOneOrMoreChildrenAndAllAreNull =
                 cellChildren.Any() &&
                 cellChildren.All(c => c.Type == JTokenType.Null);
-            return isNullArray;
+
+            return hasOneOrMoreChildrenAndAllAreNull;
         }
     }
 }
