@@ -70,6 +70,20 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ArrayOfRelationshipReferences()
+        {
+            var cypher = ToCypher(new
+            {
+                r1 = new RelationshipReference[] { 1, 2 }
+            });
+
+            Assert.AreEqual("r1=relationship({p0}, {p1})", cypher.QueryText);
+            Assert.AreEqual(2, cypher.QueryParameters.Count);
+            Assert.AreEqual(1, cypher.QueryParameters["p0"]);
+            Assert.AreEqual(2, cypher.QueryParameters["p1"]);
+        }
+
+        [Test]
         public void AllNodes()
         {
             // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-all-nodes
