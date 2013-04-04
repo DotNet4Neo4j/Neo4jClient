@@ -110,6 +110,34 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void CredentialsPreservedAllTheWayThroughToHttpStack()
+        {
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(callInfo => { throw new NotImplementedException(); });
+
+            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
+
+            try
+            {
+                graphClient.Connect();
+            }
+            // ReSharper disable EmptyGeneralCatchClause
+            catch (NotImplementedException)
+            {
+                // This will fail because we're not giving it the right
+                // HTTP response, but we only care about the request for now
+            }
+            // ReSharper restore EmptyGeneralCatchClause
+
+            var httpCall = httpClient.ReceivedCalls().First();
+            var httpRequest = (HttpRequestMessage) httpCall.GetArguments()[0];
+
+            StringAssert.StartsWith("http://username:password@foo", httpRequest.RequestUri.AbsoluteUri);
+        }
+
+        [Test]
         public void ShouldSendCustomUserAgent()
         {
             // Arrange
