@@ -40,7 +40,6 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void SingleNodeByStaticReference()
         {
-            // START n1=node(1)
             var cypher = ToCypher(new
             {
                 n1 = (NodeReference) 1
@@ -54,7 +53,6 @@ namespace Neo4jClient.Test.Cypher
         [Test]
         public void MultipleNodesByStaticReference()
         {
-            // START n1=node(1)
             var cypher = ToCypher(new
             {
                 n1 = (NodeReference)1,
