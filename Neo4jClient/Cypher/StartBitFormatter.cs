@@ -45,7 +45,11 @@ namespace Neo4jClient.Cypher
         static string FormatBitAsCypherText(string identity, object value, CreateParameterCallback createParameterCallback)
         {
             var valueType = value.GetType();
-            if (!Formatters.ContainsKey(valueType))
+            var formatterKey = Formatters
+                .Keys
+                .SingleOrDefault(k => k == valueType || k.IsAssignableFrom(valueType));
+
+            if (formatterKey == null)
                 throw new NotSupportedException(string.Format(
                     "The start expression for {0} is not a supported type. We were expecting one of: {1}. It was an instance of {2}.",
                     identity,
@@ -53,7 +57,7 @@ namespace Neo4jClient.Cypher
                     valueType.FullName
                 ));
 
-            return Formatters[valueType](value, createParameterCallback);
+            return Formatters[formatterKey](value, createParameterCallback);
         }
 
         static readonly IDictionary<Type, Func<object, CreateParameterCallback, string>> Formatters = new Dictionary<Type, Func<object, CreateParameterCallback, string>>

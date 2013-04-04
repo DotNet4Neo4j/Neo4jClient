@@ -23,6 +23,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void RootNodeReference()
+        {
+            var cypher = ToCypher(new
+            {
+                n1 = new RootNode(123)
+            });
+
+            Assert.AreEqual("n1=node({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(123, cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         [Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id")]
         public void MultipleNodeReferences()
         {
