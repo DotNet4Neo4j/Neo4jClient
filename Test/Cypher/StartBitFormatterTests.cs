@@ -70,6 +70,20 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void AllNodes()
+        {
+            // http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-all-nodes
+
+            var cypher = ToCypher(new
+            {
+                n = All.Nodes
+            });
+
+            Assert.AreEqual("n=node(*)", cypher.QueryText);
+            Assert.AreEqual(0, cypher.QueryParameters.Count);
+        }
+
+        [Test]
         public void CustomString()
         {
             var cypher = ToCypher(new
@@ -88,10 +102,11 @@ namespace Neo4jClient.Test.Cypher
             {
                 n1 = "foo",
                 n2 = (NodeReference)2,
-                r1 = (RelationshipReference)3
+                r1 = (RelationshipReference)3,
+                all = All.Nodes
             });
 
-            Assert.AreEqual("n1=foo, n2=node({p0}), r1=relationship({p1})", cypher.QueryText);
+            Assert.AreEqual("n1=foo, n2=node({p0}), r1=relationship({p1}), all=node(*)", cypher.QueryText);
             Assert.AreEqual(2, cypher.QueryParameters.Count);
             Assert.AreEqual(2, cypher.QueryParameters["p0"]);
             Assert.AreEqual(3, cypher.QueryParameters["p1"]);
