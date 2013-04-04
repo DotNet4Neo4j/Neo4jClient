@@ -2,6 +2,9 @@
 {
     public static class Node
     {
+        /// <summary>
+        /// Used for Cypher <code>START</code> clauses, like <code>Start(new { foo = Node.ByIndexLookup(…) })</code>
+        /// </summary>
         public static StartBit ByIndexLookup(string indexName, string propertyName, object value)
         {
             return new StartBit(createParameterCallback =>
@@ -12,6 +15,9 @@
                     createParameterCallback(value)));
         }
 
+        /// <summary>
+        /// Used for Cypher <code>START</code> clauses, like <code>Start(new { foo = Node.ByIndexQuery(…) })</code>
+        /// </summary>
         public static StartBit ByIndexQuery(string indexName, string query)
         {
             return new StartBit(createParameterCallback =>

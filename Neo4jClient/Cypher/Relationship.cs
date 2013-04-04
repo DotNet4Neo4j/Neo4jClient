@@ -11,6 +11,9 @@ namespace Neo4jClient
 {
     public partial class Relationship
     {
+        /// <summary>
+        /// Used for Cypher <code>START</code> clauses, like <code>Start(new { foo = Relationship.ByIndexLookup(…) })</code>
+        /// </summary>
         public static StartBit ByIndexLookup(string indexName, string propertyName, object value)
         {
             return new StartBit(createParameterCallback =>
@@ -21,6 +24,9 @@ namespace Neo4jClient
                     createParameterCallback(value)));
         }
 
+        /// <summary>
+        /// Used for Cypher <code>START</code> clauses, like <code>Start(new { foo = Relationship.ByIndexQuery(…) })</code>
+        /// </summary>
         public static StartBit ByIndexQuery(string indexName, string query)
         {
             return new StartBit(createParameterCallback =>
