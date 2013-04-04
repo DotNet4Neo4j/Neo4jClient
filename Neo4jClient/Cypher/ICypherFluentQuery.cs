@@ -19,7 +19,9 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Start(params ICypherStartBit[] startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences);
+        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(…) }) instead")]
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value);
+        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead")]
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameterText);
         ICypherFluentQuery Match(params string[] matchText);
         ICypherFluentQuery Relate(string relateText);

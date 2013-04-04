@@ -112,14 +112,22 @@ namespace Neo4jClient.Cypher
             });
         }
 
+        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(…) }) instead")]
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
         {
-            return Start(new CypherStartBitWithNodeIndexLookup(identity, indexName, key, value));
+            return Start(new Dictionary<string, object>
+            {
+                {identity, Node.ByIndexLookup(indexName, key, value)}
+            });
         }
 
+        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead")]
         public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)
         {
-            return Start(new CypherStartBitWithNodeIndexLookupWithSingleParameter(identity, indexName, parameter));
+            return Start(new Dictionary<string, object>
+            {
+                {identity, Node.ByIndexQuery(indexName, parameter)}
+            });
         }
 
         public ICypherFluentQuery Match(params string[] matchText)
