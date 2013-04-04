@@ -2,6 +2,7 @@ using System;
 
 namespace Neo4jClient.Cypher
 {
+    [Obsolete("Use IGraphClient.Cypher.Start(new { foo = \"bar\" }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
     public class RawCypherStartBit : ICypherStartBit
     {
         readonly string identifier;

@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Neo4jClient.Cypher
 {
+    [Obsolete("Use IGraphClient.Cypher.Start(new { foo = nodeRef1 }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
     public class CypherStartBit : ICypherStartBit
     {
         readonly string identifier;
