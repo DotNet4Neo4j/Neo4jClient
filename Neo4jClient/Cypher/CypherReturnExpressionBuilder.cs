@@ -137,9 +137,17 @@ namespace Neo4jClient.Cypher
 
         static string BuildStatement(MethodCallExpression expression, MemberInfo targetMember)
         {
-            if (expression.Method.DeclaringType != typeof(ICypherResultItem))
-                throw new ArgumentException(ReturnExpressionCannotBeSerializedToCypherExceptionMessage);
+            if (expression.Method.DeclaringType == typeof (ICypherResultItem))
+                return BuildCypherResultItemStatement(expression, targetMember);
 
+            if (expression.Method.DeclaringType == typeof(All))
+                return BuildCypherAllStatement(expression, targetMember);
+
+            throw new ArgumentException(ReturnExpressionCannotBeSerializedToCypherExceptionMessage);
+        }
+
+        static string BuildCypherResultItemStatement(MethodCallExpression expression, MemberInfo targetMember)
+        {
             var targetObject = (ParameterExpression)expression.Object;
 
             if (targetObject == null)
@@ -168,6 +176,18 @@ namespace Neo4jClient.Cypher
                     return string.Format("type({0}) AS {1}", targetObject.Name, targetMember.Name);
                 default:
                     throw new InvalidOperationException("Unexpected ICypherResultItem method definition, ICypherResultItem." + methodName);
+            }
+        }
+
+        static string BuildCypherAllStatement(MethodCallExpression expression, MemberInfo targetMember)
+        {
+            var methodName = expression.Method.Name;
+            switch (methodName)
+            {
+                case "Count":
+                    return string.Format("count(*) AS {0}", targetMember.Name);
+                default:
+                    throw new InvalidOperationException("Unexpected All method definition, All." + methodName);
             }
         }
 
