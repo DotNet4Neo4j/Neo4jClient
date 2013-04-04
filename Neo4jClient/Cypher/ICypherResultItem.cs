@@ -27,6 +27,19 @@ namespace Neo4jClient.Cypher
         IEnumerable<Node<T>> CollectAsDistinct<T>();
 
         /// <summary>
+        /// Equivalent to <code>RETURN count(foo)</code>
+        /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#_count
+        /// </summary>
+        long Count();
+
+        /// <summary>
+        /// Equivalent to <code>RETURN count(distinct foo)</code>
+        /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#_count
+        /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#aggregation-distinct
+        /// </summary>
+        long CountDistinct();
+
+        /// <summary>
         /// Equivalent to <code>RETURN length(foo)</code>
         /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-length
         /// </summary>

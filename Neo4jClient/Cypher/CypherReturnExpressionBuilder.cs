@@ -168,6 +168,10 @@ namespace Neo4jClient.Cypher
                     return string.Format("collect({0}) AS {1}", targetObject.Name, targetMember.Name);
                 case "CollectAsDistinct":
                     return string.Format("collect(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
+                case "Count":
+                    return string.Format("count({0}) AS {1}", targetObject.Name, targetMember.Name);
+                case "CountDistinct":
+                    return string.Format("count(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
                 case "Id":
                     return string.Format("id({0}) AS {1}", targetObject.Name, targetMember.Name);
                 case "Length":
