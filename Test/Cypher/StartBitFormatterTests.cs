@@ -49,6 +49,20 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void Mixed()
+        {
+            var cypher = ToCypher(new
+            {
+                n1 = "foo",
+                n2 = (NodeReference)2
+            });
+
+            Assert.AreEqual("n1=foo, n2=node({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(2, cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void ThrowNotSupportedExceptionForUnknownType()
         {
             var badObject = new { n1 = new StartBitFormatterTests() };
