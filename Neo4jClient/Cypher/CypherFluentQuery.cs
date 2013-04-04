@@ -108,30 +108,6 @@ namespace Neo4jClient.Cypher
             return Start(new CypherStartBitWithNodeIndexLookupWithSingleParameter(identity, indexName, parameter));
         }
 
-        [Obsolete("Call Start(new { identity = startText }) instead. Supply multiple parameters as needed, such as Start(new { foo = nodeRef1, bar = nodeRef2 }).", true)]
-        public ICypherFluentQuery AddStartPoint(string identity, string startText)
-        {
-            throw new NotSupportedException();
-        }
-
-        [Obsolete("Call Start(new CypherStartBitWithNodeIndexLookup(identity, ...)) instead. Supply multiple parameters as needed, such as Start(new { foo = nodeRef1, bar = nodeRef2 }).", true)]
-        public ICypherFluentQuery AddStartPointWithNodeIndexLookup(string identity, string indexName, string key, object value)
-        {
-            throw new NotSupportedException();
-        }
-
-        [Obsolete("Call Start(new { foo = new[] { nodeRef1, nodeRef2 } }) instead. Supply multiple parameters as needed, such as Start(new { foo = nodeRef1, bar = nodeRef2 }).", true)]
-        public ICypherFluentQuery AddStartPoint(string identity, params NodeReference[] nodeReferences)
-        {
-            throw new NotSupportedException();
-        }
-
-        [Obsolete("Call Start(new { foo = new[] { relRef1, relRef2 } }) instead. Supply multiple parameters as needed, such as Start(new { foo = nodeRef1, bar = nodeRef2 }).", true)]
-        public ICypherFluentQuery AddStartPoint(string identity, params RelationshipReference[] relationshipReferences)
-        {
-            throw new NotSupportedException();
-        }
-
         public ICypherFluentQuery Match(params string[] matchText)
         {
             return Mutate(w =>
