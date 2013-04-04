@@ -22,6 +22,22 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(1, cypher.QueryParameters["p0"]);
         }
 
+        [Test]
+        public void MultipleNodesByStaticReference()
+        {
+            // START n1=node(1)
+            var cypher = ToCypher(new
+            {
+                n1 = (NodeReference)1,
+                n2 = (NodeReference)2
+            });
+
+            Assert.AreEqual("n1=node({p0}), n2=node({p1})", cypher.QueryText);
+            Assert.AreEqual(2, cypher.QueryParameters.Count);
+            Assert.AreEqual(1, cypher.QueryParameters["p0"]);
+            Assert.AreEqual(2, cypher.QueryParameters["p1"]);
+        }
+
         static CypherQuery ToCypher(object startBits)
         {
             var parameters = new Dictionary<string, object>();
