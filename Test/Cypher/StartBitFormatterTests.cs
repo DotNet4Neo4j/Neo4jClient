@@ -73,10 +73,9 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new NodeReference[] { 1, 2 }
             });
 
-            Assert.AreEqual("n1=node({p0}, {p1})", cypher.QueryText);
-            Assert.AreEqual(2, cypher.QueryParameters.Count);
-            Assert.AreEqual(1, cypher.QueryParameters["p0"]);
-            Assert.AreEqual(2, cypher.QueryParameters["p1"]);
+            Assert.AreEqual("n1=node({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(new[] {1, 2}, cypher.QueryParameters["p0"]);
         }
 
         [Test]
@@ -100,10 +99,9 @@ namespace Neo4jClient.Test.Cypher
                 r1 = new RelationshipReference[] { 1, 2 }
             });
 
-            Assert.AreEqual("r1=relationship({p0}, {p1})", cypher.QueryText);
-            Assert.AreEqual(2, cypher.QueryParameters.Count);
-            Assert.AreEqual(1, cypher.QueryParameters["p0"]);
-            Assert.AreEqual(2, cypher.QueryParameters["p1"]);
+            Assert.AreEqual("r1=relationship({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(new[] {1, 2}, cypher.QueryParameters["p0"]);
         }
 
         [Test]
@@ -212,21 +210,20 @@ namespace Neo4jClient.Test.Cypher
                 "n3=node:indexName(property = {p1}), " +
                 "n4=node:indexName({p2}), " +
                 "r1=relationship({p3}), " +
-                "moreRels=relationship({p4}, {p5}), " +
-                "r2=relationship:indexName(property = {p6}), " +
-                "r3=relationship:indexName({p7}), " +
+                "moreRels=relationship({p4}), " +
+                "r2=relationship:indexName(property = {p5}), " +
+                "r3=relationship:indexName({p6}), " +
                 "all=node(*)";
 
             Assert.AreEqual(expected, cypher.QueryText);
-            Assert.AreEqual(8, cypher.QueryParameters.Count);
+            Assert.AreEqual(7, cypher.QueryParameters.Count);
             Assert.AreEqual(2, cypher.QueryParameters["p0"]);
             Assert.AreEqual("value", cypher.QueryParameters["p1"]);
             Assert.AreEqual("query", cypher.QueryParameters["p2"]);
             Assert.AreEqual(3, cypher.QueryParameters["p3"]);
-            Assert.AreEqual(3, cypher.QueryParameters["p4"]);
-            Assert.AreEqual(4, cypher.QueryParameters["p5"]);
-            Assert.AreEqual("value", cypher.QueryParameters["p6"]);
-            Assert.AreEqual("query", cypher.QueryParameters["p7"]);
+            Assert.AreEqual(new[] {3, 4}, cypher.QueryParameters["p4"]);
+            Assert.AreEqual("value", cypher.QueryParameters["p5"]);
+            Assert.AreEqual("query", cypher.QueryParameters["p6"]);
         }
 
         [Test]

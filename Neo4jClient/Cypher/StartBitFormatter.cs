@@ -102,30 +102,26 @@ namespace Neo4jClient.Cypher
 
         static string FormatValue(NodeReference value, CreateParameterCallback createParameterCallback)
         {
-            return string.Format("node({0})", createParameterCallback(value.Id));
+            return FormatValue(new[] {value}, createParameterCallback);
         }
 
         static string FormatValue(IEnumerable<NodeReference> value, CreateParameterCallback createParameterCallback)
         {
-            var paramNames = value
-                .Select(v => createParameterCallback(v.Id))
-                .ToArray();
-
-            return string.Format("node({0})", string.Join(", ", paramNames));
+            var ids = value.Select(v => v.Id).ToArray();
+            var idsParam = ids.Count() == 1 ? createParameterCallback(ids.Single()) : createParameterCallback(ids);
+            return string.Format("node({0})", idsParam);
         }
 
         static string FormatValue(RelationshipReference value, CreateParameterCallback createParameterCallback)
         {
-            return string.Format("relationship({0})", createParameterCallback(value.Id));
+            return FormatValue(new[] { value }, createParameterCallback);
         }
 
         static string FormatValue(IEnumerable<RelationshipReference> value, CreateParameterCallback createParameterCallback)
         {
-            var paramNames = value
-                .Select(v => createParameterCallback(v.Id))
-                .ToArray();
-
-            return string.Format("relationship({0})", string.Join(", ", paramNames));
+            var ids = value.Select(v => v.Id).ToArray();
+            var idsParam = ids.Count() == 1 ? createParameterCallback(ids.Single()) : createParameterCallback(ids);
+            return string.Format("relationship({0})", idsParam);
         }
     }
 }
