@@ -11,5 +11,14 @@
                     propertyName,
                     createParameterCallback(value)));
         }
+
+        public static StartBit ByIndexQuery(string indexName, string query)
+        {
+            return new StartBit(createParameterCallback =>
+                string.Format(
+                    "node:{0}({1})",
+                    indexName,
+                    createParameterCallback(query)));
+        }
     }
 }
