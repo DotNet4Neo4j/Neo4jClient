@@ -44,6 +44,10 @@ namespace Neo4jClient.Cypher
         static readonly IDictionary<Type, Func<object, CreateParameterCallback, string>> Formatters = new Dictionary<Type, Func<object, CreateParameterCallback, string>>
         {
             {
+                typeof(string),
+                (value, callback) => (string)value
+            },
+            {
                 typeof(NodeReference),
                 (value, callback) => FormatValue((NodeReference)value, callback)
             }

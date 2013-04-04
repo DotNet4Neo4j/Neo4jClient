@@ -67,6 +67,18 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(2, cypher.QueryParameters["p1"]);
         }
 
+        [Test]
+        public void CustomString()
+        {
+            var cypher = ToCypher(new
+            {
+                n1 = "foo"
+            });
+
+            Assert.AreEqual("n1=foo", cypher.QueryText);
+            Assert.AreEqual(0, cypher.QueryParameters.Count);
+        }
+
         static CypherQuery ToCypher(object startBits)
         {
             var parameters = new Dictionary<string, object>();
