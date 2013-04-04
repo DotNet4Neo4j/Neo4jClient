@@ -61,6 +61,16 @@ namespace Neo4jClient.Cypher
                 w.AppendClause(string.Format("START {0}={1}", identity, startText)));
         }
 
+        public ICypherFluentQuery Start(object startBits)
+        {
+            return Mutate(w =>
+            {
+                var startBitsText = StartBitFormatter.FormatAsCypherText(startBits, w.CreateParameter);
+                var startText = "START " + startBitsText;
+                w.AppendClause(startText);
+            });
+        }
+
         public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
             return Mutate(w =>

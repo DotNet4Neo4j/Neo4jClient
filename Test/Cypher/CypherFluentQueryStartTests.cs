@@ -215,6 +215,24 @@ RETURN t.Id? AS Id, t.Name? AS Name, collect(ts) AS JobSpecialties", query.Query
             Assert.AreEqual(2, query.QueryParameters["p1"]);
         }
 
+        [Test]
+        public void SingleNodeByStaticReferenceInAnonymousType()
+        {
+            // START n1=node(1)
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Start(new
+                {
+                    n1 = (NodeReference)1
+                })
+                .Query;
+
+            Assert.AreEqual("START n1=node({p0})", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters.Count);
+            Assert.AreEqual(1, query.QueryParameters["p0"]);
+        }
+
         public class JobType
         {
             public string Id { get; set; }
