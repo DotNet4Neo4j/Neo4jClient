@@ -23,6 +23,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void SingleNode()
+        {
+            var cypher = ToCypher(new
+            {
+                n1 = new Node<object>(new object(), 123, null)
+            });
+
+            Assert.AreEqual("n1=node({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(123, cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void RootNodeReference()
         {
             var cypher = ToCypher(new

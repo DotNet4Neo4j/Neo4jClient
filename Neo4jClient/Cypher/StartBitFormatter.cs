@@ -79,6 +79,10 @@ namespace Neo4jClient.Cypher
                 (value, callback) => FormatValue((NodeReference[])value, callback)
             },
             {
+                typeof(IHasNodeReference),
+                (value, callback) => FormatValue(((IHasNodeReference)value).Reference, callback)
+            },
+            {
                 typeof(RelationshipReference),
                 (value, callback) => FormatValue((RelationshipReference)value, callback)
             },

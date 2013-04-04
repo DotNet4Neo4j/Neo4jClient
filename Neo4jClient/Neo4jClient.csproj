@@ -81,6 +81,7 @@
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
+    <Compile Include="IHasNodeReference.cs" />
     <Compile Include="IHttpClient.cs" />
     <Compile Include="IRawGraphClient.cs" />
     <Compile Include="JTokenExtensions.cs" />
