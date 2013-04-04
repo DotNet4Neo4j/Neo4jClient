@@ -68,6 +68,7 @@
     <Compile Include="ApiModels\DataRow.cs" />
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="Cypher\All.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookupWithSingleParameter.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookup.cs" />
     <Compile Include="Cypher\ICypherStartBit.cs" />
@@ -186,7 +187,9 @@
     <None Include="Diagrams\GraphClientCore.cd" />
     <None Include="Diagrams\Responses.cd" />
     <None Include="Indexing.cd" />
-    <None Include="Neo4jClient.nuspec" />
+    <None Include="Neo4jClient.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
