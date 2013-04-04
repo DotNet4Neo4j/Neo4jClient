@@ -71,6 +71,7 @@ namespace Neo4jClient.Cypher
             });
         }
 
+        [Obsolete("Use Start(new { foo = nodeRef1, bar = All.Nodes }) instead")]
         public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
         {
             return Mutate(w =>
