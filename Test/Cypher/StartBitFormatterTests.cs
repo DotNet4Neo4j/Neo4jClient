@@ -9,35 +9,6 @@ namespace Neo4jClient.Test.Cypher
     public class StartBitFormatterTests
     {
         [Test]
-        public void ThrowNotSupportedExceptionForUnknownType()
-        {
-            var badObject = new { n1 = new StartBitFormatterTests() };
-            Assert.Throws<NotSupportedException>(
-                () => StartBitFormatter.FormatAsCypherText(badObject, null)
-            );
-        }
-
-        [Test]
-        public void NotSupportedExceptionForUnknownTypeIncludesIdentityName()
-        {
-            var badObject = new { n1 = new StartBitFormatterTests() };
-            var exception = Assert.Throws<NotSupportedException>(
-                () => StartBitFormatter.FormatAsCypherText(badObject, null)
-            );
-            StringAssert.Contains("n1", exception.Message);
-        }
-
-        [Test]
-        public void NotSupportedExceptionForUnknownTypeIncludesTypeName()
-        {
-            var badObject = new { n1 = new StartBitFormatterTests() };
-            var exception = Assert.Throws<NotSupportedException>(
-                () => StartBitFormatter.FormatAsCypherText(badObject, null)
-            );
-            StringAssert.Contains(typeof(StartBitFormatterTests).FullName, exception.Message);
-        }
-
-        [Test]
         public void SingleNodeByStaticReference()
         {
             var cypher = ToCypher(new
@@ -75,6 +46,35 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("n1=foo", cypher.QueryText);
             Assert.AreEqual(0, cypher.QueryParameters.Count);
+        }
+
+        [Test]
+        public void ThrowNotSupportedExceptionForUnknownType()
+        {
+            var badObject = new { n1 = new StartBitFormatterTests() };
+            Assert.Throws<NotSupportedException>(
+                () => StartBitFormatter.FormatAsCypherText(badObject, null)
+            );
+        }
+
+        [Test]
+        public void NotSupportedExceptionForUnknownTypeIncludesIdentityName()
+        {
+            var badObject = new { n1 = new StartBitFormatterTests() };
+            var exception = Assert.Throws<NotSupportedException>(
+                () => StartBitFormatter.FormatAsCypherText(badObject, null)
+            );
+            StringAssert.Contains("n1", exception.Message);
+        }
+
+        [Test]
+        public void NotSupportedExceptionForUnknownTypeIncludesTypeName()
+        {
+            var badObject = new { n1 = new StartBitFormatterTests() };
+            var exception = Assert.Throws<NotSupportedException>(
+                () => StartBitFormatter.FormatAsCypherText(badObject, null)
+            );
+            StringAssert.Contains(typeof(StartBitFormatterTests).FullName, exception.Message);
         }
 
         static CypherQuery ToCypher(object startBits)
