@@ -9,7 +9,7 @@ namespace Neo4jClient.Test.Cypher
     public class StartBitFormatterTests
     {
         [Test]
-        public void SingleNodeByStaticReference()
+        public void SingleNodeReference()
         {
             var cypher = ToCypher(new
             {
@@ -22,7 +22,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void MultipleNodesByStaticReference()
+        public void MultipleNodeReferences()
         {
             var cypher = ToCypher(new
             {
