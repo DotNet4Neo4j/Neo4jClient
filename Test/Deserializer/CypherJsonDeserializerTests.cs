@@ -5,6 +5,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Deserializer
 {
@@ -684,6 +685,42 @@ namespace Neo4jClient.Test.Deserializer
         }
 
         [Test]
+        public void DeserializeShouldRespectJsonPropertyAttribute()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<UserWithJsonPropertyAttribute>(client, CypherResultMode.Set);
+            var content = @"{
+  'columns' : [ 'Foo' ],
+  'data' : [ [ {
+    'paged_traverse' : 'http://localhost:8000/db/data/node/740/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out',
+    'data' : {
+      'givenName' : 'Bob'
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/740/traverse/{returnType}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/740/relationships/all',
+    'self' : 'http://localhost:8000/db/data/node/740',
+    'property' : 'http://localhost:8000/db/data/node/740/properties/{key}',
+    'properties' : 'http://localhost:8000/db/data/node/740/properties',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/out/{-list|&|types}',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/740/relationships/in',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/740/relationships/in/{-list|&|types}',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/740/relationships'
+  } ] ]
+}".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual("Bob", results.Single().Name);
+        }
+
+        [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/63")]
         public void DeserializeShouldMapNullCollectResultsWithOtherProperties()
         {
@@ -929,6 +966,12 @@ namespace Neo4jClient.Test.Deserializer
         {
             public Node<User> Poster { get; set; }
             public IEnumerable<Node<object>> Fans { get; set; }
+        }
+
+        public class UserWithJsonPropertyAttribute
+        {
+            [JsonProperty("givenName")]
+            public string Name { get; set; }
         }
 
         [Test]
