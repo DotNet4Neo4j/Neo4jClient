@@ -37,6 +37,8 @@ namespace Neo4jClient.Cypher
                 .Select(identity =>
                 {
                     var value = startBits[identity];
+                    if (value == null)
+                        throw new ArgumentException(string.Format("The value of {0} was null.", identity), "startBits");
                     var cypherText = FormatBitAsCypherText(identity, value, createParameterCallback);
                     return identity + "=" + cypherText;
                 })

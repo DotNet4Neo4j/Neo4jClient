@@ -274,6 +274,25 @@ namespace Neo4jClient.Test.Cypher
             StringAssert.Contains(typeof(StartBitFormatterTests).FullName, exception.Message);
         }
 
+        [Test]
+        public void ThrowArgumentExceptionForNullValue()
+        {
+            var startBits = new { foo = (object)null };
+            Assert.Throws<ArgumentException>(
+                () => StartBitFormatter.FormatAsCypherText(startBits, null)
+            );
+        }
+
+        [Test]
+        public void ArgumentExceptionForNullValueIncludesPropertyName()
+        {
+            var startBits = new { foo = (object)null };
+            var ex = Assert.Throws<ArgumentException>(
+                () => StartBitFormatter.FormatAsCypherText(startBits, null)
+            );
+            StringAssert.Contains("foo", ex.Message);
+        }
+
         static CypherQuery ToCypher(object startBits)
         {
             var parameters = new Dictionary<string, object>();
