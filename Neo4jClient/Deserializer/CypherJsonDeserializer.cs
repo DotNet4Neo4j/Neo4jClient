@@ -123,7 +123,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 // ReSharper restore UnusedParameter.Local
         {
             if (columnNames.Count() != 1)
-                throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead.");
+                throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead. If using the fluent Cypher interface, use the overload of Return that takes a lambda or object instead of single string. (The overload with a single string is for an identity, not raw query text: we can't map the columns back out if you just supply raw query text.)");
 
             var resultType = typeof(TResult);
             var isResultTypeANodeOrRelationshipInstance = resultType.IsGenericType &&
