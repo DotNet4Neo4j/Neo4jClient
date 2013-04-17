@@ -230,6 +230,24 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnCustomCypherTextFromDynamicCode()
+        {
+            // START a=node(1)
+            // MATCH a<--b
+            // RETURN abs(sum(a.age) - sum(b.age))
+
+            Expression<Func<ICypherResultItem, object>> expression =
+                b => new
+                {
+                    Foo = Return.As<long>("abs(sum(a.age)" + new string(' ', 1) + "- sum(b.age))")
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("abs(sum(a.age) - sum(b.age)) AS Foo", text);
+        }
+
+        [Test]
         public void ThrowNiceErrorForChainedMethods()
         {
             Expression<Func<ICypherResultItem, object>> expression =
