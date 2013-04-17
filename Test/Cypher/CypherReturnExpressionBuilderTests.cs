@@ -193,6 +193,25 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnCount()
+        {
+            // http://docs.neo4j.org/chunked/1.8.M05/query-aggregation.html#aggregation-collect
+            // START a=node(1)
+            // MATCH a<--b
+            // RETURN count(b)
+
+            Expression<Func<ICypherResultItem, object>> expression =
+                b => new
+                {
+                    Foo = b.Count()
+                };
+
+            var text = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("count(b) AS Foo", text);
+        }
+
+        [Test]
         public void ThrowNiceErrorForChainedMethods()
         {
             Expression<Func<ICypherResultItem, object>> expression =
