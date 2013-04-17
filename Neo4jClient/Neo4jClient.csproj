@@ -76,6 +76,7 @@
     <Compile Include="Cypher\Node.cs" />
     <Compile Include="Cypher\QueryWriter.cs" />
     <Compile Include="Cypher\RawCypherStartBit.cs" />
+    <Compile Include="Cypher\Return.cs" />
     <Compile Include="Cypher\StartBit.cs" />
     <Compile Include="Cypher\StartBitFormatter.cs" />
     <Compile Include="HttpClient.cs" />

@@ -7,7 +7,7 @@ namespace Neo4jClient.Cypher
 {
     public class CypherReturnExpressionBuilder
     {
-        internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
+        internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem, Neo4jClient.Cypher.All or Neo4jClient.Cypher.Return. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
 
         // Terminology used in this file:
         //
@@ -143,6 +143,9 @@ namespace Neo4jClient.Cypher
             if (expression.Method.DeclaringType == typeof(All))
                 return BuildCypherAllStatement(expression, targetMember);
 
+            if (expression.Method.DeclaringType == typeof(Return))
+                return BuildCypherReturnStatement(expression, targetMember);
+
             throw new ArgumentException(ReturnExpressionCannotBeSerializedToCypherExceptionMessage);
         }
 
@@ -192,6 +195,20 @@ namespace Neo4jClient.Cypher
                     return string.Format("count(*) AS {0}", targetMember.Name);
                 default:
                     throw new InvalidOperationException("Unexpected All method definition, All." + methodName);
+            }
+        }
+
+        static string BuildCypherReturnStatement(MethodCallExpression expression, MemberInfo targetMember)
+        {
+            var methodName = expression.Method.Name;
+            switch (methodName)
+            {
+                case "As":
+                    var cypherTextExpression = expression.Arguments.Single();
+                    var cypherText = Expression.Lambda<Func<string>>(cypherTextExpression).Compile()();
+                    return string.Format("{0} AS {1}", cypherText, targetMember.Name);
+                default:
+                    throw new InvalidOperationException("Unexpected Return method definition, Return." + methodName);
             }
         }
 
