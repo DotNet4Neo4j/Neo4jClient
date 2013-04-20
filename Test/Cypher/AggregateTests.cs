@@ -56,6 +56,9 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(0, query.QueryParameters.Count());
         }
 
+ 
+
+
         [Test]
         public void CountDistinct()
         {
@@ -81,6 +84,20 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN count(*) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+        }
+
+        [Test]
+        public void CountUsingICypderFluentQuery()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            ICypherFluentQuery query = new CypherFluentQuery(client);
+
+            var resultQuery =
+                query.Return(() => new { Foo = All.Count() })
+            .Query;
+
+            Assert.AreEqual("RETURN count(*) AS Foo", resultQuery.QueryText);
+            Assert.AreEqual(0, resultQuery.QueryParameters.Count());
         }
 
         [Test]
