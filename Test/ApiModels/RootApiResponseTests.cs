@@ -16,6 +16,8 @@ namespace Neo4jClient.Test.ApiModels
         [TestCase("1.7", Result = "1.7", Description = "http://docs.neo4j.org/chunked/1.7/rest-api-service-root.html")]
         [TestCase("1.7.2", Result = "1.7.2", Description = "http://docs.neo4j.org/chunked/1.7.2/rest-api-service-root.html")]
         [TestCase("1.8.M07-1-g09701c5", Result = "1.8.0.7", Description = "http://docs.neo4j.org/chunked/1.8.M07/rest-api-service-root.html")]
+        [TestCase("1.9.RC1", Result = "1.9.0.1")]
+        [TestCase("1.9.RC2", Result = "1.9.0.2")]
         public string Version(string versionString)
         {
             var response = new RootApiResponse { neo4j_version = versionString };

@@ -47,7 +47,7 @@ namespace Neo4jClient.ApiModels
 
                 var numericalVersionString = Regex.Replace(
                     neo4j_version,
-                    @"(?<major>\d*)[.](?<minor>\d*)[.]?M(?<build>\d*).*",
+                    @"(?<major>\d*)[.](?<minor>\d*)[.]?(M(?<build>\d*)|RC(?<build>\d*)?).*",
                     "${major}.${minor}.0.${build}");
 
                 numericalVersionString = Regex.Replace(
