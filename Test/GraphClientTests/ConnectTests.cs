@@ -134,7 +134,8 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpCall = httpClient.ReceivedCalls().First();
             var httpRequest = (HttpRequestMessage) httpCall.GetArguments()[0];
 
-            StringAssert.StartsWith("http://username:password@foo", httpRequest.RequestUri.AbsoluteUri);
+            StringAssert.AreEqualIgnoringCase("Basic", httpRequest.Headers.Authorization.Scheme);
+            StringAssert.AreEqualIgnoringCase("dXNlcm5hbWU6cGFzc3dvcmQ=", httpRequest.Headers.Authorization.Parameter);
         }
 
         [Test]

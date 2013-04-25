@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
@@ -141,6 +142,13 @@ namespace Neo4jClient
             }
 
             request.Headers.Add("User-Agent", userAgent);
+
+            var userInfo = request.RequestUri.UserInfo;
+            if (!string.IsNullOrEmpty(userInfo))
+            {
+                var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes(userInfo));
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+            }
 
             var baseTask = httpClient.SendAsync(request);
             var continuationTask = baseTask.ContinueWith(requestTask =>
