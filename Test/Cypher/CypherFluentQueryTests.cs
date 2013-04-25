@@ -179,16 +179,16 @@ namespace Neo4jClient.Test.Cypher
         public void OrderNodesByNull()
         {
             // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-ordering-null
-            // RETURN n.length?, n
+            // RETURN n
             // ORDER BY n.length?
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Return<object>("n.length?, n")
+                .Return<object>("n")
                 .OrderBy("n.length?")
                 .Query;
 
-            Assert.AreEqual("RETURN n.length?, n\r\nORDER BY n.length?", query.QueryText);
+            Assert.AreEqual("RETURN n\r\nORDER BY n.length?", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count);
         }
 

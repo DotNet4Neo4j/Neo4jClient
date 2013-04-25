@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
@@ -7,6 +8,9 @@ namespace Neo4jClient.Cypher
     {
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
+            if (identity.Any(c => !char.IsLetterOrDigit(c)))
+                identity = string.Format("`{0}`", identity);
+
             return Mutate<TResult>(w => w.AppendClause("RETURN " + identity));
         }
 
