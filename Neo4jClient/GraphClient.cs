@@ -1090,6 +1090,45 @@ namespace Neo4jClient
                 : data.Select(r => r.ToNode(this));
         }
 
+        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id)
+        {
+            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString());
+        }
+
+        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id)
+        {
+            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString());
+        }
+
+        IEnumerable<Node<TNode>> BuildLookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, string id)
+        {
+            CheckRoot();
+
+            string indexResource;
+            switch (indexFor)
+            {
+                case IndexFor.Node:
+                    indexResource = RootApiResponse.NodeIndex;
+                    break;
+                case IndexFor.Relationship:
+                    indexResource = RootApiResponse.RelationshipIndex;
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("LookupIndex does not support indexfor {0}", indexFor));
+            }
+
+            indexResource = string.Format("{0}/{1}/{2}/{3}", indexResource, exactIndexName, indexKey, id);
+            var response = SendHttpRequest(
+                HttpGet(indexResource),
+                HttpStatusCode.OK);
+
+            var data = new CustomJsonDeserializer().Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
+
+            return data == null
+                ? Enumerable.Empty<Node<TNode>>()
+                : data.Select(r => r.ToNode(this));
+        }
+
         public void ShutdownServer()
         {
             ExecuteScalarGremlin("g.getRawGraph().shutdown()", null);

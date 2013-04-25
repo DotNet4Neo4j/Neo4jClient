@@ -79,6 +79,9 @@ namespace Neo4jClient
         [Obsolete("There are encoding issues with this method. You should use the newer Cypher approach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher.")]
         IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query);
 
+        IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id);
+        IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id);
+
         void ShutdownServer();
 
         event OperationCompletedEventHandler OperationCompleted;
