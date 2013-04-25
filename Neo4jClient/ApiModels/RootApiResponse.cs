@@ -15,6 +15,9 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("node")]
         public string Node { get; set; }
 
+        [JsonProperty("relationship")]
+        public string Relationship { get; set; }
+        
         [JsonProperty("node_index")]
         public string NodeIndex { get; set; }
 

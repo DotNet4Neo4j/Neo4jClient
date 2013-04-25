@@ -20,6 +20,14 @@ namespace Neo4jClient
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 
+        Node<TNode> Get<TNode>(long id);
+
+        RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference) where TData : class, new();
+
+        RelationshipInstance<TData> Get<TData>(RelationshipReference reference) where TData : class, new();
+
+        Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new();
+
         /// <summary>
         /// Retrieves the specified node, gives you an opportunity to mutate it in the callback, then persists the final object back to Neo4j. Results in two calls over the wire: one to retrieve, one to set.
         /// </summary>
@@ -72,9 +80,13 @@ namespace Neo4jClient
 
         void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries);
 
+        void ReIndex(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries);
+
         void DeleteIndex(string indexName, IndexFor indexFor);
 
         void DeleteIndexEntries(string indexName, long nodeId);
+
+        void DeleteIndexEntries(string indexName, long Id, IndexFor indexFor);
 
         [Obsolete("There are encoding issues with this method. You should use the newer Cypher aproach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher.")]
         IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query );
