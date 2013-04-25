@@ -29,7 +29,7 @@ namespace Neo4jClient
         bool jsonStreamingAvailable;
         readonly string userAgent;
 
-        const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5M02. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
+        const string IndexRestApiVersionCompatMessage = "The REST indexing API was changed in neo4j 1.5. This version of Neo4jClient is only compatible with the new API call. You need to either a) upgrade your neo4j install to 1.5M02 or above (preferred), or b) downgrade your Neo4jClient library to 1.0.0.203 or below.";
 
         public bool UseJsonStreamingIfAvailable { get; set; }
         
@@ -241,7 +241,7 @@ namespace Neo4jClient
             indexEntries = (indexEntries ?? Enumerable.Empty<IndexEntry>()).ToArray();
 
             if (indexEntries.Any())
-                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+                AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
 
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
@@ -512,7 +512,7 @@ namespace Neo4jClient
                 : indexEntries.ToArray();
 
             if (allIndexEntries.Any())
-                AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+                AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
 
             var nodePropertiesEndpoint = ResolveEndpoint(nodeReference) + "/properties";
             SendHttpRequest(
@@ -548,7 +548,7 @@ namespace Neo4jClient
             {
                 indexEntries = indexEntriesCallback(node.Data).ToArray();
                 if (indexEntries.Any())
-                    AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+                    AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
             }
 
             var serializer = BuildSerializer();
@@ -984,7 +984,7 @@ namespace Neo4jClient
             if (indexEntries == null)
                 throw new ArgumentNullException("indexEntries");
 
-            AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+            AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
 
             CheckRoot();
 

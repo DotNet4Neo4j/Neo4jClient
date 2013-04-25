@@ -126,6 +126,17 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void Return_ShouldBacktickEscapeIdentitiesWithSpecialCharacters()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return<object>("foo-bar")
+                .Query;
+
+            Assert.AreEqual("RETURN `foo-bar`", query.QueryText);
+        }
+
+        [Test]
         public void ShouldUseSetResultModeForIdentityBasedReturn()
         {
             var client = Substitute.For<IRawGraphClient>();

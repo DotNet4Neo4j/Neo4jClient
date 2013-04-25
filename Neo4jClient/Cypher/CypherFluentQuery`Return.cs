@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
@@ -7,10 +8,13 @@ namespace Neo4jClient.Cypher
     {
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
+            if (identity.Any(c => !char.IsLetterOrDigit(c)))
+                identity = string.Format("`{0}`", identity);
+
             return Mutate<TResult>(w => w.AppendClause("RETURN " + identity));
         }
 
-        [Obsolete("This overload will be removed in future versions because the result mode should all be managed automatically. If there's a specific reason for why you are using this, raise an issue at https://bitbucket.org/Readify/neo4jclient/issues/new so we can fix it before we remove this overload.")]
+        [Obsolete("This overload will be removed in future versions because the result mode should all be managed automatically. If there's a specific reason for why you are using this, raise an issue at https://bitbucket.org/Readify/neo4jclient/issues/new so we can fix it before we remove this overload. If you want to create a projection, you should be using the lambda overload instead. See the 'Using Functions in Return Clauses' and 'Using Custom Text in Return Clauses' sections of https://bitbucket.org/Readify/neo4jclient/wiki/cypher for details of how to do this.")]
         public ICypherFluentQuery<TResult> Return<TResult>(string statement, CypherResultMode resultMode)
         {
             return Mutate<TResult>(w =>
