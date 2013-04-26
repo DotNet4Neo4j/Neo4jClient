@@ -191,6 +191,25 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ShouldReturnSpecificPropertyOnItsOwn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(a => a.As<Commodity>().Name)
+                .Query;
+
+            Assert.AreEqual("RETURN a.Name", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldThrowForMemberExpressionOffMethodOtherThanAs()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            Assert.Throws<ArgumentException>(
+                () => new CypherFluentQuery(client).Return(a => a.Type().Length));
+        }
+
+        [Test]
         public void ShouldUseSetResultModeForIdentityBasedReturn()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -218,6 +237,17 @@ ORDER BY common.FirstName", query.QueryText);
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Return(() => All.Count())
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseSetResultModeForSpecificPropertyReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(a => a.As<Commodity>().Name)
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);

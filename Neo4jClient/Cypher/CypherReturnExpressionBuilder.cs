@@ -31,8 +31,12 @@ namespace Neo4jClient.Cypher
                     var methodCallExpression = (MethodCallExpression)expression.Body;
                     text = BuildText(methodCallExpression);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
+                case ExpressionType.MemberAccess:
+                    var memberExpression = (MemberExpression)expression.Body;
+                    text = BuildText(memberExpression);
+                    return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
-                    throw new ArgumentException("The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), or a method call (for example: n => n.Count()).", "expression");
+                    throw new ArgumentException("The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar).", "expression");
             }
         }
 
@@ -98,6 +102,23 @@ namespace Neo4jClient.Cypher
         static string BuildText(MethodCallExpression expression)
         {
             return BuildStatement(expression, false);
+        }
+
+        /// <remarks>
+        /// This build method caters to expressions like: <code>item => item.As&lt;Foo&gt;().Bar</code>
+        /// </remarks>
+        static string BuildText(MemberExpression expression)
+        {
+            var innerExpression = expression.Expression as MethodCallExpression;
+            if (innerExpression == null ||
+                innerExpression.Method.DeclaringType != typeof(ICypherResultItem) ||
+                innerExpression.Method.Name != "As")
+                throw new ArgumentException("Member expressions are only supported off ICypherResultItem.As<TData>(). For example: Return(foo => foo.As<Bar>().Baz).", "expression");
+
+            var baseStatement = BuildStatement(innerExpression, false);
+            var statement = string.Format("{0}.{1}", baseStatement, expression.Member.Name);
+
+            return statement;
         }
 
         static string BuildStatement(Expression sourceExpression, MemberInfo targetMember)
