@@ -8,6 +8,7 @@ namespace Neo4jClient.Cypher
     public partial class CypherFluentQuery
     {
         internal const string IdentityLooksLikeAFunctionExceptionMessage = "The overload you have called takes an identity (for example: foo), but it looks like you've tried to pass in a function all (for example: count(foo)). You should use .Return(foo => foo.Count()) instead. If the function you want isn't available in the managed wrapper, you can use Return(() => Return.As<Foo>(\"function(foo)\")). If you want to return multiple columns, use an anonymous type: Return((foo, bar) => new { Foo = foo.As<Foo>(), BarCount = bar.Count() }).";
+        internal const string IdentityLooksLikeAMultiColumnStatementExceptionMessage = "The overload you have called takes an identity (for example: foo), but it looks like you've tried to pass in a multiple column statement (for example: foo,bar). If you want to return multiple columns, use an anonymous type: Return((foo, bar) => new { Foo = foo.As<Foo>(), BarCount = bar.Count() }). If the function you want isn't available in the managed wrapper, you can use Return(() => new { Foo = Return.As<Bar>(\"function(foo)\") }).";
 
         static readonly Regex LooksLikeAFunctionCallExpression = new Regex(@"^\w+\([^\)]*?\)$");
 
@@ -16,6 +17,9 @@ namespace Neo4jClient.Cypher
             if (identity.Contains("(") &&
                 LooksLikeAFunctionCallExpression.IsMatch(identity))
                 throw new ArgumentException(IdentityLooksLikeAFunctionExceptionMessage, "identity");
+
+            if (identity.Contains(","))
+                throw new ArgumentException(IdentityLooksLikeAMultiColumnStatementExceptionMessage, "identity");
 
             if (identity.Any(c => !char.IsLetterOrDigit(c)))
                 identity = string.Format("`{0}`", identity);

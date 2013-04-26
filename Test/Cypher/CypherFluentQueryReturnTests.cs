@@ -148,6 +148,16 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ShouldThrowWhenIdentityLooksLikeAMultiColumnStatement()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var ex = Assert.Throws<ArgumentException>(
+                () => new CypherFluentQuery(client).Return<long>("foo,bar")
+            );
+            StringAssert.StartsWith(CypherFluentQuery.IdentityLooksLikeAMultiColumnStatementExceptionMessage, ex.Message);
+        }
+
+        [Test]
         public void ShouldReturnCountOnItsOwn()
         {
             var client = Substitute.For<IRawGraphClient>();
