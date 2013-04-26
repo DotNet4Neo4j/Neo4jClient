@@ -83,8 +83,13 @@ namespace Neo4jClient.Test
 
         HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
         {
+            // User info isn't transmitted over the wire, so we need to strip it here too
+            var requestUri = request.RequestUri;
+            if (!string.IsNullOrEmpty(requestUri.UserInfo))
+                requestUri = new UriBuilder(requestUri) {UserName = "", Password = ""}.Uri;
+
             var matchingRequests = recordedResponses
-                .Where(can => request.RequestUri.AbsoluteUri == baseUri + can.Key.Resource)
+                .Where(can => requestUri.AbsoluteUri == baseUri + can.Key.Resource)
                 .Where(can => request.Method.ToString().Equals(can.Key.Method.ToString(), StringComparison.OrdinalIgnoreCase));
 
             string requestBody = null;
@@ -111,7 +116,7 @@ namespace Neo4jClient.Test
 
             if (!results.Any())
             {
-                var message = string.Format("No corresponding request-response pair was defined in the test harness for: {0} {1}", request.Method, request.RequestUri.AbsoluteUri);
+                var message = string.Format("No corresponding request-response pair was defined in the test harness for: {0} {1}", request.Method, requestUri.AbsoluteUri);
                 if (!string.IsNullOrEmpty(requestBody))
                 {
                     message += "\r\n\r\n" + requestBody;

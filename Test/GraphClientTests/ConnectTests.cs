@@ -139,6 +139,21 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void ShouldParseRootApiResponseFromAuthenticatedConnection()
+        {
+            using (var testHarness = new RestTestHarness()
+            {
+                { MockRequest.Get(""), MockResponse.NeoRoot() }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient("http://foo/db/data");
+                var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
+                graphClient.Connect();
+                Assert.AreEqual("/node", graphClient.RootApiResponse.Node);
+            }
+        }
+
+        [Test]
         public void ShouldSendCustomUserAgent()
         {
             // Arrange

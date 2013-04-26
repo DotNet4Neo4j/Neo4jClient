@@ -180,22 +180,27 @@ namespace Neo4jClient
                 HttpGet(""),
                 HttpStatusCode.OK);
 
+            var rootUriWithoutUserInfo = RootUri;
+            if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
+                rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
+            var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+
             RootApiResponse = result;
-            RootApiResponse.Batch = RootApiResponse.Batch.Substring(RootUri.AbsoluteUri.Length);
-            RootApiResponse.Node = RootApiResponse.Node.Substring(RootUri.AbsoluteUri.Length);
-            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(RootUri.AbsoluteUri.Length);
-            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(RootUri.AbsoluteUri.Length);
-            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(RootUri.AbsoluteUri.Length);
+            RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
+            RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
+            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
+            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
+            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
             if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
             {
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(RootUri.AbsoluteUri.Length);
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
             }
 
             if (RootApiResponse.Cypher != null)
             {
                 RootApiResponse.Cypher =
-                    RootApiResponse.Cypher.Substring(RootUri.AbsoluteUri.Length);
+                    RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
             }
 
             rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
