@@ -127,24 +127,14 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
-        public void Return_ShouldBacktickEscapeIdentitiesWithSpecialCharacters()
+        public void ShouldReturnRawFunctionCall()
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Return<object>("foo-bar")
+                .Return<long>("count(item)")
                 .Query;
 
-            Assert.AreEqual("RETURN `foo-bar`", query.QueryText);
-        }
-
-        [Test]
-        public void ShouldThrowWhenIdentityLooksLikeAFunctionCall()
-        {
-            var client = Substitute.For<IRawGraphClient>();
-            var ex = Assert.Throws<ArgumentException>(
-                () => new CypherFluentQuery(client).Return<long>("count(item)")
-            );
-            StringAssert.StartsWith(CypherFluentQuery.IdentityLooksLikeAFunctionExceptionMessage, ex.Message);
+            Assert.AreEqual("RETURN count(item)", query.QueryText);
         }
 
         [Test]
@@ -215,6 +205,17 @@ ORDER BY common.FirstName", query.QueryText);
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Return<object>("foo")
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseSetResultModeForRawFunctionCallReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return<long>("count(foo)")
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
