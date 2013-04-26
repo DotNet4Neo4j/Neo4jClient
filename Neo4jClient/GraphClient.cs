@@ -1100,12 +1100,12 @@ namespace Neo4jClient
 
         public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id)
         {
-            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString());
+            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString(CultureInfo.InvariantCulture));
         }
 
         public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id)
         {
-            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString());
+            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString(CultureInfo.InvariantCulture));
         }
 
         IEnumerable<Node<TNode>> BuildLookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, string id)
