@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Neo4jClient.Cypher
 {
     public partial class CypherFluentQuery
     {
+        internal const string IdentityLooksLikeAFunctionExceptionMessage = "The overload you have called takes an identity (for example: foo), but it looks like you've tried to pass in a function all (for example: count(foo)). You should use .Return(foo => foo.Count()) instead. If the function you want isn't available in the managed wrapper, you can use Return(() => Return.As<Foo>(\"function(foo)\")). If you want to return multiple columns, use an anonymous type: Return((foo, bar) => new { Foo = foo.As<Foo>(), BarCount = bar.Count() }).";
+
+        static readonly Regex LooksLikeAFunctionCallExpression = new Regex(@"^\w+\([^\)]*?\)$");
+
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
+            if (identity.Contains("(") &&
+                LooksLikeAFunctionCallExpression.IsMatch(identity))
+                throw new ArgumentException(IdentityLooksLikeAFunctionExceptionMessage, "identity");
+
             if (identity.Any(c => !char.IsLetterOrDigit(c)))
                 identity = string.Format("`{0}`", identity);
 
@@ -31,23 +40,23 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery<TResult> Return<TResult>(LambdaExpression expression)
         {
-            var statement = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
 
             return Mutate<TResult>(w =>
             {
-                w.ResultMode = CypherResultMode.Projection;
-                w.AppendClause("RETURN " + statement);
+                w.ResultMode = returnExpression.ResultMode;
+                w.AppendClause("RETURN " + returnExpression.Text);
             });
         }
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
         {
-            var statement = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
 
             return Mutate<TResult>(w =>
             {
-                w.ResultMode = CypherResultMode.Projection;
-                w.AppendClause("RETURN distinct " + statement);
+                w.ResultMode = returnExpression.ResultMode;
+                w.AppendClause("RETURN distinct " + returnExpression.Text);
             });
         }
 

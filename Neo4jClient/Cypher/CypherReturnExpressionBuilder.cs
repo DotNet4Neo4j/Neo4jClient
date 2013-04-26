@@ -14,18 +14,25 @@ namespace Neo4jClient.Cypher
         // - a "statement" is something like "x.Foo? AS Bar"
         // - "text" is a collection of statements, like "x.Foo? AS Bar, y.Baz as Qak"
 
-        public static string BuildText(LambdaExpression expression)
+        public static ReturnExpression BuildText(LambdaExpression expression)
         {
+            string text;
             switch (expression.Body.NodeType)
             {
                 case ExpressionType.MemberInit:
                     var memberInitExpression = (MemberInitExpression) expression.Body;
-                    return BuildText(memberInitExpression);
+                    text = BuildText(memberInitExpression);
+                    return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.New:
                     var newExpression = (NewExpression) expression.Body;
-                    return BuildText(newExpression);
+                    text = BuildText(newExpression);
+                    return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
+                case ExpressionType.Call:
+                    var methodCallExpression = (MethodCallExpression)expression.Body;
+                    text = BuildText(methodCallExpression);
+                    return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
                 default:
-                    throw new ArgumentException("The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), or an anonymous type (for example: n => new { Foo = n.Bar }).", "expression");
+                    throw new ArgumentException("The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), or a method call (for example: n => n.Count()).", "expression");
             }
         }
 
@@ -85,6 +92,14 @@ namespace Neo4jClient.Cypher
             return string.Join(", ", bindingTexts.ToArray());
         }
 
+        /// <remarks>
+        /// This build method caters to expressions like: <code>item => item.Count()</code>
+        /// </remarks>
+        static string BuildText(MethodCallExpression expression)
+        {
+            return BuildStatement(expression, false);
+        }
+
         static string BuildStatement(Expression sourceExpression, MemberInfo targetMember)
         {
             var unwrappedExpression = UnwrapImplicitCasts(sourceExpression);
@@ -137,68 +152,85 @@ namespace Neo4jClient.Cypher
 
         static string BuildStatement(MethodCallExpression expression, MemberInfo targetMember)
         {
-            if (expression.Method.DeclaringType == typeof (ICypherResultItem))
-                return BuildCypherResultItemStatement(expression, targetMember);
-
-            if (expression.Method.DeclaringType == typeof(All))
-                return BuildCypherAllStatement(expression, targetMember);
-
-            if (expression.Method.DeclaringType == typeof(Return))
-                return BuildCypherReturnStatement(expression, targetMember);
-
-            throw new ArgumentException(ReturnExpressionCannotBeSerializedToCypherExceptionMessage);
+            var isNullable = IsMemberNullable(targetMember);
+            var statement = BuildStatement(expression, isNullable);
+            statement = statement + " AS " + targetMember.Name;
+            return statement;
         }
 
-        static string BuildCypherResultItemStatement(MethodCallExpression expression, MemberInfo targetMember)
+        static string BuildStatement(MethodCallExpression expression, bool isNullable)
         {
-            var targetObject = (ParameterExpression)expression.Object;
+            string statement;
+            if (expression.Method.DeclaringType == typeof(ICypherResultItem))
+                statement = BuildCypherResultItemStatement(expression, isNullable);
+            else if (expression.Method.DeclaringType == typeof(All))
+                statement = BuildCypherAllStatement(expression);
+            else if (expression.Method.DeclaringType == typeof(Return))
+                statement = BuildCypherReturnStatement(expression);
+            else
+                throw new ArgumentException(ReturnExpressionCannotBeSerializedToCypherExceptionMessage);
+
+            return statement;
+        }
+
+        static string BuildCypherResultItemStatement(MethodCallExpression expression, bool isNullable)
+        {
+            var targetObject = (ParameterExpression) expression.Object;
 
             if (targetObject == null)
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            var isNullable = IsMemberNullable(targetMember);
-
             var optionalIndicator = isNullable ? "?" : "";
 
             var methodName = expression.Method.Name;
+            string statement;
             switch (methodName)
             {
                 case "As":
                 case "Node":
-                    return string.Format("{0}{1} AS {2}", targetObject.Name, optionalIndicator, targetMember.Name);
+                    statement = string.Format("{0}{1}", targetObject.Name, optionalIndicator);
+                    break;
                 case "CollectAs":
-                    return string.Format("collect({0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("collect({0})", targetObject.Name);
+                    break;
                 case "CollectAsDistinct":
-                    return string.Format("collect(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("collect(distinct {0})", targetObject.Name);
+                    break;
                 case "Count":
-                    return string.Format("count({0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("count({0})", targetObject.Name);
+                    break;
                 case "CountDistinct":
-                    return string.Format("count(distinct {0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("count(distinct {0})", targetObject.Name);
+                    break;
                 case "Id":
-                    return string.Format("id({0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("id({0})", targetObject.Name);
+                    break;
                 case "Length":
-                    return string.Format("length({0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("length({0})", targetObject.Name);
+                    break;
                 case "Type":
-                    return string.Format("type({0}) AS {1}", targetObject.Name, targetMember.Name);
+                    statement = string.Format("type({0})", targetObject.Name);
+                    break;
                 default:
                     throw new InvalidOperationException("Unexpected ICypherResultItem method definition, ICypherResultItem." + methodName);
             }
+            return statement;
         }
 
-        static string BuildCypherAllStatement(MethodCallExpression expression, MemberInfo targetMember)
+        static string BuildCypherAllStatement(MethodCallExpression expression)
         {
             var methodName = expression.Method.Name;
             switch (methodName)
             {
                 case "Count":
-                    return string.Format("count(*) AS {0}", targetMember.Name);
+                    return "count(*)";
                 default:
                     throw new InvalidOperationException("Unexpected All method definition, All." + methodName);
             }
         }
 
-        static string BuildCypherReturnStatement(MethodCallExpression expression, MemberInfo targetMember)
+        static string BuildCypherReturnStatement(MethodCallExpression expression)
         {
             var methodName = expression.Method.Name;
             switch (methodName)
@@ -206,7 +238,7 @@ namespace Neo4jClient.Cypher
                 case "As":
                     var cypherTextExpression = expression.Arguments.Single();
                     var cypherText = Expression.Lambda<Func<string>>(cypherTextExpression).Compile()();
-                    return string.Format("{0} AS {1}", cypherText, targetMember.Name);
+                    return cypherText;
                 default:
                     throw new InvalidOperationException("Unexpected Return method definition, Return." + methodName);
             }
@@ -232,18 +264,28 @@ namespace Neo4jClient.Cypher
 
         static bool IsMemberNullable(string memberName, Type declaringType)
         {
-            var propertyInfo = declaringType.GetProperty(memberName);
-            var fieldInfo = declaringType.GetField(memberName);
             Type memberType = null;
+
+            var propertyInfo = declaringType.GetProperty(memberName);
             if (propertyInfo != null)
                 memberType = propertyInfo.PropertyType;
-            else if (fieldInfo != null)
-                memberType = fieldInfo.FieldType;
-            var isNullable =
-                memberType != null &&
-                ((memberType.IsGenericType &&
-                memberType.GetGenericTypeDefinition() == typeof (Nullable<>)) || memberType == typeof(string));
-            return isNullable;
+
+            if (memberType == null)
+            {
+                var fieldInfo = declaringType.GetField(memberName);
+                if (fieldInfo != null)
+                    memberType = fieldInfo.FieldType;
+            }
+
+            return IsTypeNullable(memberType);
+        }
+
+        static bool IsTypeNullable(Type type)
+        {
+            if (type == null) return false;
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
+            if (type == typeof(string)) return true;
+            return false;
         }
     }
 }

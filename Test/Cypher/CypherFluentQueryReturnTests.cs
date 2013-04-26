@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using NSubstitute;
@@ -56,7 +57,7 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void Return()
+        public void ReturnIdentity()
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
@@ -137,6 +138,49 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ShouldThrowWhenIdentityLooksLikeAFunctionCall()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var ex = Assert.Throws<ArgumentException>(
+                () => new CypherFluentQuery(client).Return<long>("count(item)")
+            );
+            StringAssert.StartsWith(CypherFluentQuery.IdentityLooksLikeAFunctionExceptionMessage, ex.Message);
+        }
+
+        [Test]
+        public void ShouldReturnCountOnItsOwn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(item => item.Count())
+                .Query;
+
+            Assert.AreEqual("RETURN count(item)", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldReturnCountAllOnItsOwn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(() => All.Count())
+                .Query;
+
+            Assert.AreEqual("RETURN count(*)", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldReturnCustomFunctionCall()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(() => Return.As<long>("sum(foo.bar)"))
+                .Query;
+
+            Assert.AreEqual("RETURN sum(foo.bar)", query.QueryText);
+        }
+
+        [Test]
         public void ShouldUseSetResultModeForIdentityBasedReturn()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -148,11 +192,44 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
-        public void ShouldUseProjectionResultModeForLambdaBasedReturn()
+        public void ShouldUseSetResultModeForSingleFunctionReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(item => item.Count())
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseSetResultModeForAllFunctionReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(() => All.Count())
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseProjectionResultModeForAnonymousObjectReturn()
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Return(a => new { Foo = a.As<object>() })
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+        }
+
+        [Test]
+        public void ShouldUseProjectionResultModeForNamedObjectReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(a => new ProjectionResult { Commodity = a.As<Commodity>() })
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
@@ -271,6 +348,11 @@ ORDER BY common.FirstName", query.QueryText);
         {
             public string Name { get; set; }
             public long UniqueId { get; set; }
+        }
+
+        public class ProjectionResult
+        {
+            public Commodity Commodity { get; set; }
         }
     }
 }
