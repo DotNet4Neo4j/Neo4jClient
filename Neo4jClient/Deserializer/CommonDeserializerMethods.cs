@@ -286,7 +286,20 @@ namespace Neo4jClient.Deserializer
             foreach (var propertyName in props.Keys)
             {
                 var propertyInfo = props[propertyName];
-                var jsonToken = parentJsonToken[propertyName];
+                JToken jsonToken;
+                try
+                {
+                    jsonToken = parentJsonToken[propertyName];
+                }
+                catch (InvalidOperationException ex)
+                {
+                    throw new InvalidOperationException(string.Format("While trying to map some JSON into an object of type {0}, we failed to find an expected property ({1}) in the JSON at path {2}.\r\n\r\nThe JSON block for this token was:\r\n\r\n{3}",
+                        objType.FullName,
+                        propertyName,
+                        parentJsonToken.Path,
+                        parentJsonToken),
+                        ex);
+                }
                 SetPropertyValue(targetObject, propertyInfo, jsonToken, culture, typeMappings, nestingLevel);
             }
         }
