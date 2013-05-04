@@ -995,7 +995,7 @@ namespace Neo4jClient
 
             CheckRoot();
 
-            var nodeAddress = string.Join("/", new[] { RootApiResponse.Node, node.Id.ToString(CultureInfo.InvariantCulture) });
+            var nodeAddress = ResolveEndpoint(node);
 
             var updates = indexEntries
                 .SelectMany(
@@ -1028,7 +1028,7 @@ namespace Neo4jClient
 
             CheckRoot();
 
-            var relationshipAddress = string.Join("/", new[] { RootApiResponse.Relationship, relationship.Id.ToString(CultureInfo.InvariantCulture) });
+            var relationshipAddress = ResolveEndpoint(relationship);
 
             var updates = indexEntries
                 .SelectMany(
