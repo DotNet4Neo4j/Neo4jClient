@@ -84,6 +84,7 @@
     <Compile Include="Domain\Product.cs" />
     <Compile Include="Cypher\CypherFluentQueryResultsTests.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilderTests.cs" />
+    <Compile Include="GraphClientTests\ReIndexRelationshipsTests.cs" />
     <Compile Include="GraphClientTests\Cypher\ExecuteCypherTests.cs" />
     <Compile Include="GraphClientTests\LookupIndexTests.cs" />
     <Compile Include="GraphClientTests\ServerVersionTests.cs" />
@@ -102,7 +103,7 @@
     <Compile Include="GraphClientTests\Gremlin\ExecuteGetAllRelationshipsGremlinTests.cs" />
     <Compile Include="GraphClientTests\DeleteRelationshipTests.cs" />
     <Compile Include="GraphClientTests\QueryNodeIndexTests.cs" />
-    <Compile Include="GraphClientTests\ReIndexTests.cs" />
+    <Compile Include="GraphClientTests\ReIndexNodesTests.cs" />
     <Compile Include="GraphClientTests\RootNodeTests.cs" />
     <Compile Include="GraphClientTests\UpdateNodeTests.cs" />
     <Compile Include="GraphClientTests\Gremlin\ExecuteGetAllNodesGremlinTests.cs" />
