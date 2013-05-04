@@ -1113,26 +1113,11 @@ namespace Neo4jClient
                 HttpStatusCode.NoContent);
         }
 
-        /// <summary>
-        /// Add Index Entry with specfied key value pairs
-        /// </summary>
-        /// <param name="indexName">Name of index</param>
-        /// <param name="indexKey">Key to index</param>
-        /// <param name="indexValue">Value to index on key</param>
-        /// <param name="nodeAddress">API address of node</param>
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
             AddIndexEntry(indexName, indexKey, indexValue, nodeAddress, IndexFor.Node);
         }
 
-        /// <summary>
-        /// Add Index Entry with specfied key value pairs for a specific IndexFor
-        /// </summary>
-        /// <param name="indexName">Name of index</param>
-        /// <param name="indexKey">Key to index</param>
-        /// <param name="indexValue">Value to index on key</param>
-        /// <param name="nodeAddress">API address of node</param>
-        /// <param name="indexFor">Type of index for which entry is created</param>
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string address, IndexFor indexFor)
         {           
             var encodedIndexValue = EncodeIndexValue(indexValue);
