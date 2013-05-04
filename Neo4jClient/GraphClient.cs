@@ -982,10 +982,10 @@ namespace Neo4jClient
             }
 
             var createIndexApiRequest = new
-                {
-                    name = indexName,
-                    config
-                };
+            {
+                name = indexName,
+                config
+            };
 
             SendHttpRequest(
                 HttpPostAsJson(indexResource, createIndexApiRequest),
@@ -1096,9 +1096,9 @@ namespace Neo4jClient
         /// <param name="indexFor">Type of index for which index is deleted</param>
         public void DeleteIndexEntries(string indexName, long id, IndexFor indexFor)
         {
-            var indexResponse = indexFor == IndexFor.Node 
-                                        ? RootApiResponse.NodeIndex 
-                                        : RootApiResponse.RelationshipIndex;
+            var indexResponse = indexFor == IndexFor.Node
+                ? RootApiResponse.NodeIndex
+                : RootApiResponse.RelationshipIndex;
 
             var indexAddress = string.Join("/", new[]
             {
@@ -1114,7 +1114,7 @@ namespace Neo4jClient
         }
 
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string address, IndexFor indexFor)
-        {           
+        {
             var encodedIndexValue = EncodeIndexValue(indexValue);
             if (string.IsNullOrWhiteSpace(encodedIndexValue))
                 return;
@@ -1144,8 +1144,8 @@ namespace Neo4jClient
         string BuildIndexAddress(string indexName, IndexFor indexFor)
         {
             var indexResponse = indexFor == IndexFor.Node
-                                        ? RootApiResponse.NodeIndex
-                                        : RootApiResponse.RelationshipIndex;
+                ? RootApiResponse.NodeIndex
+                : RootApiResponse.RelationshipIndex;
 
             var indexAddress = string.Join("/", new[]
             {
