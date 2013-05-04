@@ -86,7 +86,7 @@ namespace Neo4jClient
 
         void DeleteIndexEntries(string indexName, long nodeId);
 
-        void DeleteIndexEntries(string indexName, long Id, IndexFor indexFor);
+        void DeleteIndexEntries(string indexName, long id, IndexFor indexFor);
 
         [Obsolete("There are encoding issues with this method. You should use the newer Cypher aproach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher.")]
         IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query );

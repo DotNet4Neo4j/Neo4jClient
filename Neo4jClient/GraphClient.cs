@@ -1092,9 +1092,9 @@ namespace Neo4jClient
         /// Delete Index Entries for specified type of index
         /// </summary>
         /// <param name="indexName">Name of index</param>
-        /// <param name="Id">Reference ID for node or relationship</param>
+        /// <param name="id">Reference ID for node or relationship</param>
         /// <param name="indexFor">Type of index for which index is deleted</param>
-        public void DeleteIndexEntries(string indexName, long Id, IndexFor indexFor)
+        public void DeleteIndexEntries(string indexName, long id, IndexFor indexFor)
         {
             var indexResponse = indexFor == IndexFor.Node 
                                         ? RootApiResponse.NodeIndex 
@@ -1104,12 +1104,12 @@ namespace Neo4jClient
             {
                 indexResponse,
                 Uri.EscapeDataString(indexName),
-                Uri.EscapeDataString(Id.ToString(CultureInfo.InvariantCulture))
+                Uri.EscapeDataString(id.ToString(CultureInfo.InvariantCulture))
             });
 
             SendHttpRequest(
                 HttpDelete(indexAddress),
-                string.Format("Deleting entries from index {0} for node {1}", indexName, Id),
+                string.Format("Deleting entries from index {0} for node {1}", indexName, id),
                 HttpStatusCode.NoContent);
         }
 
