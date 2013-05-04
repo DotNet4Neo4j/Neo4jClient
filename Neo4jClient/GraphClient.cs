@@ -189,6 +189,7 @@ namespace Neo4jClient
             RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
             RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
             RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
+            RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
             RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
             RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
             if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
@@ -468,9 +469,48 @@ namespace Neo4jClient
                 });
         }
 
+        public virtual Node<TNode> Get<TNode>(long id)
+        {
+            //With introduction of Get(Relationship) passing in Get(long) is ambiguous.
+            return Get<TNode>((NodeReference)id);
+        }
+
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
         {
             return Get<TNode>((NodeReference) reference);
+        }
+
+        public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference) where TData : class, new()
+        {
+            return Get<TData>((RelationshipReference)reference);
+        }
+
+        public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference reference) where TData : class, new()
+        {
+            var task = GetAsync<TData>(reference);
+            Task.WaitAll(task);
+            return task.Result;
+        }
+
+        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
+        {
+            CheckRoot();
+
+            var endpoint = ResolveEndpoint(reference);
+            return
+                SendHttpRequestAsync(HttpGet(endpoint), HttpStatusCode.OK, HttpStatusCode.NotFound)
+                .ContinueWith(responseTask =>
+                {
+                    var response = responseTask.Result;
+
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                        return (RelationshipInstance<TData>)null;
+
+                    return response
+                        .Content
+                        .ReadAsJson<RelationshipApiResponse<TData>>()
+                        .ToRelationshipInstance(this);
+                });
         }
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
@@ -642,10 +682,10 @@ namespace Neo4jClient
             return RootApiResponse.Node + "/" + node.Id;
         }
 
-        static string ResolveEndpoint(RelationshipReference relationship)
+        string ResolveEndpoint(RelationshipReference relationship)
         {
             //TODO: Make this a dynamic endpoint resolution
-            return "relationship/" + relationship.Id;
+            return RootApiResponse.Relationship + "/" + relationship.Id;
         }
 
         static string GetLastPathSegment(string uri)
@@ -981,6 +1021,39 @@ namespace Neo4jClient
             }
         }
 
+        public void ReIndex(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries)
+        {
+            //Overall extending this ReIndex method resulted in copy/paste and minor adjustments.
+            //With a proper abstraction of Reference object a generic ReIndex could be created and 
+            //from each IndexEntry the IndexFor can be teased out and passed on.
+
+            if (indexEntries == null)
+                throw new ArgumentNullException("indexEntries");
+
+            AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+
+            CheckRoot();
+
+            var relationshipAddress = string.Join("/", new[] { RootApiResponse.Relationship, relationship.Id.ToString(CultureInfo.InvariantCulture) });
+
+            var updates = indexEntries
+                .SelectMany(
+                    i => i.KeyValues,
+                    (i, kv) => new { IndexName = i.Name, kv.Key, kv.Value })
+                .Where(update => update.Value != null)
+                .ToList();
+
+            foreach (var indexName in updates.Select(u => u.IndexName).Distinct())
+            {
+                DeleteIndexEntries(indexName, relationship.Id, IndexFor.Relationship);
+            }
+
+            foreach (var update in updates)
+            {
+                AddIndexEntry(update.IndexName, update.Key, update.Value, relationshipAddress, IndexFor.Relationship);
+            }
+        }
+
         public void DeleteIndex(string indexName, IndexFor indexFor)
         {
             CheckRoot();
@@ -1003,50 +1076,103 @@ namespace Neo4jClient
                 HttpStatusCode.NoContent);
         }
 
+        /// <summary>
+        /// Delete Index Entries for specified node
+        /// </summary>
+        /// <param name="indexName">Name of index</param>
+        /// <param name="Id">Reference ID for node </param>
         public void DeleteIndexEntries(string indexName, long nodeId)
         {
-            var nodeIndexAddress = string.Join("/", new[]
+            //This maintains backwards compatibility with previous 
+            //surface area where only node index entries were handled
+            DeleteIndexEntries(indexName, nodeId, IndexFor.Node);
+        }
+
+        /// <summary>
+        /// Delete Index Entries for specified type of index
+        /// </summary>
+        /// <param name="indexName">Name of index</param>
+        /// <param name="Id">Reference ID for node or relationship</param>
+        /// <param name="indexFor">Type of index for which index is deleted</param>
+        public void DeleteIndexEntries(string indexName, long Id, IndexFor indexFor)
+        {
+            var indexResponse = indexFor == IndexFor.Node 
+                                        ? RootApiResponse.NodeIndex 
+                                        : RootApiResponse.RelationshipIndex;
+
+            var indexAddress = string.Join("/", new[]
             {
-                RootApiResponse.NodeIndex,
+                indexResponse,
                 Uri.EscapeDataString(indexName),
-                Uri.EscapeDataString(nodeId.ToString(CultureInfo.InvariantCulture))
+                Uri.EscapeDataString(Id.ToString(CultureInfo.InvariantCulture))
             });
 
             SendHttpRequest(
-                HttpDelete(nodeIndexAddress),
-                string.Format("Deleting entries from index {0} for node {1}", indexName, nodeId),
+                HttpDelete(indexAddress),
+                string.Format("Deleting entries from index {0} for node {1}", indexName, Id),
                 HttpStatusCode.NoContent);
         }
 
+        /// <summary>
+        /// Add Index Entry with specfied key value pairs
+        /// </summary>
+        /// <param name="indexName">Name of index</param>
+        /// <param name="indexKey">Key to index</param>
+        /// <param name="indexValue">Value to index on key</param>
+        /// <param name="nodeAddress">API address of node</param>
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
         {
+            AddIndexEntry(indexName, indexKey, indexValue, nodeAddress, IndexFor.Node);
+        }
+
+        /// <summary>
+        /// Add Index Entry with specfied key value pairs for a specific IndexFor
+        /// </summary>
+        /// <param name="indexName">Name of index</param>
+        /// <param name="indexKey">Key to index</param>
+        /// <param name="indexValue">Value to index on key</param>
+        /// <param name="nodeAddress">API address of node</param>
+        /// <param name="indexFor">Type of index for which entry is created</param>
+        void AddIndexEntry(string indexName, string indexKey, object indexValue, string address, IndexFor indexFor)
+        {           
             var encodedIndexValue = EncodeIndexValue(indexValue);
             if (string.IsNullOrWhiteSpace(encodedIndexValue))
                 return;
 
-            var nodeIndexAddress = BuildNodeIndexAddress(indexName);
+            var indexAddress = BuildIndexAddress(indexName, indexFor);
 
             var indexEntry = new
             {
                 key = indexKey,
                 value = encodedIndexValue,
-                uri = string.Join("", RootUri, nodeAddress)
+                uri = string.Join("", RootUri, address)
             };
 
             SendHttpRequest(
-                HttpPostAsJson(nodeIndexAddress, indexEntry),
-                string.Format("Adding '{0}'='{1}' to index {2} for {3}", indexKey, indexValue, indexName, nodeAddress),
+                HttpPostAsJson(indexAddress, indexEntry),
+                string.Format("Adding '{0}'='{1}' to index {2} for {3}", indexKey, indexValue, indexName, address),
                 HttpStatusCode.Created);
         }
 
+        [Obsolete("Use BuildIndexAddress with specified IndexFor enum")]
         string BuildNodeIndexAddress(string indexName)
         {
-            var nodeIndexAddress = string.Join("/", new[]
+            //Maintains backwards compatibility
+            return BuildIndexAddress(indexName, IndexFor.Node);
+        }
+
+        string BuildIndexAddress(string indexName, IndexFor indexFor)
+        {
+            var indexResponse = indexFor == IndexFor.Node
+                                        ? RootApiResponse.NodeIndex
+                                        : RootApiResponse.RelationshipIndex;
+
+            var indexAddress = string.Join("/", new[]
             {
-                RootApiResponse.NodeIndex,
+                indexResponse,
                 Uri.EscapeDataString(indexName)
             });
-            return nodeIndexAddress;
+            return indexAddress;
         }
 
         static string EncodeIndexValue(object value)
