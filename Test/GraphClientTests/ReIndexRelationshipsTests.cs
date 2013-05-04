@@ -194,18 +194,7 @@ namespace Neo4jClient.Test.GraphClientTests
             }
         }
 
-        public class TestNode
-        {
-            public string FooKey { get; set; }
-        }
-
-        public class TestNode2
-        {
-        }
-
-        public class TestRelationship : Relationship,
-            IRelationshipAllowingSourceNode<TestNode>,
-            IRelationshipAllowingTargetNode<TestNode2>
+        public class TestRelationship : Relationship
         {
             public TestRelationship(NodeReference targetNode)
                 : base(targetNode)

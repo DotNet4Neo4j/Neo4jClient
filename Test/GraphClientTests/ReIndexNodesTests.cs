@@ -46,8 +46,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var nodeReference = new NodeReference<TestNode>(123);
-                graphClient.ReIndex(nodeReference, indexEntries);
+                graphClient.ReIndex((NodeReference)123, indexEntries);
 
                 // Assert
                 Assert.Pass("Success.");
@@ -92,8 +91,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var nodeReference = new NodeReference<TestNode>(123);
-                graphClient.ReIndex(nodeReference, indexEntries);
+                graphClient.ReIndex((NodeReference)123, indexEntries);
 
                 // Assert
                 Assert.Pass("Success.");
@@ -139,8 +137,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var nodeReference = new NodeReference<TestNode>(123);
-                graphClient.ReIndex(nodeReference, indexEntries);
+                graphClient.ReIndex((NodeReference)123, indexEntries);
 
                 // Assert
                 Assert.Pass("Success.");
@@ -186,8 +183,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var nodeReference = new NodeReference<TestNode>(123);
-                graphClient.ReIndex(nodeReference, indexEntries);
+                graphClient.ReIndex((NodeReference)123, indexEntries);
 
                 // Assert
                 Assert.Pass("Success.");
@@ -212,34 +208,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var nodeReference = new NodeReference<TestNode>(123);
-                graphClient.ReIndex(nodeReference, new IndexEntry[0]);
+                graphClient.ReIndex((NodeReference)123, new IndexEntry[0]);
             }
         }
-
-        public class TestNode
-        {
-            public string FooKey { get; set; }
-        }
-
-        public class TestNode2
-        {
-        }
-
-        public class TestRelationship : Relationship,
-            IRelationshipAllowingSourceNode<TestNode>,
-            IRelationshipAllowingTargetNode<TestNode2>
-        {
-            public TestRelationship(NodeReference targetNode)
-                : base(targetNode)
-            {
-            }
-
-            public override string RelationshipTypeKey
-            {
-                get { return "TEST_RELATIONSHIP"; }
-            }
-        }
-
     }
 }
