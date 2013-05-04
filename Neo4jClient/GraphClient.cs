@@ -1030,7 +1030,7 @@ namespace Neo4jClient
             if (indexEntries == null)
                 throw new ArgumentNullException("indexEntries");
 
-            AssertMinimumDatabaseVersion(new Version(1, 5, 0, 2), IndexRestApiVersionCompatMessage);
+            AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
 
             CheckRoot();
 
