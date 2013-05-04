@@ -20,8 +20,6 @@ namespace Neo4jClient
 
         Node<TNode> Get<TNode>(NodeReference<TNode> reference);
 
-        Node<TNode> Get<TNode>(long id);
-
         RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference) where TData : class, new();
 
         RelationshipInstance<TData> Get<TData>(RelationshipReference reference) where TData : class, new();

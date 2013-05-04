@@ -13,7 +13,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.Get<object>(123);
+            client.Get<object>((NodeReference)123);
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                var node = graphClient.Get<TestNode>(456);
+                var node = graphClient.Get<TestNode>((NodeReference)456);
 
                 Assert.AreEqual(456, node.Reference.Id);
                 Assert.AreEqual("foo", node.Data.Foo);
@@ -81,7 +81,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                var node = graphClient.Get<TestNode>(21484836470);
+                var node = graphClient.Get<TestNode>((NodeReference)21484836470);
 
                 Assert.AreEqual(21484836470, node.Reference.Id);
                 Assert.AreEqual("foo", node.Data.Foo);
@@ -117,7 +117,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                var node = graphClient.Get<TestNodeWithEnum>(456);
+                var node = graphClient.Get<TestNodeWithEnum>((NodeReference)456);
 
                 Assert.AreEqual(456, node.Reference.Id);
                 Assert.AreEqual("foo", node.Data.Foo);
@@ -153,7 +153,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                var node = graphClient.Get<TestNode>(456);
+                var node = graphClient.Get<TestNode>((NodeReference)456);
 
                 Assert.AreEqual(graphClient, ((IGremlinQuery) node.Reference).Client);
             }
@@ -171,7 +171,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                var node = graphClient.Get<TestNode>(456);
+                var node = graphClient.Get<TestNode>((NodeReference)456);
 
                 Assert.IsNull(node);
             }
@@ -202,7 +202,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                var node = graphClient.Get<TestNode>(456);
+                var node = graphClient.Get<TestNode>((NodeReference)456);
 
                 Assert.IsNotNull(node.Data.DateOffSet);
                 Assert.AreEqual("2011-06-30 08:15:46Z", node.Data.DateOffSet.Value.ToString("u"));

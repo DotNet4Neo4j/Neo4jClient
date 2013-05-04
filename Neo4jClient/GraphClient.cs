@@ -469,12 +469,6 @@ namespace Neo4jClient
                 });
         }
 
-        public virtual Node<TNode> Get<TNode>(long id)
-        {
-            //With introduction of Get(Relationship) passing in Get(long) is ambiguous.
-            return Get<TNode>((NodeReference)id);
-        }
-
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
         {
             return Get<TNode>((NodeReference) reference);
