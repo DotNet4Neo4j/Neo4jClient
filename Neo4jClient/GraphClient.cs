@@ -1012,7 +1012,7 @@ namespace Neo4jClient
 
             foreach(var indexName in updates.Select(u => u.IndexName).Distinct())
             {
-                DeleteIndexEntries(indexName,node.Id);
+                DeleteIndexEntries(indexName, node);
             }
 
             foreach (var update in updates)
@@ -1077,24 +1077,22 @@ namespace Neo4jClient
         }
 
         /// <summary>
-        /// Delete Index Entries for specified node
+        /// Delete index entries for specified node
         /// </summary>
-        /// <param name="indexName">Name of index</param>
-        /// <param name="Id">Reference ID for node </param>
-        public void DeleteIndexEntries(string indexName, long nodeId)
+        public void DeleteIndexEntries(string indexName, NodeReference nodeReference)
         {
-            //This maintains backwards compatibility with previous 
-            //surface area where only node index entries were handled
-            DeleteIndexEntries(indexName, nodeId, IndexFor.Node);
+            DeleteIndexEntries(indexName, nodeReference.Id, IndexFor.Node);
         }
 
         /// <summary>
-        /// Delete Index Entries for specified type of index
+        /// Delete index entries for specified relationship
         /// </summary>
-        /// <param name="indexName">Name of index</param>
-        /// <param name="id">Reference ID for node or relationship</param>
-        /// <param name="indexFor">Type of index for which index is deleted</param>
-        public void DeleteIndexEntries(string indexName, long id, IndexFor indexFor)
+        public void DeleteIndexEntries(string indexName, RelationshipReference relationshipReference)
+        {
+            DeleteIndexEntries(indexName, relationshipReference.Id, IndexFor.Relationship);
+        }
+
+        void DeleteIndexEntries(string indexName, long id, IndexFor indexFor)
         {
             var indexResponse = indexFor == IndexFor.Node
                 ? RootApiResponse.NodeIndex
