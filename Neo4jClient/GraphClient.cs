@@ -678,7 +678,6 @@ namespace Neo4jClient
 
         string ResolveEndpoint(RelationshipReference relationship)
         {
-            //TODO: Make this a dynamic endpoint resolution
             return RootApiResponse.Relationship + "/" + relationship.Id;
         }
 
