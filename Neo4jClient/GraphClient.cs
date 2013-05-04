@@ -987,47 +987,26 @@ namespace Neo4jClient
 
         public void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries)
         {
-            if (indexEntries == null)
-                throw new ArgumentNullException("indexEntries");
-
-            AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
-
-            CheckRoot();
-
-            var nodeAddress = ResolveEndpoint(node);
-
-            var updates = indexEntries
-                .SelectMany(
-                    i => i.KeyValues,
-                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
-                .Where(update => update.Value != null)
-                .ToList();
-
-            foreach(var indexName in updates.Select(u => u.IndexName).Distinct())
-            {
-                DeleteIndexEntries(indexName, node);
-            }
-
-            foreach (var update in updates)
-            {
-                AddIndexEntry(update.IndexName, update.Key, update.Value, nodeAddress, IndexFor.Node);
-            }
+            var entityUri = ResolveEndpoint(node);
+            var entityId = node.Id;
+            ReIndex(entityUri, entityId, IndexFor.Node, indexEntries);
         }
 
         public void ReIndex(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries)
         {
-            //Overall extending this ReIndex method resulted in copy/paste and minor adjustments.
-            //With a proper abstraction of Reference object a generic ReIndex could be created and 
-            //from each IndexEntry the IndexFor can be teased out and passed on.
+            var entityUri = ResolveEndpoint(relationship);
+            var entityId = relationship.Id;
+            ReIndex(entityUri, entityId, IndexFor.Relationship, indexEntries);
+        }
 
+        public void ReIndex(string entityUri, long entityId, IndexFor indexFor, IEnumerable<IndexEntry> indexEntries)
+        {
             if (indexEntries == null)
                 throw new ArgumentNullException("indexEntries");
 
             AssertMinimumDatabaseVersion(new Version(1, 5), IndexRestApiVersionCompatMessage);
 
             CheckRoot();
-
-            var relationshipAddress = ResolveEndpoint(relationship);
 
             var updates = indexEntries
                 .SelectMany(
@@ -1037,14 +1016,10 @@ namespace Neo4jClient
                 .ToList();
 
             foreach (var indexName in updates.Select(u => u.IndexName).Distinct())
-            {
-                DeleteIndexEntries(indexName, relationship.Id, IndexFor.Relationship);
-            }
+                DeleteIndexEntries(indexName, entityId, indexFor);
 
             foreach (var update in updates)
-            {
-                AddIndexEntry(update.IndexName, update.Key, update.Value, relationshipAddress, IndexFor.Relationship);
-            }
+                AddIndexEntry(update.IndexName, update.Key, update.Value, entityUri, indexFor);
         }
 
         public void DeleteIndex(string indexName, IndexFor indexFor)
