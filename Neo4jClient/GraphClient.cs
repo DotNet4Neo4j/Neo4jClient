@@ -1017,7 +1017,7 @@ namespace Neo4jClient
 
             foreach (var update in updates)
             {
-                AddIndexEntry(update.IndexName, update.Key, update.Value, nodeAddress);
+                AddIndexEntry(update.IndexName, update.Key, update.Value, nodeAddress, IndexFor.Node);
             }
         }
 
@@ -1111,11 +1111,6 @@ namespace Neo4jClient
                 HttpDelete(indexAddress),
                 string.Format("Deleting entries from index {0} for node {1}", indexName, id),
                 HttpStatusCode.NoContent);
-        }
-
-        void AddIndexEntry(string indexName, string indexKey, object indexValue, string nodeAddress)
-        {
-            AddIndexEntry(indexName, indexKey, indexValue, nodeAddress, IndexFor.Node);
         }
 
         void AddIndexEntry(string indexName, string indexKey, object indexValue, string address, IndexFor indexFor)
