@@ -312,7 +312,7 @@ namespace Neo4jClient
                     .KeyValues
                     .Select(kv => new
                     {
-                        IndexAddress = BuildNodeIndexAddress(i.Name),
+                        IndexAddress = BuildIndexAddress(i.Name, IndexFor.Node),
                         kv.Key,
                         Value = EncodeIndexValue(kv.Value)
                     })
@@ -1130,13 +1130,6 @@ namespace Neo4jClient
                 HttpPostAsJson(indexAddress, indexEntry),
                 string.Format("Adding '{0}'='{1}' to index {2} for {3}", indexKey, indexValue, indexName, address),
                 HttpStatusCode.Created);
-        }
-
-        [Obsolete("Use BuildIndexAddress with specified IndexFor enum")]
-        string BuildNodeIndexAddress(string indexName)
-        {
-            //Maintains backwards compatibility
-            return BuildIndexAddress(indexName, IndexFor.Node);
         }
 
         string BuildIndexAddress(string indexName, IndexFor indexFor)
