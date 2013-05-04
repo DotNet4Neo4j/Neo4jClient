@@ -84,8 +84,14 @@ namespace Neo4jClient
 
         void DeleteIndex(string indexName, IndexFor indexFor);
 
+        /// <summary>
+        /// Delete all index entries for specified node
+        /// </summary>
         void DeleteIndexEntries(string indexName, NodeReference relationshipReference);
 
+        /// <summary>
+        /// Delete all index entries for specified relationship
+        /// </summary>
         void DeleteIndexEntries(string indexName, RelationshipReference relationshipReference);
 
         [Obsolete("There are encoding issues with this method. You should use the newer Cypher aproach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher.")]

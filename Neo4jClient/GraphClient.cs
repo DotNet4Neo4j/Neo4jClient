@@ -1076,17 +1076,11 @@ namespace Neo4jClient
                 HttpStatusCode.NoContent);
         }
 
-        /// <summary>
-        /// Delete index entries for specified node
-        /// </summary>
         public void DeleteIndexEntries(string indexName, NodeReference nodeReference)
         {
             DeleteIndexEntries(indexName, nodeReference.Id, IndexFor.Node);
         }
 
-        /// <summary>
-        /// Delete index entries for specified relationship
-        /// </summary>
         public void DeleteIndexEntries(string indexName, RelationshipReference relationshipReference)
         {
             DeleteIndexEntries(indexName, relationshipReference.Id, IndexFor.Relationship);
