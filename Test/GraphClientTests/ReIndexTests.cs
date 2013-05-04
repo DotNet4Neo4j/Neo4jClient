@@ -384,7 +384,7 @@ namespace Neo4jClient.Test.GraphClientTests
                                                          {
                                                              key = "BarKey",
                                                              value = "abc/def",
-                                                             uri = "http://foo/db/data/relationship/1234"
+                                                             uri = "http://foo/db/data/relationship/123"
                                                          }),
                         MockResponse.Json(HttpStatusCode.Created,
                                           @"Location: http://foo/db/data/index/relationship/my_relationships/BarKey/abc-def/1234")
