@@ -1117,7 +1117,7 @@ namespace Neo4jClient
             {
                 key = indexKey,
                 value = encodedIndexValue,
-                uri = string.Join("", RootUri, address)
+                uri = RootUri + address
             };
 
             SendHttpRequest(
