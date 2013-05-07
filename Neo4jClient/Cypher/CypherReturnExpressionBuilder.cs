@@ -9,6 +9,8 @@ namespace Neo4jClient.Cypher
     {
         internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem, Neo4jClient.Cypher.All or Neo4jClient.Cypher.Return. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
 
+        internal const string ReturnExpressionShouldBeOneOfExceptionMessage = "The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar). You cannot supply blocks of code (for example: n => { var a = n + 1; return a; }) or use constructors with arguments (for example: n => new Foo(n)).";
+
         // Terminology used in this file:
         //
         // - a "statement" is something like "x.Foo? AS Bar"
@@ -36,7 +38,7 @@ namespace Neo4jClient.Cypher
                     text = BuildText(memberExpression);
                     return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
-                    throw new ArgumentException("The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar).", "expression");
+                    throw new ArgumentException(ReturnExpressionShouldBeOneOfExceptionMessage, "expression");
             }
         }
 

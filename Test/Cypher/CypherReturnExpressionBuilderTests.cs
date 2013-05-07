@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
@@ -292,6 +293,17 @@ namespace Neo4jClient.Test.Cypher
 
             var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
             Assert.AreEqual(CypherReturnExpressionBuilder.ReturnExpressionCannotBeSerializedToCypherExceptionMessage, ex.Message);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/47/problem-casting-cypher-query-results-to")]
+        public void ThrowNiceErrorForConstructorsWithArguments()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new KeyValuePair<ICypherResultItem, ICypherResultItem>(a, a);
+
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            StringAssert.StartsWith(CypherReturnExpressionBuilder.ReturnExpressionShouldBeOneOfExceptionMessage, ex.Message);
         }
 
         public class Foo
