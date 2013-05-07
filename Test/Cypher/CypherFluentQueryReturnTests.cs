@@ -101,7 +101,8 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void Issue42()
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/42")]
+        public void ShouldCombineWithLimitAndOrderBy()
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
