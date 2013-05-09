@@ -75,7 +75,7 @@ namespace Neo4jClient.Cypher
                 type1.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
                 type2.IsGenericType &&
                 type2.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
-                type1.GetGenericArguments()[0] == type2.GetGenericArguments()[0];
+                type1.GetGenericArguments()[0].IsAssignableFrom(type2.GetGenericArguments()[0]);
         }
 
         static readonly IDictionary<Type, Func<object, CreateParameterCallback, string>> Formatters = new Dictionary<Type, Func<object, CreateParameterCallback, string>>
