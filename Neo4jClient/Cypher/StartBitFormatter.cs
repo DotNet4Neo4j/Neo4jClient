@@ -80,8 +80,8 @@ namespace Neo4jClient.Cypher
                 (value, callback) => FormatValue((NodeReference)value, callback)
             },
             {
-                typeof(NodeReference[]),
-                (value, callback) => FormatValue((NodeReference[])value, callback)
+                typeof(IEnumerable<NodeReference>),
+                (value, callback) => FormatValue(((IEnumerable<NodeReference>)value).ToArray(), callback)
             },
             {
                 typeof(IHasNodeReference),
@@ -92,8 +92,8 @@ namespace Neo4jClient.Cypher
                 (value, callback) => FormatValue((RelationshipReference)value, callback)
             },
             {
-                typeof(RelationshipReference[]),
-                (value, callback) => FormatValue((RelationshipReference[])value, callback)
+                typeof(IEnumerable<RelationshipReference>),
+                (value, callback) => FormatValue(((IEnumerable<RelationshipReference>)value).ToArray(), callback)
             }
         };
 
