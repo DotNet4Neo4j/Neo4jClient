@@ -37,6 +37,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void EnumerableOfNodes()
+        {
+            var cypher = ToCypher(new
+            {
+                n1 = new[] {123, 456}.Select(id => new Node<object>(new object(), id, null))
+            });
+
+            Assert.AreEqual("n1=node({p0})", cypher.QueryText);
+            Assert.AreEqual(1, cypher.QueryParameters.Count);
+            Assert.AreEqual(new[] {123, 456}, cypher.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void RootNodeReference()
         {
             var cypher = ToCypher(new

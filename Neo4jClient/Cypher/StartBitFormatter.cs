@@ -52,7 +52,10 @@ namespace Neo4jClient.Cypher
             var valueType = value.GetType();
             var formatterKey = Formatters
                 .Keys
-                .SingleOrDefault(k => k == valueType || k.IsAssignableFrom(valueType));
+                .SingleOrDefault(k =>
+                    k == valueType ||
+                    k.IsAssignableFrom(valueType) ||
+                    IsCovariantlyEquivalentEnumerable(k, valueType));
 
             if (formatterKey == null)
                 throw new NotSupportedException(string.Format(
@@ -63,6 +66,16 @@ namespace Neo4jClient.Cypher
                 ));
 
             return Formatters[formatterKey](value, createParameterCallback);
+        }
+
+        static bool IsCovariantlyEquivalentEnumerable(Type type1, Type type2)
+        {
+            return
+                type1.IsGenericType &&
+                type1.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
+                type2.IsGenericType &&
+                type2.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
+                type1.GetGenericArguments()[0] == type2.GetGenericArguments()[0];
         }
 
         static readonly IDictionary<Type, Func<object, CreateParameterCallback, string>> Formatters = new Dictionary<Type, Func<object, CreateParameterCallback, string>>
@@ -86,6 +99,14 @@ namespace Neo4jClient.Cypher
             {
                 typeof(IHasNodeReference),
                 (value, callback) => FormatValue(((IHasNodeReference)value).Reference, callback)
+            },
+            {
+                typeof(IEnumerable<IHasNodeReference>),
+                (value, callback) =>
+                {
+                    var references = ((IEnumerable<IHasNodeReference>) value).Select(n => n.Reference);
+                    return FormatValue(references, callback);
+                }
             },
             {
                 typeof(RelationshipReference),
