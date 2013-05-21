@@ -194,6 +194,25 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnHeadCollectedNodesInColumn()
+        {
+            // http://docs.neo4j.org/chunked/milestone/query-functions-scalar.html#functions-head
+            // START a=node(1)
+            // MATCH a<--b
+            // RETURN head(collect(a))
+
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new
+                {
+                    Foo = a.Head().CollectAs<Foo>()
+                };
+
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("head(collect(a)) AS Foo", returnExpression.Text);
+        }
+
+        [Test]
         public void ReturnCountInAnonymousType()
         {
             // http://docs.neo4j.org/chunked/1.8.M05/query-aggregation.html#aggregation-collect

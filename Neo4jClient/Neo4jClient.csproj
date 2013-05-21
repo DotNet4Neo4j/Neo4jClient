@@ -69,6 +69,7 @@
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
     <Compile Include="Cypher\All.cs" />
+    <Compile Include="Cypher\IFluentCypherResultItem.cs" />
     <Compile Include="Cypher\Relationship.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookupWithSingleParameter.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookup.cs" />
