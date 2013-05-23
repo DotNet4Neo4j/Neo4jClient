@@ -266,6 +266,9 @@ namespace Neo4jClient.Cypher
                 case "Head":
                     statement = "head({0})";
                     break;
+                case "Last":
+                    statement = "last({0})";
+                    break;
                 default:
                     throw new InvalidOperationException("Unexpected IFluentCypherResultItem method definition, IFluentCypherResultItem." + methodName);
             }
