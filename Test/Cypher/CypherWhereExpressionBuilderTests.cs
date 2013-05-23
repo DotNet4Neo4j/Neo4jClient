@@ -168,7 +168,7 @@ namespace Neo4jClient.Test.Cypher
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/99/throw-error-when-unary-expressions-are")]
-        public void ThrowNotSupportedExceptionForUnaryOperation()
+        public void ThrowNotSupportedExceptionForMemberAccessExpression()
         {
             // Where<FooData>(n => n.Bar)
 
@@ -182,7 +182,7 @@ namespace Neo4jClient.Test.Cypher
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/99/throw-error-when-unary-expressions-are")]
-        public void ThrowNotSupportedExceptionForNegativeUnaryOperation()
+        public void ThrowNotSupportedExceptionForUnaryNotExpression()
         {
             // Where<FooData>(n => !n.Bar)
 

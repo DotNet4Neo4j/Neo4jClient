@@ -203,6 +203,14 @@ namespace Neo4jClient.Cypher
             TextOutput.Append(valueWrappedInParameter);
         }
 
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            if (node.NodeType == ExpressionType.Convert)
+                return base.VisitUnary(node);
+
+            throw new NotSupportedException("Unary expressions, like Where(f => !f.Foo), are not yet supported. Use a comparison instead, like Where(f => f.Foo == false).");
+        }
+
         static object ParseValueFromExpression(Expression expression)
         {
             var lambdaExpression = Expression.Lambda(expression);
