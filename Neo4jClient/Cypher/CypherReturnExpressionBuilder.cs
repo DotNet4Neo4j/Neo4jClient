@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -198,17 +199,17 @@ namespace Neo4jClient.Cypher
 
         static string BuildCypherResultItemStatement(MethodCallExpression expression, bool isNullable)
         {
+            Debug.Assert(expression.Object != null, "expression.Object != null");
+
             string statement = null;
-            Expression param = null;
+            var targetObject = expression.Object as ParameterExpression;
 
-            if (expression.Object.Type == typeof(IFluentCypherResultItem))
-                statement = AppendCypherResultItemStatement((MethodCallExpression)expression, ref param, isNullable);
-
-            ParameterExpression targetObject = null;
-            if (param == null)
-                targetObject = (ParameterExpression)expression.Object;
-            else
-                targetObject = (ParameterExpression)param;
+            if (expression.Object.Type == typeof (IFluentCypherResultItem))
+            {
+                var wrappedFunctionCall = BuildWrappedFunction(expression);
+                statement = wrappedFunctionCall.StatementFormat;
+                targetObject = (ParameterExpression)wrappedFunctionCall.InnerExpression;
+            }
 
             if (targetObject == null)
                 throw new InvalidOperationException(
@@ -248,31 +249,43 @@ namespace Neo4jClient.Cypher
                     throw new InvalidOperationException("Unexpected ICypherResultItem method definition, ICypherResultItem." + methodName);
             }
 
-            if (statement != null)
-                statement = string.Format(statement, finalStatement);
-            else
-                statement = finalStatement;
+            statement = statement != null
+                ? string.Format(statement, finalStatement)
+                : finalStatement;
 
             return statement;
         }
 
-        static string AppendCypherResultItemStatement(MethodCallExpression methodCallExpression, ref Expression expression, bool isNullable)
+        static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)
         {
-            expression = ((MethodCallExpression)methodCallExpression.Object).Object;
-            var methodName = ((MethodCallExpression)methodCallExpression.Object).Method.Name;
-            string statement;
+            var targetObject = ((MethodCallExpression) methodCallExpression.Object);
+            Debug.Assert(targetObject != null, "targetObject != null");
+
+            string statementFormat;
+            var methodName = targetObject.Method.Name;
             switch (methodName)
             {
                 case "Head":
-                    statement = "head({0})";
+                    statementFormat = "head({0})";
                     break;
                 case "Last":
-                    statement = "last({0})";
+                    statementFormat = "last({0})";
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected IFluentCypherResultItem method definition, IFluentCypherResultItem." + methodName);
             }
-            return statement;
+
+            return new WrappedFunctionCall
+            {
+                StatementFormat = statementFormat,
+                InnerExpression = targetObject.Object
+            };
+        }
+
+        class WrappedFunctionCall
+        {
+            public string StatementFormat { get; set; }
+            public Expression InnerExpression { get; set; }
         }
 
         static string BuildCypherAllStatement(MethodCallExpression expression)
