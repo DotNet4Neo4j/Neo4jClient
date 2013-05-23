@@ -184,7 +184,7 @@ namespace Neo4jClient.Cypher
         static string BuildStatement(MethodCallExpression expression, bool isNullable)
         {
             string statement;
-            if (expression.Method.DeclaringType == typeof(ICypherResultItem))
+            if (expression.Method.DeclaringType == typeof(ICypherResultItem) || expression.Method.DeclaringType == typeof(IFluentCypherResultItem))
                 statement = BuildCypherResultItemStatement(expression, isNullable);
             else if (expression.Method.DeclaringType == typeof(All))
                 statement = BuildCypherAllStatement(expression);
@@ -198,45 +198,79 @@ namespace Neo4jClient.Cypher
 
         static string BuildCypherResultItemStatement(MethodCallExpression expression, bool isNullable)
         {
-            var targetObject = (ParameterExpression) expression.Object;
+            string statement = null;
+            Expression param = null;
+
+            if (expression.Object.Type == typeof(IFluentCypherResultItem))
+                statement = AppendCypherResultItemStatement((MethodCallExpression)expression, ref param, isNullable);
+
+            ParameterExpression targetObject = null;
+            if (param == null)
+                targetObject = (ParameterExpression)expression.Object;
+            else
+                targetObject = (ParameterExpression)param;
 
             if (targetObject == null)
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
             var optionalIndicator = isNullable ? "?" : "";
-
+            string finalStatement;
             var methodName = expression.Method.Name;
-            string statement;
             switch (methodName)
             {
                 case "As":
                 case "Node":
-                    statement = string.Format("{0}{1}", targetObject.Name, optionalIndicator);
+                    finalStatement = string.Format("{0}{1}", targetObject.Name, optionalIndicator);
                     break;
                 case "CollectAs":
-                    statement = string.Format("collect({0})", targetObject.Name);
+                    finalStatement = string.Format("collect({0})", targetObject.Name);
                     break;
                 case "CollectAsDistinct":
-                    statement = string.Format("collect(distinct {0})", targetObject.Name);
+                    finalStatement = string.Format("collect(distinct {0})", targetObject.Name);
                     break;
                 case "Count":
-                    statement = string.Format("count({0})", targetObject.Name);
+                    finalStatement = string.Format("count({0})", targetObject.Name);
                     break;
                 case "CountDistinct":
-                    statement = string.Format("count(distinct {0})", targetObject.Name);
+                    finalStatement = string.Format("count(distinct {0})", targetObject.Name);
                     break;
                 case "Id":
-                    statement = string.Format("id({0})", targetObject.Name);
+                    finalStatement = string.Format("id({0})", targetObject.Name);
                     break;
                 case "Length":
-                    statement = string.Format("length({0})", targetObject.Name);
+                    finalStatement = string.Format("length({0})", targetObject.Name);
                     break;
                 case "Type":
-                    statement = string.Format("type({0})", targetObject.Name);
+                    finalStatement = string.Format("type({0})", targetObject.Name);
                     break;
                 default:
                     throw new InvalidOperationException("Unexpected ICypherResultItem method definition, ICypherResultItem." + methodName);
+            }
+
+            if (statement != null)
+                statement = string.Format(statement, finalStatement);
+            else
+                statement = finalStatement;
+
+            return statement;
+        }
+
+        static string AppendCypherResultItemStatement(MethodCallExpression methodCallExpression, ref Expression expression, bool isNullable)
+        {
+            expression = ((MethodCallExpression)methodCallExpression.Object).Object;
+            var methodName = ((MethodCallExpression)methodCallExpression.Object).Method.Name;
+            string statement;
+            switch (methodName)
+            {
+                case "Head":
+                    statement = "head({0})";
+                    break;
+                case "Last":
+                    statement = "last({0})";
+                    break;
+                default:
+                    throw new InvalidOperationException("Unexpected IFluentCypherResultItem method definition, IFluentCypherResultItem." + methodName);
             }
             return statement;
         }
@@ -271,7 +305,7 @@ namespace Neo4jClient.Cypher
         {
             if (expression is UnaryExpression)
             {
-                expression = ((UnaryExpression) expression).Operand;
+                expression = ((UnaryExpression)expression).Operand;
             }
             return expression;
         }

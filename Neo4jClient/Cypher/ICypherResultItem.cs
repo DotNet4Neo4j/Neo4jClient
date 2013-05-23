@@ -27,6 +27,18 @@ namespace Neo4jClient.Cypher
         IEnumerable<Node<T>> CollectAsDistinct<T>();
 
         /// <summary>
+        /// Equivalent to <code>RETURN head()</code>
+        /// http://docs.neo4j.org/chunked/stable/query-functions-scalar.html#functions-head
+        /// </summary>
+        IFluentCypherResultItem Head();
+
+        /// <summary>
+        /// Equivalent to <code>RETURN last()</code>
+        /// http://docs.neo4j.org/chunked/stable/query-functions-scalar.html#functions-last
+        /// </summary>
+        IFluentCypherResultItem Last();
+
+        /// <summary>
         /// Equivalent to <code>RETURN count(foo)</code>
         /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#_count
         /// </summary>
