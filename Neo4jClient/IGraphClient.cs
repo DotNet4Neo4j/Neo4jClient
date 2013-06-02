@@ -11,6 +11,9 @@ namespace Neo4jClient
     {
         RootNode RootNode { get; }
 
+        /// <summary>
+        /// Creates a node, relationships and index entries all in a single HTTP call (which also means a single transaction).
+        /// </summary>
         NodeReference<TNode> Create<TNode>(TNode node, IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries)
             where TNode : class;
 
