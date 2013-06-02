@@ -208,7 +208,7 @@ namespace Neo4jClient.Cypher
             if (node.NodeType == ExpressionType.Convert)
                 return base.VisitUnary(node);
 
-            throw new NotSupportedException("Unary expressions, like Where(f => !f.Foo), are not yet supported. Use a comparison instead, like Where(f => f.Foo == false).");
+            throw new NotSupportedException("Unary expressions, like Where(f => !f.Foo), are not supported because these become ambiguous between C# and Cypher based on how Neo4j handles null values. Use a comparison instead, like Where(f => f.Foo == false).");
         }
 
         static object ParseValueFromExpression(Expression expression)
