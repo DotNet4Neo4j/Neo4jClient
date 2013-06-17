@@ -105,13 +105,11 @@ namespace Neo4jClient.Cypher
 
         void SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(string text, params string[] operators)
         {
-            foreach (var @operator in operators.Where(text.EndsWith))
-            {
-                TextOutput.Remove(TextOutput.ToString().LastIndexOf(@operator, StringComparison.Ordinal), @operator.Length);
-                SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
-                TextOutput.Append(@operator);
-                break;
-            }
+            var @operator = operators.FirstOrDefault(text.EndsWith);
+            if (@operator == null) return;
+            TextOutput.Remove(TextOutput.ToString().LastIndexOf(@operator, StringComparison.Ordinal), @operator.Length);
+            SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
+            TextOutput.Append(@operator);
         }
 
         void SwapNullQualifierFromDefaultTrueToDefaultFalse(StringBuilder text)
