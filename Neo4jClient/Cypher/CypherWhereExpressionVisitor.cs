@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -9,6 +10,11 @@ namespace Neo4jClient.Cypher
     {
         const string NotEqual = " <> ";
         const string Equal = " = ";
+        const string GreaterThan = " > ";
+        const string GreaterThanOrEqual = " >= ";
+        const string LessThan = " < ";
+        const string LessThanOrEqual = " <= ";
+
         readonly Func<object, string> createParameterCallback;
         public StringBuilder TextOutput { get; private set; }
 
@@ -35,19 +41,19 @@ namespace Neo4jClient.Cypher
                     TextOutput.Append(" NOT ");
                     break;
                 case ExpressionType.LessThanOrEqual:
-                    TextOutput.Append(" <= ");
+                    TextOutput.Append(LessThanOrEqual);
                     break;
                 case ExpressionType.LessThan:
-                    TextOutput.Append(" < ");
+                    TextOutput.Append(LessThan);
                     break;
                 case ExpressionType.Equal:
                     TextOutput.Append(Equal);
                     break;
                 case ExpressionType.GreaterThanOrEqual:
-                    TextOutput.Append(" >= ");
+                    TextOutput.Append(GreaterThanOrEqual);
                     break;
                 case ExpressionType.GreaterThan:
-                    TextOutput.Append(" > ");
+                    TextOutput.Append(GreaterThan);
                     break;
                 case ExpressionType.NotEqual:
                     TextOutput.Append(NotEqual);
@@ -79,17 +85,33 @@ namespace Neo4jClient.Cypher
                 return node;
             }
 
-            if (node.Value != null && text.EndsWith(Equal))
+            if (node.Value != null)
             {
-                TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
-                SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
-                TextOutput.Append(Equal);
+                SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(text, new[]
+                    {
+                        Equal,
+                        GreaterThan,
+                        GreaterThanOrEqual,
+                        LessThan,
+                        LessThanOrEqual
+                    });
             }
 
             var valueWrappedInParameter = createParameterCallback(node.Value);
             TextOutput.Append(valueWrappedInParameter);
 
             return node;
+        }
+
+        void SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(string text, params string[] operators)
+        {
+            foreach (var @operator in operators.Where(text.EndsWith))
+            {
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(@operator, StringComparison.Ordinal), @operator.Length);
+                SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
+                TextOutput.Append(@operator);
+                break;
+            }
         }
 
         void SwapNullQualifierFromDefaultTrueToDefaultFalse(StringBuilder text)
