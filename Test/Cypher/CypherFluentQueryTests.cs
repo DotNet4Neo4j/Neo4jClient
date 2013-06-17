@@ -549,7 +549,7 @@ RETURN b AS NodeB";
                 .Where<FooData>(n => (n.AgeLongNullable < 30 && n.Name == name) || n.Name != "Tobias")
                 .Query;
 
-            Assert.AreEqual("WHERE (((n.AgeLongNullable? < {p0}) AND (n.Name! = {p1})) OR (n.Name? <> {p2}))", query.QueryText);
+            Assert.AreEqual("WHERE (((n.AgeLongNullable! < {p0}) AND (n.Name! = {p1})) OR (n.Name? <> {p2}))", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters.Count);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
             Assert.AreEqual("Tobias", query.QueryParameters["p1"]);
@@ -779,7 +779,7 @@ RETURN b AS NodeB";
                 .Where<FooData>(n => n.Id < 30)
                 .Query;
 
-            Assert.AreEqual("WHERE (n.Id? < {p0})", query.QueryText);
+            Assert.AreEqual("WHERE (n.Id! < {p0})", query.QueryText);
             Assert.AreEqual(1, query.QueryParameters.Count);
             Assert.AreEqual(30, query.QueryParameters["p0"]);
         }
