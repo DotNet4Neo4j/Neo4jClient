@@ -82,6 +82,58 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/103/cypher-queries-include-nodes-with-missing")]
+        public void EvaluateFalseWhenComparingMissingNullablePropertyGreaterThanValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar > 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar! > {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/103/cypher-queries-include-nodes-with-missing")]
+        public void EvaluateFalseWhenComparingMissingNullablePropertyGreaterThanOrEqualToValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar >= 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar! >= {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/103/cypher-queries-include-nodes-with-missing")]
+        public void EvaluateFalseWhenComparingMissingNullablePropertyLessThanValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar < 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar! < {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/103/cypher-queries-include-nodes-with-missing")]
+        public void EvaluateFalseWhenComparingMissingNullablePropertyLessThanOrEqualToValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar <= 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar! <= {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
         public void EvaluateTrueWhenComparingMissingNullablePropertyToNull()
         {
             var parameters = new Dictionary<string, object>();
