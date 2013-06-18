@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
+using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
@@ -110,5 +111,7 @@ namespace Neo4jClient
         IGremlinClient Gremlin { get; }
 
         Version ServerVersion { get; }
+
+        List<JsonConverter> JsonConverters { get; }
     }
 }

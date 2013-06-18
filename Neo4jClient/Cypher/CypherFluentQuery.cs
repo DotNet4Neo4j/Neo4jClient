@@ -177,8 +177,7 @@ namespace Neo4jClient.Cypher
                     var validationContext = new ValidationContext(o, null, null);
                     Validator.ValidateObject(o, validationContext);
 
-                    var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore, QuoteName = false };
-                    var objectText = serializer.Serialize(o);
+                    var objectText = GetSerializer().Serialize(o);
                     return new KeyValuePair<string, string>("{" + i + "}", objectText);
                 })
                 .ToList()
@@ -186,6 +185,16 @@ namespace Neo4jClient.Cypher
 
             return Mutate(w =>
                 w.AppendClause("CREATE " + createText));
+        }
+
+        CustomJsonSerializer GetSerializer()
+        {
+            return new CustomJsonSerializer
+                {
+                    NullHandling = NullValueHandling.Ignore,
+                    QuoteName = false,
+                    JsonConverters = Client.JsonConverters
+                };
         }
 
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)
@@ -205,7 +214,7 @@ namespace Neo4jClient.Cypher
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
             
-            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore, QuoteName = false};
+            var serializer = GetSerializer();
             return Mutate(w =>
                 w.AppendClause(string.Format("CREATE ({0} {1})", identity, serializer.Serialize(node))));
         }

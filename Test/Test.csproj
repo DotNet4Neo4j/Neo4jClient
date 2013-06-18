@@ -79,8 +79,8 @@
     <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
     <Compile Include="Cypher\QueryWriterTests.cs" />
     <Compile Include="Cypher\StartBitFormatterTests.cs" />
-    <Compile Include="Deserializer\CypherJsonDeserializerTests.cs" />
-    <Compile Include="Deserializer\CustomJsonDeserializerTests.cs" />
+    <Compile Include="Serialization\CypherJsonDeserializerTests.cs" />
+    <Compile Include="Serialization\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
     <Compile Include="Cypher\CypherFluentQueryResultsTests.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilderTests.cs" />
@@ -148,8 +148,9 @@
     <Compile Include="NodeReferenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Domain\User.cs" />
-    <Compile Include="Serializer\CustomJsonSerializerTests.cs" />
+    <Compile Include="Serialization\CustomJsonSerializerTests.cs" />
     <Compile Include="CultureInfoSetupFixture.cs" />
+    <Compile Include="Serialization\UserSuppliedSerializationTests.cs" />
     <Compile Include="UtilitiesTests.cs" />
   </ItemGroup>
   <ItemGroup>

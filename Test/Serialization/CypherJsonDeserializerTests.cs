@@ -7,7 +7,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Deserializer;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Test.Deserializer
+namespace Neo4jClient.Test.Serialization
 {
     [TestFixture]
     public class CypherJsonDeserializerTests

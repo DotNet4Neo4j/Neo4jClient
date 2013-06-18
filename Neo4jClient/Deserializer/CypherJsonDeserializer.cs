@@ -56,6 +56,11 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 
         IEnumerable<TResult> DeserializeInternal(string content)
         {
+            var context = new DeserializationContext
+                {
+                    Culture = culture,
+                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
+                };
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
@@ -101,7 +106,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             switch (resultMode)
             {
                 case CypherResultMode.Set:
-                    return ParseInSingleColumnMode(root, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInSingleColumnMode(context, root, columnNames, jsonTypeMappings.ToArray());
                 case CypherResultMode.Projection:
                     jsonTypeMappings.Add(new TypeMapping
                     {
@@ -112,14 +117,14 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                         MutationCallback = n =>
                             n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
                     });
-                    return ParseInProjectionMode(root, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInProjectionMode(context, root, columnNames, jsonTypeMappings.ToArray());
                 default:
                     throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
             }
         }
 
 // ReSharper disable UnusedParameter.Local
-        IEnumerable<TResult> ParseInSingleColumnMode(JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+        IEnumerable<TResult> ParseInSingleColumnMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
 // ReSharper restore UnusedParameter.Local
         {
             if (columnNames.Count() != 1)
@@ -159,14 +164,14 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     }
                 }
 
-                var parsed = CommonDeserializerMethods.CreateAndMap(newType, elementToParse, culture, jsonTypeMappings, 0);
+                var parsed = CommonDeserializerMethods.CreateAndMap(context, newType, elementToParse, jsonTypeMappings, 0);
                 return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
             });
 
             return results;
         }
 
-        IEnumerable<TResult> ParseInProjectionMode(JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+        IEnumerable<TResult> ParseInProjectionMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
         {
             var properties = typeof(TResult).GetProperties();
             var propertiesDictionary = properties
@@ -197,7 +202,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 
                 if (ctor != null)
                 {
-                    getRow = token => ReadProjectionRowUsingCtor(token, propertiesDictionary, columnNames, jsonTypeMappings, ctor);
+                    getRow = token => ReadProjectionRowUsingCtor(context, token, propertiesDictionary, columnNames, jsonTypeMappings, ctor);
                 }
                 
                 if (getRow == null)
@@ -213,7 +218,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             }
             else
             {
-                getRow = token => ReadProjectionRowUsingProperties(token, propertiesDictionary, columnNames, jsonTypeMappings);
+                getRow = token => ReadProjectionRowUsingProperties(context, token, propertiesDictionary, columnNames, jsonTypeMappings);
             }
 
             var dataArray = (JArray)root["data"];
@@ -224,6 +229,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
         }
 
         TResult ReadProjectionRowUsingCtor(
+            DeserializationContext context,
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
             IList<string> columnNames,
@@ -238,7 +244,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     var property = propertiesDictionary[columnName];
                     if (IsNullArray(property, cell)) return null;
 
-                    var coercedValue = CommonDeserializerMethods.CoerceValue(property, cell, culture, jsonTypeMappings, 0);
+                    var coercedValue = CommonDeserializerMethods.CoerceValue(context, property, cell, jsonTypeMappings, 0);
                     return coercedValue;
                 })
                 .ToArray();
@@ -249,6 +255,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
         }
 
         TResult ReadProjectionRowUsingProperties(
+            DeserializationContext context,
             JToken row,
             IDictionary<string, PropertyInfo> propertiesDictionary,
             IList<string> columnNames,
@@ -267,7 +274,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 var isNullArray = IsNullArray(property, cell);
                 if (isNullArray) continue;
 
-                CommonDeserializerMethods.SetPropertyValue(result, property, cell, culture, jsonTypeMappings, 0);
+                CommonDeserializerMethods.SetPropertyValue(context, result, property, cell, jsonTypeMappings, 0);
             }
 
             return result;

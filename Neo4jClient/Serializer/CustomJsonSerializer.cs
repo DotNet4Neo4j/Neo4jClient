@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
@@ -6,6 +8,7 @@ namespace Neo4jClient.Serializer
 {
     public class CustomJsonSerializer
     {
+        public IEnumerable<JsonConverter> JsonConverters { get; set; }
         public string ContentType { get; set; }
         public string DateFormat { get; set; }
         public string Namespace { get; set; }
@@ -22,26 +25,46 @@ namespace Neo4jClient.Serializer
 
         public string Serialize(object obj)
         {
-            string str2;
-            var serializer2 = new JsonSerializer
+            var serializer = new JsonSerializer
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 NullValueHandling = NullHandling,
                 DefaultValueHandling = DefaultValueHandling.Include
             };
-            serializer2.Converters.Add(new EnumValueConverter());
-            serializer2.Converters.Add(new TimeZoneInfoConverter());
-            serializer2.Converters.Add(new NullableEnumValueConverter());
-            var serializer = serializer2;
-            using (var writer = new StringWriter())
-            using (var writer2 = new JsonTextWriter(writer) { QuoteName = this.QuoteName })
+
+            if (JsonConverters != null)
             {
-                writer2.Formatting = Formatting.Indented;
-                writer2.QuoteChar = '"';
-                serializer.Serialize(writer2, obj);
-                str2 = writer.ToString();
+                foreach (var converter in JsonConverters.Reverse())
+                    serializer.Converters.Add(converter);
             }
-            return str2;
+
+            using (var stringWriter = new StringWriter())
+            using (var jsonTextWriter = new JsonTextWriter(stringWriter) { QuoteName = QuoteName })
+            {
+                jsonTextWriter.Formatting = Formatting.Indented;
+                jsonTextWriter.QuoteChar = '"';
+                serializer.Serialize(jsonTextWriter, obj);
+                return stringWriter.ToString();
+            }
+        }
+        public T Deserialize<T>(string content)
+        {
+            var serializer = new JsonSerializer
+            {
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                NullValueHandling = NullHandling,
+                DefaultValueHandling = DefaultValueHandling.Include
+            };
+
+            if (JsonConverters != null)
+            {
+                foreach (var converter in JsonConverters.Reverse())
+                    serializer.Converters.Add(converter);
+            }
+
+            using (var reader = new StringReader(content))
+            using (var jsonReader = new JsonTextReader(reader))
+                return serializer.Deserialize<T>(jsonReader);
         }
     }
 }

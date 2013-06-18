@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Neo4jClient.Deserializer;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Mappers
 {
@@ -10,10 +12,10 @@ namespace Neo4jClient.Mappers
     {
         static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
 
-        public static void ConvertAndSetValue<TResult>(this TResult result, string value, PropertyInfo prop)
+        public static void ConvertAndSetValue<TResult>(this TResult result, string value, PropertyInfo prop, IEnumerable<JsonConverter> jsonConverters)
             where TResult : new()
         {
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(jsonConverters);
             try
             {
                 var validType = prop.PropertyType;

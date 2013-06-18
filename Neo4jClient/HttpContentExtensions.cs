@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Net.Http;
 using Neo4jClient.Deserializer;
+using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
@@ -12,10 +14,10 @@ namespace Neo4jClient
             return readTask.Result;
         }
 
-        public static T ReadAsJson<T>(this HttpContent content) where T : new()
+        public static T ReadAsJson<T>(this HttpContent content, IEnumerable<JsonConverter> jsonConverters) where T : new()
         {
             var stringContent = content.ReadAsString();
-            return new CustomJsonDeserializer().Deserialize<T>(stringContent);
+            return new CustomJsonDeserializer(jsonConverters).Deserialize<T>(stringContent);
         }
     }
 }

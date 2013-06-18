@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using System.Linq;
 using Neo4jClient.ApiModels.Gremlin;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.ApiModels
 {
@@ -36,7 +37,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
 
             Assert.IsTrue(response.Any(r => r.Foo == dataforfoo));
             Assert.IsTrue(response.Any(r => r.Bar == dataforbar));
@@ -64,7 +65,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.Long == 123));
         }
 
@@ -90,7 +91,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.EnumValue == MyEnum.Foo));
         }
 
@@ -116,7 +117,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.EnumValueNullable == MyEnum.Foo));
         }
 
@@ -142,7 +143,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.NullableLong.Value == 123));
         }
 
@@ -168,7 +169,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => !r.NullableLong.HasValue));
         }
 
@@ -194,7 +195,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => !r.NullableLong.HasValue));
         }
 
@@ -220,7 +221,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => !r.NullableLong.HasValue));
         }
 
@@ -247,7 +248,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.DateTimeOffsetNullable.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == expectedDate));
         }
 
@@ -274,7 +275,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == "23 Nov 2011"));
         }
 
@@ -301,7 +302,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.DateTimeOffset.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == expectedDate));
         }
 
@@ -328,7 +329,7 @@ namespace Neo4jClient.Test.ApiModels
                                 }
                         }
                 });
-            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list).ToArray();
+            var response = GremlinTableCapResponse.TransferResponseToResult<SimpleClass>(list, new JsonConverter[0]).ToArray();
             Assert.IsTrue(response.Any(r => r.DateTime.ToString("dd MMM yyyy", CultureInfo.InvariantCulture) == expectedDate));
         }
 
