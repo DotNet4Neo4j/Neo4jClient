@@ -72,7 +72,7 @@ namespace Neo4jClient.Test.Serialization
         public void DeserializeTimeZoneInfo()
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var deserializer = new CustomJsonDeserializer(new []{new TimeZoneInfoConverter()});
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
             var content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime);
 

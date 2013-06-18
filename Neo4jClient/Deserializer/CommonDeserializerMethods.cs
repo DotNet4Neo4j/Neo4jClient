@@ -228,22 +228,6 @@ namespace Neo4jClient.Deserializer
             {
                 instance = element.ToString();
             }
-            else if (type == typeof(TimeZoneInfo))
-            {
-                try
-                {
-                    instance = TimeZoneInfo.FindSystemTimeZoneById((string)element);
-                }
-                catch
-                {
-                    Trace.WriteLine("Could not deserialize TimeZoneInfo, defaulting to Utc. Ensure the TimeZoneId is valid. Valid TimeZone Ids are:");
-                    foreach (var timeZone in TimeZoneInfo.GetSystemTimeZones())
-                    {
-                        Trace.WriteLine(timeZone.Id);
-                    }
-                    instance = TimeZoneInfo.Utc;
-                }
-            }
             else if (HasJsonConverter(context, type))
             {
                 instance = ReadUsingJsonConverter(context, type, element);
