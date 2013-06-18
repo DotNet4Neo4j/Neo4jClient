@@ -28,7 +28,7 @@ namespace Neo4jClient.Cypher
         {
             TextOutput.Append("(");
             Visit(node.Left);
- 
+
             switch (node.NodeType)
             {
                 case ExpressionType.AndAlso:
@@ -61,10 +61,10 @@ namespace Neo4jClient.Cypher
                 default:
                     throw new NotSupportedException(string.Format("Expression type {0} is not supported.", node.NodeType));
             }
- 
+
             Visit(node.Right);
             TextOutput.Append(")");
- 
+
             return node;
         }
 
@@ -87,7 +87,7 @@ namespace Neo4jClient.Cypher
 
             if (node.Value != null)
             {
-                SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(text, new[]
+                SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(new[]
                     {
                         Equal,
                         GreaterThan,
@@ -101,23 +101,6 @@ namespace Neo4jClient.Cypher
             TextOutput.Append(valueWrappedInParameter);
 
             return node;
-        }
-
-        void SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(string text, params string[] operators)
-        {
-            var @operator = operators.FirstOrDefault(text.EndsWith);
-            if (@operator == null) return;
-            TextOutput.Remove(TextOutput.ToString().LastIndexOf(@operator, StringComparison.Ordinal), @operator.Length);
-            SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
-            TextOutput.Append(@operator);
-        }
-
-        void SwapNullQualifierFromDefaultTrueToDefaultFalse(StringBuilder text)
-        {
-            if (!text.ToString().EndsWith("?"))
-                return;
-            TextOutput.Remove(TextOutput.Length - 1, 1);
-            TextOutput.Append("!");
         }
 
         protected override Expression VisitMember(MemberExpression node)
@@ -150,7 +133,7 @@ namespace Neo4jClient.Cypher
             var isConstantExpression = node.Expression.NodeType == ExpressionType.Constant;
             var isConstantExpressionWrappedInMemberAccess =
                 node.Expression.NodeType == ExpressionType.MemberAccess &&
-                ((MemberExpression) node.Expression).Expression.NodeType == ExpressionType.Constant;
+                ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant;
 
             if (isConstantExpression ||
                 isConstantExpressionWrappedInMemberAccess)
@@ -168,10 +151,10 @@ namespace Neo4jClient.Cypher
             switch (node.Member.MemberType)
             {
                 case MemberTypes.Field:
-                    value = ((FieldInfo) node.Member).GetValue(null);
+                    value = ((FieldInfo)node.Member).GetValue(null);
                     break;
                 case MemberTypes.Property:
-                    value = ((PropertyInfo) node.Member).GetValue(null, null);
+                    value = ((PropertyInfo)node.Member).GetValue(null, null);
                     break;
                 default:
                     throw new NotSupportedException(string.Format(
@@ -189,7 +172,7 @@ namespace Neo4jClient.Cypher
             var identityExpression = node.Expression as ParameterExpression;
             if (identityExpression == null &&
                 node.Expression.NodeType == ExpressionType.Convert)
-                identityExpression = ((UnaryExpression) node.Expression).Operand as ParameterExpression;
+                identityExpression = ((UnaryExpression)node.Expression).Operand as ParameterExpression;
             if (identityExpression == null)
                 throw new InvalidOperationException("Failed to extract identity name from expression " + node);
             var identity = identityExpression.Name;
@@ -200,9 +183,9 @@ namespace Neo4jClient.Cypher
             var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
 
             if (
-                (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
+                (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 ||
-                (propertyType == typeof (string))
+                (propertyType == typeof(string))
                 )
                 nullIdentifier = "?";
 
@@ -219,6 +202,18 @@ namespace Neo4jClient.Cypher
                 ? data
                 : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
 
+            if (value != null)
+            {
+                SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(new[]
+                    {
+                        Equal,
+                        GreaterThan,
+                        GreaterThanOrEqual,
+                        LessThan,
+                        LessThanOrEqual
+                    });
+            }
+
             var valueWrappedInParameter = createParameterCallback(value);
             TextOutput.Append(valueWrappedInParameter);
         }
@@ -229,6 +224,24 @@ namespace Neo4jClient.Cypher
                 return base.VisitUnary(node);
 
             throw new NotSupportedException("Unary expressions, like Where(f => !f.Foo), are not supported because these become ambiguous between C# and Cypher based on how Neo4j handles null values. Use a comparison instead, like Where(f => f.Foo == false).");
+        }
+
+        void SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(params string[] operators)
+        {
+            var text = TextOutput.ToString();
+            var @operator = operators.FirstOrDefault(text.EndsWith);
+            if (@operator == null) return;
+            TextOutput.Remove(TextOutput.ToString().LastIndexOf(@operator, StringComparison.Ordinal), @operator.Length);
+            SwapNullQualifierFromDefaultTrueToDefaultFalse(TextOutput);
+            TextOutput.Append(@operator);
+        }
+
+        void SwapNullQualifierFromDefaultTrueToDefaultFalse(StringBuilder text)
+        {
+            if (!text.ToString().EndsWith("?"))
+                return;
+            TextOutput.Remove(TextOutput.Length - 1, 1);
+            TextOutput.Append("!");
         }
 
         static object ParseValueFromExpression(Expression expression)
