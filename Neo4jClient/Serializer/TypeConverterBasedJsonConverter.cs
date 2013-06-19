@@ -27,8 +27,13 @@ namespace Neo4jClient.Serializer
 
         public override bool CanConvert(Type objectType)
         {
+            var typeOfString = typeof (string);
             var typeConverter = TypeDescriptor.GetConverter(objectType);
-            return typeConverter.CanConvertTo(typeof (string)) && typeConverter.CanConvertFrom(typeof (string));
+            return
+                objectType != typeOfString &&
+                !objectType.IsPrimitive &&
+                typeConverter.CanConvertTo(typeOfString)
+                && typeConverter.CanConvertFrom(typeOfString);
         }
     }
 }

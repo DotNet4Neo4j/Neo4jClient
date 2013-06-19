@@ -26,6 +26,7 @@ namespace Neo4jClient
     {
         static readonly JsonConverter[] DefaultJsonConverters = new JsonConverter[]
             {
+                new TypeConverterBasedJsonConverter(),
                 new NullableEnumValueConverter(),
                 new TimeZoneInfoConverter(),
                 new EnumValueConverter()
