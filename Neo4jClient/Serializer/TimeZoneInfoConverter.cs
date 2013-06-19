@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Serializer
@@ -13,7 +14,19 @@ namespace Neo4jClient.Serializer
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return TimeZoneInfo.FindSystemTimeZoneById(reader.Value.ToString());
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(reader.Value.ToString());
+            }
+            catch
+            {
+                Trace.WriteLine("Could not deserialize TimeZoneInfo, defaulting to Utc. Ensure the TimeZoneId is valid. Valid TimeZone Ids are:");
+                foreach (var timeZone in TimeZoneInfo.GetSystemTimeZones())
+                {
+                    Trace.WriteLine(timeZone.Id);
+                }
+                return TimeZoneInfo.Utc;
+            }
         }
 
         public override bool CanConvert(Type objectType)

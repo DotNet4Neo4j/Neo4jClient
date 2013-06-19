@@ -10,7 +10,7 @@ using Neo4jClient.Deserializer;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Test.Deserializer
+namespace Neo4jClient.Test.Serialization
 {
     [TestFixture]
     public class CustomJsonDeserializerTests
@@ -46,7 +46,7 @@ namespace Neo4jClient.Test.Deserializer
                     thread.CurrentCulture = thread.CurrentUICulture = new CultureInfo(cultureName);
 
                     // Arrange
-                    var deserializer = new CustomJsonDeserializer();
+                    var deserializer = new CustomJsonDeserializer(null);
                     var content = string.Format("{{'Foo':'{0}'}}", input);
 
                     // Act
@@ -72,7 +72,7 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeTimeZoneInfo()
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(new []{new TimeZoneInfoConverter()});
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
             var content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime);
 
@@ -94,7 +94,7 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeTimeSpan(string value, int days, int hours, int minutes, int seconds, int milliseconds)
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
             var content = string.Format("{{'Foo':'{0}'}}", value);
 
             // Act
@@ -124,7 +124,7 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeShouldConvertTableCapResponseToGremlinTableCapResponse()
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
             const string content = @"{
                               ""columns"" : [ ""ColumnA"" ],
                               ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
@@ -183,7 +183,7 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeEnumFromString(string content, Gender expectedGender)
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
 
             // Act
             var deserialziedGender = deserializer.Deserialize<EnumModel>(content);
@@ -199,7 +199,7 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeNullableEnumFromString(string content, Gender? expectedGender)
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
 
             // Act
             var result = deserializer.Deserialize<EnumModel>(content);
@@ -220,7 +220,7 @@ namespace Neo4jClient.Test.Deserializer
             var customSerializer = new CustomJsonSerializer();
             var testStr = customSerializer.Serialize(foo);
 
-            var customDeserializer = new CustomJsonDeserializer();
+            var customDeserializer = new CustomJsonDeserializer(new JsonConverter[0]);
             var result = customDeserializer.Deserialize<EnumerableModel>(testStr);
 
             // Assert
@@ -232,7 +232,7 @@ namespace Neo4jClient.Test.Deserializer
         public void DeserializeIEnumerableOfEnum(string content, Gender[] genders)
         {
             // Act
-            var deserializer = new CustomJsonDeserializer();
+            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
 
             // Assert
             var result = deserializer.Deserialize<List<Gender>>(content);

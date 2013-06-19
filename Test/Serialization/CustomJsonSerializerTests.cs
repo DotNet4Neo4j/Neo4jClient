@@ -3,16 +3,20 @@ using NUnit.Framework;
 using Neo4jClient.Serializer;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Test.Serializer
+namespace Neo4jClient.Test.Serialization
 {
     [TestFixture]
     public class CustomJsonSerializerTests
     {
         [Test]
-        public void SerializeTimeZoneInfo()
+        public void JsonSerializerShouldSerializeTimeZoneInfo()
         {
             // Arrange
-            var serializer = new CustomJsonSerializer();
+            var serializer = new CustomJsonSerializer
+                {
+                    JsonConverters = new []{new TimeZoneInfoConverter()}
+                };
+
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
             var timeZoneData = TimeZoneInfo.FindSystemTimeZoneById(ausEasternStandardTime);
 
@@ -42,7 +46,7 @@ namespace Neo4jClient.Test.Serializer
         }
 
         [Test]
-        public void ExecuteShouldJsonSerializeAllProperties()
+        public void JsonSerializerShouldSerializeAllProperties()
         {
             // Arrange
             var testNode = new TestNode { Foo = "foo", Bar = "bar" };
@@ -57,7 +61,7 @@ namespace Neo4jClient.Test.Serializer
         }
 
         [Test]
-        public void ExecuteShouldNotJSonSerializeNullProperties()
+        public void JsonSerializerShouldNotSerializeNullProperties()
         {
             // Arrange
             var testNode = new TestNode { Foo = "foo", Bar = null };
@@ -73,11 +77,15 @@ namespace Neo4jClient.Test.Serializer
         }
 
         [Test]
-        public void ExecuteShouldSerializeEnumTypesToString()
+        public void JsonSerializerShouldSerializeEnumToString()
         {
             // Arrange
             var testNode = new TestNodeWithEnum { Status = TestEnum.Value1 };
-            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore };
+            var serializer = new CustomJsonSerializer
+                {
+                    NullHandling = NullValueHandling.Ignore,
+                    JsonConverters = new []{new EnumValueConverter()}
+                };
 
             // Act
             var result = serializer.Serialize(testNode);
@@ -132,7 +140,7 @@ namespace Neo4jClient.Test.Serializer
         }
 
         [Test]
-        public void SerializeEnumToStringValues()
+        public void JsonSerializerWithEnumConverterShouldConvertEnumToStringValues()
         {
             // Arrange
             var testClass = new TestFoo
@@ -141,7 +149,15 @@ namespace Neo4jClient.Test.Serializer
                     GenderNullable = Gender.Male
                 };
 
-            var serializer = new CustomJsonSerializer();
+            var serializer = new CustomJsonSerializer
+                {
+                    JsonConverters = new JsonConverter[]
+                    {
+                        new EnumValueConverter(),
+                        new NullableEnumValueConverter()
+                    }
+                };
+
             const string expected = "{\r\n  \"Gender\": \"Female\",\r\n  \"GenderNullable\": \"Male\"\r\n}";
 
             // Act

@@ -13,7 +13,7 @@ namespace Neo4jClient.ApiModels.Gremlin
         [JsonProperty("data")]
         public List<List<string>> Data { get; set; }
 
-        public static IEnumerable<TResult> TransferResponseToResult<TResult>(List<List<GremlinTableCapResponse>> response) where TResult : new()
+        public static IEnumerable<TResult> TransferResponseToResult<TResult>(List<List<GremlinTableCapResponse>> response, ICollection<JsonConverter> jsonConverters) where TResult : new()
         {
             var type = typeof(TResult);
             var properties = type.GetProperties();
@@ -38,7 +38,7 @@ namespace Neo4jClient.ApiModels.Gremlin
                         if (columnIndex == -1) continue;
                         var columnData = t;
                         var columnCellData = columnData[columnIndex];
-                        result.ConvertAndSetValue(columnCellData, prop);
+                        result.ConvertAndSetValue(columnCellData, prop, jsonConverters);
                     }
                     yield return result;
                 }

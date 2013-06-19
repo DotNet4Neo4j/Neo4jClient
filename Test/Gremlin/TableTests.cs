@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Gremlin;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Gremlin
 {
@@ -78,7 +79,7 @@ namespace Neo4jClient.Test.Gremlin
                 };
 
             // Act
-            var result = GremlinTableCapResponse.TransferResponseToResult<TableResult>(responses).ToArray();
+            var result = GremlinTableCapResponse.TransferResponseToResult<TableResult>(responses, new JsonConverter[0]).ToArray();
 
             // Assert
             Assert.AreEqual("data", result.First().Foo);
