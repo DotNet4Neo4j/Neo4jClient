@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Deserializer
+namespace Neo4jClient.Serialization
 {
     public class DeserializationContext
     {

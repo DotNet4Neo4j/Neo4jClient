@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Neo4jClient.Deserializer;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Mappers

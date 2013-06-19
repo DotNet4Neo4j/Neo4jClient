@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
-using Neo4jClient.Serializer;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Cypher

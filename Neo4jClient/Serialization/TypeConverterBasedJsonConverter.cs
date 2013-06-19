@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Serializer
+namespace Neo4jClient.Serialization
 {
     public class TypeConverterBasedJsonConverter : JsonConverter
     {

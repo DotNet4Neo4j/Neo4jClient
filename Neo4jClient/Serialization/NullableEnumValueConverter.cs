@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Serializer
+namespace Neo4jClient.Serialization
 {
     public class NullableEnumValueConverter : JsonConverter
     {

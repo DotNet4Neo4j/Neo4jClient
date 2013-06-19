@@ -81,7 +81,7 @@
     <Compile Include="Cypher\ReturnExpression.cs" />
     <Compile Include="Cypher\StartBit.cs" />
     <Compile Include="Cypher\StartBitFormatter.cs" />
-    <Compile Include="Deserializer\DeserializationContext.cs" />
+    <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
@@ -96,8 +96,8 @@
     <Compile Include="Cypher\CypherWhereExpressionBuilder.cs" />
     <Compile Include="Cypher\CypherWhereExpressionVisitor.cs" />
     <Compile Include="Cypher\OrderByType.cs" />
-    <Compile Include="Deserializer\CommonDeserializerMethods.cs" />
-    <Compile Include="Deserializer\CypherJsonDeserializer.cs" />
+    <Compile Include="Serialization\CommonDeserializerMethods.cs" />
+    <Compile Include="Serialization\CypherJsonDeserializer.cs" />
     <Compile Include="Cypher\CypherFluentQuery.cs" />
     <Compile Include="Cypher\CypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\CypherReturnExpressionBuilder.cs" />
@@ -106,7 +106,7 @@
     <Compile Include="Cypher\ICypherFluentQuery.cs" />
     <Compile Include="Cypher\ICypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\ICypherResultItem.cs" />
-    <Compile Include="Deserializer\TypeMapping.cs" />
+    <Compile Include="Serialization\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\EmitPropertyStep.cs" />
     <Compile Include="Gremlin\GremlinClient.cs" />
@@ -129,7 +129,7 @@
     <Compile Include="IAttachedReference.cs" />
     <Compile Include="Mappers\MapperHelper.cs" />
     <Compile Include="DeleteMode.cs" />
-    <Compile Include="Deserializer\CustomJsonDeserializer.cs" />
+    <Compile Include="Serialization\CustomJsonDeserializer.cs" />
     <Compile Include="DetachedNodeException.cs" />
     <Compile Include="ApiModels\ExtensionsApiResponse.cs" />
     <Compile Include="GraphClientExtensions.cs" />
@@ -185,11 +185,11 @@
     <Compile Include="NodeReference.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootNode.cs" />
-    <Compile Include="Serializer\TypeConverterBasedJsonConverter.cs" />
-    <Compile Include="Serializer\CustomJsonSerializer.cs" />
-    <Compile Include="Serializer\EnumValueConverter.cs" />
-    <Compile Include="Serializer\NullableEnumValueConverter.cs" />
-    <Compile Include="Serializer\TimeZoneInfoConverter.cs" />
+    <Compile Include="Serialization\TypeConverterBasedJsonConverter.cs" />
+    <Compile Include="Serialization\CustomJsonSerializer.cs" />
+    <Compile Include="Serialization\EnumValueConverter.cs" />
+    <Compile Include="Serialization\NullableEnumValueConverter.cs" />
+    <Compile Include="Serialization\TimeZoneInfoConverter.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
-using Neo4jClient.Deserializer;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient

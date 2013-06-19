@@ -9,7 +9,7 @@ using Neo4jClient.Cypher;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Neo4jClient.Deserializer
+namespace Neo4jClient.Serialization
 {
     public class CypherJsonDeserializer<TResult>
     {

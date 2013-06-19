@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using NUnit.Framework;
-using Neo4jClient.Deserializer;
-using Neo4jClient.Serializer;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Serialization

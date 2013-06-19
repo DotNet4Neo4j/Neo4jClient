@@ -6,8 +6,7 @@ using System.Threading;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Gremlin;
-using Neo4jClient.Deserializer;
-using Neo4jClient.Serializer;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Serialization

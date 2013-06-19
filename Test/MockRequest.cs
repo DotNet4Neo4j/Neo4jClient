@@ -1,5 +1,5 @@
 ﻿using System.Net.Http;
-using Neo4jClient.Serializer;
+using Neo4jClient.Serialization;
 
 namespace Neo4jClient.Test
 {

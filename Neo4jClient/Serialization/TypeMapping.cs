@@ -1,6 +1,6 @@
 using System;
 
-namespace Neo4jClient.Deserializer
+namespace Neo4jClient.Serialization
 {
     internal class TypeMapping
     {

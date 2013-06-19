@@ -15,9 +15,8 @@ using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Cypher;
-using Neo4jClient.Deserializer;
 using Neo4jClient.Gremlin;
-using Neo4jClient.Serializer;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
