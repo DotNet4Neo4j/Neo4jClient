@@ -185,6 +185,7 @@
     <Compile Include="NodeReference.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootNode.cs" />
+    <Compile Include="Serializer\TypeConverterBasedJsonConverter.cs" />
     <Compile Include="Serializer\CustomJsonSerializer.cs" />
     <Compile Include="Serializer\EnumValueConverter.cs" />
     <Compile Include="Serializer\NullableEnumValueConverter.cs" />
