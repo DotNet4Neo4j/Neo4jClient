@@ -212,9 +212,8 @@ namespace Neo4jClient.Serialization
             {
                 instance = element.ToString();
             }
-            else if (HasJsonConverter(context, type))
+            else if (TryJsonConverters(context, type, element, out instance))
             {
-                instance = ReadUsingJsonConverter(context, type, element);
             }
             else if (type.IsValueType)
             {
@@ -239,20 +238,19 @@ namespace Neo4jClient.Serialization
             return instance;
         }
 
-        static bool HasJsonConverter(DeserializationContext context, Type type)
+        static bool TryJsonConverters(DeserializationContext context, Type type, JToken element, out object instance)
         {
-            return context.JsonConverters != null && context.JsonConverters.Any(c => c.CanConvert(type));
-        }
-
-        static object ReadUsingJsonConverter(DeserializationContext context, Type type, JToken element)
-        {
+            instance = null;
+            if (context.JsonConverters == null) return false;
+            var converter = context.JsonConverters.FirstOrDefault(c => c.CanConvert(type));
+            if (converter == null) return false;
             using (var reader = element.CreateReader())
             {
                 reader.Read();
-                return context.JsonConverters.First(c => c.CanConvert(type)).ReadJson(reader, type, null, null);
+                instance = converter.ReadJson(reader, type, null, null);
+                return true;
             }
         }
-
         static object MutateObject(DeserializationContext context, JToken value, IEnumerable<TypeMapping> typeMappings, int nestingLevel,
                                    TypeMapping mapping, Type propertyType)
         {
