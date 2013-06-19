@@ -202,21 +202,6 @@ namespace Neo4jClient.Serialization
                     }
                 }
             }
-            else if (type.IsValueType)
-            {
-                if (type == typeof(Guid))
-                {
-                    instance = Guid.Parse(element.ToString());
-                }
-                else if(type.BaseType == typeof(Enum))
-                {
-                    instance = Enum.Parse(type, element.ToString(), false);
-                }
-                else
-                {
-                    instance = Convert.ChangeType(element.ToString(), type);
-                }
-            }
             else if(type.BaseType == typeof(Array)) //One Dimensional Only
             {
                 var underlyingType = type.GetElementType();
@@ -230,6 +215,21 @@ namespace Neo4jClient.Serialization
             else if (HasJsonConverter(context, type))
             {
                 instance = ReadUsingJsonConverter(context, type, element);
+            }
+            else if (type.IsValueType)
+            {
+                if (type == typeof(Guid))
+                {
+                    instance = Guid.Parse(element.ToString());
+                }
+                else if (type.BaseType == typeof(Enum))
+                {
+                    instance = Enum.Parse(type, element.ToString(), false);
+                }
+                else
+                {
+                    instance = Convert.ChangeType(element.ToString(), type);
+                }
             }
             else
             {

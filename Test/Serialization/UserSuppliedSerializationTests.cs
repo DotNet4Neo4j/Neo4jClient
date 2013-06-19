@@ -56,6 +56,11 @@ namespace Neo4jClient.Test.Serialization
             public TestValueB CustomValue { get; set; }
         }
 
+        public class TestModelC
+        {
+            public System.Drawing.Point MyPoint { get; set; }
+        }
+
         public class TestValueBTypeConverter : System.ComponentModel.TypeConverter
         {
             public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext context, Type sourceType)
@@ -133,7 +138,7 @@ namespace Neo4jClient.Test.Serialization
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/89")]
-        public void ShouldSerializeCustomValueThatHasTypeConverterUsingTypeConverterBasedJsonConverter()
+        public void ShouldSerializeCustomTypeThatHasTypeConverterUsingTypeConverterBasedJsonConverter()
         {
             //Arrange
             var serializer = new CustomJsonSerializer
@@ -162,7 +167,7 @@ namespace Neo4jClient.Test.Serialization
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/89")]
-        public void ShouldDeserializeCustomValueThatHasTypeConverterUsingTypeConverterBasedJsonConverter()
+        public void ShouldDeserializeCustomTypeThatHasTypeConverterUsingTypeConverterBasedJsonConverter()
         {
             //Arrange
             const string rawInput =
@@ -178,6 +183,50 @@ namespace Neo4jClient.Test.Serialization
             Assert.NotNull(model.CustomValue, "Model.CustomValue is unexpectedly null.");
             Assert.AreEqual('o', model.CustomValue.A);
             Assert.AreEqual('p', model.CustomValue.B);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/89")]
+        public void ShouldSerializeBuiltInTypeThatHasTypeConverterUsingTypeConverterBasedJsonConverter()
+        {
+            //Arrange
+            var serializer = new CustomJsonSerializer
+            {
+                JsonConverters = new[] { new TypeConverterBasedJsonConverter() }
+            };
+
+            var model = new TestModelC
+            {
+                MyPoint = new System.Drawing.Point(100, 200)
+            };
+
+            //Act
+            var rawResult = serializer.Serialize(model);
+
+            //Assert
+            const string expectedRawOutput =
+            "{\r\n  \"MyPoint\": \"100, 200\"\r\n}";
+
+            Assert.AreEqual(expectedRawOutput, rawResult);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/89")]
+        public void ShouldDeserializeBuiltInTypeThatHasTypeConverterUsingTypeConverterBasedJsonConverter()
+        {
+            //Arrange
+            const string rawInput =
+            "{\r\n  \"MyPoint\": \"100, 200\"\r\n}";
+
+            var serializer = new CustomJsonDeserializer(new JsonConverter[] { new TypeConverterBasedJsonConverter() });
+
+            //Act
+            var model = serializer.Deserialize<TestModelC>(rawInput);
+
+            //Assert
+            Assert.NotNull(model, "Deserialization failed.");
+            Assert.NotNull(model.MyPoint, "Model.MyPoint is unexpectedly null.");
+            Assert.AreEqual(new System.Drawing.Point(100, 200), model.MyPoint);
         }
     }
 }
