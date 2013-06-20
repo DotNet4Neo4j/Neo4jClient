@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.Serialization
             // Arrange
             var serializer = new CustomJsonSerializer
                 {
-                    JsonConverters = new []{new TimeZoneInfoConverter()}
+                    JsonConverters = GraphClient.DefaultJsonConverters
                 };
 
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.Serialization
         public void SerializeTimeSpan()
         {
             // Arrange
-            var serializer = new CustomJsonSerializer();
+            var serializer = new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
             var value = new TimeSpan(400, 13, 3, 2,10);
             var model = new TimeSpanModel
                 {
@@ -46,11 +46,35 @@ namespace Neo4jClient.Test.Serialization
         }
 
         [Test]
+        public void ShouldSerializeDateTimeOffsetInCorrectStringFormat()
+        {
+            //Arrange
+            var serializer = new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
+            var model = new DateModel
+                {
+                    DateTime = DateTimeOffset.Parse("2012-08-31T00:11:00.3642578+10:00"),
+                    DateTimeNullable = DateTimeOffset.Parse("2012-08-31T00:11:00.3642578+10:00")
+                };
+
+            //Act
+            var actual = serializer.Serialize(model);
+
+            //Assert
+            const string expected =
+                "{\r\n  \"DateTime\": \"2012-08-31T00:11:00.3642578+10:00\",\r\n  \"DateTimeNullable\": \"2012-08-31T00:11:00.3642578+10:00\"\r\n}";
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
         public void JsonSerializerShouldSerializeAllProperties()
         {
             // Arrange
             var testNode = new TestNode { Foo = "foo", Bar = "bar" };
-            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore };
+            var serializer = new CustomJsonSerializer
+                {
+                    NullHandling = NullValueHandling.Ignore,
+                    JsonConverters = GraphClient.DefaultJsonConverters
+                };
 
             // Act
             var result = serializer.Serialize(testNode);
@@ -65,7 +89,11 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var testNode = new TestNode { Foo = "foo", Bar = null };
-            var serializer = new CustomJsonSerializer { NullHandling = NullValueHandling.Ignore };
+            var serializer = new CustomJsonSerializer
+                {
+                    NullHandling = NullValueHandling.Ignore,
+                    JsonConverters = GraphClient.DefaultJsonConverters
+                };
 
             // Act
             var result = serializer.Serialize(testNode);

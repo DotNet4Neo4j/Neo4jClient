@@ -11,11 +11,16 @@ namespace Neo4jClient.Serialization
     public class CustomJsonDeserializer
     {
         readonly IEnumerable<JsonConverter> jsonConverters;
-        readonly CultureInfo culture = CultureInfo.InvariantCulture;
+        readonly CultureInfo culture;
 
-        public CustomJsonDeserializer(IEnumerable<JsonConverter> jsonConverters)
+        public CustomJsonDeserializer(IEnumerable<JsonConverter> jsonConverters) : this(jsonConverters, null)
+        {
+        }
+
+        public CustomJsonDeserializer(IEnumerable<JsonConverter> jsonConverters, CultureInfo cultureInfo)
         {
             this.jsonConverters = jsonConverters;
+            culture = cultureInfo ?? CultureInfo.InvariantCulture;
         }
 
         public T Deserialize<T>(string content) where T : new()

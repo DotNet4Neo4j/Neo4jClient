@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Gremlin;
@@ -33,45 +32,33 @@ namespace Neo4jClient.Test.Serialization
         [TestCase("2011/09/06 12:11:00 PM +10:00", "2011-09-06T12:11:00.0000000+10:00")]
         public void DeserializeShouldPreserveOffsetValuesUsingIso8601Format(string input, string expectedResult)
         {
-            var thread = Thread.CurrentThread;
-            var previousCulture = thread.CurrentCulture;
+            var culturesToTest = new[] {"en-AU", "en-US"};
 
-            var culturesToTest = new[] {"en-AU", "en-US", previousCulture.Name};
-
-            try
+            foreach (var cultureName in culturesToTest)
             {
-                foreach (var cultureName in culturesToTest)
+                // Arrange
+                var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters, new CultureInfo(cultureName));
+                var content = string.Format("{{'Foo':'{0}'}}", input);
+
+                // Act
+                var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
+
+                // Assert
+                if (expectedResult == null)
+                    Assert.IsNull(result.Foo);
+                else
                 {
-                    thread.CurrentCulture = thread.CurrentUICulture = new CultureInfo(cultureName);
-
-                    // Arrange
-                    var deserializer = new CustomJsonDeserializer(null);
-                    var content = string.Format("{{'Foo':'{0}'}}", input);
-
-                    // Act
-                    var result = deserializer.Deserialize<DateTimeOffsetModel>(content);
-
-                    // Assert
-                    if (expectedResult == null)
-                        Assert.IsNull(result.Foo);
-                    else
-                    {
-                        Assert.IsNotNull(result.Foo);
-                        Assert.AreEqual(expectedResult, result.Foo.Value.ToString("o", CultureInfo.InvariantCulture));
-                    }
+                    Assert.IsNotNull(result.Foo);
+                    Assert.AreEqual(expectedResult, result.Foo.Value.ToString("o", CultureInfo.InvariantCulture));
                 }
-            }
-            finally
-            {
-                thread.CurrentCulture = thread.CurrentUICulture = previousCulture;
             }
         }
 
         [Test]
-        public void DeserializeTimeZoneInfo()
+        public void DeserializeTimeZoneInfoWithDefaultJsonConverters()
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer(new []{new TimeZoneInfoConverter()});
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
             const string ausEasternStandardTime = "AUS Eastern Standard Time";
             var content = string.Format("{{'Foo':'{0}'}}", ausEasternStandardTime);
 
@@ -90,10 +77,10 @@ namespace Neo4jClient.Test.Serialization
         [TestCase("09:03:11.9990000", 0, 9, 3, 2, 9999)]
         [TestCase("400.09:03:02", 400, 9, 3, 2, 0)]
         [TestCase("09:03:02", 0, 9, 3, 2, 0)]
-        public void DeserializeTimeSpan(string value, int days, int hours, int minutes, int seconds, int milliseconds)
+        public void DeserializeTimeSpanWithDefaultJsonConverters(string value, int days, int hours, int minutes, int seconds, int milliseconds)
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
             var content = string.Format("{{'Foo':'{0}'}}", value);
 
             // Act
@@ -123,7 +110,7 @@ namespace Neo4jClient.Test.Serialization
         public void DeserializeShouldConvertTableCapResponseToGremlinTableCapResponse()
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
             const string content = @"{
                               ""columns"" : [ ""ColumnA"" ],
                               ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
@@ -179,10 +166,10 @@ namespace Neo4jClient.Test.Serialization
         [Test]
         [TestCase("{\"Gender\": \"Female\"}", Gender.Female)]
         [TestCase("{\"Gender\": \"1\"}", Gender.Female)]
-        public void DeserializeEnumFromString(string content, Gender expectedGender)
+        public void DeserializeEnumFromStringWithDefaultJsonConverters(string content, Gender expectedGender)
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
 
             // Act
             var deserialziedGender = deserializer.Deserialize<EnumModel>(content);
@@ -195,10 +182,10 @@ namespace Neo4jClient.Test.Serialization
         [Test]
         [TestCase("{\"GenderNullable\": \"Female\"}", Gender.Female)]
         [TestCase("{\"GenderNullable\": \"1\"}", Gender.Female)]
-        public void DeserializeNullableEnumFromString(string content, Gender? expectedGender)
+        public void DeserializeNullableEnumFromStringWithDefaultJsonConverters(string content, Gender? expectedGender)
         {
             // Arrange
-            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
 
             // Act
             var result = deserializer.Deserialize<EnumModel>(content);
@@ -209,17 +196,17 @@ namespace Neo4jClient.Test.Serialization
         }
 
         [Test]
-        public void DeserializeGuid()
+        public void DeserializeGuidWithDefaultJsonConverters()
         {
             //Arrage
             var myGuid = Guid.NewGuid();
             var foo = new EnumerableModel { Guids = new List<Guid> { myGuid } };
 
             // Act
-            var customSerializer = new CustomJsonSerializer();
+            var customSerializer = new CustomJsonSerializer{JsonConverters = GraphClient.DefaultJsonConverters};
             var testStr = customSerializer.Serialize(foo);
 
-            var customDeserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var customDeserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
             var result = customDeserializer.Deserialize<EnumerableModel>(testStr);
 
             // Assert
@@ -228,10 +215,10 @@ namespace Neo4jClient.Test.Serialization
 
         [Test]
         [TestCase("[ \"Male\", \"Female\", \"Unknown\" ]", new [] { Gender.Male, Gender.Female, Gender.Unknown })]
-        public void DeserializeIEnumerableOfEnum(string content, Gender[] genders)
+        public void DeserializeIEnumerableOfEnumWithDefaultJsonConverters(string content, Gender[] genders)
         {
             // Act
-            var deserializer = new CustomJsonDeserializer(new JsonConverter[0]);
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
 
             // Assert
             var result = deserializer.Deserialize<List<Gender>>(content);

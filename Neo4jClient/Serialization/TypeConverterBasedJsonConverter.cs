@@ -1,11 +1,28 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Serialization
 {
     public class TypeConverterBasedJsonConverter : JsonConverter
     {
+        readonly Type[] builtinSupportedTypes = new[]
+            {
+                typeof(string),
+                typeof(Uri),
+                typeof(DateTime),
+                typeof(DateTime?),
+                typeof(DateTimeOffset),
+                typeof(DateTimeOffset?),
+                typeof(decimal),
+                typeof(decimal?),
+                typeof(TimeSpan),
+                typeof(TimeSpan?),
+                typeof(Guid),
+                typeof(Guid?)
+            };
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             if (value == null)
@@ -30,8 +47,8 @@ namespace Neo4jClient.Serialization
             var typeOfString = typeof (string);
             var typeConverter = TypeDescriptor.GetConverter(objectType);
             return
-                objectType != typeOfString &&
                 !objectType.IsPrimitive &&
+                builtinSupportedTypes.All(builtinType => objectType != builtinType) &&
                 typeConverter.CanConvertTo(typeOfString)
                 && typeConverter.CanConvertFrom(typeOfString);
         }
