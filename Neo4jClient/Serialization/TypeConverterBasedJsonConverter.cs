@@ -7,7 +7,7 @@ namespace Neo4jClient.Serialization
 {
     public class TypeConverterBasedJsonConverter : JsonConverter
     {
-        readonly Type[] builtinSupportedTypes = new[]
+        readonly Type[] builtinTypes = new[]
             {
                 typeof(string),
                 typeof(Uri),
@@ -48,7 +48,7 @@ namespace Neo4jClient.Serialization
             var typeConverter = TypeDescriptor.GetConverter(objectType);
             return
                 !objectType.IsPrimitive &&
-                builtinSupportedTypes.All(builtinType => objectType != builtinType) &&
+                !builtinTypes.Contains(objectType) &&
                 typeConverter.CanConvertTo(typeOfString)
                 && typeConverter.CanConvertFrom(typeOfString);
         }
