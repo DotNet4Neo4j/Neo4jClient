@@ -194,5 +194,49 @@ namespace Neo4jClient.Test.Serialization
             // Assert
             Assert.AreEqual(expected, result);
         }
+
+        public class NodeWithBuiltInTypes
+        {
+            public int? Foo { get; set; }
+            public bool? Bar { get; set; }
+        }
+
+        [Test]
+        public void ShouldSerializeNullableInt32ToJsonNumberUsingDefaultJsonConverters()
+        {
+            // Arrange
+            var testNode = new NodeWithBuiltInTypes { Foo = 123 };
+            var serializer = new CustomJsonSerializer
+            {
+                NullHandling = NullValueHandling.Ignore,
+                JsonConverters = GraphClient.DefaultJsonConverters
+            };
+
+            // Act
+            var result = serializer.Serialize(testNode);
+            const string expectedValue = "{\r\n  \"Foo\": 123\r\n}";
+
+            // Assert
+            Assert.AreEqual(expectedValue, result);
+        }
+
+        [Test]
+        public void ShouldSerializeNullableBoolToJsonBooleanUsingDefaultJsonConverters()
+        {
+            // Arrange
+            var testNode = new NodeWithBuiltInTypes { Bar = true };
+            var serializer = new CustomJsonSerializer
+            {
+                NullHandling = NullValueHandling.Ignore,
+                JsonConverters = GraphClient.DefaultJsonConverters
+            };
+
+            // Act
+            var result = serializer.Serialize(testNode);
+            const string expectedValue = "{\r\n  \"Bar\": true\r\n}";
+
+            // Assert
+            Assert.AreEqual(expectedValue, result);
+        }
     }
 }
