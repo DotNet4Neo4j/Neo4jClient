@@ -175,6 +175,20 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/118/collectas-causes-argumentnullexception")]
+        public void PreventDoubleNodeWrappedCollect()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new
+                {
+                    Foo = a.CollectAs<Node<Foo>>()
+                };
+
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsShouldNotBeNodeTExceptionMessage, ex.Message);
+        }
+
+        [Test]
         public void ReturnCollectedDistinctNodesInColumn()
         {
             // http://docs.neo4j.org/chunked/1.9.M05/query-aggregation.html#aggregation-distinct

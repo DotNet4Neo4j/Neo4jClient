@@ -12,6 +12,8 @@ namespace Neo4jClient.Cypher
 
         internal const string ReturnExpressionShouldBeOneOfExceptionMessage = "The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar). You cannot supply blocks of code (for example: n => { var a = n + 1; return a; }) or use constructors with arguments (for example: n => new Foo(n)).";
 
+        internal const string CollectAsShouldNotBeNodeTExceptionMessage = "You've called CollectAs<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAs<T>() instead.";
+
         // Terminology used in this file:
         //
         // - a "statement" is something like "x.Foo? AS Bar"
@@ -225,6 +227,8 @@ namespace Neo4jClient.Cypher
                     finalStatement = string.Format("{0}{1}", targetObject.Name, optionalIndicator);
                     break;
                 case "CollectAs":
+                    if (IsNodeOfT(expression.Method))
+                        throw new ArgumentException(CollectAsShouldNotBeNodeTExceptionMessage, "expression");
                     finalStatement = string.Format("collect({0})", targetObject.Name);
                     break;
                 case "CollectAsDistinct":
@@ -254,6 +258,13 @@ namespace Neo4jClient.Cypher
                 : finalStatement;
 
             return statement;
+        }
+
+        static bool IsNodeOfT(MethodInfo methodInfo)
+        {
+            if (!methodInfo.IsGenericMethod) throw new InvalidOperationException("Expected generic method, but it wasn't.");
+            var methodType = methodInfo.GetGenericArguments().Single();
+            return methodType.IsGenericType && methodType.GetGenericTypeDefinition() == typeof(Node<>);
         }
 
         static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)
