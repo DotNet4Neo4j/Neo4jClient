@@ -294,6 +294,15 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/116/bug-in-returning-single-nullable-value")]
+        public void ReturnCountOnItsOwnAsNullableLong()
+        {
+            Expression<Func<ICypherResultItem, long?>> expression = b => b.Count();
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            Assert.AreEqual("count(b)", returnExpression.Text);
+        }
+
+        [Test]
         public void ReturnAllOnItsOwn()
         {
             Expression<Func<long>> expression = () => All.Count();
