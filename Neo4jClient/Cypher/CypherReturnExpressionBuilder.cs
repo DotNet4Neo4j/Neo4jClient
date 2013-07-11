@@ -14,6 +14,8 @@ namespace Neo4jClient.Cypher
 
         internal const string CollectAsShouldNotBeNodeTExceptionMessage = "You've called CollectAs<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAs<T>() instead.";
 
+        internal const string CollectAsDistinctShouldNotBeNodeTExceptionMessage = "You've called CollectAsDistinct<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAsDistinct<T>() instead.";
+
         // Terminology used in this file:
         //
         // - a "statement" is something like "x.Foo? AS Bar"
@@ -232,6 +234,8 @@ namespace Neo4jClient.Cypher
                     finalStatement = string.Format("collect({0})", targetObject.Name);
                     break;
                 case "CollectAsDistinct":
+                    if (IsNodeOfT(expression.Method))
+                        throw new ArgumentException(CollectAsDistinctShouldNotBeNodeTExceptionMessage, "expression");
                     finalStatement = string.Format("collect(distinct {0})", targetObject.Name);
                     break;
                 case "Count":

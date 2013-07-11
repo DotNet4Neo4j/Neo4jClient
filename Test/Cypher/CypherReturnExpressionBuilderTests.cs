@@ -176,7 +176,7 @@ namespace Neo4jClient.Test.Cypher
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/118/collectas-causes-argumentnullexception")]
-        public void PreventDoubleNodeWrappedCollect()
+        public void PreventDoubleNodeWrappedCollectAs()
         {
             Expression<Func<ICypherResultItem, object>> expression =
                 a => new
@@ -186,6 +186,20 @@ namespace Neo4jClient.Test.Cypher
 
             var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
             StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsShouldNotBeNodeTExceptionMessage, ex.Message);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/118/collectas-causes-argumentnullexception")]
+        public void PreventDoubleNodeWrappedCollectAsDistinct()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new
+                {
+                    Foo = a.CollectAsDistinct<Node<Foo>>()
+                };
+
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsDistinctShouldNotBeNodeTExceptionMessage, ex.Message);
         }
 
         [Test]
