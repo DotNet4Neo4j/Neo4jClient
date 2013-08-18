@@ -132,6 +132,10 @@ namespace Neo4jClient.Serialization
                 return guid;
             }
 
+            object jsonConversionResult;
+            if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
+                return jsonConversionResult;
+
             if (genericTypeDef == typeof(List<>))
             {
                 var list = BuildList(context, propertyType, value.Children(), typeMappings, nestingLevel + 1);
