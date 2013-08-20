@@ -23,13 +23,13 @@ namespace Neo4jClient
 {
     public class GraphClient : IRawGraphClient
     {
-        public static readonly JsonConverter[] DefaultJsonConverters = new JsonConverter[]
-            {
-                new TypeConverterBasedJsonConverter(),
-                new NullableEnumValueConverter(),
-                new TimeZoneInfoConverter(),
-                new EnumValueConverter()
-            };
+        public static readonly JsonConverter[] DefaultJsonConverters =
+        {
+            new TypeConverterBasedJsonConverter(),
+            new NullableEnumValueConverter(),
+            new TimeZoneInfoConverter(),
+            new EnumValueConverter()
+        };
 
         internal readonly Uri RootUri;
         readonly IHttpClient httpClient;
