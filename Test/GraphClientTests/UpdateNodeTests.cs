@@ -61,6 +61,56 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void ShouldReturnNodeAfterUpdating()
+        {
+            var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+
+            using (var testHarness = new RestTestHarness
+                {
+                    {
+                        MockRequest.Get("/node/456"),
+                        MockResponse.Json(HttpStatusCode.OK, @"{ 'self': 'http://foo/db/data/node/456',
+                          'data': { 'Foo': 'foo',
+                                    'Bar': 'bar',
+                                    'Baz': 'baz'
+                          },
+                          'create_relationship': 'http://foo/db/data/node/456/relationships',
+                          'all_relationships': 'http://foo/db/data/node/456/relationships/all',
+                          'all_typed relationships': 'http://foo/db/data/node/456/relationships/all/{-list|&|types}',
+                          'incoming_relationships': 'http://foo/db/data/node/456/relationships/in',
+                          'incoming_typed relationships': 'http://foo/db/data/node/456/relationships/in/{-list|&|types}',
+                          'outgoing_relationships': 'http://foo/db/data/node/456/relationships/out',
+                          'outgoing_typed relationships': 'http://foo/db/data/node/456/relationships/out/{-list|&|types}',
+                          'properties': 'http://foo/db/data/node/456/properties',
+                          'property': 'http://foo/db/data/node/456/property/{key}',
+                          'traverse': 'http://foo/db/data/node/456/traverse/{returnType}'
+                        }")
+                    },
+                                        {
+                        MockRequest.PutObjectAsJson("/node/456/properties", nodeToUpdate),
+                        MockResponse.Http((int)HttpStatusCode.NoContent)
+                    }
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                //Act
+                var pocoReference = new NodeReference<TestNode>(456);
+                var updatedNode = graphClient.Update(
+                    pocoReference, nodeFromDb =>
+                    {
+                        nodeFromDb.Foo = "fooUpdated";
+                        nodeFromDb.Baz = "bazUpdated";
+                    });
+
+                Assert.AreEqual(pocoReference, updatedNode.Reference);
+                Assert.AreEqual("fooUpdated", updatedNode.Data.Foo);
+                Assert.AreEqual("bazUpdated", updatedNode.Data.Baz);
+                Assert.AreEqual("bar", updatedNode.Data.Bar);
+            }
+        }
+
+        [Test]
         public void ShouldUpdateNodeWithIndexEntries()
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };

@@ -549,7 +549,7 @@ namespace Neo4jClient
             });
         }
 
-        public void Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback,
+        public Node<TNode> Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback,
             Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
             Action<IEnumerable<FieldChange>> changeCallback = null)
         {
@@ -601,6 +601,8 @@ namespace Neo4jClient
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
+
+            return node;
         }
 
         public void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback)

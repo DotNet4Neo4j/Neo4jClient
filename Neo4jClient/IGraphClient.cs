@@ -49,7 +49,7 @@ namespace Neo4jClient
         /// <param name="updateCallback">A callback to mutate the values between retrieval and persistence</param>
         /// <param name="indexEntriesCallback">A callback to return new index entries that should also be persisted</param>
         /// <param name="changeCallback">A callback to respond to the resulting property changes</param>
-        void Update<TNode>(NodeReference<TNode> nodeReference,
+        Node<TNode> Update<TNode>(NodeReference<TNode> nodeReference,
                            Action<TNode> updateCallback,
                            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
                            Action<IEnumerable<FieldChange>> changeCallback = null);
