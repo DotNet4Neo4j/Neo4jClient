@@ -83,6 +83,10 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery AndWhere<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> expression);
         ICypherFluentQuery AndWhere<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> expression);
         ICypherFluentQuery AndWhere<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Expression<Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> expression);
+        ICypherFluentQuery Limit(int? limit);
+        ICypherFluentQuery Skip(int? skip);
+        ICypherFluentQuery OrderBy(params string[] properties);
+        ICypherFluentQuery OrderByDescending(params string[] properties);
         ICypherFluentQuery<TResult> Return<TResult>(string identity);
         [Obsolete("This was an internal that never should have been exposed. If you want to create a projection, you should be using the lambda overload instead. See the 'Using Functions in Return Clauses' and 'Using Custom Text in Return Clauses' sections of https://bitbucket.org/Readify/neo4jclient/wiki/cypher for details of how to do this.", true)]
         ICypherFluentQuery<TResult> Return<TResult>(string identity, CypherResultMode resultMode);
