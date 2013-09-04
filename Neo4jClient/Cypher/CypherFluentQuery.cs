@@ -247,6 +247,32 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("UNION ALL"));
         }
 
+        public ICypherFluentQuery Limit(int? limit)
+        {
+            return limit.HasValue
+                ? Mutate(w => w.AppendClause("LIMIT {0}", limit))
+                : this;
+        }
+
+        public ICypherFluentQuery Skip(int? skip)
+        {
+            return skip.HasValue
+                ? Mutate(w => w.AppendClause("SKIP {0}", skip))
+                : this;
+        }
+
+        public ICypherFluentQuery OrderBy(params string[] properties)
+        {
+            return Mutate(w =>
+                w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
+        }
+
+        public ICypherFluentQuery OrderByDescending(params string[] properties)
+        {
+            return Mutate(w =>
+                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(", ", properties))));
+        }
+
         public CypherQuery Query
         {
             get { return QueryWriter.ToCypherQuery(); }

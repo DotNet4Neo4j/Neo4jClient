@@ -8,9 +8,9 @@ namespace Neo4jClient.Cypher
         IEnumerable<TResult> Results { get; }
         Task<IEnumerable<TResult>> ResultsAsync { get; }
 
-        ICypherFluentQuery<TResult> Limit(int? limit);
-        ICypherFluentQuery<TResult> Skip(int? skip);
-        ICypherFluentQuery<TResult> OrderBy(params string[] properties);
-        ICypherFluentQuery<TResult> OrderByDescending(params string[] properties);
+        new ICypherFluentQuery<TResult> Limit(int? limit);
+        new ICypherFluentQuery<TResult> Skip(int? skip);
+        new ICypherFluentQuery<TResult> OrderBy(params string[] properties);
+        new ICypherFluentQuery<TResult> OrderByDescending(params string[] properties);
     }
 }
