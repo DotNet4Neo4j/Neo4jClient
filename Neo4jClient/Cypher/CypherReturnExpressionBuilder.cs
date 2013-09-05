@@ -23,23 +23,31 @@ namespace Neo4jClient.Cypher
 
         public static ReturnExpression BuildText(LambdaExpression expression)
         {
+            var body = expression.Body;
+
+            if (body.NodeType == ExpressionType.Convert &&
+                body is UnaryExpression)
+            {
+                body = ((UnaryExpression)expression.Body).Operand;
+            }
+
             string text;
-            switch (expression.Body.NodeType)
+            switch (body.NodeType)
             {
                 case ExpressionType.MemberInit:
-                    var memberInitExpression = (MemberInitExpression) expression.Body;
+                    var memberInitExpression = (MemberInitExpression) body;
                     text = BuildText(memberInitExpression);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.New:
-                    var newExpression = (NewExpression) expression.Body;
+                    var newExpression = (NewExpression) body;
                     text = BuildText(newExpression);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.Call:
-                    var methodCallExpression = (MethodCallExpression)expression.Body;
+                    var methodCallExpression = (MethodCallExpression) body;
                     text = BuildText(methodCallExpression);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
                 case ExpressionType.MemberAccess:
-                    var memberExpression = (MemberExpression)expression.Body;
+                    var memberExpression = (MemberExpression) body;
                     text = BuildText(memberExpression);
                     return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
@@ -91,6 +99,15 @@ namespace Neo4jClient.Cypher
         /// </remarks>
         static string BuildText(NewExpression expression)
         {
+            var resultingType = expression.Constructor.DeclaringType;
+            var quacksLikeAnAnonymousType =
+                resultingType.IsSpecialName &&
+                resultingType.IsValueType &&
+                resultingType.IsNestedPrivate &&
+                !resultingType.IsGenericType;
+            if (expression.Members == null && !quacksLikeAnAnonymousType)
+                throw new ArgumentException(ReturnExpressionShouldBeOneOfExceptionMessage, "expression");
+
             if (expression.Arguments.Count != expression.Members.Count)
                 throw new InvalidOperationException("Somehow we had a different number of members than arguments. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
