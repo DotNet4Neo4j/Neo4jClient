@@ -224,5 +224,37 @@ namespace Neo4jClient.Test.Serialization
             var result = deserializer.Deserialize<List<Gender>>(content);
             CollectionAssert.AreEquivalent(result, genders);
         }
+
+
+        public class ModelWithDecimal
+        {
+            public decimal MyDecimalValue { get; set; }
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/149/deserialization-of-type-decimal-fails-when")]
+        public void DecimalDeserializationIsCultureIndependent()
+        {
+            //SetupFixture defaults culture info so culture-dependent tests should preserve culture state
+            var currentNumberDecimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+
+            try
+            {
+                //Arrage
+                CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator = ",";
+                const string serializedModelWithDecimal = "{'data':{'MyDecimalValue':0.5}}";
+
+                //Act
+                var customDeserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
+                var result = customDeserializer.Deserialize<ModelWithDecimal>(serializedModelWithDecimal);
+
+                //Assert
+                Assert.AreEqual(0.5m, result.MyDecimalValue);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator = currentNumberDecimalSeparator;
+            }
+        }
     }
 }
