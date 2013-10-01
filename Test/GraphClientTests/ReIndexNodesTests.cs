@@ -189,27 +189,5 @@ namespace Neo4jClient.Test.GraphClientTests
                 Assert.Pass("Success.");
             }
         }
-
-        [Test]
-        [ExpectedException(typeof (NotSupportedException))]
-        public void ShouldThrowNotSupportExceptionForPre15M02Database()
-        {
-            //Arrange
-
-            using (var testHarness = new RestTestHarness
-                {
-                    {
-                        MockRequest.Get(""),
-                        MockResponse.NeoRootPre15M02()
-                    }
-                })
-            {
-
-                var graphClient = testHarness.CreateAndConnectGraphClient();
-
-                //Act
-                graphClient.ReIndex((NodeReference)123, new IndexEntry[0]);
-            }
-        }
     }
 }

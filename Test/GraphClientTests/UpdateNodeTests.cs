@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using NUnit.Framework;
@@ -172,59 +171,6 @@ namespace Neo4jClient.Test.GraphClientTests
                 Assert.AreEqual("fooUpdated", nodeToUpdate.Foo);
                 Assert.AreEqual("bazUpdated", nodeToUpdate.Baz);
                 Assert.AreEqual("bar", nodeToUpdate.Bar);
-            }
-        }
-
-        [Test]
-        [ExpectedException(typeof(NotSupportedException))]
-        public void ShouldThrowNotSupportedExceptionForPre15M02DatabaseWithIndexEntries()
-        {
-            using (var testHarness = new RestTestHarness
-                {
-                    {
-                        MockRequest.Get(""),
-                        MockResponse.NeoRootPre15M02()
-                    },
-                    {
-                        MockRequest.Get("/node/456"),
-                        MockResponse.Json(HttpStatusCode.OK, @"{ 'self': 'http://foo/db/data/node/456',
-                            'data': { 'Foo': 'foo',
-                                    'Bar': 'bar',
-                                    'Baz': 'baz'
-                            },
-                            'create_relationship': 'http://foo/db/data/node/456/relationships',
-                            'all_relationships': 'http://foo/db/data/node/456/relationships/all',
-                            'all_typed relationships': 'http://foo/db/data/node/456/relationships/all/{-list|&|types}',
-                            'incoming_relationships': 'http://foo/db/data/node/456/relationships/in',
-                            'incoming_typed relationships': 'http://foo/db/data/node/456/relationships/in/{-list|&|types}',
-                            'outgoing_relationships': 'http://foo/db/data/node/456/relationships/out',
-                            'outgoing_typed relationships': 'http://foo/db/data/node/456/relationships/out/{-list|&|types}',
-                            'properties': 'http://foo/db/data/node/456/properties',
-                            'property': 'http://foo/db/data/node/456/property/{key}',
-                            'traverse': 'http://foo/db/data/node/456/traverse/{returnType}'
-                        }")
-                    },
-                })
-            {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
-
-                //Act
-                var pocoReference = new NodeReference<TestNode>(456);
-                graphClient.Update(
-                    pocoReference,
-                    nodeFromDb =>
-                    {
-                        nodeFromDb.Foo = "fooUpdated";
-                        nodeFromDb.Baz = "bazUpdated";
-                    },
-                    nodeFromDb => new List<IndexEntry>
-                {
-                    new IndexEntry
-                    {
-                        Name = "foo",
-                        KeyValues = new Dictionary<string, object> {{"foo", "bar"}},
-                    }
-                });
             }
         }
 

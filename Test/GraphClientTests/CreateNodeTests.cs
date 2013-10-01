@@ -47,38 +47,6 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
-        public void ShouldThrowNotSupportExceptionForPre15M02Database()
-        {
-            var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.NeoRootPre15M02()
-                }
-            };
-
-            var graphClient = testHarness.CreateAndConnectGraphClient();
-
-            graphClient.Create(
-                new object(),
-                null,
-                new[]
-                {
-                    new IndexEntry
-                    {
-                        Name = "my_index",
-                        KeyValues = new[]
-                        {
-                            new KeyValuePair<string, object>("key", "value"),
-                            new KeyValuePair<string, object>("key2", ""),
-                            new KeyValuePair<string, object>("key3", "value3")
-                        }
-                    }
-                });
-        }
-
-        [Test]
         public void ShouldNotThrowANotSupportedExceptionForPre15M02DatabaseWhenThereAreNoIndexEntries()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
