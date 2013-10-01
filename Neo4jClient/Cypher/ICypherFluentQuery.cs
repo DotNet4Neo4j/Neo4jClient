@@ -24,7 +24,6 @@ namespace Neo4jClient.Cypher
         [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameterText);
         ICypherFluentQuery Match(params string[] matchText);
-        ICypherFluentQuery Relate(string relateText);
         ICypherFluentQuery CreateUnique(string createUniqueText);
         ICypherFluentQuery Create(string createText, params object[] objects);
         ICypherFluentQuery Delete(string identities);
