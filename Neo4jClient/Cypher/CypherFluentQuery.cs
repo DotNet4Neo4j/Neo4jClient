@@ -225,12 +225,6 @@ namespace Neo4jClient.Cypher
                 w.AppendClause(string.Format("DELETE {0}", identities)));
         }
 
-        public ICypherFluentQuery With(string withText)
-        {
-            return Mutate(w =>
-                w.AppendClause(string.Format("WITH {0}", withText)));
-        }
-
         public ICypherFluentQuery Set(string setText)
         {
             return Mutate(w =>

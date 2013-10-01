@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
 {
-    public interface ICypherFluentQuery
+    public partial interface ICypherFluentQuery
     {
         CypherQuery Query { get; }
         void ExecuteWithoutResults();
@@ -28,7 +28,6 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery CreateUnique(string createUniqueText);
         ICypherFluentQuery Create(string createText, params object[] objects);
         ICypherFluentQuery Delete(string identities);
-        ICypherFluentQuery With(string withText);
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery Union();
         ICypherFluentQuery UnionAll();
