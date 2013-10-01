@@ -130,7 +130,7 @@ namespace Neo4jClient.Cypher
                 return node;
             }
 
-            var isConstantExpression = node.Expression.NodeType == ExpressionType.Constant;
+            var isConstantExpression = IsConstantExpression(node);
             var isConstantExpressionWrappedInMemberAccess =
                 node.Expression.NodeType == ExpressionType.MemberAccess &&
                 ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant;
@@ -194,14 +194,7 @@ namespace Neo4jClient.Cypher
 
         void VisitConstantMember(MemberExpression node)
         {
-            var data = node.Expression.NodeType == ExpressionType.Constant
-                ? ParseValueFromExpression(node)
-                : ParseValueFromExpression(node.Expression);
-
-            var value = node.Expression.NodeType == ExpressionType.Constant
-                ? data
-                : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
-
+            var value = GetConstantExpressionValue(node);
             if (value != null)
             {
                 SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(new[]
@@ -216,6 +209,34 @@ namespace Neo4jClient.Cypher
 
             var valueWrappedInParameter = createParameterCallback(value);
             TextOutput.Append(valueWrappedInParameter);
+        }
+
+        static object GetConstantExpressionValue(MemberExpression node)
+        {
+            if (node.Expression == null)
+                return null;
+
+            if (node.Expression.NodeType != ExpressionType.Constant && ((MemberExpression)node.Expression).Expression.NodeType != ExpressionType.Constant)
+            {
+                var name = node.Member.Name;
+                var retrieved = GetConstantExpressionValue(node.Expression as MemberExpression);
+                return retrieved.GetType().GetProperty(name).GetValue(retrieved, BindingFlags.Public, null, null, null);
+            }
+
+            var data = ParseValueFromExpression(node.Expression.NodeType == ExpressionType.Constant ? node : node.Expression);
+            var value = node.Expression.NodeType == ExpressionType.Constant
+                ? data
+                : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
+
+            return value;
+        }
+
+        static bool IsConstantExpression(MemberExpression node)
+        {
+            if (node == null || node.Expression == null)
+                return false;
+
+            return node.Expression.NodeType == ExpressionType.Constant || IsConstantExpression(node.Expression as MemberExpression);
         }
 
         protected override Expression VisitUnary(UnaryExpression node)
