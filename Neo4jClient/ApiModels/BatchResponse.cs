@@ -7,7 +7,7 @@ namespace Neo4jClient.ApiModels
     {
         public BatchStepResult this[BatchStep step]
         {
-            get { return this.Where(r => r.Id == step.Id).SingleOrDefault(); }
+            get { return this.SingleOrDefault(r => r.Id == step.Id); }
         }
     }
 }
