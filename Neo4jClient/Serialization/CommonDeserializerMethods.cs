@@ -114,7 +114,7 @@ namespace Neo4jClient.Serialization
 
             if (propertyType == typeof(Decimal))
             {
-                var dec = Decimal.Parse(value.AsString(), context.Culture);
+                var dec = Convert.ToDecimal(((JValue) value).Value);
                 return dec;
             }
 
