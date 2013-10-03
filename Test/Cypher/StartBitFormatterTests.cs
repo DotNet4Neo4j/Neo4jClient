@@ -193,7 +193,7 @@ namespace Neo4jClient.Test.Cypher
                 n = Node.ByIndexLookup("someIndex", "name", "A")
             });
 
-            Assert.AreEqual("n=node:someIndex(name = {p0})", cypher.QueryText);
+            Assert.AreEqual("n=node:`someIndex`(name = {p0})", cypher.QueryText);
             Assert.AreEqual(1, cypher.QueryParameters.Count);
             Assert.AreEqual("A", cypher.QueryParameters["p0"]);
         }
@@ -207,7 +207,7 @@ namespace Neo4jClient.Test.Cypher
                 n = Node.ByIndexQuery("someIndex", "name:A")
             });
 
-            Assert.AreEqual("n=node:someIndex({p0})", cypher.QueryText);
+            Assert.AreEqual("n=node:`someIndex`({p0})", cypher.QueryText);
             Assert.AreEqual(1, cypher.QueryParameters.Count);
             Assert.AreEqual("name:A", cypher.QueryParameters["p0"]);
         }
@@ -221,7 +221,7 @@ namespace Neo4jClient.Test.Cypher
                 r = Relationship.ByIndexLookup("someIndex", "name", "A")
             });
 
-            Assert.AreEqual("r=relationship:someIndex(name = {p0})", cypher.QueryText);
+            Assert.AreEqual("r=relationship:`someIndex`(name = {p0})", cypher.QueryText);
             Assert.AreEqual(1, cypher.QueryParameters.Count);
             Assert.AreEqual("A", cypher.QueryParameters["p0"]);
         }
@@ -234,7 +234,7 @@ namespace Neo4jClient.Test.Cypher
                 r = Relationship.ByIndexQuery("someIndex", "name:A")
             });
 
-            Assert.AreEqual("r=relationship:someIndex({p0})", cypher.QueryText);
+            Assert.AreEqual("r=relationship:`someIndex`({p0})", cypher.QueryText);
             Assert.AreEqual(1, cypher.QueryParameters.Count);
             Assert.AreEqual("name:A", cypher.QueryParameters["p0"]);
         }
@@ -262,12 +262,12 @@ namespace Neo4jClient.Test.Cypher
             const string expected =
                 "n1=custom, " +
                 "n2=node({p0}), " +
-                "n3=node:indexName(property = {p1}), " +
-                "n4=node:indexName({p2}), " +
+                "n3=node:`indexName`(property = {p1}), " +
+                "n4=node:`indexName`({p2}), " +
                 "r1=relationship({p3}), " +
                 "moreRels=relationship({p4}), " +
-                "r2=relationship:indexName(property = {p5}), " +
-                "r3=relationship:indexName({p6}), " +
+                "r2=relationship:`indexName`(property = {p5}), " +
+                "r3=relationship:`indexName`({p6}), " +
                 "all=node(*)";
 
             Assert.AreEqual(expected, cypher.QueryText);

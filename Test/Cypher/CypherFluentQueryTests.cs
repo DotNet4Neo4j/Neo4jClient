@@ -1051,7 +1051,7 @@ RETURN b AS NodeB";
 // ReSharper restore InconsistentNaming
                 .Query;
 
-            Assert.AreEqual(@"START me=node:node_auto_index(name = {p0})
+            Assert.AreEqual(@"START me=node:`node_auto_index`(name = {p0})
 MATCH me-[r?:STATUS]-secondlatestupdate
 DELETE r
 WITH me, secondlatestupdate

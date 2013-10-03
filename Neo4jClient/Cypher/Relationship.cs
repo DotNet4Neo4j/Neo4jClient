@@ -18,7 +18,7 @@ namespace Neo4jClient
         {
             return new StartBit(createParameterCallback =>
                 string.Format(
-                    "relationship:{0}({1} = {2})",
+                    "relationship:`{0}`({1} = {2})",
                     indexName,
                     propertyName,
                     createParameterCallback(value)));
@@ -31,7 +31,7 @@ namespace Neo4jClient
         {
             return new StartBit(createParameterCallback =>
                 string.Format(
-                    "relationship:{0}({1})",
+                    "relationship:`{0}`({1})",
                     indexName,
                     createParameterCallback(query)));
         }

@@ -21,7 +21,7 @@ namespace Neo4jClient.Cypher
         public string ToCypherText(Func<object, string> createParameterCallback)
         {
             var valueParameter = createParameterCallback(value);
-            return string.Format("{0}=node:{1}({2} = {3})",
+            return string.Format("{0}=node:`{1}`({2} = {3})",
                 identifier,
                 indexName,
                 key,

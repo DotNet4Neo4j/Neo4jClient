@@ -9,7 +9,7 @@
         {
             return new StartBit(createParameterCallback =>
                 string.Format(
-                    "node:{0}({1} = {2})",
+                    "node:`{0}`({1} = {2})",
                     indexName,
                     propertyName,
                     createParameterCallback(value)));
@@ -22,7 +22,7 @@
         {
             return new StartBit(createParameterCallback =>
                 string.Format(
-                    "node:{0}({1})",
+                    "node:`{0}`({1})",
                     indexName,
                     createParameterCallback(query)));
         }
