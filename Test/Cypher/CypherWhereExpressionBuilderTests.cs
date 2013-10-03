@@ -16,6 +16,16 @@ namespace Neo4jClient.Test.Cypher
             public int? NullableBar { get; set; }
             public bool SomeBool { get; set; }
         }
+
+        class Nested
+        {
+            public Foo Foo { get; set; }
+        }
+
+        class SuperNested
+        {
+            public Nested Nested { get; set; }
+        }
         // ReSharper restore ClassNeverInstantiated.Local
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
@@ -328,6 +338,34 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.Throws<NotSupportedException>(() =>
                 CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v)));
+        }
+
+        [Test]
+        public void GetsValueFromNestedProperty()
+        {
+            var comparison = new Nested {Foo = new Foo {Bar = BazField}};
+
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.Bar == comparison.Foo.Bar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.Bar = {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        public void GetsValueFromSuperNestedProperty()
+        {
+            var comparison = new SuperNested {Nested= new Nested {Foo = new Foo {Bar = BazField}}};
+
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.Bar == comparison.Nested.Foo.Bar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.Bar = {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
         }
 
         static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
