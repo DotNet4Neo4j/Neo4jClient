@@ -3,12 +3,12 @@
   <metadata>
     <id>Neo4jClient</id>
     <version>0.0.0.0</version>
-    <authors>Tatham Oddie, Romiko Derbynew, contributors</authors>
+    <authors>Readify</authors>
     <owners>Tatham Oddie</owners>
     <licenseUrl>http://hg.readify.net/neo4jclient/src/tip/LICENSE</licenseUrl>
     <projectUrl>http://hg.readify.net/neo4jclient</projectUrl>
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
-    <tags>neo4j REST nosql</tags>
+    <tags>neo4j nosql cypher</tags>
     <dependencies>
       <dependency id="Microsoft.Net.Http" />
       <dependency id="Newtonsoft.Json" version="5.0" />
