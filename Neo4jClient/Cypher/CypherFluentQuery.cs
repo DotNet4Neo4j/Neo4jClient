@@ -136,6 +136,21 @@ namespace Neo4jClient.Cypher
                 w.AppendClause("MATCH " + string.Join(", ", matchText)));
         }
 
+        public ICypherFluentQuery Merge(string mergeText)
+        {
+            return Mutate(w => w.AppendClause("MERGE " + mergeText));
+        }
+
+        public ICypherFluentQuery OnCreate(string identity)
+        {
+            return Mutate(w => w.AppendClause("ON CREATE " + identity));
+        }
+
+        public ICypherFluentQuery OnMatch(string identity)
+        {
+            return Mutate(w => w.AppendClause("ON MATCH " + identity));
+        }
+
         public ICypherFluentQuery CreateUnique(string createUniqueText)
         {
             return Mutate(w => w.AppendClause("CREATE UNIQUE " + createUniqueText));
