@@ -705,6 +705,7 @@ namespace Neo4jClient
 
         public List<JsonConverter> JsonConverters { get; private set; }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
@@ -728,6 +729,7 @@ namespace Neo4jClient
             return response.Content.ReadAsString();
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new()
         {
             CheckRoot();
@@ -824,11 +826,13 @@ namespace Neo4jClient
             });
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
         {
             return ExecuteGetAllRelationshipsGremlin<object>(query, parameters);
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsGremlin<TData>(string query, IDictionary<string, object> parameters)
             where TData : class, new()
         {
@@ -857,16 +861,19 @@ namespace Neo4jClient
             return relationships;
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
         {
             return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, new List<string>()));
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations)
         {
             return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, declarations));
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
         {
             CheckRoot();
@@ -1196,6 +1203,7 @@ namespace Neo4jClient
                 : data.Select(r => r.ToNode(this));
         }
 
+        [Obsolete("This method depends on Cypher, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management.")]
         public void ShutdownServer()
         {
             ExecuteScalarGremlin("g.getRawGraph().shutdown()", null);
