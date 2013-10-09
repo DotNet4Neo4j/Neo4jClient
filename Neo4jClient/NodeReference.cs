@@ -82,6 +82,7 @@ namespace Neo4jClient
             get { return new List<string>(); }
         }
 
+        [Obsolete("Use graphClient.Cypher.Start(new { myNodeReference }) instead.")]
         public ICypherFluentQuery StartCypher(string identity)
         {
             var query = new CypherFluentQuery(client)
