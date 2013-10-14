@@ -13,6 +13,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery,
         IAttachedReference
     {
+        private readonly Version minimumCypherParserVersion = new Version(1, 9);
         protected readonly IRawGraphClient Client;
         protected readonly QueryWriter QueryWriter;
 
@@ -280,6 +281,19 @@ namespace Neo4jClient.Cypher
         IGraphClient IAttachedReference.Client
         {
             get { return Client; }
+        }
+
+        public ICypherFluentQuery ParserVersion(Version version)
+        {
+            if (version < minimumCypherParserVersion)
+                return Mutate(w => w.AppendClause("CYPHER LEGACY"));
+            
+            return Mutate(w => w.AppendClause(string.Format("CYPHER {0}.{1}", version.Major, version.Minor)));
+        }
+
+        public ICypherFluentQuery ParserVersion(int major, int minor)
+        {
+            return ParserVersion(new Version(major, minor));
         }
     }
 }
