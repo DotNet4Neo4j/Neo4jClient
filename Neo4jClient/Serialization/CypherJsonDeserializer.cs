@@ -36,11 +36,11 @@ namespace Neo4jClient.Serialization
             catch (Exception ex)
             {
                 const string messageTemplate =
-                    @"Neo4jClient encountered an exception while deserializing the response from the server. This is likely a bug in Neo4jClient.
+                    @"Neo4j returned a valid response, however Neo4jClient was unable to deserialize into the object structure you supplied.
 
-Please open an issue at https://bitbucket.org/Readify/neo4jclient/issues/new
+First, try and review the exception below to work out what broke.
 
-To get a reply, and track your issue, ensure you are logged in on BitBucket before submitting.
+If it's not obvious, you can ask for help at http://stackoverflow.com/questions/tagged/neo4jclient
 
 Include the full text of this exception, including this message, the stack trace, and all of the inner exception details.
 
