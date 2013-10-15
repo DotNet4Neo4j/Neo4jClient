@@ -381,6 +381,20 @@ namespace Neo4jClient.Test.Cypher
             StringAssert.StartsWith(CypherReturnExpressionBuilder.ReturnExpressionShouldBeOneOfExceptionMessage, ex.Message);
         }
 
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/159/problems-with-nodebyindexlookup")]
+        public void ThrowNiceErrorForConstructorsWithArgumentsInReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => a.As<KeyValuePair<object, object>>();
+
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+
+            const string expectedMessage =
+                "You've called As<KeyValuePair`2>() in your return clause, where KeyValuePair`2 is not a supported type. It must be a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
+            StringAssert.StartsWith(expectedMessage, ex.Message);
+        }
+
         public class Foo
         {
             public int Age { get; set; }

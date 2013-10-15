@@ -12,6 +12,8 @@ namespace Neo4jClient.Cypher
 
         internal const string ReturnExpressionShouldBeOneOfExceptionMessage = "The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar). You cannot supply blocks of code (for example: n => { var a = n + 1; return a; }) or use constructors with arguments (for example: n => new Foo(n)).";
 
+        internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
+
         internal const string CollectAsShouldNotBeNodeTExceptionMessage = "You've called CollectAs<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAs<T>() instead.";
 
         internal const string CollectAsDistinctShouldNotBeNodeTExceptionMessage = "You've called CollectAsDistinct<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAsDistinct<T>() instead.";
@@ -239,19 +241,26 @@ namespace Neo4jClient.Cypher
             var optionalIndicator = isNullable ? "?" : "";
             string finalStatement;
             var methodName = expression.Method.Name;
+            var singleGenericArgument = expression.Method.IsGenericMethod
+                ? expression.Method.GetGenericArguments().Single()
+                : null;
+
             switch (methodName)
             {
                 case "As":
                 case "Node":
+                    Debug.Assert(singleGenericArgument != null);
+                    if (!IsSupportedForAs(singleGenericArgument))
+                        throw new ArgumentException(string.Format(ReturnAsTypeShouldBeOneOfExceptionMessage, singleGenericArgument.Name), "expression");
                     finalStatement = string.Format("{0}{1}", targetObject.Name, optionalIndicator);
                     break;
                 case "CollectAs":
-                    if (IsNodeOfT(expression.Method))
+                    if (IsNodeOfT(singleGenericArgument))
                         throw new ArgumentException(CollectAsShouldNotBeNodeTExceptionMessage, "expression");
                     finalStatement = string.Format("collect({0})", targetObject.Name);
                     break;
                 case "CollectAsDistinct":
-                    if (IsNodeOfT(expression.Method))
+                    if (IsNodeOfT(singleGenericArgument))
                         throw new ArgumentException(CollectAsDistinctShouldNotBeNodeTExceptionMessage, "expression");
                     finalStatement = string.Format("collect(distinct {0})", targetObject.Name);
                     break;
@@ -281,11 +290,24 @@ namespace Neo4jClient.Cypher
             return statement;
         }
 
-        static bool IsNodeOfT(MethodInfo methodInfo)
+        static bool IsNodeOfT(Type type)
         {
-            if (!methodInfo.IsGenericMethod) throw new InvalidOperationException("Expected generic method, but it wasn't.");
-            var methodType = methodInfo.GetGenericArguments().Single();
-            return methodType.IsGenericType && methodType.GetGenericTypeDefinition() == typeof(Node<>);
+            if (type == null) throw new ArgumentNullException("type");
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Node<>);
+        }
+
+        static bool IsSupportedForAs(Type type)
+        {
+            if (type == null) throw new ArgumentNullException("type");
+
+            var hasDefaultConstructor = type.GetConstructor(Type.EmptyTypes) != null;
+            if (hasDefaultConstructor)
+                return true;
+
+            if (type == typeof (RelationshipInstance))
+                return true;
+
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>);
         }
 
         static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)
