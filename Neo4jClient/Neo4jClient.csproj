@@ -57,11 +57,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AggregateExceptionExtensions.cs" />
     <Compile Include="AmbiguousRelationshipDirectionException.cs" />
     <Compile Include="ApiModels\BatchResponse.cs" />
     <Compile Include="ApiModels\BatchStep.cs" />
     <Compile Include="ApiModels\BatchStepExtensions.cs" />
     <Compile Include="ApiModels\BatchStepResult.cs" />
+    <Compile Include="ApiModels\ExceptionResponse.cs" />
     <Compile Include="ApiModels\NodeOrRelationshipApiResponse.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\Cypher\PathsResult.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Cypher\ReturnExpression.cs" />
     <Compile Include="Cypher\StartBit.cs" />
     <Compile Include="Cypher\StartBitFormatter.cs" />
+    <Compile Include="NeoException.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />

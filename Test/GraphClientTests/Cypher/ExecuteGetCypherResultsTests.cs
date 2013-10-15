@@ -638,5 +638,53 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 Assert.AreEqual(42586, thirdResult.UniqueId);
             }
         }
+
+        [Test]
+        public void ShouldPromoteBadQueryResponseToNiceException()
+        {
+            // Arrange
+            const string queryText = @"broken query";
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+                {
+                    {
+                        MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                        MockResponse.Json(HttpStatusCode.BadRequest, @"{
+  'message' : 'expected START or CREATE\n\'bad query\'\n ^',
+  'exception' : 'SyntaxException',
+  'fullname' : 'org.neo4j.cypher.SyntaxException',
+  'stacktrace' : [ 'org.neo4j.cypher.internal.parser.v1_9.CypherParserImpl.parse(CypherParserImpl.scala:45)', 'org.neo4j.cypher.CypherParser.parse(CypherParser.scala:44)', 'org.neo4j.cypher.ExecutionEngine$$anonfun$prepare$1.apply(ExecutionEngine.scala:80)', 'org.neo4j.cypher.ExecutionEngine$$anonfun$prepare$1.apply(ExecutionEngine.scala:80)', 'org.neo4j.cypher.internal.LRUCache.getOrElseUpdate(LRUCache.scala:37)', 'org.neo4j.cypher.ExecutionEngine.prepare(ExecutionEngine.scala:80)', 'org.neo4j.cypher.ExecutionEngine.execute(ExecutionEngine.scala:72)', 'org.neo4j.cypher.ExecutionEngine.execute(ExecutionEngine.scala:76)', 'org.neo4j.cypher.javacompat.ExecutionEngine.execute(ExecutionEngine.java:79)', 'org.neo4j.server.rest.web.CypherService.cypher(CypherService.java:94)', 'java.lang.reflect.Method.invoke(Unknown Source)', 'org.neo4j.server.rest.security.SecurityFilter.doFilter(SecurityFilter.java:112)' ]
+}")
+                    }
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                var ex = Assert.Throws<NeoException>(() => graphClient.ExecuteGetCypherResults<ResultWithRelationshipDto>(cypherQuery));
+                Assert.AreEqual("SyntaxException: expected START or CREATE\n'bad query'\n ^", ex.Message);
+                Assert.AreEqual("expected START or CREATE\n'bad query'\n ^", ex.NeoMessage);
+                Assert.AreEqual("SyntaxException", ex.NeoExceptionName);
+                Assert.AreEqual("org.neo4j.cypher.SyntaxException", ex.NeoFullName);
+
+                var expectedStack = new[]
+                {
+                    "org.neo4j.cypher.internal.parser.v1_9.CypherParserImpl.parse(CypherParserImpl.scala:45)",
+                    "org.neo4j.cypher.CypherParser.parse(CypherParser.scala:44)",
+                    "org.neo4j.cypher.ExecutionEngine$$anonfun$prepare$1.apply(ExecutionEngine.scala:80)",
+                    "org.neo4j.cypher.ExecutionEngine$$anonfun$prepare$1.apply(ExecutionEngine.scala:80)",
+                    "org.neo4j.cypher.internal.LRUCache.getOrElseUpdate(LRUCache.scala:37)",
+                    "org.neo4j.cypher.ExecutionEngine.prepare(ExecutionEngine.scala:80)",
+                    "org.neo4j.cypher.ExecutionEngine.execute(ExecutionEngine.scala:72)",
+                    "org.neo4j.cypher.ExecutionEngine.execute(ExecutionEngine.scala:76)",
+                    "org.neo4j.cypher.javacompat.ExecutionEngine.execute(ExecutionEngine.java:79)",
+                    "org.neo4j.server.rest.web.CypherService.cypher(CypherService.java:94)",
+                    "java.lang.reflect.Method.invoke(Unknown Source)",
+                    "org.neo4j.server.rest.security.SecurityFilter.doFilter(SecurityFilter.java:112)"
+                };
+                CollectionAssert.AreEqual(expectedStack, ex.NeoStackTrace);
+            }
+        }
     }
 }

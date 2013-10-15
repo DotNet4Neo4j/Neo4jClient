@@ -770,7 +770,17 @@ namespace Neo4jClient
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
             var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
-            Task.WaitAll(task);
+            try
+            {
+                Task.WaitAll(task);
+            }
+            catch (AggregateException ex)
+            {
+                Exception unwrappedException;
+                if (ex.TryUnwrap(out unwrappedException))
+                    throw unwrappedException;
+                throw;
+            }
             return task.Result;
         }
 

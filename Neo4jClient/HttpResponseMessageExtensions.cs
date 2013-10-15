@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using Neo4jClient.ApiModels;
+using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
@@ -16,6 +18,12 @@ namespace Neo4jClient
         {
             if (expectedStatusCodes.Contains(response.StatusCode))
                 return;
+
+            if (response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                var neoException = TryBuildNeoException(response);
+                if (neoException != null) throw neoException;
+            }
 
             commandDescription = string.IsNullOrWhiteSpace(commandDescription)
                 ? ""
@@ -36,6 +44,20 @@ namespace Neo4jClient
                 (int)response.StatusCode,
                 response.ReasonPhrase,
                 rawBody));
+        }
+
+        static NeoException TryBuildNeoException(HttpResponseMessage response)
+        {
+            var isJson = response.Content.Headers.ContentType.MediaType.Equals("application/json", StringComparison.InvariantCulture);
+            if (!isJson) return null;
+
+            var exceptionResponse = response.Content.ReadAsJson<ExceptionResponse>(new JsonConverter[0]);
+
+            if (string.IsNullOrEmpty(exceptionResponse.Message) ||
+                string.IsNullOrEmpty(exceptionResponse.Exception))
+                return null;
+
+            return new NeoException(exceptionResponse);
         }
     }
 }
