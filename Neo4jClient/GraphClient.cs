@@ -689,6 +689,7 @@ namespace Neo4jClient
             get {return new CypherFluentQuery(this); }
         }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         public IGremlinClient Gremlin
         {
             get { return new GremlinClient(this); }
