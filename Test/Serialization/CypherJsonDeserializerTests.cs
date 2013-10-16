@@ -1099,6 +1099,36 @@ namespace Neo4jClient.Test.Serialization
             StringAssert.Contains(typeof(Asset).FullName, ex.Message);
         }
 
+        [Test]
+        public void ClassWithoutDefaultPublicConstructorShouldThrowExceptionThatExplainsThis()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ClassWithoutDefaultPublicConstructor>(client, CypherResultMode.Set);
+            var content = @"{
+                  'data' : [
+                    [ { 'Name': 'Tokyo', 'Population': 13000000 } ],
+                    [ { 'Name': 'London', 'Population': 8000000 } ],
+                    [ { 'Name': 'Sydney', 'Population': 4000000 } ]
+                  ],
+                  'columns' : [ 'Cities' ]
+                }".Replace("'", "\"");
+
+            var ex = Assert.Throws<ArgumentException>(() => deserializer.Deserialize(content));
+            var innerEx = ex.InnerException as ApplicationException;
+            Assert.IsNotNull(innerEx);
+            Assert.AreEqual("We expected a default public constructor on ClassWithoutDefaultPublicConstructor so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.", innerEx.Message);
+        }
+
+        public class ClassWithoutDefaultPublicConstructor
+        {
+            public int A { get; set; }
+
+            public ClassWithoutDefaultPublicConstructor(int a)
+            {
+                A = a;
+            }
+        }
+
         public class Asset
         {
             public long UniqueId { get; set; }
