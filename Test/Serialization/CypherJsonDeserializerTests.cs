@@ -1114,9 +1114,7 @@ namespace Neo4jClient.Test.Serialization
                 }".Replace("'", "\"");
 
             var ex = Assert.Throws<ArgumentException>(() => deserializer.Deserialize(content));
-            var innerEx = ex.InnerException as ApplicationException;
-            Assert.IsNotNull(innerEx);
-            Assert.AreEqual("We expected a default public constructor on ClassWithoutDefaultPublicConstructor so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.", innerEx.Message);
+            StringAssert.StartsWith("We expected a default public constructor on ClassWithoutDefaultPublicConstructor so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.", ex.Message);
         }
 
         public class ClassWithoutDefaultPublicConstructor

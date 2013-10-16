@@ -242,7 +242,7 @@ namespace Neo4jClient.Serialization
                 }
                 catch (MissingMethodException ex)
                 {
-                    throw new ApplicationException(
+                    throw new DeserializationException(
                         string.Format("We expected a default public constructor on {0} so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.", type.Name),
                         ex);
                 }

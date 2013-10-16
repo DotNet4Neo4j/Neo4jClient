@@ -113,6 +113,7 @@
     <Compile Include="Cypher\ICypherFluentQuery.cs" />
     <Compile Include="Cypher\ICypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\ICypherResultItem.cs" />
+    <Compile Include="Serialization\DeserializationException.cs" />
     <Compile Include="Serialization\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\EmitPropertyStep.cs" />
