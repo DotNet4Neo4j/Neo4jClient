@@ -10,6 +10,8 @@ namespace Neo4jClient.Cypher
         void ExecuteWithoutResults();
 
         ICypherFluentQuery WithParam(string key, object value);
+        ICypherFluentQuery WithParams(IDictionary<string,object> parameters);
+        ICypherFluentQuery WithParams(object parameters);
 
         ICypherFluentQuery ParserVersion(Version version);
         ICypherFluentQuery ParserVersion(int major, int minor);

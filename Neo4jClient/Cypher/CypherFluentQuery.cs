@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
@@ -54,6 +55,29 @@ namespace Neo4jClient.Cypher
             if (QueryWriter.ContainsParameterWithKey(key))
                 throw new ArgumentException("A parameter with the given key is already defined in the query.", "key");
             return Mutate(w => w.CreateParameter(key, value));
+        }
+
+        public ICypherFluentQuery WithParams(IDictionary<string, object> parameters)
+        {
+            if (parameters == null || parameters.Count == 0) return this;
+
+            if (parameters.Keys.Any(key => QueryWriter.ContainsParameterWithKey(key)))
+                throw new ArgumentException("A parameter with the given key is already defined in the query.", "parameters");
+
+            return Mutate(w => w.CreateParameters(parameters));
+        }
+
+        public ICypherFluentQuery WithParams(object parameters)
+        {
+            if (parameters == null) return this;
+            var keyValuePairs = new Dictionary<string, object>();
+            foreach (PropertyDescriptor propertyDescriptor in TypeDescriptor.GetProperties(parameters))
+            {
+                var key = propertyDescriptor.Name;
+                var value = propertyDescriptor.GetValue(parameters);
+                keyValuePairs.Add(key, value);
+            }
+            return WithParams(keyValuePairs);
         }
 
         [Obsolete("Use Start(new { identity = startText }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]

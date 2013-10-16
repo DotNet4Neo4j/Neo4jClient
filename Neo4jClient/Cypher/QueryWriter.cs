@@ -65,6 +65,12 @@ namespace Neo4jClient.Cypher
             queryParameters.Add(key, value);
         }
 
+        public void CreateParameters(IDictionary<string,object> parameters)
+        {
+            foreach(var parameter in parameters)
+                queryParameters.Add(parameter.Key, parameter.Value);
+        }
+
         public bool ContainsParameterWithKey(string key)
         {
             return queryParameters.ContainsKey(key);
