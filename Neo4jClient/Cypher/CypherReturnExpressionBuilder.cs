@@ -306,8 +306,10 @@ namespace Neo4jClient.Cypher
 
             if (type == typeof (RelationshipInstance))
                 return true;
-
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>);
+            
+            return type.IsGenericType && 
+                (  type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>) 
+                || type.GetGenericTypeDefinition() == typeof(Node<>));
         }
 
         static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)

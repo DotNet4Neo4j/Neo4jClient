@@ -29,6 +29,20 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnNode()
+        {            
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new 
+                {
+                    FooNode = a.As<Node<Foo>>()
+                };
+
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("a AS FooNode", returnExpression.Text);
+        }
+        
+        [Test]
         public void ReturnPropertyWithNullablePropertyOnRightHandSide()
         {
             Expression<Func<ICypherResultItem, Foo>> expression =
