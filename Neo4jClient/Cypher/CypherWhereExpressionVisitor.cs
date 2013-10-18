@@ -216,19 +216,7 @@ namespace Neo4jClient.Cypher
             if (node.Expression == null)
                 return null;
 
-            if (node.Expression.NodeType != ExpressionType.Constant && ((MemberExpression)node.Expression).Expression.NodeType != ExpressionType.Constant)
-            {
-                var name = node.Member.Name;
-                var retrieved = GetConstantExpressionValue(node.Expression as MemberExpression);
-                return retrieved.GetType().GetProperty(name).GetValue(retrieved, BindingFlags.Public, null, null, null);
-            }
-
-            var data = ParseValueFromExpression(node.Expression.NodeType == ExpressionType.Constant ? node : node.Expression);
-            var value = node.Expression.NodeType == ExpressionType.Constant
-                ? data
-                : data.GetType().GetProperty(node.Member.Name).GetValue(data, BindingFlags.Public, null, null, null);
-
-            return value;
+            return Expression.Lambda(node).Compile().DynamicInvoke();
         }
 
         static bool IsConstantExpression(MemberExpression node)
@@ -263,12 +251,6 @@ namespace Neo4jClient.Cypher
                 return;
             TextOutput.Remove(TextOutput.Length - 1, 1);
             TextOutput.Append("!");
-        }
-
-        static object ParseValueFromExpression(Expression expression)
-        {
-            var lambdaExpression = Expression.Lambda(expression);
-            return lambdaExpression.Compile().DynamicInvoke();
         }
     }
 }

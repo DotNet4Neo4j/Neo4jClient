@@ -68,6 +68,21 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/158/neo4jclient-cypher-where-clauses-using-a")]
+        public void ShouldCompareAgainstValueOfNullableType()
+        {
+            var bar = (long?)123;
+
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.Bar == bar.Value;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.Bar = {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
         public void EvaluateFalseWhenComparingMissingNullablePropertyToConstantValue()
         {
             var parameters = new Dictionary<string, object>();
