@@ -11,9 +11,10 @@ namespace Neo4jClient.Cypher
         T As<T>();
 
         /// <summary>
-        /// Shortcut for As&lt;Node&lt;T&gt;&gt;
+        /// DO NOT USE IN NEW CODE.
+        /// Shortcut for As&lt;Node&lt;T&gt;&gt;.
+        /// The general trend in both Neo4j and Cypher is moving way from returning node references. Use As<T> instead to return the information you need, without the metadata of the node. For future queries, use indexes, match expressions and well-known domain-specific data to locate the node you need rather than passing in a reference to it. (In the Neo4j 2.0 timeframe, even the START clause is starting to be deprecated in favour of MATCH and WHERE.) For updating or deleting nodes, start to use mutable Cypher instead. Clauses likE CREATE, SET and DELETE will let you do more in the same query, rather than sending extra HTTP calls over the wire for each action.
         /// </summary>
-        [Obsolete("The general trend in both Neo4j and Cypher is moving way from returning node references. Use As<T> instead to return the information you need, without the metadata of the node. For future queries, use indexes, match expressions and well-known domain-specific data to locate the node you need rather than passing in a reference to it. (In the Neo4j 2.0 timeframe, even the START clause is starting to be deprecated in favour of MATCH and WHERE.) For updating or deleting nodes, start to use mutable Cypher instead. Clauses likE CREATE, SET and DELETE will let you do more in the same query, rather than sending extra HTTP calls over the wire for each action.")]
         Node<T> Node<T>();
 
         /// <summary>
