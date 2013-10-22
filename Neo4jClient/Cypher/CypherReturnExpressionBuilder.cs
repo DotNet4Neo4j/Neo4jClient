@@ -279,6 +279,9 @@ namespace Neo4jClient.Cypher
                 case "Type":
                     finalStatement = string.Format("type({0})", targetObject.Name);
                     break;
+                case "Labels":
+                    finalStatement = string.Format("labels({0})", targetObject.Name);
+                    break;
                 default:
                     throw new InvalidOperationException("Unexpected ICypherResultItem method definition, ICypherResultItem." + methodName);
             }

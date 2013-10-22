@@ -70,5 +70,11 @@ namespace Neo4jClient.Cypher
         /// http://docs.neo4j.org/chunked/stable/query-function.html#functions-id
         /// </summary>
         long Id();
+
+        /// <summary>
+        /// Equivalent to <code>RETURN labels(foo)</code>
+        /// http://docs.neo4j.org/chunked/preview/query-functions-collection.html#functions-labels
+        /// </summary>
+        IEnumerable<string> Labels();
     }
 }

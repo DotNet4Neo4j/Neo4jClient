@@ -317,6 +317,24 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ReturnLabelsInAnonymousType()
+        {
+            // MATCH (a:User)
+            // WHERE a.Id == 123
+            // RETURN labels(a)
+
+            Expression<Func<ICypherResultItem, object>> expression =
+                b => new
+                {
+                    Foo = b.Labels()
+                };
+
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("labels(b) AS Foo", returnExpression.Text);
+        }
+
+        [Test]
         public void ReturnAllOnItsOwn()
         {
             Expression<Func<long>> expression = () => All.Count();
