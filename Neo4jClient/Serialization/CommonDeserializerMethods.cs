@@ -175,6 +175,10 @@ namespace Neo4jClient.Serialization
         {
             object instance;
             typeMappings = typeMappings.ToArray();
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                type = type.GetGenericArguments()[0];
+
             if (type.IsGenericType)
             {
                 var genericTypeDef = type.GetGenericTypeDefinition();

@@ -1132,5 +1132,24 @@ namespace Neo4jClient.Test.Serialization
             public long UniqueId { get; set; }
             public string Name { get; set; }
         }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/162/deserialization-of-int-long-into-nullable")]
+        public void DeserializeInt64IntoNullableInt64()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<long?>(client, CypherResultMode.Set);
+            var content = @"{
+                          'data' : [ [ 123 ] ],
+                          'columns' : [ 'count(distinct registration)' ]
+                        }".Replace("'", "\"");
+
+            // Act
+            var result = deserializer.Deserialize(content).First();
+
+            // Assert
+            Assert.AreEqual(123, result);
+        }
     }
 }
