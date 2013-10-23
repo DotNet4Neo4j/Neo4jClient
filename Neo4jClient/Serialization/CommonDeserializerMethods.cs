@@ -176,21 +176,22 @@ namespace Neo4jClient.Serialization
             object instance;
             typeMappings = typeMappings.ToArray();
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            var genericTypeDefinition = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+
+            if (genericTypeDefinition == typeof(Nullable<>))
                 type = type.GetGenericArguments()[0];
 
-            if (type.IsGenericType)
+            if (genericTypeDefinition != null)
             {
-                var genericTypeDef = type.GetGenericTypeDefinition();
-                if (genericTypeDef == typeof (Dictionary<,>))
+                if (genericTypeDefinition == typeof(Dictionary<,>))
                 {
                     instance = BuildDictionary(context, type, element.Children(), typeMappings, nestingLevel + 1);
                 }
-                else if (genericTypeDef == typeof (List<>))
+                else if (genericTypeDefinition == typeof(List<>))
                 {
                     instance = BuildList(context, type, element.Children(), typeMappings, nestingLevel + 1);
                 }
-                else if (genericTypeDef == typeof (IEnumerable<>))
+                else if (genericTypeDefinition == typeof(IEnumerable<>))
                 {
                     instance = BuildIEnumerable(context, type, element.Children(), typeMappings, nestingLevel + 1);
                 }
