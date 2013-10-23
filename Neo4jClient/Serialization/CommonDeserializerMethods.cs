@@ -60,14 +60,18 @@ namespace Neo4jClient.Serialization
                 return null;
 
             var propertyType = propertyInfo.PropertyType;
+            Type genericTypeDef = null;
 
-            // check for nullable and extract underlying type
-            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (propertyType.IsGenericType)
             {
-                propertyType = propertyType.GetGenericArguments()[0];
-            }
+                genericTypeDef = propertyType.GetGenericTypeDefinition();
 
-            var genericTypeDef = propertyType.IsGenericType ? propertyType.GetGenericTypeDefinition() : null;
+                if (genericTypeDef == typeof(Nullable<>))
+                {
+                    propertyType = propertyType.GetGenericArguments()[0];
+                    genericTypeDef = null;
+                }
+            }
 
             typeMappings = typeMappings.ToArray();
             if (propertyType.IsPrimitive)
@@ -176,12 +180,16 @@ namespace Neo4jClient.Serialization
             object instance;
             typeMappings = typeMappings.ToArray();
 
-            var genericTypeDefinition = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+            Type genericTypeDefinition = null;
 
-            if (genericTypeDefinition == typeof (Nullable<>))
+            if (type.IsGenericType)
             {
-                type = type.GetGenericArguments()[0];
-                genericTypeDefinition = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+                genericTypeDefinition = type.GetGenericTypeDefinition();
+                if (genericTypeDefinition == typeof (Nullable<>))
+                {
+                    type = type.GetGenericArguments()[0];
+                    genericTypeDefinition = null;
+                }
             }
 
             if (genericTypeDefinition != null)
