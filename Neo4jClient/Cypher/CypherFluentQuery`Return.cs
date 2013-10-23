@@ -7,7 +7,6 @@ namespace Neo4jClient.Cypher
     {
         internal const string IdentityLooksLikeAMultiColumnStatementExceptionMessage = "The overload you have called takes an identity (for example: foo), but it looks like you've tried to pass in a multiple column statement (for example: foo,bar). If you want to return multiple columns, use an anonymous type: Return((foo, bar) => new { Foo = foo.As<Foo>(), BarCount = bar.Count() }). If the function you want isn't available in the managed wrapper, you can use Return(() => new { Foo = Return.As<Bar>(\"function(foo)\") }).";
 
-        [Obsolete("Use Return(identity => identity.As<T>()) instead. See https://bitbucket.org/Readify/neo4jclient/wiki/cypher for lots of examples of the Return clause.")]
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
             if (identity.Contains(","))
@@ -22,7 +21,6 @@ namespace Neo4jClient.Cypher
             throw new NotSupportedException("This was an internal that never should have been exposed. If you want to create a projection, you should be using the lambda overload instead. See the 'Using Functions in Return Clauses' and 'Using Custom Text in Return Clauses' sections of https://bitbucket.org/Readify/neo4jclient/wiki/cypher for details of how to do this.");
         }
 
-        [Obsolete("Use ReturnDistinct(identity => identity.As<T>()) instead. See https://bitbucket.org/Readify/neo4jclient/wiki/cypher for lots of examples of the Return clause.")]
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity)
         {
             return Mutate<TResult>(w => w.AppendClause("RETURN distinct " + identity));
