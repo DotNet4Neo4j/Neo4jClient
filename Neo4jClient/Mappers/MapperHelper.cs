@@ -8,11 +8,12 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient.Mappers
 {
-    public static class MapperHelper
+    [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
+    internal static class MapperHelper
     {
         static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
 
-        public static void ConvertAndSetValue<TResult>(this TResult result, string value, PropertyInfo prop, IEnumerable<JsonConverter> jsonConverters)
+        internal static void ConvertAndSetValue<TResult>(this TResult result, string value, PropertyInfo prop, IEnumerable<JsonConverter> jsonConverters)
             where TResult : new()
         {
             var deserializer = new CustomJsonDeserializer(jsonConverters);
@@ -59,7 +60,7 @@ namespace Neo4jClient.Mappers
         }
     }
 
-    public class DateHolder
+    internal class DateHolder
     {
         public DateTimeOffset DateTimeOffset { get; set; }
     }
