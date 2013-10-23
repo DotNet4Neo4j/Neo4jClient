@@ -103,6 +103,7 @@ namespace Neo4jClient.Cypher
         {
             var resultingType = expression.Constructor.DeclaringType;
             var quacksLikeAnAnonymousType =
+                resultingType != null &&
                 resultingType.IsSpecialName &&
                 resultingType.IsValueType &&
                 resultingType.IsNestedPrivate &&
