@@ -178,8 +178,11 @@ namespace Neo4jClient.Serialization
 
             var genericTypeDefinition = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
 
-            if (genericTypeDefinition == typeof(Nullable<>))
+            if (genericTypeDefinition == typeof (Nullable<>))
+            {
                 type = type.GetGenericArguments()[0];
+                genericTypeDefinition = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+            }
 
             if (genericTypeDefinition != null)
             {
