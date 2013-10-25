@@ -265,6 +265,192 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyToConstantValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar = {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyToNotConstantValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar <> {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyGreaterThanConstantValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar > 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar > {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyGreaterThanOrEqualToConstantValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar >= 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar >= {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyLessThanConstantValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar < 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar < {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyLessThanOrEqualToConstantValue()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar <= 123;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar <= {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyToNull()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == null;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("not(has(foo.NullableBar))", result);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyToNotNull()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != null;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("has(foo.NullableBar)", result);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyToLocalMemberValue()
+        {
+            var localObject = new { NoneCypherLocalProperty = 123 };
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == localObject.NoneCypherLocalProperty;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar = {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyToNotLocalMemberValue()
+        {
+            var localObject = new { NoneCypherLocalProperty = 123 };
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != localObject.NoneCypherLocalProperty;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar <> {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyGreaterThanLocalMemberValue()
+        {
+            var localObject = new { NoneCypherLocalProperty = 123 };
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar > localObject.NoneCypherLocalProperty;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar > {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyGreaterThanOrEqualToLocalMemberValue()
+        {
+            var localObject = new { NoneCypherLocalProperty = 123 };
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar >= localObject.NoneCypherLocalProperty;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar >= {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyLessThanLocalMemberValue()
+        {
+            var localObject = new { NoneCypherLocalProperty = 123 };
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar < localObject.NoneCypherLocalProperty;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar < {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void DontSuffixPropertyForNeo4j20WhenComparingMissingNullablePropertyLessThanOrEqualToLocalMemberValue()
+        {
+            var localObject = new { NoneCypherLocalProperty = 123 };
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar <= localObject.NoneCypherLocalProperty;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+
+            Assert.AreEqual("(foo.NullableBar <= {p0})", result);
+            Assert.AreEqual(123, parameters["p0"]);
+        }
+
+        [Test]
         public void ShouldComparePropertiesAcrossEntities()
         {
             // http://stackoverflow.com/questions/15718916/neo4jclient-where-clause-not-putting-in-parameters
