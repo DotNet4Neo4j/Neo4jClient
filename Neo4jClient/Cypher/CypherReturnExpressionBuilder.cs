@@ -23,8 +23,10 @@ namespace Neo4jClient.Cypher
         // - a "statement" is something like "x.Foo? AS Bar"
         // - "text" is a collection of statements, like "x.Foo? AS Bar, y.Baz as Qak"
 
-        public static ReturnExpression BuildText(LambdaExpression expression)
+        public static ReturnExpression BuildText(LambdaExpression expression, CypherCapabilities capabilities = null)
         {
+            capabilities = capabilities ?? CypherCapabilities.Default;
+
             var body = expression.Body;
 
             if (body.NodeType == ExpressionType.Convert &&
@@ -38,19 +40,19 @@ namespace Neo4jClient.Cypher
             {
                 case ExpressionType.MemberInit:
                     var memberInitExpression = (MemberInitExpression) body;
-                    text = BuildText(memberInitExpression);
+                    text = BuildText(memberInitExpression, capabilities);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.New:
                     var newExpression = (NewExpression) body;
-                    text = BuildText(newExpression);
+                    text = BuildText(newExpression, capabilities);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.Call:
                     var methodCallExpression = (MethodCallExpression) body;
-                    text = BuildText(methodCallExpression);
+                    text = BuildText(methodCallExpression, capabilities);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
                 case ExpressionType.MemberAccess:
                     var memberExpression = (MemberExpression) body;
-                    text = BuildText(memberExpression);
+                    text = BuildText(memberExpression, capabilities);
                     return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
                     throw new ArgumentException(ReturnExpressionShouldBeOneOfExceptionMessage, "expression");
@@ -65,9 +67,9 @@ namespace Neo4jClient.Cypher
         /// It does not however cater to anonymous types, as they don't compile
         /// down to traditional object initializers.
         /// 
-        /// <see cref="BuildText(NewExpression)"/> caters to anonymous types.
+        /// <see cref="BuildText(NewExpression, CypherCapabilities)"/> caters to anonymous types.
         /// </remarks>
-        static string BuildText(MemberInitExpression expression)
+        static string BuildText(MemberInitExpression expression, CypherCapabilities capabilities)
         {
             if (expression.NewExpression.Constructor.GetParameters().Any())
                 throw new ArgumentException(
@@ -80,7 +82,7 @@ namespace Neo4jClient.Cypher
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
                 var memberAssignment = (MemberAssignment)binding;
-                return BuildStatement(memberAssignment.Expression, binding.Member);
+                return BuildStatement(memberAssignment.Expression, binding.Member, capabilities);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -99,7 +101,7 @@ namespace Neo4jClient.Cypher
         /// 
         /// This is the scenario that this build method caters for.
         /// </remarks>
-        static string BuildText(NewExpression expression)
+        static string BuildText(NewExpression expression, CypherCapabilities capabilities)
         {
             var resultingType = expression.Constructor.DeclaringType;
             var quacksLikeAnAnonymousType =
@@ -117,7 +119,7 @@ namespace Neo4jClient.Cypher
             var bindingTexts = expression.Members.Select((member, index) =>
             {
                 var argument = expression.Arguments[index];
-                return BuildStatement(argument, member);
+                return BuildStatement(argument, member, capabilities);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -126,15 +128,15 @@ namespace Neo4jClient.Cypher
         /// <remarks>
         /// This build method caters to expressions like: <code>item => item.Count()</code>
         /// </remarks>
-        static string BuildText(MethodCallExpression expression)
+        static string BuildText(MethodCallExpression expression, CypherCapabilities capabilities)
         {
-            return BuildStatement(expression, false);
+            return BuildStatement(expression, false, capabilities);
         }
 
         /// <remarks>
         /// This build method caters to expressions like: <code>item => item.As&lt;Foo&gt;().Bar</code>
         /// </remarks>
-        static string BuildText(MemberExpression expression)
+        static string BuildText(MemberExpression expression, CypherCapabilities capabilities)
         {
             var innerExpression = expression.Expression as MethodCallExpression;
             if (innerExpression == null ||
@@ -142,30 +144,30 @@ namespace Neo4jClient.Cypher
                 innerExpression.Method.Name != "As")
                 throw new ArgumentException("Member expressions are only supported off ICypherResultItem.As<TData>(). For example: Return(foo => foo.As<Bar>().Baz).", "expression");
 
-            var baseStatement = BuildStatement(innerExpression, false);
+            var baseStatement = BuildStatement(innerExpression, false, capabilities);
             var statement = string.Format("{0}.{1}", baseStatement, expression.Member.Name);
 
             return statement;
         }
 
-        static string BuildStatement(Expression sourceExpression, MemberInfo targetMember)
+        static string BuildStatement(Expression sourceExpression, MemberInfo targetMember, CypherCapabilities capabilities)
         {
             var unwrappedExpression = UnwrapImplicitCasts(sourceExpression);
 
             var memberExpression = unwrappedExpression as MemberExpression;
             if (memberExpression != null)
-                return BuildStatement(memberExpression, targetMember);
+                return BuildStatement(memberExpression, targetMember, capabilities);
 
             var methodCallExpression = unwrappedExpression as MethodCallExpression;
             if (methodCallExpression != null)
-                return BuildStatement(methodCallExpression, targetMember);
+                return BuildStatement(methodCallExpression, targetMember, capabilities);
 
             throw new NotSupportedException(string.Format(
                 "Expression of type {0} is not supported.",
                 unwrappedExpression.GetType().FullName));
         }
 
-        static string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember)
+        static string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember, CypherCapabilities capabilities)
         {
             MethodCallExpression methodCallExpression;
             MemberInfo memberInfo;
@@ -190,27 +192,30 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            var isTargetMemberNullable = IsMemberNullable(targetMember);
-            var isNullable = isTargetMemberNullable || IsMemberNullable(memberInfo);
-
-            var optionalIndicator = isNullable ? "?" : "";
+            var optionalIndicator = "";
+            if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
+            {
+                var isTargetMemberNullable = IsMemberNullable(targetMember);
+                var isNullable = isTargetMemberNullable || IsMemberNullable(memberInfo);
+                if (isNullable) optionalIndicator = "?";
+            }
 
             return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberInfo.Name, optionalIndicator, targetMember.Name);
         }
 
-        static string BuildStatement(MethodCallExpression expression, MemberInfo targetMember)
+        static string BuildStatement(MethodCallExpression expression, MemberInfo targetMember, CypherCapabilities capabilities)
         {
             var isNullable = IsMemberNullable(targetMember);
-            var statement = BuildStatement(expression, isNullable);
+            var statement = BuildStatement(expression, isNullable, capabilities);
             statement = statement + " AS " + targetMember.Name;
             return statement;
         }
 
-        static string BuildStatement(MethodCallExpression expression, bool isNullable)
+        static string BuildStatement(MethodCallExpression expression, bool isNullable, CypherCapabilities capabilities)
         {
             string statement;
             if (expression.Method.DeclaringType == typeof(ICypherResultItem) || expression.Method.DeclaringType == typeof(IFluentCypherResultItem))
-                statement = BuildCypherResultItemStatement(expression, isNullable);
+                statement = BuildCypherResultItemStatement(expression, isNullable, capabilities);
             else if (expression.Method.DeclaringType == typeof(All))
                 statement = BuildCypherAllStatement(expression);
             else if (expression.Method.DeclaringType == typeof(Return))
@@ -221,7 +226,7 @@ namespace Neo4jClient.Cypher
             return statement;
         }
 
-        static string BuildCypherResultItemStatement(MethodCallExpression expression, bool isNullable)
+        static string BuildCypherResultItemStatement(MethodCallExpression expression, bool isNullable, CypherCapabilities capabilities)
         {
             Debug.Assert(expression.Object != null, "expression.Object != null");
 
@@ -239,7 +244,7 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            var optionalIndicator = isNullable ? "?" : "";
+            var optionalIndicator = capabilities.SupportsPropertySuffixesForControllingNullComparisons && isNullable ? "?" : "";
             string finalStatement;
             var methodName = expression.Method.Name;
             var singleGenericArgument = expression.Method.IsGenericMethod

@@ -16,11 +16,14 @@ namespace Neo4jClient.Cypher
         const string LessThanOrEqual = " <= ";
 
         readonly Func<object, string> createParameterCallback;
+        readonly CypherCapabilities capabilities;
+
         public StringBuilder TextOutput { get; private set; }
 
-        public CypherWhereExpressionVisitor(Func<object, string> createParameterCallback)
+        public CypherWhereExpressionVisitor(Func<object, string> createParameterCallback, CypherCapabilities capabilities)
         {
             this.createParameterCallback = createParameterCallback;
+            this.capabilities = capabilities;
             TextOutput = new StringBuilder();
         }
 
@@ -85,7 +88,7 @@ namespace Neo4jClient.Cypher
                 return node;
             }
 
-            if (node.Value != null)
+            if (capabilities.SupportsPropertySuffixesForControllingNullComparisons && node.Value != null)
             {
                 SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(new[]
                     {
@@ -182,12 +185,11 @@ namespace Neo4jClient.Cypher
             var propertyParent = node.Member.ReflectedType;
             var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
 
-            if (
-                (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                ||
-                (propertyType == typeof(string))
-                )
-                nullIdentifier = "?";
+            if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
+            {
+                var isNullable = propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
+                if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
+            }
 
             TextOutput.Append(string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier));
         }
@@ -195,7 +197,7 @@ namespace Neo4jClient.Cypher
         void VisitConstantMember(MemberExpression node)
         {
             var value = GetConstantExpressionValue(node);
-            if (value != null)
+            if (capabilities.SupportsPropertySuffixesForControllingNullComparisons && value != null)
             {
                 SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(new[]
                     {
@@ -237,6 +239,9 @@ namespace Neo4jClient.Cypher
 
         void SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(params string[] operators)
         {
+            if (!capabilities.SupportsPropertySuffixesForControllingNullComparisons)
+                throw new InvalidOperationException();
+
             var text = TextOutput.ToString();
             var @operator = operators.FirstOrDefault(text.EndsWith);
             if (@operator == null) return;
@@ -247,6 +252,9 @@ namespace Neo4jClient.Cypher
 
         void SwapNullQualifierFromDefaultTrueToDefaultFalse(StringBuilder text)
         {
+            if (!capabilities.SupportsPropertySuffixesForControllingNullComparisons)
+                throw new InvalidOperationException();
+
             if (!text.ToString().EndsWith("?"))
                 return;
             TextOutput.Remove(TextOutput.Length - 1, 1);

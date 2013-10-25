@@ -11,6 +11,7 @@ namespace Neo4jClient
     /// </summary>
     public interface IRawGraphClient : IGraphClient
     {
+        CypherCapabilities CypherCapabilities { get; }
         IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
         Task<IEnumerable<TResult>> ExecuteGetCypherResultsAsync<TResult>(CypherQuery query);
         void ExecuteCypher(CypherQuery query);

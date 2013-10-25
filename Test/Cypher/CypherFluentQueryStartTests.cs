@@ -194,7 +194,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual(@"START s=node:`node_auto_index`(StartType = {p0})
 MATCH s-[:starts]->t, t-[:SubTypes]->ts
-RETURN t.Id? AS Id, t.Name? AS Name, collect(ts) AS JobSpecialties", query.QueryText);
+RETURN t.Id AS Id, t.Name AS Name, collect(ts) AS JobSpecialties", query.QueryText);
             Assert.AreEqual("JobTypes", query.QueryParameters["p0"]);
         }
 

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Neo4jClient.Cypher;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -98,6 +99,32 @@ namespace Neo4jClient.Test.GraphClientTests
                 var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
                 Assert.AreEqual("1.5.0.2", graphClient.RootApiResponse.Version.ToString());
+            }
+        }
+
+        [Test]
+        public void ShouldReturnCypher19CapabilitiesForPre20Version()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                Assert.AreEqual(CypherCapabilities.Cypher19, graphClient.CypherCapabilities);
+            }
+        }
+
+        [Test]
+        public void ShouldReturnCypher19CapabilitiesForVersion20()
+        {
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot20()
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                Assert.AreEqual(CypherCapabilities.Cypher20, graphClient.CypherCapabilities);
             }
         }
 

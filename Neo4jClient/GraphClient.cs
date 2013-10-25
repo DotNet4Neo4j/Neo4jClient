@@ -37,6 +37,7 @@ namespace Neo4jClient
         RootNode rootNode;
         bool jsonStreamingAvailable;
         readonly string userAgent;
+        CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
 
         public bool UseJsonStreamingIfAvailable { get; set; }
         
@@ -219,6 +220,9 @@ namespace Neo4jClient
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
             jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);
+
+            if (RootApiResponse.Version < new Version(2, 0))
+                cypherCapabilities = CypherCapabilities.Cypher19;
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -758,6 +762,11 @@ namespace Neo4jClient
             var results = GremlinTableCapResponse.TransferResponseToResult<TResult>(responses, JsonConverters);
 
             return results;
+        }
+
+        CypherCapabilities IRawGraphClient.CypherCapabilities
+        {
+            get { return cypherCapabilities; }
         }
 
         [Obsolete("This method is for use by the framework internally. Use IGraphClient.Cypher instead, and read the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher. If you really really want to call this method directly, and you accept the fact that YOU WILL LIKELY INTRODUCE A RUNTIME SECURITY RISK if you do so, then it shouldn't take you too long to find the correct explicit interface implementation that you have to call. This hurdle is for your own protection. You really really should not do it. This signature may be removed or renamed at any time.", true)]

@@ -53,7 +53,7 @@ namespace Neo4jClient.Test.Cypher
 
             var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
 
-            Assert.AreEqual("a.AgeNullable? AS Age", returnExpression.Text);
+            Assert.AreEqual("a.AgeNullable AS Age", returnExpression.Text);
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace Neo4jClient.Test.Cypher
 
             var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
 
-            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name? AS FirstName", returnExpression.Text);
+            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", returnExpression.Text);
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace Neo4jClient.Test.Cypher
 
             var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
 
-            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name? AS FirstName", returnExpression.Text);
+            Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", returnExpression.Text);
         }
 
         [Test]
@@ -111,11 +111,11 @@ namespace Neo4jClient.Test.Cypher
 
             var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
 
-            Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name? AS FirstName", returnExpression.Text);
+            Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name AS FirstName", returnExpression.Text);
         }
 
         [Test]
-        public void NullablePropertiesShouldBeQueriedAsCypherOptionalProperties()
+        public void NullablePropertiesShouldBeQueriedAsCypherOptionalProperties_PreNeo4j20()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-optional-properties
             // START n=node(1)
@@ -128,9 +128,24 @@ namespace Neo4jClient.Test.Cypher
                     NumberOfCats = n.As<Foo>().NumberOfCats
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Cypher19);
 
             Assert.AreEqual("n.Age AS Age, n.NumberOfCats? AS NumberOfCats", returnExpression.Text);
+        }
+
+        [Test]
+        public void NullablePropertiesShouldNotGetSpecialHandling()
+        {
+            Expression<Func<ICypherResultItem, OptionalPropertiesQueryResult>> expression =
+                n => new OptionalPropertiesQueryResult
+                {
+                    Age = n.As<Foo>().Age,
+                    NumberOfCats = n.As<Foo>().NumberOfCats
+                };
+
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+
+            Assert.AreEqual("n.Age AS Age, n.NumberOfCats AS NumberOfCats", returnExpression.Text);
         }
 
         [Test]
