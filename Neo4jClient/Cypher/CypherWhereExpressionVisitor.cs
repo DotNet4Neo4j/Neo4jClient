@@ -15,6 +15,8 @@ namespace Neo4jClient.Cypher
         const string LessThan = " < ";
         const string LessThanOrEqual = " <= ";
 
+        string lastWrittenMemberName = null;
+
         readonly Func<object, string> createParameterCallback;
         readonly CypherCapabilities capabilities;
 
@@ -77,14 +79,30 @@ namespace Neo4jClient.Cypher
             if (node.Value == null && text.EndsWith(NotEqual))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(NotEqual, StringComparison.Ordinal), NotEqual.Length);
-                TextOutput.Append(" is not null");
+                if (capabilities.SupportsNullComparisonsWithIsOperator)
+                {
+                    TextOutput.Append(" is not null");
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("has({0})", lastWrittenMemberName));
+                }
                 return node;
             }
 
             if (node.Value == null && text.EndsWith(Equal))
             {
                 TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
-                TextOutput.Append(" is null");
+                if (capabilities.SupportsNullComparisonsWithIsOperator)
+                {
+                    TextOutput.Append(" is null");
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("not(has({0}))", lastWrittenMemberName));
+                }
                 return node;
             }
 
@@ -191,7 +209,8 @@ namespace Neo4jClient.Cypher
                 if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
             }
 
-            TextOutput.Append(string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier));
+            lastWrittenMemberName = string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier);
+            TextOutput.Append(lastWrittenMemberName);
         }
 
         void VisitConstantMember(MemberExpression node)

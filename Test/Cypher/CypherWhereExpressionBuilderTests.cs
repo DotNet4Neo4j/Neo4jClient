@@ -351,7 +351,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.AreEqual("not(has(foo.NullableBar))", result);
+            Assert.AreEqual("(not(has(foo.NullableBar)))", result);
         }
 
         [Test]
@@ -363,7 +363,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.AreEqual("has(foo.NullableBar)", result);
+            Assert.AreEqual("(has(foo.NullableBar))", result);
         }
 
         [Test]

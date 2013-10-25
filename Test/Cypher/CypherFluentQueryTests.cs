@@ -792,7 +792,7 @@ RETURN b AS NodeB";
                 .Where<FooData>(r => r.Name == null && r.Id == 100)
                 .Query;
 
-            Assert.AreEqual("WHERE (not(has(r.Name)) AND (r.Id = {p0}))", query.QueryText);
+            Assert.AreEqual("WHERE ((not(has(r.Name))) AND (r.Id = {p0}))", query.QueryText);
             Assert.AreEqual(1, query.QueryParameters.Count);
             Assert.AreEqual(100, query.QueryParameters["p0"]);
         }
