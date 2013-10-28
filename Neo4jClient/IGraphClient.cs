@@ -113,6 +113,8 @@ namespace Neo4jClient
 
         ICypherFluentQuery Cypher { get; }
 
+        CypherCapabilities CypherCapabilities { get; }
+
         IGremlinClient Gremlin { get; }
 
         Version ServerVersion { get; }

@@ -764,7 +764,7 @@ namespace Neo4jClient
             return results;
         }
 
-        CypherCapabilities IRawGraphClient.CypherCapabilities
+        public CypherCapabilities CypherCapabilities
         {
             get { return cypherCapabilities; }
         }
