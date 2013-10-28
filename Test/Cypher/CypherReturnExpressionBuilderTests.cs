@@ -332,6 +332,23 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/165/as-throws-systemargumentexception-in")]
+        public void ReturnComplexAnonymousWithValueTypesAndCustomExpressions()
+        {
+            Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, object>> expression = (ping, reviews, reviewer) => new
+            {
+                PingId = Return.As<long>("ping.Id"),
+                PingImage = Return.As<string>("ping.Image"),
+                PingDescription = Return.As<string>("ping.Description"),
+                Reviews = reviews.As<long>(),
+                Reviewers = reviewer.CountDistinct(),
+                Avatars = Return.As<IEnumerable<string>>("collect(distinct reviewer.Avatar)[0..{maxAvatars}]")
+            };
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            Assert.AreEqual("ping.Id AS PingId, ping.Image AS PingImage, ping.Description AS PingDescription, reviews AS Reviews, reviewer AS Reviewers, collect(distinct reviewer.Avatar)[0..{maxAvatars}] AS Avatars", returnExpression.Text);
+        }
+
+        [Test]
         public void ReturnLabelsInAnonymousType()
         {
             // MATCH (a:User)
