@@ -23,7 +23,7 @@ namespace Neo4jClient.Test.Cypher
                     SomethingTotallyDifferent = a.As<Foo>().Age
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a.Age AS SomethingTotallyDifferent", returnExpression.Text);
         }
@@ -37,7 +37,7 @@ namespace Neo4jClient.Test.Cypher
                     FooNode = a.As<Node<Foo>>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a AS FooNode", returnExpression.Text);
         }
@@ -51,7 +51,7 @@ namespace Neo4jClient.Test.Cypher
                     Age = a.As<Foo>().AgeNullable.Value
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a.AgeNullable AS Age", returnExpression.Text);
         }
@@ -70,7 +70,7 @@ namespace Neo4jClient.Test.Cypher
                     FirstName = a.As<Foo>().Name
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", returnExpression.Text);
         }
@@ -89,7 +89,7 @@ namespace Neo4jClient.Test.Cypher
                     FirstName = a.As<Foo>().Name
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a.Age AS SomethingTotallyDifferent, a.Name AS FirstName", returnExpression.Text);
         }
@@ -109,7 +109,7 @@ namespace Neo4jClient.Test.Cypher
                     FirstName = fof.As<Foo>().Name
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("john.Age AS SomethingTotallyDifferent, fof.Name AS FirstName", returnExpression.Text);
         }
@@ -128,7 +128,7 @@ namespace Neo4jClient.Test.Cypher
                     NumberOfCats = n.As<Foo>().NumberOfCats
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Cypher19);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Cypher19, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("n.Age AS Age, n.NumberOfCats? AS NumberOfCats", returnExpression.Text);
         }
@@ -143,7 +143,7 @@ namespace Neo4jClient.Test.Cypher
                     NumberOfCats = n.As<Foo>().NumberOfCats
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("n.Age AS Age, n.NumberOfCats AS NumberOfCats", returnExpression.Text);
         }
@@ -160,7 +160,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.As<Foo>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a AS Foo", returnExpression.Text);
         }
@@ -179,7 +179,7 @@ namespace Neo4jClient.Test.Cypher
                     Bar = b.As<Foo>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("a AS Foo, b AS Bar", returnExpression.Text);
         }
@@ -198,7 +198,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.CollectAs<Foo>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("collect(a) AS Foo", returnExpression.Text);
         }
@@ -213,7 +213,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.CollectAs<Node<Foo>>()
                 };
 
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
             StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsShouldNotBeNodeTExceptionMessage, ex.Message);
         }
 
@@ -227,7 +227,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.CollectAsDistinct<Node<Foo>>()
                 };
 
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
             StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsDistinctShouldNotBeNodeTExceptionMessage, ex.Message);
         }
 
@@ -245,7 +245,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.CollectAsDistinct<Foo>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("collect(distinct a) AS Foo", returnExpression.Text);
         }
@@ -264,7 +264,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.Head().CollectAs<Foo>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("head(collect(a)) AS Foo", returnExpression.Text);
         }
@@ -283,7 +283,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = a.Last().CollectAs<Foo>()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("last(collect(a)) AS Foo", returnExpression.Text);
         }
@@ -302,7 +302,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = b.Count()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("count(b) AS Foo", returnExpression.Text);
         }
@@ -317,7 +317,7 @@ namespace Neo4jClient.Test.Cypher
 
             Expression<Func<ICypherResultItem, long>> expression = b => b.Count();
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("count(b)", returnExpression.Text);
         }
@@ -327,7 +327,7 @@ namespace Neo4jClient.Test.Cypher
         public void ReturnCountOnItsOwnAsNullableLong()
         {
             Expression<Func<ICypherResultItem, long?>> expression = b => b.Count();
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
             Assert.AreEqual("count(b)", returnExpression.Text);
         }
 
@@ -344,8 +344,8 @@ namespace Neo4jClient.Test.Cypher
                 Reviewers = reviewer.CountDistinct(),
                 Avatars = Return.As<IEnumerable<string>>("collect(distinct reviewer.Avatar)[0..{maxAvatars}]")
             };
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
-            Assert.AreEqual("ping.Id AS PingId, ping.Image AS PingImage, ping.Description AS PingDescription, reviews AS Reviews, reviewer AS Reviewers, collect(distinct reviewer.Avatar)[0..{maxAvatars}] AS Avatars", returnExpression.Text);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
+            Assert.AreEqual("ping.Id AS PingId, ping.Image AS PingImage, ping.Description AS PingDescription, reviews AS Reviews, count(distinct reviewer) AS Reviewers, collect(distinct reviewer.Avatar)[0..{maxAvatars}] AS Avatars", returnExpression.Text);
         }
 
         [Test]
@@ -361,7 +361,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = b.Labels()
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("labels(b) AS Foo", returnExpression.Text);
         }
@@ -370,7 +370,7 @@ namespace Neo4jClient.Test.Cypher
         public void ReturnAllOnItsOwn()
         {
             Expression<Func<long>> expression = () => All.Count();
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
             Assert.AreEqual("count(*)", returnExpression.Text);
         }
 
@@ -378,7 +378,7 @@ namespace Neo4jClient.Test.Cypher
         public void ReturnCustomStatementOnItsOwn()
         {
             Expression<Func<long>> expression = () => Return.As<long>("custom statement");
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
             Assert.AreEqual("custom statement", returnExpression.Text);
         }
 
@@ -395,7 +395,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = Return.As<long>("abs(sum(a.age) - sum(b.age))")
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("abs(sum(a.age) - sum(b.age)) AS Foo", returnExpression.Text);
         }
@@ -413,7 +413,7 @@ namespace Neo4jClient.Test.Cypher
                     Foo = Return.As<long>("abs(sum(a.age)" + new string(' ', 1) + "- sum(b.age))")
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("abs(sum(a.age) - sum(b.age)) AS Foo", returnExpression.Text);
         }
@@ -430,7 +430,7 @@ namespace Neo4jClient.Test.Cypher
                         .ToList()
                 };
 
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
             Assert.AreEqual(CypherReturnExpressionBuilder.ReturnExpressionCannotBeSerializedToCypherExceptionMessage, ex.Message);
         }
 
@@ -441,7 +441,7 @@ namespace Neo4jClient.Test.Cypher
             Expression<Func<ICypherResultItem, object>> expression =
                 a => new KeyValuePair<ICypherResultItem, ICypherResultItem>(a, a);
 
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
             StringAssert.StartsWith(CypherReturnExpressionBuilder.ReturnExpressionShouldBeOneOfExceptionMessage, ex.Message);
         }
 
@@ -450,13 +450,28 @@ namespace Neo4jClient.Test.Cypher
         public void ThrowNiceErrorForConstructorsWithArgumentsInReturnAs()
         {
             Expression<Func<ICypherResultItem, object>> expression =
-                a => a.As<KeyValuePair<object, object>>();
+                a => a.As<TypeWithoutDefaultConstructor>();
 
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression));
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
 
             const string expectedMessage =
-                "You've called As<KeyValuePair`2>() in your return clause, where KeyValuePair`2 is not a supported type. It must be a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
+                "You've called As<TypeWithoutDefaultConstructor>() in your return clause, where TypeWithoutDefaultConstructor is not a supported type. It must be a simple type (link int, string or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
             StringAssert.StartsWith(expectedMessage, ex.Message);
+        }
+
+        public class TypeWithoutDefaultConstructor
+        {
+            readonly int c;
+
+            public TypeWithoutDefaultConstructor(int a, int b)
+            {
+                c = a + b;
+            }
+
+            public override string ToString()
+            {
+                return c.ToString();
+            }
         }
 
         public class Foo

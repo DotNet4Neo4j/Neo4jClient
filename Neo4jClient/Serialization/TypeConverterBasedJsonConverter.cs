@@ -7,7 +7,7 @@ namespace Neo4jClient.Serialization
 {
     public class TypeConverterBasedJsonConverter : JsonConverter
     {
-        readonly Type[] builtinTypes =
+        internal static readonly Type[] BuiltinTypes =
         {
             typeof(string),
             typeof(bool),
@@ -70,11 +70,13 @@ namespace Neo4jClient.Serialization
         {
             var typeOfString = typeof (string);
             var typeConverter = TypeDescriptor.GetConverter(objectType);
-            return
+            var result =
                 !objectType.IsPrimitive &&
-                !builtinTypes.Contains(objectType) &&
-                typeConverter.CanConvertTo(typeOfString)
-                && typeConverter.CanConvertFrom(typeOfString);
+                !BuiltinTypes.Contains(objectType) &&
+                typeConverter.GetType() != typeof(TypeConverter) && // Ignore the default one
+                typeConverter.CanConvertTo(typeOfString) &&
+                typeConverter.CanConvertFrom(typeOfString);
+            return result;
         }
     }
 }

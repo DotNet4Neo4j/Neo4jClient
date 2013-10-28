@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Neo4jClient.Serialization;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Cypher
 {
@@ -12,7 +15,7 @@ namespace Neo4jClient.Cypher
 
         internal const string ReturnExpressionShouldBeOneOfExceptionMessage = "The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar). You cannot supply blocks of code (for example: n => { var a = n + 1; return a; }) or use constructors with arguments (for example: n => new Foo(n)).";
 
-        internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
+        internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a simple type (link int, string or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
 
         internal const string CollectAsShouldNotBeNodeTExceptionMessage = "You've called CollectAs<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAs<T>() instead.";
 
@@ -23,7 +26,10 @@ namespace Neo4jClient.Cypher
         // - a "statement" is something like "x.Foo? AS Bar"
         // - "text" is a collection of statements, like "x.Foo? AS Bar, y.Baz as Qak"
 
-        public static ReturnExpression BuildText(LambdaExpression expression, CypherCapabilities capabilities = null)
+        public static ReturnExpression BuildText(
+            LambdaExpression expression,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             capabilities = capabilities ?? CypherCapabilities.Default;
 
@@ -40,19 +46,19 @@ namespace Neo4jClient.Cypher
             {
                 case ExpressionType.MemberInit:
                     var memberInitExpression = (MemberInitExpression) body;
-                    text = BuildText(memberInitExpression, capabilities);
+                    text = BuildText(memberInitExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.New:
                     var newExpression = (NewExpression) body;
-                    text = BuildText(newExpression, capabilities);
+                    text = BuildText(newExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.Call:
                     var methodCallExpression = (MethodCallExpression) body;
-                    text = BuildText(methodCallExpression, capabilities);
+                    text = BuildText(methodCallExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
                 case ExpressionType.MemberAccess:
                     var memberExpression = (MemberExpression) body;
-                    text = BuildText(memberExpression, capabilities);
+                    text = BuildText(memberExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
                     return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
                     throw new ArgumentException(ReturnExpressionShouldBeOneOfExceptionMessage, "expression");
@@ -67,9 +73,12 @@ namespace Neo4jClient.Cypher
         /// It does not however cater to anonymous types, as they don't compile
         /// down to traditional object initializers.
         /// 
-        /// <see cref="BuildText(NewExpression, CypherCapabilities)"/> caters to anonymous types.
+        /// <see cref="BuildText(NewExpression, CypherCapabilities, IEnumerable&lt;JsonConverter&gt;)"/> caters to anonymous types.
         /// </remarks>
-        static string BuildText(MemberInitExpression expression, CypherCapabilities capabilities)
+        static string BuildText(
+            MemberInitExpression expression,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             if (expression.NewExpression.Constructor.GetParameters().Any())
                 throw new ArgumentException(
@@ -82,7 +91,7 @@ namespace Neo4jClient.Cypher
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
                 var memberAssignment = (MemberAssignment)binding;
-                return BuildStatement(memberAssignment.Expression, binding.Member, capabilities);
+                return BuildStatement(memberAssignment.Expression, binding.Member, capabilities, jsonConvertersThatTheDeserializerWillUse);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -101,7 +110,10 @@ namespace Neo4jClient.Cypher
         /// 
         /// This is the scenario that this build method caters for.
         /// </remarks>
-        static string BuildText(NewExpression expression, CypherCapabilities capabilities)
+        static string BuildText(
+            NewExpression expression,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             var resultingType = expression.Constructor.DeclaringType;
             var quacksLikeAnAnonymousType =
@@ -119,7 +131,7 @@ namespace Neo4jClient.Cypher
             var bindingTexts = expression.Members.Select((member, index) =>
             {
                 var argument = expression.Arguments[index];
-                return BuildStatement(argument, member, capabilities);
+                return BuildStatement(argument, member, capabilities, jsonConvertersThatTheDeserializerWillUse);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -128,15 +140,21 @@ namespace Neo4jClient.Cypher
         /// <remarks>
         /// This build method caters to expressions like: <code>item => item.Count()</code>
         /// </remarks>
-        static string BuildText(MethodCallExpression expression, CypherCapabilities capabilities)
+        static string BuildText(
+            MethodCallExpression expression,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
-            return BuildStatement(expression, false, capabilities);
+            return BuildStatement(expression, false, capabilities, jsonConvertersThatTheDeserializerWillUse);
         }
 
         /// <remarks>
         /// This build method caters to expressions like: <code>item => item.As&lt;Foo&gt;().Bar</code>
         /// </remarks>
-        static string BuildText(MemberExpression expression, CypherCapabilities capabilities)
+        static string BuildText(
+            MemberExpression expression,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             var innerExpression = expression.Expression as MethodCallExpression;
             if (innerExpression == null ||
@@ -144,13 +162,17 @@ namespace Neo4jClient.Cypher
                 innerExpression.Method.Name != "As")
                 throw new ArgumentException("Member expressions are only supported off ICypherResultItem.As<TData>(). For example: Return(foo => foo.As<Bar>().Baz).", "expression");
 
-            var baseStatement = BuildStatement(innerExpression, false, capabilities);
+            var baseStatement = BuildStatement(innerExpression, false, capabilities, jsonConvertersThatTheDeserializerWillUse);
             var statement = string.Format("{0}.{1}", baseStatement, expression.Member.Name);
 
             return statement;
         }
 
-        static string BuildStatement(Expression sourceExpression, MemberInfo targetMember, CypherCapabilities capabilities)
+        static string BuildStatement(
+            Expression sourceExpression,
+            MemberInfo targetMember,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             var unwrappedExpression = UnwrapImplicitCasts(sourceExpression);
 
@@ -160,14 +182,17 @@ namespace Neo4jClient.Cypher
 
             var methodCallExpression = unwrappedExpression as MethodCallExpression;
             if (methodCallExpression != null)
-                return BuildStatement(methodCallExpression, targetMember, capabilities);
+                return BuildStatement(methodCallExpression, targetMember, capabilities, jsonConvertersThatTheDeserializerWillUse);
 
             throw new NotSupportedException(string.Format(
                 "Expression of type {0} is not supported.",
                 unwrappedExpression.GetType().FullName));
         }
 
-        static string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember, CypherCapabilities capabilities)
+        static string BuildStatement(
+            MemberExpression memberExpression,
+            MemberInfo targetMember,
+            CypherCapabilities capabilities)
         {
             MethodCallExpression methodCallExpression;
             MemberInfo memberInfo;
@@ -203,19 +228,27 @@ namespace Neo4jClient.Cypher
             return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberInfo.Name, optionalIndicator, targetMember.Name);
         }
 
-        static string BuildStatement(MethodCallExpression expression, MemberInfo targetMember, CypherCapabilities capabilities)
+        static string BuildStatement(
+            MethodCallExpression expression,
+            MemberInfo targetMember,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             var isNullable = IsMemberNullable(targetMember);
-            var statement = BuildStatement(expression, isNullable, capabilities);
+            var statement = BuildStatement(expression, isNullable, capabilities, jsonConvertersThatTheDeserializerWillUse);
             statement = statement + " AS " + targetMember.Name;
             return statement;
         }
 
-        static string BuildStatement(MethodCallExpression expression, bool isNullable, CypherCapabilities capabilities)
+        static string BuildStatement(
+            MethodCallExpression expression,
+            bool isNullable,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             string statement;
             if (expression.Method.DeclaringType == typeof(ICypherResultItem) || expression.Method.DeclaringType == typeof(IFluentCypherResultItem))
-                statement = BuildCypherResultItemStatement(expression, isNullable, capabilities);
+                statement = BuildCypherResultItemStatement(expression, isNullable, capabilities, jsonConvertersThatTheDeserializerWillUse);
             else if (expression.Method.DeclaringType == typeof(All))
                 statement = BuildCypherAllStatement(expression);
             else if (expression.Method.DeclaringType == typeof(Return))
@@ -226,7 +259,11 @@ namespace Neo4jClient.Cypher
             return statement;
         }
 
-        static string BuildCypherResultItemStatement(MethodCallExpression expression, bool isNullable, CypherCapabilities capabilities)
+        static string BuildCypherResultItemStatement(
+            MethodCallExpression expression,
+            bool isNullable,
+            CypherCapabilities capabilities,
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             Debug.Assert(expression.Object != null, "expression.Object != null");
 
@@ -256,7 +293,7 @@ namespace Neo4jClient.Cypher
                 case "As":
                 case "Node":
                     Debug.Assert(singleGenericArgument != null);
-                    if (!IsSupportedForAs(singleGenericArgument))
+                    if (!IsSupportedForAs(singleGenericArgument, jsonConvertersThatTheDeserializerWillUse))
                         throw new ArgumentException(string.Format(ReturnAsTypeShouldBeOneOfExceptionMessage, singleGenericArgument.Name), "expression");
                     finalStatement = string.Format("{0}{1}", targetObject.Name, optionalIndicator);
                     break;
@@ -305,9 +342,16 @@ namespace Neo4jClient.Cypher
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Node<>);
         }
 
-        static bool IsSupportedForAs(Type type)
+        static bool IsSupportedForAs(Type type, IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
             if (type == null) throw new ArgumentNullException("type");
+
+            if (TypeConverterBasedJsonConverter.BuiltinTypes.Contains(type))
+                return true;
+
+            jsonConvertersThatTheDeserializerWillUse = jsonConvertersThatTheDeserializerWillUse ?? GraphClient.DefaultJsonConverters;
+            if (jsonConvertersThatTheDeserializerWillUse.Any(c => c.CanConvert(type)))
+                return true;
 
             var hasDefaultConstructor = type.GetConstructor(Type.EmptyTypes) != null;
             if (hasDefaultConstructor)
