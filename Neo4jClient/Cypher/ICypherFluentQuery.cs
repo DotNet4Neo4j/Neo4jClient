@@ -35,6 +35,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery CreateUnique(string createUniqueText);
         ICypherFluentQuery Create(string createText, params object[] objects);
         ICypherFluentQuery Delete(string identities);
+        ICypherFluentQuery Drop(string dropText);
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery Union();
         ICypherFluentQuery UnionAll();

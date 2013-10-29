@@ -250,6 +250,12 @@ namespace Neo4jClient.Cypher
                 w.AppendClause(string.Format("DELETE {0}", identities)));
         }
 
+        public ICypherFluentQuery Drop(string dropText)
+        {
+            return Mutate(w =>
+                w.AppendClause(string.Format("DROP {0}", dropText)));
+        }
+
         public ICypherFluentQuery Set(string setText)
         {
             return Mutate(w =>
