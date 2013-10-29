@@ -181,6 +181,12 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("CREATE UNIQUE " + createUniqueText));
         }
 
+        public ICypherFluentQuery Create(string createText)
+        {
+            return Mutate(w => w.AppendClause("CREATE " + createText));
+        }
+
+        [Obsolete("Use Create(string) with explicitly named params instead. For example, instead of Create(\"(c:Customer {0})\", customer), use Create(\"(c:Customer {customer})\").WithParams(new { customer }).")]
         public ICypherFluentQuery Create(string createText, params object[] objects)
         {
             objects

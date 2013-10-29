@@ -33,6 +33,8 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery OnCreate(string identity);
         ICypherFluentQuery OnMatch(string identity);
         ICypherFluentQuery CreateUnique(string createUniqueText);
+        ICypherFluentQuery Create(string createText);
+        [Obsolete("Use Create(string) with explicitly named params instead. For example, instead of Create(\"(c:Customer {0})\", customer), use Create(\"(c:Customer {customer})\").WithParams(new { customer }).")]
         ICypherFluentQuery Create(string createText, params object[] objects);
         ICypherFluentQuery Delete(string identities);
         ICypherFluentQuery Drop(string dropText);
