@@ -190,7 +190,8 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery Create(string createText, params object[] objects)
         {
             objects
-                .Select((o, i) =>
+                .ToList()
+                .ForEach(o =>
                 {
                     if (o == null)
                         throw new ArgumentException("Array includes a null entry", "objects");
@@ -207,25 +208,9 @@ namespace Neo4jClient.Cypher
 
                     var validationContext = new ValidationContext(o, null, null);
                     Validator.ValidateObject(o, validationContext);
+                });
 
-                    var objectText = GetSerializer().Serialize(o);
-                    return new KeyValuePair<string, string>("{" + i + "}", objectText);
-                })
-                .ToList()
-                .ForEach(kv => createText = createText.Replace(kv.Key, kv.Value));
-
-            return Mutate(w =>
-                w.AppendClause("CREATE " + createText));
-        }
-
-        CustomJsonSerializer GetSerializer()
-        {
-            return new CustomJsonSerializer
-                {
-                    NullHandling = NullValueHandling.Ignore,
-                    QuoteName = false,
-                    JsonConverters = Client.JsonConverters
-                };
+            return Mutate(w => w.AppendClause("CREATE " + createText, objects));
         }
 
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)
@@ -238,16 +223,14 @@ namespace Neo4jClient.Cypher
                    typeof(TNode).GetGenericArguments()[0].Name),
                    "node");
             }
-            
+
             if (node == null)
                 throw new ArgumentNullException("node");
-            
+
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
-            
-            var serializer = GetSerializer();
-            return Mutate(w =>
-                w.AppendClause(string.Format("CREATE ({0} {1})", identity, serializer.Serialize(node))));
+
+            return Mutate(w => w.AppendClause(string.Format("CREATE ({0} {{0}})", identity), node));
         }
 
         public ICypherFluentQuery Delete(string identities)

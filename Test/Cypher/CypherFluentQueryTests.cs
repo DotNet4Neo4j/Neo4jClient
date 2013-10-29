@@ -945,12 +945,14 @@ RETURN b AS NodeB";
             // CREATE (a {Foo: 'foo', Bar: 'bar', Baz: 'baz'})
             // RETURN a
 
+            var data = new CreateNodeTests.TestNode {Foo = "foo", Bar = "bar", Baz = "baz"};
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Create("a", new CreateNodeTests.TestNode {Foo = "foo", Bar = "bar", Baz = "baz"})
+                .Create("a", data)
                 .Return<object>("a")
                 .Query;
-            Assert.AreEqual("CREATE (a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})\r\nRETURN a", query.QueryText);
+            Assert.AreEqual("CREATE (a {p0})\r\nRETURN a", query.QueryText);
+            Assert.AreEqual(data, query.QueryParameters["p0"]);
         }
 
         [Test]
@@ -959,18 +961,18 @@ RETURN b AS NodeB";
             // START n=node(1)
             // CREATE n-[r:REL]->(a {Foo: 'foo', Bar: 'bar', Baz: 'baz'})-[r:REL]->(b {Foo: 'foo2', Bar: 'bar2', Baz: 'baz2'})
             // RETURN a
-            
+
+            var data1 = new CreateNodeTests.TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
+            var data2 = new CreateNodeTests.TestNode { Foo = "foo2", Bar = "bar2", Baz = "baz2" };
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)1)
-                .Create(
-                    "n-[r:REL]->(a {0})-[r:REL]->(b {1})",
-                    new CreateNodeTests.TestNode { Foo = "foo", Bar = "bar", Baz = "baz" },
-                    new CreateNodeTests.TestNode { Foo = "foo2", Bar = "bar2", Baz = "baz2" }
-                )
+                .Create("n-[r:REL]->(a {0})-[r:REL]->(b {1})", data1, data2)
                 .Return<CreateNodeTests.TestNode>("a")
                 .Query;
-            Assert.AreEqual("START n=node({p0})\r\nCREATE n-[r:REL]->(a {\r\n  Foo: \"foo\",\r\n  Bar: \"bar\",\r\n  Baz: \"baz\"\r\n})-[r:REL]->(b {\r\n  Foo: \"foo2\",\r\n  Bar: \"bar2\",\r\n  Baz: \"baz2\"\r\n})\r\nRETURN a", query.QueryText);
+            Assert.AreEqual("START n=node({p0})\r\nCREATE n-[r:REL]->(a {p1})-[r:REL]->(b {p2})\r\nRETURN a", query.QueryText);
+            Assert.AreEqual(data1, query.QueryParameters["p1"]);
+            Assert.AreEqual(data2, query.QueryParameters["p2"]);
         }
 
         [Test]
@@ -1030,13 +1032,16 @@ RETURN b AS NodeB";
             // WHERE secondlatestupdate <> null
             // RETURN latest_update.text as new_status
 
+            var update = new { text = "Status", date = 123 };
+
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Start(new { me = Node.ByIndexLookup("node_auto_index", "name", "Bob") })
                 .Match("me-[r?:STATUS]-secondlatestupdate")
                 .Delete("r")
                 .With("me, secondlatestupdate")
-                .Create("me-[:STATUS]->(latest_update {0})", new { text = "Status", date = 123 })
+                .Create("me-[:STATUS]->(latest_update {update})")
+                .WithParams(new { update })
                 .With("latest_update,secondlatestupdate")
                 .Create("latest_update-[:NEXT]-secondlatestupdate")
                 .Where("secondlatestupdate <> null")
@@ -1049,15 +1054,13 @@ RETURN b AS NodeB";
 MATCH me-[r?:STATUS]-secondlatestupdate
 DELETE r
 WITH me, secondlatestupdate
-CREATE me-[:STATUS]->(latest_update {
-  text: ""Status"",
-  date: 123
-})
+CREATE me-[:STATUS]->(latest_update {update})
 WITH latest_update,secondlatestupdate
 CREATE latest_update-[:NEXT]-secondlatestupdate
 WHERE secondlatestupdate <> null
 RETURN latest_update.text AS new_status", query.QueryText);
             Assert.AreEqual("Bob", query.QueryParameters["p0"]);
+            Assert.AreEqual(update, query.QueryParameters["update"]);
         }
 
         public class UpdateData
