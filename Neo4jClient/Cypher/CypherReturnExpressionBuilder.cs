@@ -346,6 +346,39 @@ namespace Neo4jClient.Cypher
         {
             if (type == null) throw new ArgumentNullException("type");
 
+            var jsonConvertersThatTheDeserializerWillUseAsArray = jsonConvertersThatTheDeserializerWillUse != null
+                ? jsonConvertersThatTheDeserializerWillUse.ToArray() : null;
+
+            if (IsSupportedElementForAs(type, jsonConvertersThatTheDeserializerWillUseAsArray))
+                return true;
+
+            if (type.IsArray)
+                return IsSupportedElementForAs(type.GetElementType(), jsonConvertersThatTheDeserializerWillUseAsArray);
+
+            if (type.IsGenericType)
+            {
+                var genericTypeDefinition = type.GetGenericTypeDefinition();
+                if (genericTypeDefinition == typeof (IEnumerable<>)
+                    || genericTypeDefinition == typeof (ICollection<>)
+                    || genericTypeDefinition == typeof (IList<>))
+                {
+                    var genericArguments = type.GetGenericArguments();
+                    if (genericArguments.Length == 1)
+                    {
+                        var onlyGenericArgument = genericArguments[0];
+                        if (IsSupportedElementForAs(onlyGenericArgument, jsonConvertersThatTheDeserializerWillUseAsArray))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        static bool IsSupportedElementForAs(Type type, IList<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
+        {
+            if (type == null) throw new ArgumentNullException("type");
+
             if (TypeConverterBasedJsonConverter.BuiltinTypes.Contains(type))
                 return true;
 
@@ -357,32 +390,15 @@ namespace Neo4jClient.Cypher
             if (hasDefaultConstructor)
                 return true;
 
-            if (type == typeof (RelationshipInstance) || type == typeof(RelationshipInstance[]))
+            if (type == typeof(RelationshipInstance))
                 return true;
 
             if (type.IsGenericType)
             {
                 var genericTypeDefinition = type.GetGenericTypeDefinition();
-                if ((genericTypeDefinition == typeof (RelationshipInstance<>)
-                     || genericTypeDefinition == typeof (Node<>)))
+                if ((genericTypeDefinition == typeof(RelationshipInstance<>)
+                     || genericTypeDefinition == typeof(Node<>)))
                     return true;
-
-                if (genericTypeDefinition == typeof (IEnumerable<>)
-                    || genericTypeDefinition == typeof (ICollection<>)
-                    || genericTypeDefinition == typeof (IList<>))
-                {
-                    var genericArguments = type.GetGenericArguments();
-                    if (genericArguments.Length == 1)
-                    {
-                        var onlyGenericArgument = genericArguments[0];
-                        if(onlyGenericArgument == typeof(RelationshipInstance))
-                            return true;
-
-                        if (onlyGenericArgument.IsGenericType &&
-                            (onlyGenericArgument.GetGenericTypeDefinition() == typeof (RelationshipInstance<>)))
-                            return true;
-                    }
-                }
             }
 
             return false;

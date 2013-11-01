@@ -483,6 +483,30 @@ namespace Neo4jClient.Test.Cypher
             Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
         }
 
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/171/remove-false-protection-around-return-a")]
+        public void AllowArrayOfInt32InReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression = a => a.As<int[]>();
+            Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/171/remove-false-protection-around-return-a")]
+        public void AllowEnumerableOfInt32InReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression = a => a.As<IEnumerable<int>>();
+            Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/171/remove-false-protection-around-return-a")]
+        public void AllowListOfInt32InReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression = a => a.As<List<int>>();
+            Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+        }
+
         public class TypeWithoutDefaultConstructor
         {
             readonly int c;
