@@ -455,8 +455,32 @@ namespace Neo4jClient.Test.Cypher
             var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
 
             const string expectedMessage =
-                "You've called As<TypeWithoutDefaultConstructor>() in your return clause, where TypeWithoutDefaultConstructor is not a supported type. It must be a simple type (link int, string or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
+                "You've called As<TypeWithoutDefaultConstructor>() in your return clause, where TypeWithoutDefaultConstructor is not a supported type. It must be a simple type (like int, string, or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, RelationshipInstance<T>, list of RelationshipInstance, or list of RelationshipInstance<T>.";
             StringAssert.StartsWith(expectedMessage, ex.Message);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/171/remove-false-protection-around-return-a")]
+        public void AllowArrayOfRelationshipInstanceInReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression = a => a.As<RelationshipInstance[]>();
+            Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/171/remove-false-protection-around-return-a")]
+        public void AllowListOfRelationshipInstanceInReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression = a => a.As<List<RelationshipInstance>>();
+            Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/171/remove-false-protection-around-return-a")]
+        public void AllowEnumerableOfRelationshipInstanceInReturnAs()
+        {
+            Expression<Func<ICypherResultItem, object>> expression = a => a.As<IEnumerable<RelationshipInstance<object>>>();
+            Assert.DoesNotThrow(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
         }
 
         public class TypeWithoutDefaultConstructor

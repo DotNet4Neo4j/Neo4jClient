@@ -15,7 +15,7 @@ namespace Neo4jClient.Cypher
 
         internal const string ReturnExpressionShouldBeOneOfExceptionMessage = "The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar). You cannot supply blocks of code (for example: n => { var a = n + 1; return a; }) or use constructors with arguments (for example: n => new Foo(n)).";
 
-        internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a simple type (link int, string or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, or RelationshipInstance<T>.";
+        internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a simple type (like int, string, or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, RelationshipInstance<T>, list of RelationshipInstance, or list of RelationshipInstance<T>.";
 
         internal const string CollectAsShouldNotBeNodeTExceptionMessage = "You've called CollectAs<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAs<T>() instead.";
 
@@ -357,12 +357,35 @@ namespace Neo4jClient.Cypher
             if (hasDefaultConstructor)
                 return true;
 
-            if (type == typeof (RelationshipInstance))
+            if (type == typeof (RelationshipInstance) || type == typeof(RelationshipInstance[]))
                 return true;
-            
-            return type.IsGenericType && 
-                (  type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>) 
-                || type.GetGenericTypeDefinition() == typeof(Node<>));
+
+            if (type.IsGenericType)
+            {
+                var genericTypeDefinition = type.GetGenericTypeDefinition();
+                if ((genericTypeDefinition == typeof (RelationshipInstance<>)
+                     || genericTypeDefinition == typeof (Node<>)))
+                    return true;
+
+                if (genericTypeDefinition == typeof (IEnumerable<>)
+                    || genericTypeDefinition == typeof (ICollection<>)
+                    || genericTypeDefinition == typeof (IList<>))
+                {
+                    var genericArguments = type.GetGenericArguments();
+                    if (genericArguments.Length == 1)
+                    {
+                        var onlyGenericArgument = genericArguments[0];
+                        if(onlyGenericArgument == typeof(RelationshipInstance))
+                            return true;
+
+                        if (onlyGenericArgument.IsGenericType &&
+                            (onlyGenericArgument.GetGenericTypeDefinition() == typeof (RelationshipInstance<>)))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)
