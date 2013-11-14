@@ -23,6 +23,8 @@ namespace Neo4jClient
 {
     public class GraphClient : IRawGraphClient
     {
+        internal const string GremlinPluginUnavailable = "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
+
         public static readonly JsonConverter[] DefaultJsonConverters =
         {
             new TypeConverterBasedJsonConverter(),
@@ -715,6 +717,10 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            if (RootApiResponse.Extensions.GremlinPlugin == null ||
+                RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
+                throw new ApplicationException(GremlinPluginUnavailable);
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -858,6 +864,10 @@ namespace Neo4jClient
         {
             CheckRoot();
 
+            if (RootApiResponse.Extensions.GremlinPlugin == null ||
+                RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
+                throw new ApplicationException(GremlinPluginUnavailable);
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -897,6 +907,10 @@ namespace Neo4jClient
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
         {
             CheckRoot();
+
+            if (RootApiResponse.Extensions.GremlinPlugin == null ||
+                RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
+                throw new ApplicationException(GremlinPluginUnavailable);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();

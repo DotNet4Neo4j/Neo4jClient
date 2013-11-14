@@ -38,5 +38,24 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                 Assert.AreEqual(1, int.Parse(node));
             }
         }
+
+        [Test]
+        public void ShouldFailGracefullyWhenGremlinIsNotAvailable()
+        {
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot20()
+                }
+            })
+            {
+                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
+
+                var ex = Assert.Throws<ApplicationException>(
+                    () => graphClient.ExecuteScalarGremlin("foo bar query", null));
+                Assert.AreEqual(GraphClient.GremlinPluginUnavailable, ex.Message);
+            }
+        }
     }
 }

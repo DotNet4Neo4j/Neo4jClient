@@ -264,5 +264,24 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                 Assert.AreEqual("KNOWS", relationships.ElementAt(0).TypeKey);
             }
         }
+
+        [Test]
+        public void ShouldFailGracefullyWhenGremlinIsNotAvailable()
+        {
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot20()
+                }
+            })
+            {
+                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
+
+                var ex = Assert.Throws<ApplicationException>(
+                    () => graphClient.ExecuteGetAllRelationshipsGremlin("foo bar query", null));
+                Assert.AreEqual(GraphClient.GremlinPluginUnavailable, ex.Message);
+            }
+        }
     }
 }
