@@ -33,7 +33,7 @@ namespace Neo4jClient.Test
             {
                 Resource = uri,
                 Method = HttpMethod.Post,
-                Body = new CustomJsonSerializer(){JsonConverters = GraphClient.DefaultJsonConverters}.Serialize(body)
+                Body = new CustomJsonSerializer{JsonConverters = GraphClient.DefaultJsonConverters}.Serialize(body)
             };
         }
 
