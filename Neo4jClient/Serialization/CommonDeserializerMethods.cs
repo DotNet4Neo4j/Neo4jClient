@@ -136,6 +136,11 @@ namespace Neo4jClient.Serialization
                 return guid;
             }
 
+            if (propertyType == typeof(byte[]))
+            {
+                return Convert.FromBase64String(value.Value<string>());
+            }
+
             object jsonConversionResult;
             if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
                 return jsonConversionResult;
@@ -222,7 +227,11 @@ namespace Neo4jClient.Serialization
                     }
                 }
             }
-            else if(type.BaseType == typeof(Array)) //One Dimensional Only
+            else if (type == typeof(byte[]))
+            {
+                instance = Convert.FromBase64String(element.Value<string>());
+            }
+            else if (type.BaseType == typeof(Array)) //One Dimensional Only
             {
                 var underlyingType = type.GetElementType();
                 var arrayType = typeof(ArrayList);

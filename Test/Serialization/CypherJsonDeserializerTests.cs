@@ -1151,5 +1151,48 @@ namespace Neo4jClient.Test.Serialization
             // Assert
             Assert.AreEqual(123, result);
         }
+
+        public class ModelWithByteArray
+        {
+            public byte[] Array { get; set; }
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/114/byte-support")]
+        public void DeserializeBase64StringIntoByteArrayInProjectionResultMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<ModelWithByteArray>(client, CypherResultMode.Projection);
+            var content = @"{
+                          'data' : [ [ 'AQIDBA==' ] ],
+                          'columns' : [ 'Array' ]
+                        }".Replace("'", "\"");
+
+            // Act
+            var result = deserializer.Deserialize(content).First();
+
+            // Assert
+            CollectionAssert.AreEqual(new byte[] {1, 2, 3, 4}, result.Array);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/114/byte-support")]
+        public void DeserializeBase64StringIntoByteArrayInSetResultMode()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<byte[]>(client, CypherResultMode.Set);
+            var content = @"{
+                          'data' : [ [ 'AQIDBA==' ] ],
+                          'columns' : [ 'column1' ]
+                        }".Replace("'", "\"");
+
+            // Act
+            var result = deserializer.Deserialize(content).First();
+
+            // Assert
+            CollectionAssert.AreEqual(new byte[] { 1, 2, 3, 4 }, result);
+        }
     }
 }
