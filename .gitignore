@@ -1,0 +1,10 @@
+[Bb]in
+[Oo]bj
+*.user
+*.suo
+_ReSharper*
+TestResults
+Neo4jClient.*.nupkg
+*.docstates
+*.crunchsolution.cache
+packages
