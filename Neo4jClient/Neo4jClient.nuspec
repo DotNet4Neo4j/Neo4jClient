@@ -5,8 +5,8 @@
     <version>0.0.0.0</version>
     <authors>Readify</authors>
     <owners>Tatham Oddie</owners>
-    <licenseUrl>http://hg.readify.net/neo4jclient/src/tip/LICENSE</licenseUrl>
-    <projectUrl>http://hg.readify.net/neo4jclient</projectUrl>
+    <licenseUrl>https://github.com/Readify/Neo4jClient/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Readify/Neo4jClient</projectUrl>
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
     <tags>neo4j nosql cypher</tags>
     <dependencies>
