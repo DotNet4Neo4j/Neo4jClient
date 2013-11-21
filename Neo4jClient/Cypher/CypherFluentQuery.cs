@@ -161,6 +161,12 @@ namespace Neo4jClient.Cypher
                 w.AppendClause("MATCH " + string.Join(", ", matchText)));
         }
 
+        public ICypherFluentQuery OptionalMatch(string pattern)
+        {
+            return Mutate(w =>
+                w.AppendClause("OPTIONAL MATCH " + pattern));
+        }
+
         public ICypherFluentQuery Merge(string mergeText)
         {
             return Mutate(w => w.AppendClause("MERGE " + mergeText));

@@ -265,25 +265,6 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void MatchRelatedNodes()
-        {
-            // http://docs.neo4j.org/chunked/1.6/query-match.html#match-related-nodes
-            // START n=node(3)
-            // MATCH (n)--(x)
-            // RETURN x
-
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
-                .Match("(n)--(x)")
-                .Return<object>("x")
-                .Query;
-
-            Assert.AreEqual("START n=node({p0})\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
-            Assert.AreEqual(3, query.QueryParameters["p0"]);
-        }
-
-        [Test]
         public void ReturnColumnAlias()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
