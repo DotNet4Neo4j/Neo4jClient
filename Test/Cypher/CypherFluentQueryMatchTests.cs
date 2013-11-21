@@ -83,13 +83,7 @@ namespace Neo4jClient.Test.Cypher
                 .Where((FooBarBaz a) => a.Baz == "ghi")
                 .Query;
 
-            const string expected =
-                @"MATCH (n)
-WHERE (n.Foo = {p0})
-OPTIONAL MATCH (n)--(x)
-WHERE (x.Bar = {p1})
-OPTIONAL MATCH (x)--(a)
-WHERE (a.Baz = {p2})";
+            const string expected = "MATCH (n)\r\nWHERE (n.Foo = {p0})\r\nOPTIONAL MATCH (n)--(x)\r\nWHERE (x.Bar = {p1})\r\nOPTIONAL MATCH (x)--(a)\r\nWHERE (a.Baz = {p2})";
 
             Assert.AreEqual(expected, query.QueryText);
             Assert.AreEqual(3, query.QueryParameters.Count());
