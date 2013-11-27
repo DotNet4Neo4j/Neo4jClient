@@ -28,12 +28,12 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Merge("(robert:Person)")
-                .OnCreate("robert")
+                .OnCreate()
                 .Set("robert.Created = timestamp()")
                 .Query;
 
             // Assert
-            Assert.AreEqual("MERGE (robert:Person)\r\nON CREATE robert\r\nSET robert.Created = timestamp()", query.QueryText);
+            Assert.AreEqual("MERGE (robert:Person)\r\nON CREATE\r\nSET robert.Created = timestamp()", query.QueryText);
         }
 
         [Test]
@@ -43,12 +43,12 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Merge("(robert:Person)")
-                .OnMatch("robert")
+                .OnMatch()
                 .Set("robert.LastSeen = timestamp()")
                 .Query;
 
             // Assert
-            Assert.AreEqual("MERGE (robert:Person)\r\nON MATCH robert\r\nSET robert.LastSeen = timestamp()", query.QueryText);
+            Assert.AreEqual("MERGE (robert:Person)\r\nON MATCH\r\nSET robert.LastSeen = timestamp()", query.QueryText);
         }
 
         [Test]
@@ -58,14 +58,14 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Merge("(robert:Person)")
-                .OnCreate("robert")
+                .OnCreate()
                 .Set("robert.Created = timestamp()")
-                .OnMatch("robert")
+                .OnMatch()
                 .Set("robert.LastSeen = timestamp()")
                 .Query;
 
             // Assert
-            Assert.AreEqual("MERGE (robert:Person)\r\nON CREATE robert\r\nSET robert.Created = timestamp()\r\nON MATCH robert\r\nSET robert.LastSeen = timestamp()", query.QueryText);
+            Assert.AreEqual("MERGE (robert:Person)\r\nON CREATE\r\nSET robert.Created = timestamp()\r\nON MATCH\r\nSET robert.LastSeen = timestamp()", query.QueryText);
         }
     }
 }
