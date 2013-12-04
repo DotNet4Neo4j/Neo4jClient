@@ -100,6 +100,8 @@ namespace Neo4jClient.Cypher
         static string BuildText(NewExpression expression)
         {
             var resultingType = expression.Constructor.DeclaringType;
+            Debug.Assert(resultingType != null, "resultingType != null");
+
             var quacksLikeAnAnonymousType =
                 resultingType.IsSpecialName &&
                 resultingType.IsValueType &&
