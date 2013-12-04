@@ -1,5 +1,8 @@
-﻿namespace Neo4jClient
+﻿using System;
+
+namespace Neo4jClient
 {
+    [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
     public class RootNode : NodeReference<RootNode>
     {
         public RootNode() : base(0) { }

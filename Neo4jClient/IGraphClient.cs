@@ -10,6 +10,7 @@ namespace Neo4jClient
 {
     public interface IGraphClient
     {
+        [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
         RootNode RootNode { get; }
 
         /// <summary>
