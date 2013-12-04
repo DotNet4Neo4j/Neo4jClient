@@ -107,6 +107,7 @@ namespace Neo4jClient
         IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id);
         IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id);
 
+        [Obsolete("This method depends on Cypher, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management.")]
         void ShutdownServer();
 
         event OperationCompletedEventHandler OperationCompleted;
@@ -115,6 +116,7 @@ namespace Neo4jClient
 
         CypherCapabilities CypherCapabilities { get; }
 
+        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         IGremlinClient Gremlin { get; }
 
         Version ServerVersion { get; }
