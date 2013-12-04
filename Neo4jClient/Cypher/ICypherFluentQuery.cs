@@ -40,6 +40,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Delete(string identities);
         ICypherFluentQuery Drop(string dropText);
         ICypherFluentQuery Set(string setText);
+        ICypherFluentQuery ForEach(string text);
         ICypherFluentQuery Union();
         ICypherFluentQuery UnionAll();
         ICypherFluentQuery Limit(int? limit);

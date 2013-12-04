@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
-using Neo4jClient.Serialization;
-using Newtonsoft.Json;
 
 namespace Neo4jClient.Cypher
 {
@@ -255,6 +253,11 @@ namespace Neo4jClient.Cypher
         {
             return Mutate(w =>
                 w.AppendClause(string.Format("SET {0}", setText)));
+        }
+
+        public ICypherFluentQuery ForEach(string text)
+        {
+            return Mutate(w => w.AppendClause("DELETE " + text));
         }
 
         public ICypherFluentQuery Union()
