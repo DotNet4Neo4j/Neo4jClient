@@ -15,7 +15,7 @@ namespace Neo4jClient.Cypher
         const string LessThan = " < ";
         const string LessThanOrEqual = " <= ";
 
-        string lastWrittenMemberName = null;
+        string lastWrittenMemberName;
 
         readonly Func<object, string> createParameterCallback;
         readonly CypherCapabilities capabilities;
