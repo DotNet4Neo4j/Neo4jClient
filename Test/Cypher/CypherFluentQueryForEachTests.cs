@@ -19,7 +19,7 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             Assert.AreEqual("FOREACH (n IN nodes(p) | SET n.marked = TRUE)", query.QueryText);
-            Assert.AreEqual(0, query.QueryParameters.Length);
+            Assert.AreEqual(0, query.QueryParameters.Count);
         }
     }
 }

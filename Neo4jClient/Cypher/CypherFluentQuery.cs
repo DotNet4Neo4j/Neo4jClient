@@ -257,7 +257,7 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery ForEach(string text)
         {
-            return Mutate(w => w.AppendClause("DELETE " + text));
+            return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
         public ICypherFluentQuery Union()
