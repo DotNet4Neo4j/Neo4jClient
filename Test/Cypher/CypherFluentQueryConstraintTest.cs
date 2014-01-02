@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .CreateConstraint("(book:Book)", "book.isbn")
+                .CreateConstraint("book:Book", "book.isbn")
                 .Query;
 
             // Assert
@@ -27,7 +27,7 @@ namespace Neo4jClient.Test.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .DropConstraint("(book:Book)", "book.isbn")
+                .DropConstraint("book:Book", "book.isbn")
                 .Query;
 
             // Assert
