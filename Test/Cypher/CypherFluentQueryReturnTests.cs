@@ -139,6 +139,40 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ReturnsWhenIdentityIsACollection()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("(n0),(n1)")
+                .Return<IEnumerable<object>>("[n0,n1]")
+                .Query;
+
+            Assert.AreEqual("MATCH (n0),(n1)\r\nRETURN [n0,n1]", query.QueryText);
+        }
+
+        [Test]
+        public void ReturnsWhenIdentityIsACollectionRegardlessOfPadding()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("(n0),(n1)")
+                .Return<IEnumerable<object>>("  [n0,n1]  ")
+                .Query;
+
+            Assert.AreEqual("MATCH (n0),(n1)\r\nRETURN [n0,n1]", query.QueryText);
+        }
+        
+        [Test]
+        public void ShouldThrowWhenIdentityIsCollectionButResultIsNot()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var ex = Assert.Throws<ArgumentException>(
+                () => new CypherFluentQuery(client).Return<object>("[foo,bar]")
+            );
+            StringAssert.StartsWith(CypherFluentQuery.IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, ex.Message);
+        }
+
+        [Test]
         public void ShouldThrowWhenIdentityLooksLikeAMultiColumnStatement()
         {
             var client = Substitute.For<IRawGraphClient>();

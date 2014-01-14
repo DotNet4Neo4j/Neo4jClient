@@ -6,11 +6,18 @@ namespace Neo4jClient.Cypher
     public partial class CypherFluentQuery
     {
         internal const string IdentityLooksLikeAMultiColumnStatementExceptionMessage = "The overload you have called takes an identity (for example: foo), but it looks like you've tried to pass in a multiple column statement (for example: foo,bar). If you want to return multiple columns, use an anonymous type: Return((foo, bar) => new { Foo = foo.As<Foo>(), BarCount = bar.Count() }). If the function you want isn't available in the managed wrapper, you can use Return(() => new { Foo = Return.As<Bar>(\"function(foo)\") }).";
+        internal const string IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage = "It looks like you've tried to pass in a collection statement (for example: [foo,bar]), but you aren't returning an IEnumerable derived type. If you want to return a collection, you should return an IEnumerable<TYPE>.";
 
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
-            if (identity.Contains(","))
+            identity = identity.Trim();
+            var identityIsCollection = identity.StartsWith("[") && identity.EndsWith("]");
+
+            if (identity.Contains(",") && (!identityIsCollection))
                 throw new ArgumentException(IdentityLooksLikeAMultiColumnStatementExceptionMessage, "identity");
+
+            if(identityIsCollection && !(typeof(TResult).GetInterface("IEnumerable") != null)) 
+                throw new ArgumentException(IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, "identity");
 
             return Mutate<TResult>(w => w.AppendClause("RETURN " + identity));
         }
