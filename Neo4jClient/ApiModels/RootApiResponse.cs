@@ -6,6 +6,9 @@ namespace Neo4jClient.ApiModels
 {
     class RootApiResponse
     {
+        [JsonProperty("transaction")]
+        public string Transaction { get; set; }
+
         [JsonProperty("cypher")]
         public string Cypher { get; set; }
 

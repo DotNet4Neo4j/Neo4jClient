@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Neo4jClient.Cypher;
+using Neo4jClient.Execution;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -186,7 +187,7 @@ namespace Neo4jClient.Test.GraphClientTests
             // Arrange
             var httpClient = Substitute.For<IHttpClient>();
             var graphClient = new GraphClient(new Uri("http://localhost"), httpClient);
-            var expectedUserAgent = graphClient.UserAgent;
+            var expectedUserAgent = graphClient.ExecutionConfiguration.UserAgent;
             httpClient
                 .SendAsync(Arg.Do<HttpRequestMessage>(message =>
                 {
@@ -227,7 +228,7 @@ namespace Neo4jClient.Test.GraphClientTests
         public void ShouldFormatUserAgentCorrectly()
         {
             var graphClient = new GraphClient(new Uri("http://localhost"));
-            var userAgent = graphClient.UserAgent;
+            var userAgent = graphClient.ExecutionConfiguration.UserAgent;
             Assert.IsTrue(Regex.IsMatch(userAgent, @"Neo4jClient/\d+\.\d+\.\d+\.\d+"), "User agent should be in format Neo4jClient/1.2.3.4");
         }
     }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
+using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -28,10 +29,25 @@ namespace Neo4jClient.Serialization
         {
             try
             {
+                var context = new DeserializationContext
+                {
+                    Culture = culture,
+                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
+                };
+                content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+
+                var reader = new JsonTextReader(new StringReader(content))
+                {
+                    DateParseHandling = DateParseHandling.DateTimeOffset
+                };
+
                 // Force the deserialization to happen now, not later, as there's
                 // not much value to deferred execution here and we'd like to know
                 // about any errors now
-                return DeserializeInternal(content).ToArray();
+                var transactionalClient = client as ITransactionalGraphClient;
+                return transactionalClient == null || transactionalClient.Transaction == null ? 
+                    DeserializeFromRoot(content, reader, context).ToArray() : 
+                    DeserializeFromResults(content, reader, context).ToArray();
             }
             catch (Exception ex)
             {
@@ -62,22 +78,9 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             }
         }
 
-        IEnumerable<TResult> DeserializeInternal(string content)
+        IEnumerable<TResult> DeserializeResultSet(JToken resultRoot, DeserializationContext context)
         {
-            var context = new DeserializationContext
-                {
-                    Culture = culture,
-                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
-                };
-            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
-
-            var reader = new JsonTextReader(new StringReader(content))
-            {
-                DateParseHandling = DateParseHandling.DateTimeOffset
-            };
-            var root = JToken.ReadFrom(reader).Root;
-
-            var columnsArray = (JArray)root["columns"];
+            var columnsArray = (JArray)resultRoot["columns"];
             var columnNames = columnsArray
                 .Children()
                 .Select(c => c.AsString())
@@ -114,7 +117,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             switch (resultMode)
             {
                 case CypherResultMode.Set:
-                    return ParseInSingleColumnMode(context, root, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInSingleColumnMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
                 case CypherResultMode.Projection:
                     jsonTypeMappings.Add(new TypeMapping
                     {
@@ -125,10 +128,50 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                         MutationCallback = n =>
                             n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
                     });
-                    return ParseInProjectionMode(context, root, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInProjectionMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
                 default:
                     throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
             }
+        }
+
+        private IEnumerable<TResult> DeserializeFromResults(string content, JsonTextReader reader, DeserializationContext context)
+        {
+            var root = JToken.ReadFrom(reader).Root as JObject;
+            if (root == null)
+            {
+                throw new InvalidOperationException("Root expected to be a JSON object.");
+            }
+            var results = root
+                .Properties()
+                .Single(property => property.Name == "results")
+                .Value as JArray;
+            if (results == null)
+            {
+                throw new InvalidOperationException("`results` property expected to a JSON array.");
+            }
+
+            if (results.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    @"`results` array should have one result set.
+This means no query was emitted, so a method that doesn't care about getting results should have been called."
+                    );
+            }
+
+            // discarding all the results but the first
+            // (this won't affect the library because as of now there is no way of executing
+            // multiple statements in the same batch within a transaction and returning the results)
+            return DeserializeResultSet(results.First, context);
+        }
+
+        IEnumerable<TResult> DeserializeFromRoot(string content, JsonTextReader reader, DeserializationContext context)
+        {
+            var root = JToken.ReadFrom(reader).Root;
+            if (!(root is JObject))
+            {
+                throw new InvalidOperationException("Root expected to be a JSON object.");
+            }
+            return DeserializeResultSet(root, context);
         }
 
 // ReSharper disable UnusedParameter.Local
