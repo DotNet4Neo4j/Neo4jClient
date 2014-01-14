@@ -50,6 +50,7 @@
     <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -232,7 +233,14 @@
     <Compile Include="Transactions\INeo4jTransaction.cs" />
     <Compile Include="Transactions\ITransaction.cs" />
     <Compile Include="Transactions\ITransactionalGraphClient.cs" />
-    <Compile Include="Transactions\Transaction.cs" />
+    <Compile Include="Transactions\ITransactionResourceManager.cs" />
+    <Compile Include="Transactions\Neo4jTransaction.cs" />
+    <Compile Include="Transactions\Neo4jTransactionProxy.cs" />
+    <Compile Include="Transactions\Neo4jTransactionResourceManager.cs" />
+    <Compile Include="Transactions\SuppressTransactionProxy.cs" />
+    <Compile Include="Transactions\TransactionConnectionContext.cs" />
+    <Compile Include="Transactions\TransactionScopeProxy.cs" />
+    <Compile Include="Transactions\TransactionSinglePhaseNotification.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

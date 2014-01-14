@@ -25,5 +25,11 @@ namespace Neo4jClient.Transactions
         /// Prevents the transaction from being claimed as an orphaned transaction.
         /// </summary>
         void KeepAlive();
+
+        /// <summary>
+        /// Returns true if the transaction is still open, that is, if the programmer has not called
+        /// Commit() or Rollback().
+        /// </summary>
+        bool IsOpen { get; }
     }
 }

@@ -20,7 +20,7 @@ namespace Neo4jClient.Execution
             get
             {
                 var transactionalGraphClient = Client as ITransactionalGraphClient;
-                return transactionalGraphClient != null && transactionalGraphClient.Transaction != null;
+                return transactionalGraphClient != null && transactionalGraphClient.InTransaction;
             }
         }
 

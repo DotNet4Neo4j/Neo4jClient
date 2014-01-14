@@ -16,6 +16,22 @@ namespace Neo4jClient.Execution
         {
         }
 
+        private INeo4jTransaction GetTransactionInScope()
+        {
+            var transactionalClient = Client as ITransactionalGraphClient;
+            if (transactionalClient == null)
+            {
+                return null;
+            }
+            var proxiedTransaction = transactionalClient.Transaction as TransactionScopeProxy;
+            if (proxiedTransaction == null)
+            {
+                return null;
+            }
+
+            return (INeo4jTransaction) proxiedTransaction.Transaction;
+        }
+
         public override Uri BaseEndpoint
         {
             get
@@ -25,9 +41,14 @@ namespace Neo4jClient.Execution
                     return Client.CypherEndpoint;
                 }
 
+                var proxiedTransaction = GetTransactionInScope();
                 var transactionalClient = (ITransactionalGraphClient) Client;
-                var startingReference = ((INeo4jTransaction) transactionalClient.Transaction).Endpoint ??
-                                        transactionalClient.TransactionEndpoint;
+                if (proxiedTransaction == null)
+                {
+                    return transactionalClient.TransactionEndpoint;
+                }
+
+                var startingReference = proxiedTransaction.Endpoint ?? transactionalClient.TransactionEndpoint;
                 return startingReference;
             }
         }
@@ -67,8 +88,12 @@ namespace Neo4jClient.Execution
             }
 
             // determine if we need to update the transaction end point
-            var transaction = (INeo4jTransaction) transactionalClient.Transaction;
-            if (transaction.Endpoint != null) return;
+            var transaction = GetTransactionInScope();
+            if (transaction == null || transaction.Endpoint != null)
+            {
+                return;
+            }
+
             var locationHeader = executionMetadata["Location"] as IEnumerable<string>;
             if (locationHeader == null)
             {

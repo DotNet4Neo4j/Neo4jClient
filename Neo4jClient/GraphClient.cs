@@ -22,7 +22,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
-    public class GraphClient : IRawGraphClient, ITransactionalGraphClient
+    public class GraphClient : IRawGraphClient, ITransactionalGraphClient, IDisposable
     {
         internal const string GremlinPluginUnavailable = "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
 
@@ -34,7 +34,8 @@ namespace Neo4jClient
             new EnumValueConverter()
         };
 
-        [ThreadStatic] private static Transaction ambientTransaction;
+        // holds the transaction objects
+        [ThreadStatic] private static Stack<TransactionScopeProxy> scopedTransactions;
 
         private IExecutionPolicyFactory policyFactory;
         public ExecutionConfiguration ExecutionConfiguration { get; private set; }
@@ -109,6 +110,11 @@ namespace Neo4jClient
 
         public virtual void Connect()
         {
+            if (IsConnected)
+            {
+                return;
+            }
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -134,6 +140,8 @@ namespace Neo4jClient
             if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
             {
                 RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
+                Thread.BeginThreadAffinity();
+                scopedTransactions = new Stack<TransactionScopeProxy>();
             }
 
             if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
@@ -737,35 +745,127 @@ namespace Neo4jClient
 
         public ITransaction BeginTransaction()
         {
+            return BeginTransaction(TransactionScopeOption.Join);
+        }
+
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
+        {
+            CheckRoot();
+
+            if (scopeOption == TransactionScopeOption.Suppress)
+            {
+                // TransactionScopeOption.Suppress doesn't fail with older versions of Neo4j
+                return BeginSupressTransaction();
+            }
+
             if (ServerVersion < new Version(2, 0) || RootApiResponse.Transaction == null)
             {
                 throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
             }
 
-            if (Transaction != null)
+            if (scopeOption == TransactionScopeOption.Join)
             {
-                throw new NotSupportedException("Parallel transactions per GraphClient are not supported.");
+                var joinedTransaction = BeginJoinTransaction();
+                if (joinedTransaction != null)
+                {
+                    return joinedTransaction;
+                }
             }
 
-            Thread.BeginThreadAffinity();
-            ambientTransaction = new Transaction(this, policyFactory);
-            return ambientTransaction;
+            // then scopeOption == TransactionScopeOption.RequiresNew or we dont have a current transaction
+            return BeginNewTransaction();
+        }
+
+        private void PushScopeTransaction(TransactionScopeProxy transaction)
+        {
+            if (scopedTransactions == null)
+            {
+                scopedTransactions = new Stack<TransactionScopeProxy>();
+            }
+            scopedTransactions.Push(transaction);
+        }
+
+        private ITransaction BeginNewTransaction()
+        {
+            var transaction = new Neo4jTransactionProxy(this, new Neo4jTransaction(this),  true);
+            PushScopeTransaction(transaction);
+            return transaction;
+        }
+
+        private ITransaction BeginJoinTransaction()
+        {
+            var parentScope = InternalTransaction;
+            if (parentScope == null)
+            {
+                return null;
+            }
+
+            if (!parentScope.Committable)
+            {
+                return null;
+            }
+
+            if (!parentScope.IsOpen)
+            {
+                throw new ClosedTransactionException(null);
+            }
+
+            var joinedTransaction = new Neo4jTransactionProxy(this, parentScope.Transaction, false);
+            PushScopeTransaction(joinedTransaction);
+            return joinedTransaction;
+        }
+
+        private ITransaction BeginSupressTransaction()
+        {
+            var suppressTransaction = new SuppressTransactionProxy(this);
+            PushScopeTransaction(suppressTransaction);
+            return suppressTransaction;
+        }
+
+        private TransactionScopeProxy InternalTransaction
+        {
+            get
+            {
+                try
+                {
+                    return scopedTransactions == null ? null : scopedTransactions.Peek();
+                }
+                catch (InvalidOperationException)
+                {
+                    // the stack is empty
+                    return null;
+                }
+            }
         }
 
         public ITransaction Transaction
         {
-            get { return ambientTransaction; }
+            get { return InternalTransaction; }
+        }
+
+        public bool InTransaction
+        {
+            get
+            {
+                var transactionObject = InternalTransaction;
+                return transactionObject != null && transactionObject.Committable;
+            }
         }
 
         public void EndTransaction()
         {
-            if (Transaction != null)
+            TransactionScopeProxy currentTransaction = null;
+            try
             {
-                Transaction.Dispose();
+                currentTransaction = scopedTransactions == null ? null : scopedTransactions.Pop();
             }
-
-            ambientTransaction = null;
-            Thread.EndThreadAffinity();
+            catch (InvalidOperationException)
+            {
+            }
+            if (currentTransaction != null)
+            {
+                currentTransaction.Dispose();
+            }
         }
 
         [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
@@ -1314,6 +1414,11 @@ namespace Neo4jClient
             var eventInstance = OperationCompleted;
             if (eventInstance != null)
                 eventInstance(this, args);
+        }
+
+        public void Dispose()
+        {
+            Thread.EndThreadAffinity();
         }
     }
 }

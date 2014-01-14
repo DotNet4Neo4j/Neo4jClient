@@ -159,7 +159,7 @@
     <Compile Include="CultureInfoSetupFixture.cs" />
     <Compile Include="Serialization\UserSuppliedSerializationTests.cs" />
     <Compile Include="Transactions\QueriesInTransactionTests.cs" />
-    <Compile Include="Transactions\RestCallFailTests.cs" />
+    <Compile Include="Transactions\RestCallScenarioTests.cs" />
     <Compile Include="Transactions\TransactionManagementTests.cs" />
     <Compile Include="UtilitiesTests.cs" />
   </ItemGroup>

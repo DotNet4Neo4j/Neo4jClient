@@ -124,7 +124,9 @@ namespace Neo4jClient.Test.Transactions
                         .Return(n => n.Count())
                         .ExecuteWithoutResults();
 
-                    Assert.AreEqual(new Uri("http://foo/db/data/transaction/1"), ((Transaction) transaction).Endpoint);
+                    Assert.AreEqual(
+                        new Uri("http://foo/db/data/transaction/1"),
+                        ((INeo4jTransaction)((TransactionScopeProxy) transaction).Transaction).Endpoint);
                 }
             }
         }
