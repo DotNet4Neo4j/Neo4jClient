@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Transactions;
 using Neo4jClient.Transactions;
 
 namespace Neo4jClient.Execution
@@ -20,7 +21,8 @@ namespace Neo4jClient.Execution
             get
             {
                 var transactionalGraphClient = Client as ITransactionalGraphClient;
-                return transactionalGraphClient != null && transactionalGraphClient.InTransaction;
+                return transactionalGraphClient != null &&
+                       (transactionalGraphClient.InTransaction || Transaction.Current != null);
             }
         }
 

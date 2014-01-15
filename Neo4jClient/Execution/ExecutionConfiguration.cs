@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Execution
 {
+
     public class ExecutionConfiguration
     {
         public IHttpClient HttpClient { get; set; }

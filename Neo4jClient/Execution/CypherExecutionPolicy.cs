@@ -18,11 +18,18 @@ namespace Neo4jClient.Execution
 
         private INeo4jTransaction GetTransactionInScope()
         {
-            var transactionalClient = Client as ITransactionalGraphClient;
+            var transactionalClient = Client as IInternalTransactionalGraphClient;
             if (transactionalClient == null)
             {
                 return null;
             }
+
+            var ambientTransaction = transactionalClient.TransactionManager.CurrentDtcTransaction;
+            if (ambientTransaction != null)
+            {
+                return (INeo4jTransaction) ambientTransaction;
+            }
+
             var proxiedTransaction = transactionalClient.Transaction as TransactionScopeProxy;
             if (proxiedTransaction == null)
             {

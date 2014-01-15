@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
@@ -22,9 +21,10 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
-    public class GraphClient : IRawGraphClient, ITransactionalGraphClient, IDisposable
+    public class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient, IDisposable
     {
-        internal const string GremlinPluginUnavailable = "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
+        internal const string GremlinPluginUnavailable =
+            "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
 
         public static readonly JsonConverter[] DefaultJsonConverters =
         {
@@ -34,19 +34,17 @@ namespace Neo4jClient
             new EnumValueConverter()
         };
 
-        // holds the transaction objects
-        [ThreadStatic] private static Stack<TransactionScopeProxy> scopedTransactions;
-
+        private ITransactionManager transactionManager;
         private IExecutionPolicyFactory policyFactory;
         public ExecutionConfiguration ExecutionConfiguration { get; private set; }
         internal readonly Uri RootUri;
         internal RootApiResponse RootApiResponse;
-        RootNode rootNode;
-        
-        CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
+        private RootNode rootNode;
+
+        private CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
 
         public bool UseJsonStreamingIfAvailable { get; set; }
-        
+
         public GraphClient(Uri rootUri)
             : this(rootUri, new HttpClientWrapper())
         {
@@ -78,7 +76,7 @@ namespace Neo4jClient
             policyFactory = new ExecutionPolicyFactory(this);
         }
 
-        Uri BuildUri(string relativeUri)
+        private Uri BuildUri(string relativeUri)
         {
             var baseUri = RootUri;
             if (!RootUri.AbsoluteUri.EndsWith("/"))
@@ -94,8 +92,8 @@ namespace Neo4jClient
         {
             return response.Headers.ToDictionary(
                 headerPair => headerPair.Key,
-                headerPair => (object)headerPair.Value
-            );
+                headerPair => (object) headerPair.Value
+                );
         }
 
         private string SerializeAsJson(object contents)
@@ -140,8 +138,7 @@ namespace Neo4jClient
             if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
             {
                 RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
-                Thread.BeginThreadAffinity();
-                scopedTransactions = new Stack<TransactionScopeProxy>();
+                transactionManager = new TransactionManager(this);
             }
 
             if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
@@ -162,11 +159,11 @@ namespace Neo4jClient
 
             // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
             ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
-                RootApiResponse.Version >= new Version(1, 8);
+                                                      RootApiResponse.Version >= new Version(1, 8);
 
             if (RootApiResponse.Version < new Version(2, 0))
                 cypherCapabilities = CypherCapabilities.Cypher19;
-            
+
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -177,7 +174,9 @@ namespace Neo4jClient
             });
         }
 
-        [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
+        [Obsolete(
+            "The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels."
+            )]
         public virtual RootNode RootNode
         {
             get
@@ -193,12 +192,12 @@ namespace Neo4jClient
             IEnumerable<IndexEntry> indexEntries)
             where TNode : class
         {
-            if (typeof(TNode).IsGenericType &&
-                typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>))
+            if (typeof (TNode).IsGenericType &&
+                typeof (TNode).GetGenericTypeDefinition() == typeof (Node<>))
             {
                 throw new ArgumentException(string.Format(
                     "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
-                    typeof(TNode).GetGenericArguments()[0].Name),
+                    typeof (TNode).GetGenericArguments()[0].Name),
                     "node");
             }
 
@@ -217,15 +216,15 @@ namespace Neo4jClient
             var calculatedRelationships = relationships
                 .Cast<Relationship>()
                 .Select(r => new
-                    {
-                        CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof (TNode), r),
-                        Relationship = r
-                    })
+                {
+                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof (TNode), r),
+                    Relationship = r
+                })
                 .ToArray();
 
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Batch);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var batchSteps = new List<BatchStep>();
 
@@ -292,7 +291,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Create<{0}>", typeof(TNode).Name),
+                QueryText = string.Format("Create<{0}>", typeof (TNode).Name),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -300,7 +299,7 @@ namespace Neo4jClient
             return nodeReference;
         }
 
-        BatchResponse ExecuteBatch(List<BatchStep> batchSteps, IExecutionPolicy policy)
+        private BatchResponse ExecuteBatch(List<BatchStep> batchSteps, IExecutionPolicy policy)
         {
             return Request.With(ExecutionConfiguration)
                 .Post(policy.BaseEndpoint)
@@ -325,7 +324,7 @@ namespace Neo4jClient
 
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             return CreateRelationship(
                 sourceNodeReference,
@@ -335,14 +334,15 @@ namespace Neo4jClient
                 policy);
         }
 
-        RelationshipReference CreateRelationship(NodeReference sourceNode, NodeReference targetNode, string relationshipTypeKey, object data, IExecutionPolicy policy)
+        private RelationshipReference CreateRelationship(NodeReference sourceNode, NodeReference targetNode,
+            string relationshipTypeKey, object data, IExecutionPolicy policy)
         {
             var relationship = new RelationshipTemplate
-                {
-                    To = policy.BaseEndpoint.AddPath(targetNode, policy).ToString(),
-                    Data = data,
-                    Type = relationshipTypeKey
-                };
+            {
+                To = policy.BaseEndpoint.AddPath(targetNode, policy).ToString(),
+                Data = data,
+                Type = relationshipTypeKey
+            };
 
             var sourceNodeEndpoint = policy.BaseEndpoint
                 .AddPath(sourceNode, policy)
@@ -372,7 +372,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -407,7 +407,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             return Request.With(ExecutionConfiguration)
                 .Get(policy.BaseEndpoint.AddPath(reference, policy))
@@ -423,23 +423,26 @@ namespace Neo4jClient
             return Get<TNode>((NodeReference) reference);
         }
 
-        public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference) where TData : class, new()
+        public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference)
+            where TData : class, new()
         {
-            return Get<TData>((RelationshipReference)reference);
+            return Get<TData>((RelationshipReference) reference);
         }
 
-        public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference reference) where TData : class, new()
+        public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference reference)
+            where TData : class, new()
         {
             var task = GetAsync<TData>(reference);
             Task.WaitAll(task);
             return task.Result;
         }
 
-        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
+        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference)
+            where TData : class, new()
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             return Request.With(ExecutionConfiguration)
                 .Get(policy.BaseEndpoint.AddPath(reference, policy))
@@ -452,11 +455,12 @@ namespace Neo4jClient
                         responseTask.Result != null ? responseTask.Result.ToRelationshipInstance(this) : null);
         }
 
-        public void Update<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
+        public void Update<TNode>(NodeReference<TNode> nodeReference, TNode replacementData,
+            IEnumerable<IndexEntry> indexEntries = null)
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -477,7 +481,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                QueryText = string.Format("Update<{0}> {1}", typeof (TNode).Name, nodeReference.Id),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -489,7 +493,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -511,18 +515,22 @@ namespace Neo4jClient
 
             if (changeCallback != null)
             {
-                var originalValuesDictionary = new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(originalValuesString);
+                var originalValuesDictionary =
+                    new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(
+                        originalValuesString);
                 var newValuesString = serializer.Serialize(node.Data);
-                var newValuesDictionary = new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(newValuesString);
-                var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
+                var newValuesDictionary =
+                    new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(newValuesString);
+                var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary,
+                    newValuesDictionary);
                 changeCallback(differences);
             }
 
             Request.With(ExecutionConfiguration)
-               .Put(policy.BaseEndpoint.AddPath(nodeReference, policy).AddPath("properties"))
-               .WithJsonContent(serializer.Serialize(node.Data))
-               .WithExpectedStatusCodes(HttpStatusCode.NoContent)
-               .Execute();
+                .Put(policy.BaseEndpoint.AddPath(nodeReference, policy).AddPath("properties"))
+                .WithJsonContent(serializer.Serialize(node.Data))
+                .WithExpectedStatusCodes(HttpStatusCode.NoContent)
+                .Execute();
 
             if (indexEntriesCallback != null)
             {
@@ -532,7 +540,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
+                QueryText = string.Format("Update<{0}> {1}", typeof (TNode).Name, nodeReference.Id),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -540,12 +548,13 @@ namespace Neo4jClient
             return node;
         }
 
-        public void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback)
+        public void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference,
+            Action<TRelationshipData> updateCallback)
             where TRelationshipData : class, new()
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -569,7 +578,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TRelationshipData).Name, relationshipReference.Id),
+                QueryText = string.Format("Update<{0}> {1}", typeof (TRelationshipData).Name, relationshipReference.Id),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -579,7 +588,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -608,7 +617,7 @@ namespace Neo4jClient
             });
         }
 
-        void DeleteAllRelationships(NodeReference reference, IExecutionPolicy policy)
+        private void DeleteAllRelationships(NodeReference reference, IExecutionPolicy policy)
         {
             //TODO: Make this a dynamic endpoint resolution
             var relationshipEndpoint = policy.BaseEndpoint
@@ -631,7 +640,7 @@ namespace Neo4jClient
             }
         }
 
-        static string GetLastPathSegment(string uri)
+        private static string GetLastPathSegment(string uri)
         {
             var path = new Uri(uri).AbsolutePath;
             return path
@@ -641,10 +650,12 @@ namespace Neo4jClient
 
         public ICypherFluentQuery Cypher
         {
-            get {return new CypherFluentQuery(this); }
+            get { return new CypherFluentQuery(this); }
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
         public IGremlinClient Gremlin
         {
             get { return new GremlinClient(this); }
@@ -729,9 +740,14 @@ namespace Neo4jClient
 
         public List<JsonConverter> JsonConverters { get; private set; }
 
-        private void FailDependingOnPolicy(IExecutionPolicy policy)
+        private void CheckTransactionEnvironmentWithPolicy(IExecutionPolicy policy)
         {
-            if (policy.InTransaction && policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Denied)
+            if (transactionManager != null)
+            {
+                transactionManager.RegisterToTransactionIfNeeded();
+            }
+
+            if (InTransaction && policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Denied)
             {
                 throw new InvalidOperationException("Cannot be done inside a transaction scope.");
             }
@@ -751,129 +767,41 @@ namespace Neo4jClient
         public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
         {
             CheckRoot();
-
-            if (scopeOption == TransactionScopeOption.Suppress)
-            {
-                // TransactionScopeOption.Suppress doesn't fail with older versions of Neo4j
-                return BeginSupressTransaction();
-            }
-
-            if (ServerVersion < new Version(2, 0) || RootApiResponse.Transaction == null)
+            if (transactionManager == null)
             {
                 throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
             }
 
-            if (scopeOption == TransactionScopeOption.Join)
-            {
-                var joinedTransaction = BeginJoinTransaction();
-                if (joinedTransaction != null)
-                {
-                    return joinedTransaction;
-                }
-            }
-
-            // then scopeOption == TransactionScopeOption.RequiresNew or we dont have a current transaction
-            return BeginNewTransaction();
-        }
-
-        private void PushScopeTransaction(TransactionScopeProxy transaction)
-        {
-            if (scopedTransactions == null)
-            {
-                scopedTransactions = new Stack<TransactionScopeProxy>();
-            }
-            scopedTransactions.Push(transaction);
-        }
-
-        private ITransaction BeginNewTransaction()
-        {
-            var transaction = new Neo4jTransactionProxy(this, new Neo4jTransaction(this),  true);
-            PushScopeTransaction(transaction);
-            return transaction;
-        }
-
-        private ITransaction BeginJoinTransaction()
-        {
-            var parentScope = InternalTransaction;
-            if (parentScope == null)
-            {
-                return null;
-            }
-
-            if (!parentScope.Committable)
-            {
-                return null;
-            }
-
-            if (!parentScope.IsOpen)
-            {
-                throw new ClosedTransactionException(null);
-            }
-
-            var joinedTransaction = new Neo4jTransactionProxy(this, parentScope.Transaction, false);
-            PushScopeTransaction(joinedTransaction);
-            return joinedTransaction;
-        }
-
-        private ITransaction BeginSupressTransaction()
-        {
-            var suppressTransaction = new SuppressTransactionProxy(this);
-            PushScopeTransaction(suppressTransaction);
-            return suppressTransaction;
-        }
-
-        private TransactionScopeProxy InternalTransaction
-        {
-            get
-            {
-                try
-                {
-                    return scopedTransactions == null ? null : scopedTransactions.Peek();
-                }
-                catch (InvalidOperationException)
-                {
-                    // the stack is empty
-                    return null;
-                }
-            }
+            return transactionManager.BeginTransaction(scopeOption);
         }
 
         public ITransaction Transaction
         {
-            get { return InternalTransaction; }
+            get { return transactionManager == null ? null : transactionManager.CurrentNonDtcTransaction; }
         }
 
         public bool InTransaction
         {
-            get
-            {
-                var transactionObject = InternalTransaction;
-                return transactionObject != null && transactionObject.Committable;
-            }
+            get { return transactionManager != null && transactionManager.InTransaction; }
         }
 
         public void EndTransaction()
         {
-            TransactionScopeProxy currentTransaction = null;
-            try
+            if (transactionManager == null)
             {
-                currentTransaction = scopedTransactions == null ? null : scopedTransactions.Pop();
+                throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
             }
-            catch (InvalidOperationException)
-            {
-            }
-            if (currentTransaction != null)
-            {
-                currentTransaction.Dispose();
-            }
+            transactionManager.EndTransaction();
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
         public virtual string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Gremlin);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             if (RootApiResponse.Extensions.GremlinPlugin == null ||
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
@@ -887,7 +815,7 @@ namespace Neo4jClient
                 .WithJsonContent(Serializer.Serialize(new GremlinApiQuery(query, parameters)))
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .Execute(string.Format("The query was: {0}", query));
-            
+
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
@@ -899,12 +827,15 @@ namespace Neo4jClient
             return response.Content.ReadAsString();
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
-        public virtual IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new()
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
+        public virtual IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query)
+            where TResult : new()
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Gremlin);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -916,7 +847,7 @@ namespace Neo4jClient
                 .ParseAs<List<List<GremlinTableCapResponse>>>()
                 .Execute(string.Format("The query was: {0}", query.QueryText));
 
-            var responses = response ?? new List<List<GremlinTableCapResponse>> { new List<GremlinTableCapResponse>() };
+            var responses = response ?? new List<List<GremlinTableCapResponse>> {new List<GremlinTableCapResponse>()};
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -936,7 +867,9 @@ namespace Neo4jClient
             get { return cypherCapabilities; }
         }
 
-        [Obsolete("This method is for use by the framework internally. Use IGraphClient.Cypher instead, and read the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher. If you really really want to call this method directly, and you accept the fact that YOU WILL LIKELY INTRODUCE A RUNTIME SECURITY RISK if you do so, then it shouldn't take you too long to find the correct explicit interface implementation that you have to call. This hurdle is for your own protection. You really really should not do it. This signature may be removed or renamed at any time.", true)]
+        [Obsolete(
+            "This method is for use by the framework internally. Use IGraphClient.Cypher instead, and read the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher. If you really really want to call this method directly, and you accept the fact that YOU WILL LIKELY INTRODUCE A RUNTIME SECURITY RISK if you do so, then it shouldn't take you too long to find the correct explicit interface implementation that you have to call. This hurdle is for your own protection. You really really should not do it. This signature may be removed or renamed at any time.",
+            true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
@@ -948,7 +881,7 @@ namespace Neo4jClient
             var request = Request.With(ExecutionConfiguration)
                 .Post(policy.BaseEndpoint)
                 .WithJsonContent(policy.SerializeRequest(query));
-            if (Transaction != null)
+            if (InTransaction)
             {
                 // HttpStatusCode.Created may be returned when emitting the first query on a transaction
                 return request.WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created);
@@ -977,7 +910,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Cypher);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -1002,7 +935,7 @@ namespace Neo4jClient
                             TimeTaken = stopwatch.Elapsed
                         });
 
-                        return (IEnumerable<TResult>)results;
+                        return (IEnumerable<TResult>) results;
                     });
         }
 
@@ -1010,12 +943,13 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Cypher);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var response = PrepareCypherRequest(query, policy).Execute(string.Format("The query was: {0}", query.QueryText));
+            var response =
+                PrepareCypherRequest(query, policy).Execute(string.Format("The query was: {0}", query.QueryText));
             policy.AfterExecution(GetMetadataFromResponse(response));
 
             stopwatch.Stop();
@@ -1031,7 +965,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Transaction);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var queryList = queries.ToList();
             string queriesInText = string.Join(", ", queryList.Select(query => query.QueryText));
@@ -1056,19 +990,25 @@ namespace Neo4jClient
             });
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
-        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
+        public virtual IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query,
+            IDictionary<string, object> parameters)
         {
             return ExecuteGetAllRelationshipsGremlin<object>(query, parameters);
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
-        public virtual IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsGremlin<TData>(string query, IDictionary<string, object> parameters)
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
+        public virtual IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsGremlin<TData>(string query,
+            IDictionary<string, object> parameters)
             where TData : class, new()
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Gremlin);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             if (RootApiResponse.Extensions.GremlinPlugin == null ||
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
@@ -1099,24 +1039,32 @@ namespace Neo4jClient
             return relationships;
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters)
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query,
+            IDictionary<string, object> parameters)
         {
             return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, new List<string>()));
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
-        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query, IDictionary<string, object> parameters, IList<string> declarations)
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
+        public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(string query,
+            IDictionary<string, object> parameters, IList<string> declarations)
         {
             return ExecuteGetAllNodesGremlin<TNode>(new GremlinQuery(this, query, parameters, declarations));
         }
 
-        [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
+        [Obsolete(
+            "Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher."
+            )]
         public virtual IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Gremlin);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             if (RootApiResponse.Extensions.GremlinPlugin == null ||
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
@@ -1163,7 +1111,7 @@ namespace Neo4jClient
         private Uri GetUriForIndexType(IndexFor indexFor)
         {
             var policy = GetPolicyForIndex(indexFor);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
             return policy.BaseEndpoint;
         }
 
@@ -1195,7 +1143,7 @@ namespace Neo4jClient
             return response.StatusCode == HttpStatusCode.OK;
         }
 
-        void CheckRoot()
+        private void CheckRoot()
         {
             if (RootApiResponse == null)
                 throw new InvalidOperationException(
@@ -1236,18 +1184,19 @@ namespace Neo4jClient
             ReIndex(entityUri.ToString(), entityId, IndexFor.Relationship, indexEntries);
         }
 
-        private void ReIndex(string entityUri, long entityId, IndexFor indexFor, IEnumerable<IndexEntry> indexEntries, IExecutionPolicy policy)
+        private void ReIndex(string entityUri, long entityId, IndexFor indexFor, IEnumerable<IndexEntry> indexEntries,
+            IExecutionPolicy policy)
         {
             if (indexEntries == null)
                 throw new ArgumentNullException("indexEntries");
 
             CheckRoot();
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             var updates = indexEntries
                 .SelectMany(
                     i => i.KeyValues,
-                    (i, kv) => new { IndexName = i.Name, kv.Key, kv.Value })
+                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
                 .Where(update => update.Value != null)
                 .ToList();
 
@@ -1267,7 +1216,7 @@ namespace Neo4jClient
         {
             CheckRoot();
             var policy = GetPolicyForIndex(indexFor);
-            FailDependingOnPolicy(policy);
+            CheckTransactionEnvironmentWithPolicy(policy);
 
             Request.With(ExecutionConfiguration)
                 .Delete(policy.BaseEndpoint.AddPath(indexName))
@@ -1285,7 +1234,7 @@ namespace Neo4jClient
             DeleteIndexEntries(indexName, relationshipReference.Id, GetUriForIndexType(IndexFor.Relationship));
         }
 
-        void DeleteIndexEntries(string indexName, long id, Uri indexUri)
+        private void DeleteIndexEntries(string indexName, long id, Uri indexUri)
         {
             var indexAddress = indexUri
                 .AddPath(Uri.EscapeDataString(indexName))
@@ -1299,7 +1248,8 @@ namespace Neo4jClient
                 );
         }
 
-        void AddIndexEntry(string indexName, string indexKey, object indexValue, string address, IndexFor indexFor)
+        private void AddIndexEntry(string indexName, string indexKey, object indexValue, string address,
+            IndexFor indexFor)
         {
             var encodedIndexValue = EncodeIndexValue(indexValue);
             if (string.IsNullOrWhiteSpace(encodedIndexValue))
@@ -1335,7 +1285,7 @@ namespace Neo4jClient
             return GetUriForIndexType(indexFor).AddPath(Uri.EscapeDataString(indexName));
         }
 
-        static string EncodeIndexValue(object value)
+        private static string EncodeIndexValue(object value)
         {
             string indexValue;
             if (value is DateTimeOffset)
@@ -1344,7 +1294,7 @@ namespace Neo4jClient
             }
             else if (value is DateTime)
             {
-                indexValue = ((DateTime)value).Ticks.ToString(CultureInfo.InvariantCulture);
+                indexValue = ((DateTime) value).Ticks.ToString(CultureInfo.InvariantCulture);
             }
             else
             {
@@ -1359,7 +1309,9 @@ namespace Neo4jClient
         }
 
         //ToDo Check status of https://github.com/neo4j/community/issues/249 for limiting query result sets
-        [Obsolete("There are encoding issues with this method. You should use the newer Cypher approach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher.")]
+        [Obsolete(
+            "There are encoding issues with this method. You should use the newer Cypher approach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher."
+            )]
         public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
         {
             CheckRoot();
@@ -1375,17 +1327,20 @@ namespace Neo4jClient
                 .Select(nodeResponse => nodeResponse.ToNode(this));
         }
 
-        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id)
+        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey,
+            long id)
         {
             return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString(CultureInfo.InvariantCulture));
         }
 
-        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id)
+        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey,
+            int id)
         {
             return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString(CultureInfo.InvariantCulture));
         }
 
-        IEnumerable<Node<TNode>> BuildLookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, string id)
+        private IEnumerable<Node<TNode>> BuildLookupIndex<TNode>(string exactIndexName, IndexFor indexFor,
+            string indexKey, string id)
         {
             CheckRoot();
             var indexResource = GetUriForIndexType(indexFor)
@@ -1401,7 +1356,9 @@ namespace Neo4jClient
                 .Select(query => query.ToNode(this));
         }
 
-        [Obsolete("This method depends on Gremlin, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management.")]
+        [Obsolete(
+            "This method depends on Gremlin, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management."
+            )]
         public void ShutdownServer()
         {
             ExecuteScalarGremlin("g.getRawGraph().shutdown()", null);
@@ -1418,7 +1375,15 @@ namespace Neo4jClient
 
         public void Dispose()
         {
-            Thread.EndThreadAffinity();
+            if (transactionManager != null)
+            {
+                transactionManager.Dispose();
+            }
+        }
+
+        public ITransactionManager TransactionManager
+        {
+            get { return transactionManager; }
         }
     }
 }
