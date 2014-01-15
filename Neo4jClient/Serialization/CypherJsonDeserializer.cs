@@ -16,13 +16,20 @@ namespace Neo4jClient.Serialization
     {
         readonly IGraphClient client;
         readonly CypherResultMode resultMode;
+        private readonly bool inTransaction; 
 
         readonly CultureInfo culture = CultureInfo.InvariantCulture;
 
         public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode)
+            : this(client, resultMode, false)
+        {
+        }
+
+        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, bool inTransaction)
         {
             this.client = client;
             this.resultMode = resultMode;
+            this.inTransaction = inTransaction;
         }
 
         public IEnumerable<TResult> Deserialize(string content)
@@ -44,10 +51,9 @@ namespace Neo4jClient.Serialization
                 // Force the deserialization to happen now, not later, as there's
                 // not much value to deferred execution here and we'd like to know
                 // about any errors now
-                var transactionalClient = client as ITransactionalGraphClient;
-                return transactionalClient == null || transactionalClient.Transaction == null ? 
-                    DeserializeFromRoot(content, reader, context).ToArray() : 
-                    DeserializeFromResults(content, reader, context).ToArray();
+                return inTransaction
+                    ? DeserializeFromResults(content, reader, context).ToArray()
+                    : DeserializeFromRoot(content, reader, context).ToArray();
             }
             catch (Exception ex)
             {
@@ -119,15 +125,19 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 case CypherResultMode.Set:
                     return ParseInSingleColumnMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
                 case CypherResultMode.Projection:
-                    jsonTypeMappings.Add(new TypeMapping
+                    // if we are in transaction and we have an object we dont need a mutation
+                    if (!inTransaction)
                     {
-                        ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                            nestingLevel == 0 && type.IsClass,
-                        DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
-                            typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
-                        MutationCallback = n =>
-                            n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
-                    });
+                        jsonTypeMappings.Add(new TypeMapping
+                        {
+                            ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                                nestingLevel == 0 && type.IsClass,
+                            DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                                typeof (NodeOrRelationshipApiResponse<>).MakeGenericType(new[] {t}),
+                            MutationCallback = n =>
+                                n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
+                        });
+                    }
                     return ParseInProjectionMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
                 default:
                     throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
@@ -192,10 +202,29 @@ This means no query was emitted, so a method that doesn't care about getting res
             var rows = dataArray.Children();
             var results = rows.Select(row =>
             {
-                if (!(row is JArray))
-                    throw new InvalidOperationException("Expected the row to be a JSON array of values, but it wasn't.");
+                if (inTransaction)
+                {
+                    var rowObject = row as JObject;
+                    if (rowObject == null)
+                    {
+                        throw new InvalidOperationException("Expected the row to be a JSON object, but it wasn't.");
+                    }
+                    
+                    JToken rowProperty;
+                    if (!rowObject.TryGetValue("row", out rowProperty))
+                    {
+                        throw new InvalidOperationException("There is no row property in the JSON object.");
+                    }
+                    row = rowProperty;
 
-                var rowAsArray = (JArray) row;
+                }
+
+                if (!(row is JArray))
+                {
+                    // no transaction mode and the row is not an array
+                    throw new InvalidOperationException("Expected the row to be a JSON array of values, but it wasn't.");
+                }
+                var rowAsArray = (JArray)row;
                 if (rowAsArray.Count != 1)
                     throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
 
@@ -274,9 +303,8 @@ This means no query was emitted, so a method that doesn't care about getting res
 
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
-            var results = rows.Select(getRow);
 
-            return results;
+            return inTransaction ? rows.Select(row => row["row"]).Select(getRow) : rows.Select(getRow);
         }
 
         TResult ReadProjectionRowUsingCtor(

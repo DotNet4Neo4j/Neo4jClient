@@ -974,6 +974,122 @@ namespace Neo4jClient.Test.Serialization
             public string Name { get; set; }
         }
 
+        private class CityAndLabel
+        {
+            public City City { get; set; }
+            public IEnumerable<string> Labels { get; set; }
+        }
+
+        [Test]
+        public void DeserializerTwoLevelProjectionInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<CityAndLabel>(client, CypherResultMode.Projection, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'City', 'Labels'
+                    ],
+                    'data':[
+                        {
+                            'row': [{ 'Name': 'Sydney', 'Population': 4000000}, ['City1']]
+                        },
+                        {
+                            'row': [{ 'Name': 'Tijuana', 'Population': 1300000}, ['City2']]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(2, results.Length);
+            var city = results[0];
+            Assert.AreEqual("Sydney", city.City.Name);
+            Assert.AreEqual(4000000, city.City.Population);
+            Assert.AreEqual("City1", city.Labels.First());
+            city = results[1];
+            Assert.AreEqual("Tijuana", city.City.Name);
+            Assert.AreEqual(1300000, city.City.Population);
+            Assert.AreEqual("City2", city.Labels.First());
+        }
+
+        [Test]
+        public void DeserializerProjectionInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Projection, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'Name', 'Population'
+                    ],
+                    'data':[
+                        {
+                            'row': ['Sydney', 4000000]
+                        },
+                        {
+                            'row': ['Tijuana', 1300000]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(2, results.Length);
+            var city = results[0];
+            Assert.AreEqual("Sydney", city.Name);
+            Assert.AreEqual(4000000, city.Population);
+            city = results[1];
+            Assert.AreEqual("Tijuana", city.Name);
+            Assert.AreEqual(1300000, city.Population);
+        }
+
+        [Test]
+        public void DeserializeSimpleSetInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<int>(client, CypherResultMode.Set, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'count(n)'
+                    ],
+                    'data':[
+                        {
+                            'row': [3]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            Assert.AreEqual(3, results[0]);
+        }
+
+        [Test]
+        public void DeserializeResultsSetInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Set, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'c'
+                    ],
+                    'data':[
+                        {
+                            'row': [{
+                                'Name': 'Sydney', 'Population': 4000000
+                            }]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            var city = results[0];
+            Assert.AreEqual("Sydney", city.Name);
+            Assert.AreEqual(4000000, city.Population);
+        }
+
         [Test]
         public void DeserializeShouldPreserveUtf8Characters()
         {

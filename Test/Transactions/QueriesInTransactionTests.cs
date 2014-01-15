@@ -495,6 +495,49 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
+        public void DeserializeResultsFromTransaction()
+        {
+            var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+            var deserializationRequest = MockRequest.PostJson("/transaction/1", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+            var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    initTransactionRequest,
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                },
+                {
+                    deserializationRequest,
+                    MockResponse.Json(200, @"{'results':[{'columns': ['count(n)'], 'data': [{'row': [0]}]}]}")
+                },
+                {
+                    rollbackTransactionRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                using (var transaction = client.BeginTransaction())
+                {
+                    // dummy query to generate request
+                    client.Cypher
+                        .Match("n")
+                        .Return(n => n.Count())
+                        .ExecuteWithoutResults();
+
+                    // this query will hit the deserializer
+                    var count = client.Cypher
+                        .Match("n")
+                        .Return(n => n.Count())
+                        .Results;
+
+                    Assert.AreEqual(count.First(), 0);
+                }
+            }
+        }
+
+        [Test]
         public void OnTransactionDisposeCallRollback()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{

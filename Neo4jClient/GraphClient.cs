@@ -914,6 +914,11 @@ namespace Neo4jClient
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+
+            // the transaction handling is handled by a thread-local variable (ThreadStatic) so we need
+            // to know if we are in a transaction right now because our deserializer will run in another thread
+            bool inTransaction = InTransaction;
+
             return PrepareCypherRequest(query, policy)
                 .ExecuteAsync(
                     string.Format("The query was: {0}", query.QueryText),
@@ -922,7 +927,7 @@ namespace Neo4jClient
                         var response = responseTask.Result;
                         policy.AfterExecution(GetMetadataFromResponse(response));
 
-                        var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
+                        var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, inTransaction);
                         var results = deserializer
                             .Deserialize(response.Content.ReadAsString())
                             .ToList();

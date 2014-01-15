@@ -163,9 +163,11 @@ namespace Neo4jClient.Transactions
 
         private static void DoRollback(Uri rollbackUri, ExecutionConfiguration executionConfiguration)
         {
+            // not found is ok because it means our transaction either was committed or the timeout was expired
+            // and it was rolled back for us
             Request.With(executionConfiguration)
                 .Delete(rollbackUri)
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
+                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
                 .Execute();
         }
 
