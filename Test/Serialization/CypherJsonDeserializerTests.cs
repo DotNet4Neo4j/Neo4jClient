@@ -980,6 +980,61 @@ namespace Neo4jClient.Test.Serialization
             public IEnumerable<string> Labels { get; set; }
         }
 
+        private class State
+        {
+            public string Name { get; set; }
+        }
+
+        private class StateCityAndLabel
+        {
+            public State State { get; set; }
+            public IEnumerable<string> Labels { get; set; }
+            public IEnumerable<City> Cities { get; set; }
+        }
+
+        [Test]
+        public void DeserializeNestedObjectsInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<StateCityAndLabel>(client, CypherResultMode.Projection, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'State','Labels','Cities'
+                    ],
+                    'data':[
+                        {
+                            'row':[
+                                {'Name':'Baja California'},
+                                ['State'],
+                                [
+                                    {'Name':'Tijuana', Population: 1300000},
+                                    {'Name':'Mexicali', Population: 500000}
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            var result = results[0];
+            Assert.AreEqual("Baja California", result.State.Name);
+            Assert.AreEqual("State", result.Labels.First());
+
+            var cities = result.Cities.ToArray();
+            Assert.AreEqual(2, cities.Length);
+
+            var city = cities[0];
+            Assert.AreEqual("Tijuana", city.Name);
+            Assert.AreEqual(1300000, city.Population);
+
+            city = cities[1];
+            Assert.AreEqual("Mexicali", city.Name);
+            Assert.AreEqual(500000, city.Population);
+        }
+
+
         [Test]
         public void DeserializerTwoLevelProjectionInTransaction()
         {

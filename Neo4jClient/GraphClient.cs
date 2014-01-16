@@ -876,7 +876,7 @@ namespace Neo4jClient
             throw new NotImplementedException();
         }
 
-        private IResponseBuilder PrepareCypherRequest(CypherQuery query, IExecutionPolicy policy)
+        private Task<CypherPartialResult> PrepareCypherRequest<TResult>(CypherQuery query, IExecutionPolicy policy)
         {
             var request = Request.With(ExecutionConfiguration)
                 .Post(policy.BaseEndpoint)
@@ -884,9 +884,33 @@ namespace Neo4jClient
             if (InTransaction)
             {
                 // HttpStatusCode.Created may be returned when emitting the first query on a transaction
-                return request.WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created);
+                return request
+                    .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
+                    .ExecuteAsync(
+                        string.Format("The query was: {0}", query.QueryText),
+                        responseTask =>
+                        {
+                            // we need to check for errors returned by the transaction. The difference with a normal REST cypher
+                            // query is that the errors are embedded within the result object, instead of having a 400 bad request
+                            // status code.
+                            var response = responseTask.Result;
+                            policy.AfterExecution(GetMetadataFromResponse(response));
+
+                            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, true);
+                            return new CypherPartialResult
+                            {
+                                DeserializationContext =
+                                    deserializer.CheckForErrorsInTransactionResponse(response.Content.ReadAsString()),
+                                ResponseObject = response
+                            };
+                        });
             }
-            return request.WithExpectedStatusCodes(HttpStatusCode.OK);
+            return request
+                .WithExpectedStatusCodes(HttpStatusCode.OK)
+                .ExecuteAsync(response => new CypherPartialResult
+                {
+                    ResponseObject = response.Result
+                });
         }
 
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
@@ -919,18 +943,27 @@ namespace Neo4jClient
             // to know if we are in a transaction right now because our deserializer will run in another thread
             bool inTransaction = InTransaction;
 
-            return PrepareCypherRequest(query, policy)
-                .ExecuteAsync(
-                    string.Format("The query was: {0}", query.QueryText),
+            return PrepareCypherRequest<TResult>(query, policy)
+                .ContinueWith(
                     responseTask =>
                     {
-                        var response = responseTask.Result;
-                        policy.AfterExecution(GetMetadataFromResponse(response));
-
                         var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, inTransaction);
-                        var results = deserializer
-                            .Deserialize(response.Content.ReadAsString())
-                            .ToList();
+                        List<TResult> results;
+                        if (inTransaction)
+                        {
+                            results = deserializer
+                                .DeserializeFromTransactionPartialContext(responseTask.Result.DeserializationContext)
+                                .ToList();
+                        }
+                        else
+                        {
+                            var response = responseTask.Result.ResponseObject;
+                            policy.AfterExecution(GetMetadataFromResponse(response));
+
+                            results = deserializer
+                                .Deserialize(response.Content.ReadAsString())
+                                .ToList();
+                        }
 
                         stopwatch.Stop();
                         OnOperationCompleted(new OperationCompletedEventArgs
@@ -953,9 +986,18 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var response =
-                PrepareCypherRequest(query, policy).Execute(string.Format("The query was: {0}", query.QueryText));
-            policy.AfterExecution(GetMetadataFromResponse(response));
+            var task = PrepareCypherRequest<object>(query, policy);
+            try
+            {
+                Task.WaitAll(task);
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerExceptions.Count() == 1)
+                    throw ex.InnerExceptions.Single();
+                throw;
+            }
+            policy.AfterExecution(GetMetadataFromResponse(task.Result.ResponseObject));
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs

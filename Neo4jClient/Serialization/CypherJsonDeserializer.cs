@@ -52,11 +52,17 @@ namespace Neo4jClient.Serialization
                 // not much value to deferred execution here and we'd like to know
                 // about any errors now
                 return inTransaction
-                    ? DeserializeFromResults(content, reader, context).ToArray()
+                    ? FullDeserializationFromTransactionResponse(reader, context).ToArray()
                     : DeserializeFromRoot(content, reader, context).ToArray();
             }
             catch (Exception ex)
             {
+                // we want the NeoException to be thrown
+                if (ex is NeoException)
+                {
+                    throw;
+                }
+
                 const string messageTemplate =
                     @"Neo4j returned a valid response, however Neo4jClient was unable to deserialize into the object structure you supplied.
 
@@ -144,34 +150,136 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             }
         }
 
-        private IEnumerable<TResult> DeserializeFromResults(string content, JsonTextReader reader, DeserializationContext context)
+        private string GetStringPropertyFromObject(JObject obj, string propertyName)
         {
+            JToken propValue;
+            if (obj.TryGetValue(propertyName, out propValue))
+            {
+                return (string) (propValue as JValue);
+            }
+            return null;
+        }
+
+        private NeoException BuildNeoException(JToken error)
+        {
+            var errorObject = error as JObject;
+            var code = GetStringPropertyFromObject(errorObject, "code");
+            if (code == null)
+            {
+                throw new InvalidOperationException("Expected 'code' property on error message");
+            }
+
+            var message = GetStringPropertyFromObject(errorObject, "message");
+            if (message == null)
+            {
+                throw new InvalidOperationException("Expected 'message' property on error message");
+            }
+
+            var lastCodePart = code.Substring(code.LastIndexOf('.') + 1);
+
+            return new NeoException(new ExceptionResponse
+            {
+                // there is no stack trace in transaction error response
+                StackTrace = new string[] {},
+                Exception = lastCodePart,
+                FullName = code,
+                Message = message
+            });
+        }
+
+        public PartialDeserializationContext CheckForErrorsInTransactionResponse(string content)
+        {
+            if (!inTransaction)
+            {
+                throw new InvalidOperationException("Deserialization of this type must be done inside of a transaction scope.");
+            }
+
+            var context = new DeserializationContext
+            {
+                Culture = culture,
+                JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
+            };
+            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+
+            var reader = new JsonTextReader(new StringReader(content))
+            {
+                DateParseHandling = DateParseHandling.DateTimeOffset
+            };
+
             var root = JToken.ReadFrom(reader).Root as JObject;
+
+            return new PartialDeserializationContext
+            {
+                RootResult = GetRootResultInTransaction(root),
+                DeserializationContext = context
+            };
+        }
+
+        private JToken GetRootResultInTransaction(JObject root)
+        {
             if (root == null)
             {
                 throw new InvalidOperationException("Root expected to be a JSON object.");
             }
-            var results = root
-                .Properties()
-                .Single(property => property.Name == "results")
-                .Value as JArray;
+
+            JToken rawErrors;
+            if (root.TryGetValue("errors", out rawErrors))
+            {
+                var errors = rawErrors as JArray;
+                if (errors == null)
+                {
+                    throw new InvalidOperationException("`errors` property expected to a JSON array.");
+                }
+
+                if (errors.Count > 0)
+                {
+                    throw BuildNeoException(errors.First());
+                }
+            }
+
+            JToken rawResults;
+            if (!root.TryGetValue("results", out rawResults))
+            {
+                throw new InvalidOperationException("Expected `results` property on JSON root object");
+            }
+
+            var results = rawResults as JArray;
             if (results == null)
             {
                 throw new InvalidOperationException("`results` property expected to a JSON array.");
             }
 
-            if (results.Count == 0)
+            return results.FirstOrDefault();
+        }
+
+        public IEnumerable<TResult> DeserializeFromTransactionPartialContext(PartialDeserializationContext context)
+        {
+            if (context.RootResult == null)
             {
                 throw new InvalidOperationException(
                     @"`results` array should have one result set.
 This means no query was emitted, so a method that doesn't care about getting results should have been called."
                     );
             }
+            return DeserializeResultSet(context.RootResult, context.DeserializationContext);
+        }
 
+        private IEnumerable<TResult> FullDeserializationFromTransactionResponse(JsonTextReader reader, DeserializationContext context)
+        {
+            var root = JToken.ReadFrom(reader).Root as JObject;
+            
             // discarding all the results but the first
             // (this won't affect the library because as of now there is no way of executing
             // multiple statements in the same batch within a transaction and returning the results)
-            return DeserializeResultSet(results.First, context);
+            var resultSet = GetRootResultInTransaction(root);
+            if (resultSet == null)
+            {
+                throw new InvalidOperationException(
+                    @"`results` array should have one result set.
+This means no query was emitted, so a method that doesn't care about getting results should have been called."
+                    );
+            }
+            return DeserializeResultSet(resultSet, context);
         }
 
         IEnumerable<TResult> DeserializeFromRoot(string content, JsonTextReader reader, DeserializationContext context)

@@ -72,6 +72,7 @@
     <Compile Include="ApiModels\Cypher\PathsResult.cs" />
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="CypherPartialResult.cs" />
     <Compile Include="Cypher\All.cs" />
     <Compile Include="Cypher\CypherCapabilities.cs" />
     <Compile Include="Cypher\CypherFluentQuery`With.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="Cypher\ICypherResultItem.cs" />
     <Compile Include="Serialization\DeserializationException.cs" />
     <Compile Include="Serialization\ISerializer.cs" />
+    <Compile Include="Serialization\PartialDeserializationContext.cs" />
     <Compile Include="Serialization\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\EmitPropertyStep.cs" />

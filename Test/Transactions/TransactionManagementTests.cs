@@ -1,6 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Neo4jClient.ApiModels.Cypher;
+using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
 using NUnit.Framework;
 
@@ -369,6 +376,41 @@ namespace Neo4jClient.Test.Transactions
                 Assert.IsNotNull(transactionFromThread2);
                 Assert.AreNotEqual(transactionFromThread1, transactionFromThread2);
 
+            }
+        }
+
+        [Test]
+        public void ShouldPromoteBadQueryResponseToNiceException()
+        {
+            // Arrange
+            const string queryText = @"broken query";
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
+
+            using (var testHarness = new RestTestHarness
+                {
+                    {
+                        MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                        MockResponse.Json(HttpStatusCode.OK, @"{'results':[], 'errors': [{
+    'code' : 'Neo.ClientError.Statement.InvalidSyntax',
+    'message' : 'Invalid input b: expected SingleStatement (line 1, column 1)\nThis is not a valid Cypher Statement.\n ^'
+  }]}")
+                    }
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectTransactionalGraphClient();
+                var rawClient = (IRawGraphClient) graphClient;
+
+                using (graphClient.BeginTransaction())
+                {
+
+                    var ex = Assert.Throws<NeoException>(() => rawClient.ExecuteCypher(cypherQuery));
+                    Assert.AreEqual("InvalidSyntax: Invalid input b: expected SingleStatement (line 1, column 1)\nThis is not a valid Cypher Statement.\n ^", ex.Message);
+                    Assert.AreEqual("Invalid input b: expected SingleStatement (line 1, column 1)\nThis is not a valid Cypher Statement.\n ^", ex.NeoMessage);
+                    Assert.AreEqual("InvalidSyntax", ex.NeoExceptionName);
+                    Assert.AreEqual("Neo.ClientError.Statement.InvalidSyntax", ex.NeoFullName);
+                    CollectionAssert.AreEqual(new String[] {}, ex.NeoStackTrace);
+                }
             }
         }
     }
