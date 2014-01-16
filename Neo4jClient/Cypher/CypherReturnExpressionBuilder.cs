@@ -22,6 +22,9 @@ namespace Neo4jClient.Cypher
         internal const string CollectAsDistinctShouldNotBeNodeTExceptionMessage = "You've called CollectAsDistinct<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAsDistinct<T>() instead.";
 
         internal const string UnsupportedBinaryExpressionExceptionMessageFormat = "We don't currently support {0} as an expression. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
+
+        internal const string UnsupportedBinaryExpressionComparisonExceptionMessage = "We don't currently support anything other than null for a binary expression comparison. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
+
         // Terminology used in this file:
         //
         // - a "statement" is something like "x.Foo? AS Bar"
@@ -194,7 +197,6 @@ namespace Neo4jClient.Cypher
                 unwrappedExpression.GetType().FullName));
         }
 
-        internal const string UnsupportedBinaryExpressionComparisonExceptionMessage = "We don't currently support anything other than null as a binary expression comparison. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
         static string BuildStatement(
             BinaryExpression binaryExpression,
             MemberInfo targetMember)
