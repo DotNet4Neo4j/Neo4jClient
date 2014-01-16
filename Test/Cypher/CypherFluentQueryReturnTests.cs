@@ -9,6 +9,9 @@ using Neo4jClient.Cypher;
 
 namespace Neo4jClient.Test.Cypher
 {
+    using System.Linq.Expressions;
+    using System.Text.RegularExpressions;
+
     [TestFixture]
     public class CypherFluentQueryReturnTests
     {
@@ -136,6 +139,40 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("RETURN count(item)", query.QueryText);
+        }
+
+        [Test]
+        public void ReturnsWhenIdentityIsACollection()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("(n0),(n1)")
+                .Return<IEnumerable<object>>("[n0,n1]")
+                .Query;
+
+            Assert.AreEqual("MATCH (n0),(n1)\r\nRETURN [n0,n1]", query.QueryText);
+        }
+
+        [Test]
+        public void ReturnsWhenIdentityIsACollectionRegardlessOfPadding()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("(n0),(n1)")
+                .Return<IEnumerable<object>>("  [n0,n1]  ")
+                .Query;
+
+            Assert.AreEqual("MATCH (n0),(n1)\r\nRETURN [n0,n1]", query.QueryText);
+        }
+        
+        [Test]
+        public void ShouldThrowWhenIdentityIsCollectionButResultIsNot()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var ex = Assert.Throws<ArgumentException>(
+                () => new CypherFluentQuery(client).Return<object>("[foo,bar]")
+            );
+            StringAssert.StartsWith(CypherFluentQuery.IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, ex.Message);
         }
 
         [Test]
@@ -384,6 +421,49 @@ ORDER BY common.FirstName", query.QueryText);
                 Assert.AreEqual("Bismuth", result.Foo.Name);
                 Assert.AreEqual(37, result.Foo.UniqueId);
             }
+        }
+
+        [Test]
+        public void BinaryExpressionIsNotNull()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("(a)")
+                .Return(a => new {NotNull = a != null})
+                .Query;
+
+            Assert.AreEqual("MATCH (a)\r\nRETURN a IS NOT NULL AS NotNull", query.QueryText);
+        }
+
+        [Test]
+        public void BinaryExpressionIsNull()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("(a)")
+                .Return(a => new { IsNull = a == null })
+                .Query;
+
+            Assert.AreEqual("MATCH (a)\r\nRETURN a IS NULL AS IsNull", query.QueryText);
+        }
+
+        [Test]
+        public void BinaryExpressionThrowNotSupportedExceptionForUnsupportedExpressionComparison()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var ex = Assert.Throws<NotSupportedException>(() => new CypherFluentQuery(client).Return(a => new { IsNull = a.As<int>() == 10 }));
+
+            StringAssert.StartsWith(CypherReturnExpressionBuilder.UnsupportedBinaryExpressionComparisonExceptionMessage, ex.Message);
+        }
+
+        [Test]
+        public void BinaryExpressionThrowNotSupportedExceptionForUnsupportedExpressionTypes()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var ex = Assert.Throws<NotSupportedException>(() => new CypherFluentQuery(client).Return(a => new {IsNull = a.As<int>() > 10}));
+
+            var message = string.Format(CypherReturnExpressionBuilder.UnsupportedBinaryExpressionExceptionMessageFormat, ExpressionType.GreaterThan);
+            StringAssert.StartsWith(message, ex.Message);
         }
 
         public class Commodity
