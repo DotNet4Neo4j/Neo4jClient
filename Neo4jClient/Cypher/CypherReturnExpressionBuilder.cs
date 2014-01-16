@@ -21,6 +21,10 @@ namespace Neo4jClient.Cypher
 
         internal const string CollectAsDistinctShouldNotBeNodeTExceptionMessage = "You've called CollectAsDistinct<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAsDistinct<T>() instead.";
 
+        internal const string UnsupportedBinaryExpressionExceptionMessageFormat = "We don't currently support {0} as an expression. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
+
+        internal const string UnsupportedBinaryExpressionComparisonExceptionMessage = "We don't currently support anything other than null for a binary expression comparison. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
+
         // Terminology used in this file:
         //
         // - a "statement" is something like "x.Foo? AS Bar"
@@ -184,9 +188,38 @@ namespace Neo4jClient.Cypher
             if (methodCallExpression != null)
                 return BuildStatement(methodCallExpression, targetMember, capabilities, jsonConvertersThatTheDeserializerWillUse);
 
+            var binaryExpression = unwrappedExpression as BinaryExpression;
+            if(binaryExpression != null)
+                return BuildStatement(binaryExpression, targetMember);
+
             throw new NotSupportedException(string.Format(
                 "Expression of type {0} is not supported.",
                 unwrappedExpression.GetType().FullName));
+        }
+
+        static string BuildStatement(
+            BinaryExpression binaryExpression,
+            MemberInfo targetMember)
+        {
+            string expression;
+            switch (binaryExpression.NodeType)
+            {
+                case ExpressionType.NotEqual:
+                    expression = "IS NOT";
+                    break;
+                case ExpressionType.Equal:
+                    expression = "IS";
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format(UnsupportedBinaryExpressionExceptionMessageFormat, binaryExpression.NodeType));
+            }
+
+            var comparison = (ConstantExpression) binaryExpression.Right;
+            if(comparison.Value != null)
+                throw new NotSupportedException(UnsupportedBinaryExpressionComparisonExceptionMessage);
+
+            var targetObject = (ParameterExpression)binaryExpression.Left;
+            return string.Format("{0} {1} NULL AS {2}", targetObject.Name, expression, targetMember.Name);
         }
 
         static string BuildStatement(
@@ -215,7 +248,7 @@ namespace Neo4jClient.Cypher
 
             if (targetObject == null)
                 throw new InvalidOperationException(
-                    "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
+                    "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.");
 
             var optionalIndicator = "";
             if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
