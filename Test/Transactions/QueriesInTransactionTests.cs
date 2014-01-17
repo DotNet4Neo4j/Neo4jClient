@@ -105,7 +105,7 @@ namespace Neo4jClient.Test.Transactions
         public void UpdateTransactionEndpointAfterFirstRequest()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
             using (var testHarness = new RestTestHarness
             {
@@ -138,7 +138,7 @@ namespace Neo4jClient.Test.Transactions
         public void TransactionCommit()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
             using (var testHarness = new RestTestHarness
             {
@@ -175,7 +175,7 @@ namespace Neo4jClient.Test.Transactions
             // this request will be mode in Promote() after second durable enlistment
             var promoteRequest = MockRequest.PostJson("/transaction/1", @"{'statements': []}");
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
 
             // there are no delete requests because those will be made in another app domain
 
@@ -221,7 +221,7 @@ namespace Neo4jClient.Test.Transactions
         public void SuppressTransactionScopeShouldNotEmitTransactionalQuery()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
 
             var nonTransactionalRequest = MockRequest.PostJson("/cypher", @"{'query': 'MATCH n\r\nRETURN count(n)', 'params': {}}");
 
@@ -274,7 +274,7 @@ namespace Neo4jClient.Test.Transactions
         public void NestedRequiresNewTransactionScope()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var commitTransactionRequest = MockRequest.PostJson("/transaction/1/commit", @"{
                 'statements': []}");
             var deleteRequest = MockRequest.Delete("/transaction/1");
@@ -320,9 +320,9 @@ namespace Neo4jClient.Test.Transactions
         public void NestedJoinedTransactionScope()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var secondRequest = MockRequest.PostJson("/transaction/1", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var deleteRequest = MockRequest.Delete("/transaction/1");
             using (var testHarness = new RestTestHarness
             {
@@ -366,7 +366,7 @@ namespace Neo4jClient.Test.Transactions
         public void TransactionRollbackInTransactionScope()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var deleteRequest = MockRequest.Delete("/transaction/1");
             using (var testHarness = new RestTestHarness
             {
@@ -394,7 +394,7 @@ namespace Neo4jClient.Test.Transactions
         public void TransactionCommitInTransactionScope()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
             using (var testHarness = new RestTestHarness
             {
@@ -423,9 +423,9 @@ namespace Neo4jClient.Test.Transactions
         public void SecondRequestDoesntReturnCreateHttpStatus()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var secondRequest = MockRequest.PostJson("/transaction/1", @"{
-                'statements': [{'statement': 'MATCH t\r\nRETURN count(t)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH t\r\nRETURN count(t)', 'resultDataContents':[], 'parameters': {}}]}");
             var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
             using (var testHarness = new RestTestHarness
             {
@@ -464,7 +464,7 @@ namespace Neo4jClient.Test.Transactions
         public void KeepAliveAfterFirstRequest()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
             var keepAliveRequest = MockRequest.PostJson("/transaction/1", @"{'statements': []}");
             using (var testHarness = new RestTestHarness
@@ -498,9 +498,9 @@ namespace Neo4jClient.Test.Transactions
         public void DeserializeResultsFromTransaction()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var deserializationRequest = MockRequest.PostJson("/transaction/1", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
             using (var testHarness = new RestTestHarness
             {
@@ -541,7 +541,7 @@ namespace Neo4jClient.Test.Transactions
         public void OnTransactionDisposeCallRollback()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
-                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'parameters': {}}]}");
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
             var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
             using (var testHarness = new RestTestHarness
             {

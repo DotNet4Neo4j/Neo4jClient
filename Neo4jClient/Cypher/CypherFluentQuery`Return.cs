@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Microsoft.SqlServer.Server;
 
 namespace Neo4jClient.Cypher
 {
@@ -18,8 +19,22 @@ namespace Neo4jClient.Cypher
 
             if(identityIsCollection && (typeof(TResult).GetInterface("IEnumerable") == null)) 
                 throw new ArgumentException(IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, "identity");
+            
+            var resultType = typeof (TResult);
+            
+            var restFormatNeeded = resultType.IsGenericType && (
+                resultType.GetGenericTypeDefinition() == typeof (Node<>) ||
+                resultType.GetGenericTypeDefinition() == typeof (RelationshipInstance<>) ||
+                resultType.GetGenericTypeDefinition() == typeof (Relationship<>));
 
-            return Mutate<TResult>(w => w.AppendClause("RETURN " + identity));
+            return Mutate<TResult>(w =>
+            {
+                if (restFormatNeeded)
+                {
+                    w.ResultFormat = CypherResultFormat.Rest;
+                }
+                w.AppendClause("RETURN " + identity);
+            });
         }
 
         [Obsolete("This was an internal that never should have been exposed. If you want to create a projection, you should be using the lambda overload instead. See the 'Using Functions in Return Clauses' and 'Using Custom Text in Return Clauses' sections of https://bitbucket.org/Readify/neo4jclient/wiki/cypher for details of how to do this.", true)]
@@ -40,6 +55,7 @@ namespace Neo4jClient.Cypher
             return Mutate<TResult>(w =>
             {
                 w.ResultMode = returnExpression.ResultMode;
+                w.ResultFormat = returnExpression.ResultFormat;
                 w.AppendClause("RETURN " + returnExpression.Text);
             });
         }
@@ -51,6 +67,7 @@ namespace Neo4jClient.Cypher
             return Mutate<TResult>(w =>
             {
                 w.ResultMode = returnExpression.ResultMode;
+                w.ResultFormat = returnExpression.ResultFormat;
                 w.AppendClause("RETURN distinct " + returnExpression.Text);
             });
         }

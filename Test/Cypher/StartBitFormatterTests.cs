@@ -360,7 +360,7 @@ namespace Neo4jClient.Test.Cypher
 
             var cypherText = StartBitFormatter.FormatAsCypherText(startBits, createParameter);
 
-            var query = new CypherQuery(cypherText, parameters, CypherResultMode.Projection);
+            var query = new CypherQuery(cypherText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest);
             return query;
         }
     }

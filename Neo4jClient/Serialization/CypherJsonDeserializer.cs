@@ -16,20 +16,30 @@ namespace Neo4jClient.Serialization
     {
         readonly IGraphClient client;
         readonly CypherResultMode resultMode;
+        private readonly CypherResultFormat resultFormat;
         private readonly bool inTransaction; 
 
         readonly CultureInfo culture = CultureInfo.InvariantCulture;
 
-        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode)
-            : this(client, resultMode, false)
+        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, CypherResultFormat resultFormat)
+            : this(client, resultMode, resultFormat, false)
         {
         }
 
-        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, bool inTransaction)
+        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, CypherResultFormat resultFormat, bool inTransaction)
         {
             this.client = client;
             this.resultMode = resultMode;
             this.inTransaction = inTransaction;
+            // here is where we decide if we should deserialize as transactional or REST endpoint data format.
+            if (resultFormat == CypherResultFormat.DependsOnEnvironment)
+            {
+                this.resultFormat = inTransaction ? CypherResultFormat.Transactional : CypherResultFormat.Rest;
+            }
+            else
+            {
+                this.resultFormat = resultFormat;
+            }
         }
 
         public IEnumerable<TResult> Deserialize(string content)
@@ -308,6 +318,8 @@ This means no query was emitted, so a method that doesn't care about getting res
 
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
+
+            var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
             var results = rows.Select(row =>
             {
                 if (inTransaction)
@@ -319,7 +331,7 @@ This means no query was emitted, so a method that doesn't care about getting res
                     }
                     
                     JToken rowProperty;
-                    if (!rowObject.TryGetValue("row", out rowProperty))
+                    if (!rowObject.TryGetValue(dataPropertyNameInTransaction, out rowProperty))
                     {
                         throw new InvalidOperationException("There is no row property in the JSON object.");
                     }
@@ -412,7 +424,8 @@ This means no query was emitted, so a method that doesn't care about getting res
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
 
-            return inTransaction ? rows.Select(row => row["row"]).Select(getRow) : rows.Select(getRow);
+            var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
+            return inTransaction ? rows.Select(row => row[dataPropertyNameInTransaction]).Select(getRow) : rows.Select(getRow);
         }
 
         TResult ReadProjectionRowUsingCtor(

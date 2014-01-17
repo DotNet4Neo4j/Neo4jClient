@@ -896,7 +896,7 @@ namespace Neo4jClient
                             var response = responseTask.Result;
                             policy.AfterExecution(GetMetadataFromResponse(response));
 
-                            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, true);
+                            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, true);
                             return new CypherPartialResult
                             {
                                 DeserializationContext =
@@ -947,7 +947,7 @@ namespace Neo4jClient
                 .ContinueWith(
                     responseTask =>
                     {
-                        var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, inTransaction);
+                        var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, inTransaction);
                         List<TResult> results;
                         if (inTransaction)
                         {

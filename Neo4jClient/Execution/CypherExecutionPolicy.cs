@@ -68,7 +68,7 @@ namespace Neo4jClient.Execution
         public override string SerializeRequest(object toSerialize)
         {
             var query = toSerialize as CypherQuery;
-            if (toSerialize == null)
+            if (query == null)
             {
                 throw new InvalidOperationException(
                     "Unsupported operation: Attempting to serialize something that was not a query.");
@@ -76,7 +76,12 @@ namespace Neo4jClient.Execution
 
             if (InTransaction)
             {
-                return Client.Serializer.Serialize(new CypherStatementList {new CypherTransactionStatement(query)});
+                return Client
+                    .Serializer
+                    .Serialize(new CypherStatementList
+                    {
+                        new CypherTransactionStatement(query, query.ResultFormat == CypherResultFormat.Rest)
+                    });
             }
             return Client.Serializer.Serialize(new CypherApiQuery(query));
         }
