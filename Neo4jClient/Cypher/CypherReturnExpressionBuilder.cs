@@ -17,10 +17,6 @@ namespace Neo4jClient.Cypher
 
         internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a simple type (like int, string, or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, RelationshipInstance<T>, list of RelationshipInstance, or list of RelationshipInstance<T>.";
 
-        internal const string CollectAsShouldNotBeNodeTExceptionMessage = "You've called CollectAs<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAs<T>() instead.";
-
-        internal const string CollectAsDistinctShouldNotBeNodeTExceptionMessage = "You've called CollectAsDistinct<Node<T>>(), however this method already wraps the type in Node<>. Your current code would result in Node<Node<T>>, which is invalid. Use CollectAsDistinct<T>() instead.";
-
         internal const string UnsupportedBinaryExpressionExceptionMessageFormat = "We don't currently support {0} as an expression. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
 
         internal const string UnsupportedBinaryExpressionComparisonExceptionMessage = "We don't currently support anything other than null for a binary expression comparison. Please raise an issue at https://github.com/Readify/Neo4jClient including your query code.";
@@ -382,16 +378,18 @@ namespace Neo4jClient.Cypher
                     format = methodName == "Node" ? CypherResultFormat.Rest : CypherResultFormat.DependsOnEnvironment;
                     break;
                 case "CollectAs":
-                    if (IsNodeOfT(singleGenericArgument))
-                        throw new ArgumentException(CollectAsShouldNotBeNodeTExceptionMessage, "expression");
+                    if (IsNodeOrRelationshipOfT(singleGenericArgument))
+                    {
+                        format = CypherResultFormat.Rest;
+                    }
                     finalStatement = string.Format("collect({0})", targetObject.Name);
-                    format = CypherResultFormat.Rest;
                     break;
                 case "CollectAsDistinct":
-                    if (IsNodeOfT(singleGenericArgument))
-                        throw new ArgumentException(CollectAsDistinctShouldNotBeNodeTExceptionMessage, "expression");
+                    if (IsNodeOrRelationshipOfT(singleGenericArgument))
+                    {
+                        format = CypherResultFormat.Rest;
+                    }
                     finalStatement = string.Format("collect(distinct {0})", targetObject.Name);
-                    format = CypherResultFormat.Rest;
                     break;
                 case "Count":
                     finalStatement = string.Format("count({0})", targetObject.Name);
@@ -422,10 +420,13 @@ namespace Neo4jClient.Cypher
             return new ExpressionBuild(statement, format);
         }
 
-        static bool IsNodeOfT(Type type)
+        static bool IsNodeOrRelationshipOfT(Type type)
         {
             if (type == null) throw new ArgumentNullException("type");
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Node<>);
+            return type.IsGenericType && (
+                type.GetGenericTypeDefinition() == typeof (Node<>) ||
+                type.GetGenericTypeDefinition() == typeof (Relationship<>) ||
+                type.GetGenericTypeDefinition() == typeof (RelationshipInstance<>));
         }
 
         static bool IsSupportedForAs(Type type, IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
