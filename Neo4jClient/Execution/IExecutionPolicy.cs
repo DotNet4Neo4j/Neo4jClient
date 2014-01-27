@@ -7,7 +7,7 @@ namespace Neo4jClient.Execution
     {
         bool InTransaction { get; }
         TransactionExecutionPolicy TransactionExecutionPolicy { get; }
-        void AfterExecution(IDictionary<string, object> executionMetadata);
+        void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext);
         string SerializeRequest(object toSerialize);
         Uri BaseEndpoint { get; }
         Uri AddPath(Uri startUri, object startReference);

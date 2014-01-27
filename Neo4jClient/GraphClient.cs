@@ -883,6 +883,13 @@ namespace Neo4jClient
                 .WithJsonContent(policy.SerializeRequest(query));
             if (InTransaction)
             {
+                // we try to get the current dtc transaction. If we are in a System.Transactions transaction and it has
+                // been "promoted" to be handled by DTC then transactionObject will be null, but it doesn't matter as
+                // we don't care about updating the object.
+                var transactionObject = transactionManager.CurrentDtcTransaction ??
+                                        transactionManager.CurrentNonDtcTransaction;
+
+
                 // HttpStatusCode.Created may be returned when emitting the first query on a transaction
                 return request
                     .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
@@ -894,7 +901,7 @@ namespace Neo4jClient
                             // query is that the errors are embedded within the result object, instead of having a 400 bad request
                             // status code.
                             var response = responseTask.Result;
-                            policy.AfterExecution(GetMetadataFromResponse(response));
+                            policy.AfterExecution(GetMetadataFromResponse(response), transactionObject);
 
                             var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, true);
                             return new CypherPartialResult
@@ -958,7 +965,7 @@ namespace Neo4jClient
                         else
                         {
                             var response = responseTask.Result.ResponseObject;
-                            policy.AfterExecution(GetMetadataFromResponse(response));
+                            policy.AfterExecution(GetMetadataFromResponse(response), null);
 
                             results = deserializer
                                 .Deserialize(response.Content.ReadAsString())
@@ -997,7 +1004,7 @@ namespace Neo4jClient
                     throw ex.InnerExceptions.Single();
                 throw;
             }
-            policy.AfterExecution(GetMetadataFromResponse(task.Result.ResponseObject));
+            policy.AfterExecution(GetMetadataFromResponse(task.Result.ResponseObject), null);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -1026,7 +1033,9 @@ namespace Neo4jClient
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .Execute("Executing multiple queries: " + queriesInText);
 
-            policy.AfterExecution(GetMetadataFromResponse(response));
+            var transactionObject = transactionManager.CurrentDtcTransaction ??
+                                    transactionManager.CurrentNonDtcTransaction;
+            policy.AfterExecution(GetMetadataFromResponse(response), transactionObject);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs

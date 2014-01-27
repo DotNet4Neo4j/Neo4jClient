@@ -7,20 +7,35 @@ using System.Transactions;
 
 namespace Neo4jClient.Transactions
 {
-    internal abstract class TransactionScopeProxy : ITransaction
+    /// <summary>
+    /// Represents a transaction scope within an ITransactionalManager. Encapsulates the real transaction, so that in reality
+    /// it only exists one single transaction object in a joined scope, but multiple TransactionScopeProxies that can be pushed, or
+    /// popped (in a scope context).
+    /// </summary>
+    internal abstract class TransactionScopeProxy : INeo4jTransaction
     {
-        private ITransactionalGraphClient _client;
+        private readonly ITransactionalGraphClient _client;
         private bool _markCommitted = false;
         private bool _disposing = false;
+        private INeo4jTransaction _transaction;
 
 
-        public ITransaction Transaction { get; private set; }
+        public ITransaction Transaction
+        {
+            get { return _transaction; }
+        }
 
-        protected TransactionScopeProxy(ITransactionalGraphClient client, ITransaction transaction)
+        protected TransactionScopeProxy(ITransactionalGraphClient client, INeo4jTransaction transaction)
         {
             _client = client;
             _disposing = false;
-            Transaction = transaction;
+            _transaction = transaction;
+        }
+
+        public Uri Endpoint
+        {
+            get { return _transaction.Endpoint; }
+            set { _transaction.Endpoint = value; }
         }
 
         public virtual void Dispose()
@@ -37,10 +52,10 @@ namespace Neo4jClient.Transactions
                 Rollback();
             }
 
-            if (Transaction != null && ShouldDisposeTransaction())
+            if (_transaction != null && ShouldDisposeTransaction())
             {
-                Transaction.Dispose();
-                Transaction = null;
+                _transaction.Dispose();
+                _transaction = null;
             }
         }
 

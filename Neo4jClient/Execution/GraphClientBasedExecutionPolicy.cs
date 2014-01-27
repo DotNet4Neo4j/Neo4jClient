@@ -27,7 +27,7 @@ namespace Neo4jClient.Execution
         }
 
         public abstract TransactionExecutionPolicy TransactionExecutionPolicy { get; }
-        public abstract void AfterExecution(IDictionary<string, object> executionMetadata);
+        public abstract void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext);
         
         public virtual string SerializeRequest(object toSerialize)
         {
