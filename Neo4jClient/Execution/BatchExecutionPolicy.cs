@@ -16,7 +16,7 @@ namespace Neo4jClient.Execution
             get { return TransactionExecutionPolicy.Denied; }
         }
 
-        public override void AfterExecution(IDictionary<string, object> executionMetadata)
+        public override void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext)
         {
         }
 

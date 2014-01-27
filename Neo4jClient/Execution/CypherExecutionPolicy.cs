@@ -86,21 +86,15 @@ namespace Neo4jClient.Execution
             return Client.Serializer.Serialize(new CypherApiQuery(query));
         }
 
-        public override void AfterExecution(IDictionary<string, object> executionMetadata)
+        public override void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext)
         {
             if (Client == null || executionMetadata == null || executionMetadata.Count == 0)
             {
                 return;
             }
 
-            var transactionalClient = Client as ITransactionalGraphClient;
-            if (!InTransaction || transactionalClient == null)
-            {
-                return;
-            }
-
             // determine if we need to update the transaction end point
-            var transaction = GetTransactionInScope();
+            var transaction = executionContext as INeo4jTransaction;
             if (transaction == null || transaction.Endpoint != null)
             {
                 return;

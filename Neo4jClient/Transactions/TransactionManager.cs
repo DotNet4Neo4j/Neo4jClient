@@ -21,6 +21,10 @@ namespace Neo4jClient.Transactions
             // specifies that we are about to use variables that depend on OS threads
             Thread.BeginThreadAffinity();
             _scopedTransactions = new Stack<TransactionScopeProxy>();
+
+            // this object enables the interacion with System.Transactions and MSDTC, at first by
+            // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
+            // then it notifies the library how to do it.
             _promotable = new TransactionPromotableSinglePhaseNotification(client);
         }
 
@@ -135,7 +139,7 @@ namespace Neo4jClient.Transactions
                 throw new ClosedTransactionException(null);
             }
 
-            var joinedTransaction = new Neo4jTransactionProxy(_client, parentScope.Transaction, false);
+            var joinedTransaction = new Neo4jTransactionProxy(_client, (INeo4jTransaction)parentScope.Transaction, false);
             PushScopeTransaction(joinedTransaction);
             return joinedTransaction;
         }

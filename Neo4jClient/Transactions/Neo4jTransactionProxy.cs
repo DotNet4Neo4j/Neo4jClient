@@ -5,11 +5,14 @@ using System.Text;
 
 namespace Neo4jClient.Transactions
 {
+    /// <summary>
+    /// Implements the TransactionScopeProxy interfaces for INeo4jTransaction
+    /// </summary>
     internal class Neo4jTransactionProxy : TransactionScopeProxy
     {
         private readonly bool _doCommitInScope;
 
-        public Neo4jTransactionProxy(ITransactionalGraphClient client, ITransaction transaction, bool newScope)
+        public Neo4jTransactionProxy(ITransactionalGraphClient client, INeo4jTransaction transaction, bool newScope)
             : base(client, transaction)
         {
             _doCommitInScope = newScope;
