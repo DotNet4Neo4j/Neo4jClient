@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -70,7 +69,7 @@ namespace Neo4jClient.Execution
                 condition);
         }
 
-        private Task<HttpResponseMessage> PrepareAsync()
+        private Task<HttpResponseMessage> PrepareAsync(TaskFactory taskFactory)
         {
             if (_executionConfiguration.UseJsonStreaming)
             {
@@ -87,27 +86,40 @@ namespace Neo4jClient.Execution
                 var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes(userInfo));
                 _request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
             }
-            return _executionConfiguration.HttpClient.SendAsync(_request);
+
+            if (taskFactory == null)
+            {
+                // use the standard factory
+                return _executionConfiguration.HttpClient.SendAsync(_request);
+            }
+
+            // use a custom task factory
+            return taskFactory.StartNew(() => _executionConfiguration.HttpClient.SendAsync(_request).Result);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync()
         {
-            return ExecuteAsync(null, null);
+            return ExecuteAsync(null, null, null);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync(string commandDescription)
         {
-            return ExecuteAsync(commandDescription, null);
-        }
-
-        public Task<HttpResponseMessage> ExecuteAsync(Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
-        {
-            return ExecuteAsync(null, continuationFunction);
+            return ExecuteAsync(commandDescription, null, null);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
         {
-            var executionTask = PrepareAsync().ContinueWith(requestTask =>
+            return ExecuteAsync(commandDescription, continuationFunction, null);
+        }
+
+        public Task<HttpResponseMessage> ExecuteAsync(Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
+        {
+            return ExecuteAsync(null, continuationFunction, null);
+        }
+
+        public Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction, TaskFactory taskFactory)
+        {
+            var executionTask = PrepareAsync(taskFactory).ContinueWith(requestTask =>
             {
                 var response = requestTask.Result;
                 if (string.IsNullOrEmpty(commandDescription))
@@ -149,17 +161,27 @@ namespace Neo4jClient.Execution
 
         public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<HttpResponseMessage>, TExpected> continuationFunction)
         {
-            return ExecuteAsync(commandDescription).ContinueWith(continuationFunction);
+            return ExecuteAsync(commandDescription, continuationFunction, null);
+        }
+
+        public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<HttpResponseMessage>, TExpected> continuationFunction, TaskFactory taskFactory)
+        {
+            return ExecuteAsync(commandDescription, null, taskFactory).ContinueWith(continuationFunction);
         }
 
         public HttpResponseMessage Execute()
         {
-            return Execute(null);
+            return Execute(null, null);
         }
 
         public HttpResponseMessage Execute(string commandDescription)
         {
-            var task = ExecuteAsync(commandDescription, null);
+            return Execute(commandDescription, null);
+        }
+
+        public HttpResponseMessage Execute(string commandDescription, TaskFactory taskFactory)
+        {
+            var task = ExecuteAsync(commandDescription, null, taskFactory);
             try
             {
                 Task.WaitAll(task);

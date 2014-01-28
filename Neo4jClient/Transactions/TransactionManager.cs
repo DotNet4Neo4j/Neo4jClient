@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Transactions;
+using Neo4jClient.Cypher;
+using Neo4jClient.Execution;
 
 namespace Neo4jClient.Transactions
 {
@@ -12,6 +16,8 @@ namespace Neo4jClient.Transactions
     {
         // holds the transaction objects per thread
         [ThreadStatic] private static Stack<TransactionScopeProxy> _scopedTransactions;
+        // holds the transaction contexts for transactions from the System.Transactions framework
+        private IDictionary<string, TransactionContext> _dtcContexts; 
         private TransactionPromotableSinglePhaseNotification _promotable;
         private ITransactionalGraphClient _client;
 
@@ -26,6 +32,39 @@ namespace Neo4jClient.Transactions
             // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
             // then it notifies the library how to do it.
             _promotable = new TransactionPromotableSinglePhaseNotification(client);
+            _dtcContexts = new Dictionary<string, TransactionContext>();
+        }
+
+        private TransactionContext GetOrCreateDtcTransactionContext()
+        {
+            // we need to lock as we could get other async requests to the same transaction
+            var txId = Transaction.Current.TransactionInformation.LocalIdentifier;
+            lock (_dtcContexts)
+            {
+                TransactionContext txContext;
+                if (_dtcContexts.TryGetValue(txId, out txContext))
+                {
+                    return txContext;
+                }
+
+                // associate it with the ambient transaction
+                txContext = new TransactionContext(_promotable.AmbientTransaction);
+                _dtcContexts[txId] = txContext;
+
+                return txContext;
+            }
+        }
+
+        private TransactionContext GetContext()
+        {
+            var nonDtcTransaction = CurrentInternalTransaction;
+            if (nonDtcTransaction != null && nonDtcTransaction.Committable)
+            {
+                return nonDtcTransaction.TransactionContext;
+            }
+
+            // if we are not in a native transaction get the context of our ambient transaction
+            return GetOrCreateDtcTransactionContext();
         }
 
         public bool InTransaction
@@ -105,6 +144,16 @@ namespace Neo4jClient.Transactions
             return BeginNewTransaction();
         }
 
+        private TransactionContext GenerateTransaction()
+        {
+            return new TransactionContext(new Neo4jTransaction(_client));
+        }
+
+        private TransactionContext GenerateTransaction(TransactionContext reference)
+        {
+            return new TransactionContext(reference.Transaction);
+        }
+
         private void PushScopeTransaction(TransactionScopeProxy transaction)
         {
             if (_scopedTransactions == null)
@@ -116,7 +165,7 @@ namespace Neo4jClient.Transactions
 
         private ITransaction BeginNewTransaction()
         {
-            var transaction = new Neo4jTransactionProxy(_client, new Neo4jTransaction(_client), true);
+            var transaction = new Neo4jTransactionProxy(_client, GenerateTransaction(), true);
             PushScopeTransaction(transaction);
             return transaction;
         }
@@ -139,7 +188,7 @@ namespace Neo4jClient.Transactions
                 throw new ClosedTransactionException(null);
             }
 
-            var joinedTransaction = new Neo4jTransactionProxy(_client, (INeo4jTransaction)parentScope.Transaction, false);
+            var joinedTransaction = new Neo4jTransactionProxy(_client, GenerateTransaction(parentScope.TransactionContext), false);
             PushScopeTransaction(joinedTransaction);
             return joinedTransaction;
         }
@@ -168,7 +217,7 @@ namespace Neo4jClient.Transactions
         }
 
         /// <summary>
-        /// Registers to ambient System.Transactions.Transaction if needed
+        /// Registers to ambient System.Transactions.TransactionContext if needed
         /// </summary>
         public void RegisterToTransactionIfNeeded()
         {
@@ -178,6 +227,19 @@ namespace Neo4jClient.Transactions
                 return;
             }
             _promotable.EnlistIfNecessary();
+        }
+
+        public Task<HttpResponseMessage> EnqueueCypherRequest(string commandDescription, IGraphClient client, CypherQuery query)
+        {
+            var policy = new CypherTransactionExecutionPolicy(client);
+            // we try to get the current dtc transaction. If we are in a System.Transactions transaction and it has
+            // been "promoted" to be handled by DTC then transactionObject will be null, but it doesn't matter as
+            // we don't care about updating the object.
+            var txContext = GetContext();
+
+            // the main difference with a normal Request.With() call is that the request is associated with the
+            // TX context.
+            return txContext.EnqueueTask(commandDescription, client, policy, query);
         }
 
         public void Dispose()

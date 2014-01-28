@@ -36,7 +36,7 @@ namespace Neo4jClient.Execution
                 return null;
             }
 
-            return (INeo4jTransaction) proxiedTransaction.Transaction;
+            return (INeo4jTransaction) proxiedTransaction.TransactionContext;
         }
 
         public override Uri BaseEndpoint

@@ -46,6 +46,7 @@ namespace Neo4jClient.Transactions
                 // doesn't store it in its stack of scopes.
                  var localTransaction = new Neo4jTransaction(_client);
                 localTransaction.ForceKeepAlive();
+                _transactionId = localTransaction.Id;
                 var resourceManager = GetResourceManager();
                 var propagationToken = TransactionInterop.GetTransmitterPropagationToken(transaction);
                 var transactionExecutionEnvironment = new TransactionExecutionEnvironment(_client.ExecutionConfiguration)
@@ -76,7 +77,7 @@ namespace Neo4jClient.Transactions
 
             if (_transactionId == 0)
             {
-                throw new InvalidOperationException("For some reason we don't have a Transaction ID");
+                throw new InvalidOperationException("For some reason we don't have a TransactionContext ID");
             }
 
             var resourceManager = GetResourceManager();

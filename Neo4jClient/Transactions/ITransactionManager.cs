@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Neo4jClient.Cypher;
 
 namespace Neo4jClient.Transactions
 {
@@ -14,5 +17,6 @@ namespace Neo4jClient.Transactions
         ITransaction BeginTransaction(TransactionScopeOption option);
         void EndTransaction();
         void RegisterToTransactionIfNeeded();
+        Task<HttpResponseMessage> EnqueueCypherRequest(string commandDescription, IGraphClient client, CypherQuery query);
     }
 }

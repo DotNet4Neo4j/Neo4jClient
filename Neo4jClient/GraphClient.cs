@@ -88,14 +88,6 @@ namespace Neo4jClient
             return new Uri(baseUri, relativeUri);
         }
 
-        private IDictionary<string, object> GetMetadataFromResponse(HttpResponseMessage response)
-        {
-            return response.Headers.ToDictionary(
-                headerPair => headerPair.Key,
-                headerPair => (object) headerPair.Value
-                );
-        }
-
         private string SerializeAsJson(object contents)
         {
             return Serializer.Serialize(contents);
@@ -878,41 +870,29 @@ namespace Neo4jClient
 
         private Task<CypherPartialResult> PrepareCypherRequest<TResult>(CypherQuery query, IExecutionPolicy policy)
         {
-            var request = Request.With(ExecutionConfiguration)
-                .Post(policy.BaseEndpoint)
-                .WithJsonContent(policy.SerializeRequest(query));
             if (InTransaction)
             {
-                // we try to get the current dtc transaction. If we are in a System.Transactions transaction and it has
-                // been "promoted" to be handled by DTC then transactionObject will be null, but it doesn't matter as
-                // we don't care about updating the object.
-                var transactionObject = transactionManager.CurrentDtcTransaction ??
-                                        transactionManager.CurrentNonDtcTransaction;
-
-
-                // HttpStatusCode.Created may be returned when emitting the first query on a transaction
-                return request
-                    .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
-                    .ExecuteAsync(
-                        string.Format("The query was: {0}", query.QueryText),
-                        responseTask =>
+                return transactionManager
+                    .EnqueueCypherRequest(string.Format("The query was: {0}", query.QueryText), this, query)
+                    .ContinueWith(responseTask =>
+                    {
+                        // we need to check for errors returned by the transaction. The difference with a normal REST cypher
+                        // query is that the errors are embedded within the result object, instead of having a 400 bad request
+                        // status code.
+                        var response = responseTask.Result;
+                        var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, true);
+                        return new CypherPartialResult
                         {
-                            // we need to check for errors returned by the transaction. The difference with a normal REST cypher
-                            // query is that the errors are embedded within the result object, instead of having a 400 bad request
-                            // status code.
-                            var response = responseTask.Result;
-                            policy.AfterExecution(GetMetadataFromResponse(response), transactionObject);
-
-                            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, true);
-                            return new CypherPartialResult
-                            {
-                                DeserializationContext =
-                                    deserializer.CheckForErrorsInTransactionResponse(response.Content.ReadAsString()),
-                                ResponseObject = response
-                            };
-                        });
+                            DeserializationContext =
+                                deserializer.CheckForErrorsInTransactionResponse(response.Content.ReadAsString()),
+                            ResponseObject = response
+                        };
+                    });
             }
-            return request
+
+            return Request.With(ExecutionConfiguration)
+                .Post(policy.BaseEndpoint)
+                .WithJsonContent(policy.SerializeRequest(query))
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ExecuteAsync(response => new CypherPartialResult
                 {
@@ -965,8 +945,6 @@ namespace Neo4jClient
                         else
                         {
                             var response = responseTask.Result.ResponseObject;
-                            policy.AfterExecution(GetMetadataFromResponse(response), null);
-
                             results = deserializer
                                 .Deserialize(response.Content.ReadAsString())
                                 .ToList();
@@ -1004,7 +982,7 @@ namespace Neo4jClient
                     throw ex.InnerExceptions.Single();
                 throw;
             }
-            policy.AfterExecution(GetMetadataFromResponse(task.Result.ResponseObject), null);
+            policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(task.Result.ResponseObject), null);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -1035,7 +1013,7 @@ namespace Neo4jClient
 
             var transactionObject = transactionManager.CurrentDtcTransaction ??
                                     transactionManager.CurrentNonDtcTransaction;
-            policy.AfterExecution(GetMetadataFromResponse(response), transactionObject);
+            policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs

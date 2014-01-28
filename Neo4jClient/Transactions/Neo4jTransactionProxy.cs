@@ -12,8 +12,8 @@ namespace Neo4jClient.Transactions
     {
         private readonly bool _doCommitInScope;
 
-        public Neo4jTransactionProxy(ITransactionalGraphClient client, INeo4jTransaction transaction, bool newScope)
-            : base(client, transaction)
+        public Neo4jTransactionProxy(ITransactionalGraphClient client, TransactionContext transactionContext, bool newScope)
+            : base(client, transactionContext)
         {
             _doCommitInScope = newScope;
         }
@@ -22,7 +22,7 @@ namespace Neo4jClient.Transactions
         {
             if (_doCommitInScope)
             {
-                Transaction.Commit();
+                TransactionContext.Commit();
             }
         }
 
@@ -38,19 +38,19 @@ namespace Neo4jClient.Transactions
 
         public override void Rollback()
         {
-            Transaction.Rollback();
+            TransactionContext.Rollback();
         }
 
         public override void KeepAlive()
         {
-            Transaction.KeepAlive();
+            TransactionContext.KeepAlive();
         }
 
         public override bool IsOpen
         {
             get
             {
-                return Transaction != null && Transaction.IsOpen;
+                return TransactionContext != null && TransactionContext.IsOpen;
             }
         }
     }

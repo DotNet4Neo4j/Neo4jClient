@@ -67,7 +67,8 @@ namespace Neo4jClient.Test.Transactions
 
         private ITransaction GetRealTransaction(ITransaction proxiedTransaction)
         {
-            return ((TransactionScopeProxy) proxiedTransaction).Transaction;
+            var txContext = ((TransactionScopeProxy) proxiedTransaction).TransactionContext;
+            return txContext == null ? null : txContext.Transaction;
         }
 
         [Test]
