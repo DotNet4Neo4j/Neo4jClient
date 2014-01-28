@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Transactions;
+using Neo4jClient.ApiModels.Cypher;
+using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
 using NUnit.Framework;
 using TransactionScopeOption = System.Transactions.TransactionScopeOption;
@@ -18,13 +22,19 @@ namespace Neo4jClient.Test.Transactions
             return new DateTime().AddSeconds(60).ToString("ddd, dd, MMM yyyy HH:mm:ss +0000");
         }
 
-        private string GenerateInitTransactionResponse(int id)
+        private string GenerateInitTransactionResponse(int id, string results)
         {
             return string.Format(
-                @"{{'commit': 'http://foo/db/data/transaction/{0}/commit', 'results': [], 'errors': [], 'transaction': {{ 'expires': '{1}' }} }}",
+                @"{{'commit': 'http://foo/db/data/transaction/{0}/commit', 'results': [{1}], 'errors': [], 'transaction': {{ 'expires': '{2}' }} }}",
                 id,
+                results,
                 ResetTransactionTimer()
             );
+        }
+
+        private string GenerateInitTransactionResponse(int id)
+        {
+            return GenerateInitTransactionResponse(id, string.Empty);
         }
 
         [Test]
@@ -129,7 +139,7 @@ namespace Neo4jClient.Test.Transactions
 
                     Assert.AreEqual(
                         new Uri("http://foo/db/data/transaction/1"),
-                        ((INeo4jTransaction)((TransactionScopeProxy) transaction).Transaction).Endpoint);
+                        ((INeo4jTransaction)((TransactionScopeProxy) transaction).TransactionContext).Endpoint);
                 }
             }
         }
@@ -177,6 +187,9 @@ namespace Neo4jClient.Test.Transactions
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
                 'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
 
+            var secondClientRequest = MockRequest.PostJson("/transaction/2", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
+
             // there are no delete requests because those will be made in another app domain
 
             using (var testHarness = new RestTestHarness
@@ -185,7 +198,11 @@ namespace Neo4jClient.Test.Transactions
                     initTransactionRequest,
                     MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
-                 {
+                {
+                    secondClientRequest,
+                    MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                },
+                {
                     afterPspeFailRequest,
                     MockResponse.Json(201, GenerateInitTransactionResponse(2), "http://foo/db/data/transaction/2")
                 },
@@ -560,10 +577,178 @@ namespace Neo4jClient.Test.Transactions
                     // dummy query to generate request
                     client.Cypher
                         .Match("n")
-                        .Return(n =>  n.Count())
+                        .Return(n => n.Count())
                         .ExecuteWithoutResults();
                 }
             }
+        }
+
+        public class DummyTotal
+        {
+            public int Total { get; set; }
+        }
+
+        [Test]
+        public void ExecuteAsyncRequestInTransaction()
+        {
+            const string queryText = @"MATCH (n) RETURN count(n) as Total";
+            const string resultColumn = @"{'columns':['Total'], 'data':[{'row':[1]}]}";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var rawClient = (IRawGraphClient) client;
+                using (var tran = client.BeginTransaction())
+                {
+                    var totalObj = rawClient.ExecuteGetCypherResultsAsync<DummyTotal>(cypherQuery).Result.Single();
+                    Assert.AreEqual(1, totalObj.Total);
+                    tran.Commit();
+                }
+
+            } 
+        }
+
+        private class RestHarnessWithCounter : RestTestHarness
+        {
+            public ConcurrentQueue<int> Queue { get; set; }
+
+            public RestHarnessWithCounter()
+            {
+                Queue = new ConcurrentQueue<int>();
+            }
+
+            protected override HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
+            {
+                if (request.Method == HttpMethod.Post)
+                {
+                    var content = request.Content.ReadAsString();
+                    int totalIndex = content.IndexOf("RETURN ", StringComparison.InvariantCultureIgnoreCase);
+                    if (totalIndex > 0)
+                    {
+                        totalIndex += "RETURN ".Length;
+                        int spaceIndex = content.IndexOf(" ", totalIndex, StringComparison.InvariantCultureIgnoreCase);
+                        Assert.Greater(spaceIndex, totalIndex);
+                        Queue.Enqueue(int.Parse(content.Substring(totalIndex, spaceIndex - totalIndex)));
+                    }
+                }
+
+                return base.HandleRequest(request, baseUri);
+            }
+        }
+
+        [Test]
+        public void AsyncRequestsInTransactionShouldBeExecutedInOrder()
+        {
+            const string queryTextBase = @"MATCH (n) RETURN {0} as Total";
+            const string resultColumnBase = @"{{'columns':['Total'], 'data':[{{'row':[{0}]}}]}}";
+            const int asyncRequests = 15;
+
+            var queries = new CypherQuery[asyncRequests];
+            var apiQueries = new CypherStatementList[asyncRequests];
+            var responses = new MockResponse[asyncRequests];
+            var testHarness = new RestHarnessWithCounter();
+
+            for (int i = 0; i < asyncRequests; i++)
+            {
+                queries[i] = new CypherQuery(string.Format(queryTextBase, i), new Dictionary<string, object>(),
+                    CypherResultMode.Projection);
+                apiQueries[i] = new CypherStatementList {new CypherTransactionStatement(queries[i], false)};
+                responses[i] = MockResponse.Json(200,
+                    @"{'results':[" + string.Format(resultColumnBase, i) + @"], 'errors':[] }");
+                if (i > 0)
+                {
+                    testHarness.Add(MockRequest.PostObjectAsJson("/transaction/1", apiQueries[i]), responses[i]);
+                }
+            }
+
+            testHarness.Add(
+                MockRequest.PostObjectAsJson("/transaction", apiQueries[0]),
+                MockResponse.Json(201, GenerateInitTransactionResponse(1, string.Format(resultColumnBase, 0)),
+                    "http://foo/db/data/transaction/1")
+                );
+            testHarness.Add(
+                MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}"),
+                MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+            );
+            try
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var rawClient = (IRawGraphClient)client;
+                var tasks = new Task[asyncRequests];
+                using (var tran = client.BeginTransaction())
+                {
+                    for (int i = 0; i < asyncRequests; i++)
+                    {
+                        int tmpResult = i;
+                        tasks[i] = rawClient.ExecuteGetCypherResultsAsync<DummyTotal>(queries[i]).ContinueWith(task =>
+                        {
+                            Assert.AreEqual(tmpResult, task.Result.Single().Total);
+                        });
+                    }
+
+                    Task.WaitAll(tasks);
+                    tran.Commit();
+                }
+            }
+            finally
+            {
+                testHarness.Dispose();
+            }
+
+            // check that we have a total order
+            Assert.AreEqual(asyncRequests, testHarness.Queue.Count);
+            int lastElement = -1;
+            for (int i = 0; i < asyncRequests; i++)
+            {
+                int headItem;
+                Assert.IsTrue(testHarness.Queue.TryDequeue(out headItem));
+                Assert.Greater(headItem, lastElement);
+                lastElement = headItem;
+            }
+        }
+
+        
+        [Test]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CommitFailsOnPendingAsyncRequests()
+        {
+            const string queryText = @"MATCH (n) RETURN count(n) as Total";
+            const string resultColumn = @"{'columns':['Total'], 'data':[{'row':[1]}]}";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+
+            using (var testHarness = new RestTestHarness(false)
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var rawClient = (IRawGraphClient) client;
+                using (var tran = client.BeginTransaction())
+                {
+                    rawClient.ExecuteGetCypherResultsAsync<DummyTotal>(cypherQuery);
+                    tran.Commit();
+                }
+
+            }
+
+            Assert.Fail("Commit did not fail with pending tasks");
         }
     }
 }

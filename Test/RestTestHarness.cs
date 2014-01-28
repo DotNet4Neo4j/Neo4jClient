@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using Neo4jClient.Execution;
 using Neo4jClient.Transactions;
@@ -20,6 +21,16 @@ namespace Neo4jClient.Test
         readonly IList<MockRequest> processedRequests = new List<MockRequest>();
         readonly IList<string> unservicedRequests = new List<string>();
         public readonly string BaseUri = "http://foo/db/data";
+        private readonly bool assertConstraintsAreMet;
+
+        public RestTestHarness() : this(true)
+        {
+        }
+
+        public RestTestHarness(bool assertConstraintsAreMet)
+        {
+            this.assertConstraintsAreMet = assertConstraintsAreMet;
+        }
 
         public void Add(MockRequest request, MockResponse response)
         {
@@ -110,7 +121,7 @@ namespace Neo4jClient.Test
             return httpClient;
         }
 
-        HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
+        protected virtual HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
         {
             // User info isn't transmitted over the wire, so we need to strip it here too
             var requestUri = request.RequestUri;
@@ -200,7 +211,10 @@ namespace Neo4jClient.Test
 
         public void Dispose()
         {
-            AssertRequestConstraintsAreMet();
+            if (assertConstraintsAreMet)
+            {
+                AssertRequestConstraintsAreMet();
+            }
         }
     }
 }

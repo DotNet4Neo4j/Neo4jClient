@@ -40,7 +40,7 @@ namespace Neo4jClient.Execution
 
         public new Task<TParse> ExecuteAsync(string commandDescription)
         {
-            return ExecuteAsync(commandDescription, null);
+            return ExecuteAsync(commandDescription, null, null);
         }
 
         public Task<TParse> ExecuteAsync(Func<Task<TParse>, TParse> continuationFunction)
@@ -50,7 +50,12 @@ namespace Neo4jClient.Execution
 
         public Task<TParse> ExecuteAsync(string commandDescription, Func<Task<TParse>, TParse> continuationFunction)
         {
-            var executionTask = base.ExecuteAsync(commandDescription)
+            return ExecuteAsync(commandDescription, continuationFunction, null);
+        }
+
+        public Task<TParse> ExecuteAsync(string commandDescription, Func<Task<TParse>, TParse> continuationFunction, TaskFactory taskFactory)
+        {
+            var executionTask = base.ExecuteAsync(commandDescription, null, taskFactory)
                 .ContinueWith(
                     responseAction =>
                         responseAction.Result == null ? default(TParse) : CastIntoResult(responseAction.Result));
@@ -59,7 +64,7 @@ namespace Neo4jClient.Execution
 
         public new Task<TParse> ExecuteAsync()
         {
-            return ExecuteAsync(null, null);
+            return ExecuteAsync(null, null, null);
         }
 
         public Task<TExpected> ExecuteAsync<TExpected>(Func<Task<TParse>, TExpected> continuationFunction)
@@ -72,9 +77,19 @@ namespace Neo4jClient.Execution
             return ExecuteAsync(commandDescription).ContinueWith(continuationFunction);
         }
 
+        public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<TParse>, TExpected> continuationFunction, TaskFactory taskFactory)
+        {
+            throw new NotImplementedException();
+        }
+
         public new TParse Execute(string commandDescription)
         {
-            return CastIntoResult(base.Execute(commandDescription));
+            return Execute(commandDescription, null);
+        }
+
+        public new TParse Execute(string commandDescription, TaskFactory taskFactory)
+        {
+            return CastIntoResult(base.Execute(commandDescription, taskFactory));
         }
 
         public new TParse Execute()
