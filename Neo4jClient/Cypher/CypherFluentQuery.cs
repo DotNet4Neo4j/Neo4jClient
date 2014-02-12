@@ -265,6 +265,12 @@ namespace Neo4jClient.Cypher
                 w.AppendClause(string.Format("SET {0}", setText)));
         }
 
+        public ICypherFluentQuery Remove(string removeText)
+        {
+            return Mutate(w =>
+                w.AppendClause(string.Format("REMOVE {0}", removeText)));
+        }
+
         public ICypherFluentQuery ForEach(string text)
         {
             return Mutate(w => w.AppendClause("FOREACH " + text));
