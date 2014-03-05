@@ -237,6 +237,16 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause(string.Format("CREATE ({0} {{0}})", identity), node));
         }
 
+        public ICypherFluentQuery CreateUniqueConstraint(string identity, string property)
+        {
+            return Mutate(w => w.AppendClause(string.Format("CREATE CONSTRAINT ON ({0}) ASSERT {1} IS UNIQUE", identity, property)));
+        }
+
+        public ICypherFluentQuery DropUniqueConstraint(string identity, string property)
+        {
+            return Mutate(w => w.AppendClause(string.Format("DROP CONSTRAINT ON ({0}) ASSERT {1} IS UNIQUE", identity, property)));
+        }
+
         public ICypherFluentQuery Delete(string identities)
         {
             return Mutate(w =>
@@ -253,6 +263,12 @@ namespace Neo4jClient.Cypher
         {
             return Mutate(w =>
                 w.AppendClause(string.Format("SET {0}", setText)));
+        }
+
+        public ICypherFluentQuery Remove(string removeText)
+        {
+            return Mutate(w =>
+                w.AppendClause(string.Format("REMOVE {0}", removeText)));
         }
 
         public ICypherFluentQuery ForEach(string text)

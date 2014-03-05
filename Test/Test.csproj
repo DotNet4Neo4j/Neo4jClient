@@ -69,9 +69,11 @@
     <Compile Include="Cypher\AggregateTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryForEachTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryDropTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryConstraintTest.cs" />
     <Compile Include="Cypher\CypherFluentQueryParserVersionTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryMergeTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryMatchTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryRemoveTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
     <Compile Include="Cypher\DocumentationExamples.cs" />
     <Compile Include="Cypher\UnionTests.cs" />

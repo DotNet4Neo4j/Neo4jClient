@@ -216,6 +216,45 @@ namespace Neo4jClient.Cypher
         void VisitConstantMember(MemberExpression node)
         {
             var value = GetConstantExpressionValue(node);
+
+            // if the value is null, sending a parameter would return something we don't want.
+            // A PropertyBag within the Neo4j server cannot have property with null value, that is, having a null
+            // property is the same as not having the property.
+            var text = TextOutput.ToString();
+            if (value == null && text.EndsWith(NotEqual))
+            {
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(NotEqual, StringComparison.Ordinal), NotEqual.Length);
+                if (capabilities.SupportsNullComparisonsWithIsOperator)
+                {
+                    TextOutput.Append(" is not null");
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("has({0})", lastWrittenMemberName));
+                }
+
+                // no further processing is required
+                return;
+            }
+
+            if (value == null && text.EndsWith(Equal))
+            {
+                TextOutput.Remove(TextOutput.ToString().LastIndexOf(Equal, StringComparison.Ordinal), Equal.Length);
+                if (capabilities.SupportsNullComparisonsWithIsOperator)
+                {
+                    TextOutput.Append(" is null");
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("not(has({0}))", lastWrittenMemberName));
+                }
+
+                // no further processing is required
+                return;
+            }
+
             if (capabilities.SupportsPropertySuffixesForControllingNullComparisons && value != null)
             {
                 SwapNullQualifierFromDefaultTrueToDefaultFalseIfTextEndsWithAny(new[]
