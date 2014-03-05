@@ -16,6 +16,11 @@ namespace Neo4jClient.Test.Cypher
         // ReSharper restore ClassNeverInstantiated.Local
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
+        class MockWithNullField
+        {
+            public string NullField { get; set; }
+        }
+
         [Test]
         public void ComparePropertiesAcrossEntitiesEqual()
         {
@@ -26,6 +31,21 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("WHERE (a.Bar = b.Bar)", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count);
+        }
+
+        [Test]
+        public void CompareWithNullInMemberExpression()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var mockWithNullField = new MockWithNullField
+            {
+                NullField = null
+            };
+            var query = new CypherFluentQuery(client)
+                .Where<MockWithNullField>(a => a.NullField == mockWithNullField.NullField)
+                .Query;
+
+            Assert.AreEqual("WHERE (not(has(a.NullField)))", query.QueryText);
         }
 
         [Test]
