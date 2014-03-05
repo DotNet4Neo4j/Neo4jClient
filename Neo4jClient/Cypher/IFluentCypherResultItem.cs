@@ -2,6 +2,6 @@
 {
     public interface IFluentCypherResultItem
     {
-        Node<T> CollectAs<T>();
+        T CollectAs<T>();
     }
 }

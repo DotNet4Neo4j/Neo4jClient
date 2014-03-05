@@ -20,13 +20,13 @@ namespace Neo4jClient.Cypher
         /// Equivalent to <code>RETURN collect(foo)</code>
         /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#aggregation-collect
         /// </summary>
-        IEnumerable<Node<T>> CollectAs<T>();
+        IEnumerable<T> CollectAs<T>();
 
         /// <summary>
         /// Equivalent to <code>RETURN collect(distinct foo)</code>
         /// http://docs.neo4j.org/chunked/stable/query-aggregation.html#aggregation-collect
         /// </summary>
-        IEnumerable<Node<T>> CollectAsDistinct<T>();
+        IEnumerable<T> CollectAsDistinct<T>();
 
         /// <summary>
         /// Equivalent to <code>RETURN head()</code>

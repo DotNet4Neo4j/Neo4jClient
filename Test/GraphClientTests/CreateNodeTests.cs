@@ -91,7 +91,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             graphClient.Create(testNode, null, null);
 
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             graphClient.Create(new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" });
 
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Test]
@@ -187,7 +187,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             graphClient.Create(new TestNode { Foo = "foo東京", Bar = "bar", Baz = "baz" });
 
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Test]
@@ -232,7 +232,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var node = graphClient.Create(testNode);
 
             Assert.AreEqual(760, node.Id);
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Test]
@@ -277,7 +277,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var node = graphClient.Create(testNode);
 
             Assert.AreEqual(2157483647, node.Id);
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Test]
@@ -384,7 +384,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Test]
@@ -527,7 +527,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 
-            testHarness.AssertAllRequestsWereReceived();
+            testHarness.AssertRequestConstraintsAreMet();
         }
 
         public class TestNode

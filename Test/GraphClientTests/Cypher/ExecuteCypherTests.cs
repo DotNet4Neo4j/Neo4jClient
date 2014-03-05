@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 {"p1", 219}
             };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest);
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness

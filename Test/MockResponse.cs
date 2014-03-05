@@ -15,14 +15,31 @@ namespace Neo4jClient.Test
 
         public string ContentType { get; set; }
         public string Content { get; set; }
+        public string Location { get; set; }
+
+        public static MockResponse Json(int statusCode, string json)
+        {
+            return Json((HttpStatusCode)statusCode, json, null);
+        }
+
+        public static MockResponse Json(int statusCode, string json, string location)
+        {
+            return Json((HttpStatusCode)statusCode, json, location);
+        }
 
         public static MockResponse Json(HttpStatusCode statusCode, string json)
+        {
+            return Json(statusCode, json, null);
+        }
+
+        public static MockResponse Json(HttpStatusCode statusCode, string json, string location)
         {
             return new MockResponse
             {
                 StatusCode = statusCode,
                 ContentType = "application/json",
-                Content = json
+                Content = json,
+                Location = location
             };
         }
 
@@ -55,6 +72,7 @@ namespace Neo4jClient.Test
                 'relationship_index' : 'http://foo/db/data/index/relationship',
                 'reference_node' : 'http://foo/db/data/node/123',
                 'neo4j_version' : '2.0.M06',
+                'transaction': 'http://foo/db/data/transaction',
                 'extensions_info' : 'http://foo/db/data/ext',
                 'extensions' : {}
             }");
