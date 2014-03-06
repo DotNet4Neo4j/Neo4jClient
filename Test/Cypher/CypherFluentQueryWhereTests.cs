@@ -34,21 +34,6 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        public void CompareWithNullInMemberExpression()
-        {
-            var client = Substitute.For<IRawGraphClient>();
-            var mockWithNullField = new MockWithNullField
-            {
-                NullField = null
-            };
-            var query = new CypherFluentQuery(client)
-                .Where<MockWithNullField>(a => a.NullField == mockWithNullField.NullField)
-                .Query;
-
-            Assert.AreEqual("WHERE (not(has(a.NullField)))", query.QueryText);
-        }
-
-        [Test]
         public void ComparePropertiesAcrossEntitiesNotEqual()
         {
             var client = Substitute.For<IRawGraphClient>();

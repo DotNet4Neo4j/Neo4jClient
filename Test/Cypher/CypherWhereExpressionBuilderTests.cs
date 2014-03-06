@@ -159,6 +159,66 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ForPre20VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
+
+            Assert.AreEqual("(foo.NullableBar? is null)", result);
+        }
+
+        [Test]
+        public void For20VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher20);
+
+            Assert.AreEqual("(not(has(foo.NullableBar)))", result);
+        }
+
+        [Test]
+        public void ForPre20VersionsEvaluateTrueWhenComparingNotMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
+
+            Assert.AreEqual("(foo.NullableBar? is not null)", result);
+        }
+
+        [Test]
+        public void For20VersionsEvaluateTrueWhenComparingNotMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher20);
+
+            Assert.AreEqual("(has(foo.NullableBar))", result);
+        }
+
+        [Test]
         public void ForPre20VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNull()
         {
             var parameters = new Dictionary<string, object>();
