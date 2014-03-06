@@ -16,6 +16,11 @@ namespace Neo4jClient.Test.Cypher
         // ReSharper restore ClassNeverInstantiated.Local
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
+        class MockWithNullField
+        {
+            public string NullField { get; set; }
+        }
+
         [Test]
         public void ComparePropertiesAcrossEntitiesEqual()
         {
