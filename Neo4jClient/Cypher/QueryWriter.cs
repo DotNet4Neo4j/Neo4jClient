@@ -10,22 +10,26 @@ namespace Neo4jClient.Cypher
         readonly StringBuilder queryTextBuilder;
         readonly IDictionary<string, object> queryParameters;
         CypherResultMode resultMode;
+        private CypherResultFormat resultFormat;
 
         public QueryWriter()
         {
             queryTextBuilder = new StringBuilder();
             queryParameters = new Dictionary<string, object>();
             resultMode = CypherResultMode.Set;
+            resultFormat = CypherResultFormat.DependsOnEnvironment;
         }
 
         QueryWriter(
             StringBuilder queryTextBuilder,
             IDictionary<string, object> queryParameters,
-            CypherResultMode resultMode)
+            CypherResultMode resultMode,
+            CypherResultFormat resultFormat)
         {
             this.queryTextBuilder = queryTextBuilder;
             this.queryParameters = queryParameters;
             this.resultMode = resultMode;
+            this.resultFormat = resultFormat;
         }
 
         public CypherResultMode ResultMode
@@ -34,11 +38,17 @@ namespace Neo4jClient.Cypher
             set { resultMode = value; }
         }
 
+        public CypherResultFormat ResultFormat
+        {
+            get { return resultFormat; }
+            set { resultFormat = value; }
+        }
+
         public QueryWriter Clone()
         {
             var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
             var clonedParameters = new Dictionary<string, object>(queryParameters);
-            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode);
+            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode, resultFormat);
         }
 
         public CypherQuery ToCypherQuery()
@@ -50,7 +60,8 @@ namespace Neo4jClient.Cypher
             return new CypherQuery(
                 queryText,
                 new Dictionary<string, object>(queryParameters),
-                resultMode);
+                resultMode,
+                resultFormat);
         }
 
         public string CreateParameter(object paramValue)

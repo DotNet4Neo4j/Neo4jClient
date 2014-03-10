@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Neo4jClient.Execution;
 
 namespace Neo4jClient
 {

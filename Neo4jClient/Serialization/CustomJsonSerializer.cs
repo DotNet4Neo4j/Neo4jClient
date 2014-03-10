@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient.Serialization
 {
-    public class CustomJsonSerializer
+    public class CustomJsonSerializer : ISerializer
     {
         public IEnumerable<JsonConverter> JsonConverters { get; set; }
         public string ContentType { get; set; }

@@ -56,6 +56,7 @@
     <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -160,6 +161,9 @@
     <Compile Include="Serialization\CustomJsonSerializerTests.cs" />
     <Compile Include="CultureInfoSetupFixture.cs" />
     <Compile Include="Serialization\UserSuppliedSerializationTests.cs" />
+    <Compile Include="Transactions\QueriesInTransactionTests.cs" />
+    <Compile Include="Transactions\RestCallScenarioTests.cs" />
+    <Compile Include="Transactions\TransactionManagementTests.cs" />
     <Compile Include="UtilitiesTests.cs" />
   </ItemGroup>
   <ItemGroup>

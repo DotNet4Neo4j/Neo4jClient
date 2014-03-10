@@ -31,7 +31,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {"p1", 219}
                 };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest);
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -91,7 +91,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 {
                     {"p0", 123}
                 },
-                CypherResultMode.Projection);
+                CypherResultMode.Projection,
+                CypherResultFormat.Rest);
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -141,7 +142,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             var cypherQuery = new CypherQuery(
                 @"START root=node(0) MATCH root-[:HAS_COMPANIES]->()-[:HAS_COMPANY]->company, company--foo RETURN company, collect(foo) as Bar",
                 new Dictionary<string, object>(),
-                CypherResultMode.Projection);
+                CypherResultMode.Projection,
+                CypherResultFormat.Rest);
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -302,7 +304,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 {
                     {"p0", 123}
                 },
-                CypherResultMode.Projection);
+                CypherResultMode.Projection,
+                CypherResultFormat.Rest);
 
              var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -426,7 +429,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     {
                         {"p0", 123}
                     },
-                CypherResultMode.Projection);
+                CypherResultMode.Projection,
+                CypherResultFormat.Rest);
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -547,7 +551,8 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 {
                     {"p0", 123}
                 },
-                CypherResultMode.Projection);
+                CypherResultMode.Projection,
+                CypherResultFormat.Rest);
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -644,7 +649,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             // Arrange
             const string queryText = @"broken query";
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Rest);
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
