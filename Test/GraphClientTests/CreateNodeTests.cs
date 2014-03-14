@@ -47,6 +47,49 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        [ExpectedException(typeof(NeoException), ExpectedMessage = "PropertyValueException: Could not set property \"TestNode2\", unsupported type: {Foo=foo, Bar=bar}")]
+        public void ShouldThrowNeoExceptionWhenBatchCreationStepJobFails()
+        {
+            var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostJson("/batch",
+                        @"[{
+                          'method': 'POST', 'to' : '/node',
+                          'body': {
+                            'Foo': 'foo',
+                            'TestNode2': { 'Foo': 'foo', 'Bar': 'bar' }
+                          },
+                          'id': 0
+                        }]"
+                    ),
+                    MockResponse.Json(HttpStatusCode.OK,
+                       @"[ {
+                        'id':0,'location':null, 
+                        'body': {
+                            'message': 'Could not set property ""TestNode2"", unsupported type: {Foo=foo, Bar=bar}',
+                            'exception': 'PropertyValueException',
+                            'fullname': 'org.neo4j.server.rest.web.PropertyValueException',
+                            'stacktrace': [
+                               'org.neo4j.server.rest.domain.PropertySettingStrategy.setProperty(PropertySettingStrategy.java:141)',
+                               'java.lang.Thread.run(Unknown Source)'
+                            ] 
+                        }, 
+                        'status': 400}]" 
+                    )
+                }
+            };
+
+            var graphClient = testHarness.CreateAndConnectGraphClient();
+            graphClient.Create(new NestedTestNode()
+                                   {
+                                       Foo = "foo",
+                                       TestNode2 = new TestNode2() {Bar = "bar", Foo = "foo"}
+                                   });
+
+        }
+
+        [Test]
         public void ShouldNotThrowANotSupportedExceptionForPre15M02DatabaseWhenThereAreNoIndexEntries()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
@@ -540,12 +583,19 @@ namespace Neo4jClient.Test.GraphClientTests
 
             [RegularExpression(@"\w*")]
             public string Baz { get; set; }
+
         }
 
         public class TestNode2
         {
             public string Foo { get; set; }
             public string Bar { get; set; }
+        }
+
+        public class NestedTestNode
+        {
+            public string Foo { get; set; }
+            public TestNode2 TestNode2 { get; set; }
         }
 
         public class TestPayload
