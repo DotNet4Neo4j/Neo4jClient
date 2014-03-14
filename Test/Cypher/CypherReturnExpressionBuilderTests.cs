@@ -435,6 +435,28 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ThrowNiceErrorForStructInNewExpression()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new KeyValuePair<ICypherResultItem, ICypherResultItem>();
+            
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+            StringAssert.StartsWith(CypherReturnExpressionBuilder.ReturnExpressionCannotBeStruct, ex.Message);
+        }
+
+        [Test]
+        public void ThrowNiceErrorForStructInMemberInitExpression()
+        {
+            Expression<Func<ICypherResultItem, object>> expression =
+                a => new KeyValuePair<ICypherResultItem, ICypherResultItem>()
+                {
+                };
+
+            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
+            StringAssert.StartsWith(CypherReturnExpressionBuilder.ReturnExpressionCannotBeStruct, ex.Message);
+        }
+
+        [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/47/problem-casting-cypher-query-results-to")]
         public void ThrowNiceErrorForConstructorsWithArguments()
         {
