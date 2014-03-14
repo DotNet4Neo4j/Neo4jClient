@@ -13,6 +13,8 @@ namespace Neo4jClient.Cypher
     {
         internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem, Neo4jClient.Cypher.All or Neo4jClient.Cypher.Return. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
 
+        internal const string ReturnExpressionCannotBeStruct = "The expression must be constructed from an object initializer with a constructor without arguments. This means that structs cannot be used as part of the return expression.";
+
         internal const string ReturnExpressionShouldBeOneOfExceptionMessage = "The expression must be constructed as either an object initializer (for example: n => new MyResultType { Foo = n.Bar }), an anonymous type initializer (for example: n => new { Foo = n.Bar }), a method call (for example: n => n.Count()), or a member accessor (for example: n => n.As<Foo>().Bar). You cannot supply blocks of code (for example: n => { var a = n + 1; return a; }) or use constructors with arguments (for example: n => new Foo(n)).";
 
         internal const string ReturnAsTypeShouldBeOneOfExceptionMessage = "You've called As<{0}>() in your return clause, where {0} is not a supported type. It must be a simple type (like int, string, or long), a class with a default constructor (so that we can deserialize into it), RelationshipInstance, RelationshipInstance<T>, list of RelationshipInstance, or list of RelationshipInstance<T>.";
@@ -117,6 +119,11 @@ namespace Neo4jClient.Cypher
             CypherCapabilities capabilities,
             IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
+            if (expression.NewExpression.Constructor == null)
+            {
+                throw new ArgumentException(ReturnExpressionCannotBeStruct);
+            }
+
             if (expression.NewExpression.Constructor.GetParameters().Any())
                 throw new ArgumentException(
                     "The result type must be constructed using a parameterless constructor. For example: n => new MyResultType { Foo = n.Bar }",
@@ -161,7 +168,13 @@ namespace Neo4jClient.Cypher
             CypherCapabilities capabilities,
             IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
         {
-            var resultingType = expression.Constructor.DeclaringType;
+            var constructor = expression.Constructor;
+            if (constructor == null)
+            {
+                throw new ArgumentException(ReturnExpressionCannotBeStruct);
+            }
+
+            var resultingType = constructor.DeclaringType;
             var quacksLikeAnAnonymousType =
                 resultingType != null &&
                 resultingType.IsSpecialName &&
