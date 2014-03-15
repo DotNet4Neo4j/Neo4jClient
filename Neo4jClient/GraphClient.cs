@@ -343,6 +343,7 @@ namespace Neo4jClient
             var batchResponse = ExecuteBatch(batchSteps);
 
             var createResponse = batchResponse[createNodeStep];
+            EnsureNodeWasCreated(createResponse);
             var nodeId = long.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
 
@@ -1251,6 +1252,19 @@ namespace Neo4jClient
             var eventInstance = OperationCompleted;
             if (eventInstance != null)
                 eventInstance(this, args);
+        }
+
+        private void EnsureNodeWasCreated(BatchStepResult createResponse)
+        {
+            if (createResponse.Status == HttpStatusCode.BadRequest && createResponse.Body != null)
+            {
+                var exceptionResponse = JsonConvert.DeserializeObject<ExceptionResponse>(createResponse.Body);
+
+                if (exceptionResponse == null || string.IsNullOrEmpty(exceptionResponse.Message) || string.IsNullOrEmpty(exceptionResponse.Exception))
+                    throw new ApplicationException(string.Format("Response from Neo4J: {0}", createResponse.Body));
+
+                throw new NeoException(exceptionResponse);
+            }
         }
     }
 }
