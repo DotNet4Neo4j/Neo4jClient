@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
-    public interface IGraphClient
+    public interface IGraphClient : ICypherGraphClient
     {
         [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
         RootNode RootNode { get; }
@@ -112,8 +112,6 @@ namespace Neo4jClient
         void ShutdownServer();
 
         event OperationCompletedEventHandler OperationCompleted;
-
-        ICypherFluentQuery Cypher { get; }
 
         CypherCapabilities CypherCapabilities { get; }
 

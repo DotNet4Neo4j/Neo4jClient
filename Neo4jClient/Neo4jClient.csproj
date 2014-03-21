@@ -87,6 +87,7 @@
     <Compile Include="Cypher\ReturnExpression.cs" />
     <Compile Include="Cypher\StartBit.cs" />
     <Compile Include="Cypher\StartBitFormatter.cs" />
+    <Compile Include="ICypherGraphClient.cs" />
     <Compile Include="NeoException.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="HttpClient.cs" />
