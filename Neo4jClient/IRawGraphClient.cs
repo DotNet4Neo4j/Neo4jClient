@@ -1,6 +1,6 @@
+using Neo4jClient.Cypher;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Neo4jClient.Cypher;
 
 namespace Neo4jClient
 {
@@ -14,5 +14,6 @@ namespace Neo4jClient
         IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
         Task<IEnumerable<TResult>> ExecuteGetCypherResultsAsync<TResult>(CypherQuery query);
         void ExecuteCypher(CypherQuery query);
+        Task ExecuteCypherAsync(CypherQuery Query);
     }
 }

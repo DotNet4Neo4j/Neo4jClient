@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
 {
@@ -8,6 +9,7 @@ namespace Neo4jClient.Cypher
     {
         CypherQuery Query { get; }
         void ExecuteWithoutResults();
+        Task ExecuteWithoutResultsAsync();
 
         ICypherFluentQuery WithParam(string key, object value);
         ICypherFluentQuery WithParams(IDictionary<string,object> parameters);

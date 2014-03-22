@@ -1,4 +1,11 @@
-﻿using System;
+﻿using Neo4jClient.ApiModels;
+using Neo4jClient.ApiModels.Cypher;
+using Neo4jClient.ApiModels.Gremlin;
+using Neo4jClient.Cypher;
+using Neo4jClient.Gremlin;
+using Neo4jClient.Serialization;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -11,13 +18,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Neo4jClient.ApiModels;
-using Neo4jClient.ApiModels.Cypher;
-using Neo4jClient.ApiModels.Gremlin;
-using Neo4jClient.Cypher;
-using Neo4jClient.Gremlin;
-using Neo4jClient.Serialization;
-using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
@@ -852,6 +852,28 @@ namespace Neo4jClient
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
+        }
+
+        Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
+        {
+            CheckRoot();
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var task = SendHttpRequestAsync(
+                HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
+                string.Format("The query was: {0}", query.QueryText),
+                HttpStatusCode.OK);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.QueryText,
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
+            return task;
         }
 
         [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
