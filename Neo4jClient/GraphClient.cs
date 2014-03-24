@@ -824,7 +824,7 @@ namespace Neo4jClient
                     stopwatch.Stop();
                     OnOperationCompleted(new OperationCompletedEventArgs
                     {
-                        QueryText = query.QueryText,
+                        QueryText = query.DebugQueryText,
                         ResourcesReturned = results.Count(),
                         TimeTaken = stopwatch.Elapsed
                     });
@@ -848,7 +848,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = query.QueryText,
+                QueryText = query.DebugQueryText,
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });

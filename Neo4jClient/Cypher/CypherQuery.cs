@@ -36,7 +36,7 @@ namespace Neo4jClient.Cypher
             get { return resultMode; }
         }
 
-        protected string DebugQueryText
+        public string DebugQueryText
         {
             get
             {
