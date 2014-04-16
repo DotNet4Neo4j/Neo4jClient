@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Neo4jClient.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -36,15 +38,38 @@ namespace Neo4jClient.Cypher
             get { return resultMode; }
         }
 
+        CustomJsonSerializer BuildSerializer()
+        {
+            return new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
+        }
+
         public string DebugQueryText
         {
             get
             {
                 var text = queryParameters
                     .Keys
-                    .Aggregate(queryText, (current, paramName)
-                        => current.Replace("{" + paramName + "}", queryParameters[paramName].ToString()))
-                    .Replace("\r\n", "   ");
+                    .Aggregate(
+                        queryText,
+                        (current, paramName) =>
+                        {
+                            var value = queryParameters[paramName];
+                            var targetType = value.GetType();
+                            if (targetType.IsClass && targetType != typeof (string))
+                            {
+                                value = BuildSerializer().Serialize(value);
+                                value = Regex.Replace(
+                                    value.ToString(),
+                                    "\"\\w+\":",
+                                    match =>
+                                    {
+                                        var val = match.ToString().Replace("\"", "");
+                                        return val;
+                                    });
+                            }
+
+                            return current.Replace("{" + paramName + "}", value.ToString());
+                        });
 
                 return text;
             }
