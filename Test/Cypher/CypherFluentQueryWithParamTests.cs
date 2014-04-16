@@ -78,5 +78,40 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("key", ex.ParamName);
             Assert.AreEqual("A parameter with the given key is already defined in the query.\r\nParameter name: key", ex.Message);
         }
+
+        public class ComplexObjForWithParamTest
+        {
+            public long? Id { get; set; }
+            public string Name { get; set; }
+            public decimal Currency { get; set; }
+        }
+
+        [Test]
+        public void ComplexObjectInWithParam()
+        {
+            // Arrange
+            var client = Substitute.For<IRawGraphClient>();
+
+            // Act
+            var query = new CypherFluentQuery(client)
+                .Start("n", (NodeReference) 3)
+                .CreateUnique("n-[:X]-(leaf {obj})")
+                .WithParam("obj", new ComplexObjForWithParamTest
+                                  {
+                                      Id = 123,
+                                      Name = "Bar",
+                                      Currency = (decimal) 12.143
+                                  })
+                .Query;
+
+            // Assert
+            Assert.AreEqual("START n=node(3)" +
+                            "\r\nCREATE UNIQUE n-[:X]-(leaf {" +
+                            "\r\n  Id: 123," +
+                            "\r\n  Name: \"Bar\"," +
+                            "\r\n  Currency: 12.143" +
+                            "\r\n})", query.DebugQueryText);
+            Assert.AreEqual(2, query.QueryParameters.Count);
+        }
     }
 }
