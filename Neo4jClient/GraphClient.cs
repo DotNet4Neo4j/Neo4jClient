@@ -734,18 +734,19 @@ namespace Neo4jClient
 
         private void CheckTransactionEnvironmentWithPolicy(IExecutionPolicy policy)
         {
+            bool inTransaction = InTransaction;
+
             if (transactionManager != null)
             {
                 transactionManager.RegisterToTransactionIfNeeded();
             }
 
-            if (InTransaction && policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Denied)
+            if (inTransaction && policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Denied)
             {
                 throw new InvalidOperationException("Cannot be done inside a transaction scope.");
             }
 
-
-            if (policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Required)
+            if (!inTransaction && policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Required)
             {
                 throw new InvalidOperationException("Cannot be done outside a transaction scope.");
             }
@@ -1008,7 +1009,7 @@ namespace Neo4jClient
             var response = Request.With(ExecutionConfiguration)
                 .Post(policy.BaseEndpoint)
                 .WithJsonContent(SerializeAsJson(new CypherStatementList(queryList)))
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
+                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
                 .Execute("Executing multiple queries: " + queriesInText);
 
             var transactionObject = transactionManager.CurrentDtcTransaction ??
