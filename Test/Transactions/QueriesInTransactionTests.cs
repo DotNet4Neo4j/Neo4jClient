@@ -145,6 +145,51 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
+        public void ExecuteMultipleStatementInOneRequest()
+        {
+            var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}, {'statement': 'MATCH t\r\nRETURN count(t)', 'resultDataContents':[], 'parameters': {}}]}");
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    initTransactionRequest,
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                using (var transaction = client.BeginTransaction())
+                {
+                    // dummy query to generate request
+                    var rawClient = client as IRawGraphClient;
+                    if (rawClient == null)
+                    {
+                        Assert.Fail("ITransactionalGraphClient is not IRawGraphClient");
+                    }
+
+                    var queries = new List<CypherQuery>()
+                    {
+                        client.Cypher
+                            .Match("n")
+                            .Return(n => n.Count())
+                            .Query,
+                        client.Cypher
+                            .Match("t")
+                            .Return(t => t.Count())
+                            .Query
+                    };
+
+                    rawClient.ExecuteMultipleCypherQueriesInTransaction(queries);
+                    transaction.Commit();
+                }
+            }
+        }
+
+        [Test]
         public void TransactionCommit()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
