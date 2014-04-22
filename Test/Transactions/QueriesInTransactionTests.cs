@@ -453,6 +453,162 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
+        public void NestedTransactionWithTransactionScopeQueryFirst()
+        {
+            const string queryTextMsTransaction = @"MATCH (n) RETURN count(n)";
+            const string queryTextTx = @"MATCH (t) RETURN count(t)";
+            const string resultColumn = @"{'columns':['count(n)'], 'data':[{'row':[1]}]}";
+            var cypherQueryMsTx = new CypherQuery(queryTextMsTransaction, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherQueryMsTxStatement = new CypherStatementList { new CypherTransactionStatement(cypherQueryMsTx, false) };
+            var cypherQueryTx = new CypherQuery(queryTextTx, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherQueryTxStatement = new CypherStatementList { new CypherTransactionStatement(cypherQueryTx, false) };
+            var deleteRequest = MockRequest.Delete("/transaction/1");
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+            var commitRequestTx = MockRequest.PostJson("/transaction/2/commit", @"{'statements': []}");
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherQueryMsTxStatement),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                },
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherQueryTxStatement),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(2, resultColumn), "http://foo/db/data/transaction/2")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                },
+                {
+                    commitRequestTx, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                },
+                {
+                    deleteRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            }.ShouldNotBeCalled(commitRequest))
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                using (var msTransaction = new TransactionScope())
+                {
+                    Assert.IsTrue(client.InTransaction);
+
+                    long totalMsTx = client.Cypher
+                        .Match("(n)")
+                        .Return(n => n.Count())
+                        .Results
+                        .SingleOrDefault();
+                    Assert.AreEqual(1, totalMsTx);
+
+                    using (var tx = client.BeginTransaction())
+                    {
+                        long total = client.Cypher
+                            .Match("(t)")
+                            .Return(t => t.Count())
+                            .Results
+                            .SingleOrDefault();
+
+                        Assert.AreEqual(1, total);
+
+                        // should not be called
+                        tx.Commit();
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void NestedTransactionMixedBetweenTransactionScopeAndBeginTransaction()
+        {
+            const string queryText = @"MATCH (n) RETURN count(n)";
+            const string resultColumn = @"{'columns':['count(n)'], 'data':[{'row':[1]}]}";
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var deleteRequest = MockRequest.Delete("/transaction/1");
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                },
+                {
+                    deleteRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            }.ShouldNotBeCalled(commitRequest))
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                using (var parentTx = client.BeginTransaction())
+                {
+                    using (var msTransaction = new TransactionScope())
+                    {
+                        Assert.IsTrue(client.InTransaction);
+
+                        using (var tx = client.BeginTransaction())
+                        {
+                            long total = client.Cypher
+                                .Match("(n)")
+                                .Return(n => n.Count())
+                                .Results
+                                .SingleOrDefault();
+
+                            Assert.AreEqual(1, total);
+
+                            // should not be called
+                            tx.Commit();
+                        }
+
+                        msTransaction.Complete();
+                    }
+                }
+
+                Assert.IsFalse(client.InTransaction);
+            }
+        }
+
+        [Test]
+        public void TestTransactionScopeWithSimpleDeserialization()
+        {
+            const string queryText = @"MATCH (n) RETURN count(n)";
+            const string resultColumn = @"{'columns':['count(n)'], 'data':[{'row':[1]}]}";
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                using (var msTransaction = new TransactionScope())
+                {
+                    Assert.IsTrue(client.InTransaction);
+
+                    long total = client.Cypher
+                        .Match("(n)")
+                        .Return(n => n.Count())
+                        .Results
+                        .SingleOrDefault();
+
+                    Assert.AreEqual(1, total);
+
+                    msTransaction.Complete();
+                }
+
+                Assert.IsFalse(client.InTransaction);
+            }
+        }
+
+        [Test]
         public void TransactionCommitInTransactionScope()
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{

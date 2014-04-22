@@ -18,10 +18,17 @@ namespace Neo4jClient.Execution
 
         private INeo4jTransaction GetTransactionInScope()
         {
+            // first try to get the Non DTC transaction and if it doesn't succeed then try it with the DTC
             var transactionalClient = Client as IInternalTransactionalGraphClient;
             if (transactionalClient == null)
             {
                 return null;
+            }
+
+            var proxiedTransaction = transactionalClient.Transaction as TransactionScopeProxy;
+            if (proxiedTransaction != null)
+            {
+                return proxiedTransaction.TransactionContext;;
             }
 
             var ambientTransaction = transactionalClient.TransactionManager.CurrentDtcTransaction;
@@ -30,13 +37,7 @@ namespace Neo4jClient.Execution
                 return (INeo4jTransaction) ambientTransaction;
             }
 
-            var proxiedTransaction = transactionalClient.Transaction as TransactionScopeProxy;
-            if (proxiedTransaction == null)
-            {
-                return null;
-            }
-
-            return (INeo4jTransaction) proxiedTransaction.TransactionContext;
+            return null;
         }
 
         public override Uri BaseEndpoint

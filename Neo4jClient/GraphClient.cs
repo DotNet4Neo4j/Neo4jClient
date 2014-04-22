@@ -1012,8 +1012,8 @@ namespace Neo4jClient
                 .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
                 .Execute("Executing multiple queries: " + queriesInText);
 
-            var transactionObject = transactionManager.CurrentDtcTransaction ??
-                                    transactionManager.CurrentNonDtcTransaction;
+            var transactionObject = transactionManager.CurrentNonDtcTransaction ??
+                                    transactionManager.CurrentDtcTransaction;
             policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
 
             stopwatch.Stop();
