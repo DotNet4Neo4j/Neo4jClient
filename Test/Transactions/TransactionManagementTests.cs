@@ -6,10 +6,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
 using NUnit.Framework;
+using TransactionScopeOption = Neo4jClient.Transactions.TransactionScopeOption;
 
 namespace Neo4jClient.Test.Transactions
 {
@@ -47,6 +49,24 @@ namespace Neo4jClient.Test.Transactions
                 {
                     Assert.AreSame(transaction, client.Transaction);
                 }
+            }
+        }
+
+        [Test]
+        public void IgnoreSystemTransactionsIfInsideInternalTransaction()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                using (var transaction = client.BeginTransaction())
+                {
+                    using (var msTransaction = new TransactionScope())
+                    {
+                        Assert.IsTrue(client.InTransaction);
+                    }
+                    Assert.IsTrue(client.InTransaction);
+                }
+
             }
         }
 

@@ -71,14 +71,14 @@ namespace Neo4jClient.Transactions
         {
             get
             {
-                // if we are in an ambient System.Transactions transaction then we are in a transaction!
-                if (Transaction.Current != null)
+                var transactionObject = CurrentInternalTransaction;
+                if (transactionObject != null)
                 {
-                    return true;
+                    return transactionObject.Committable;
                 }
 
-                var transactionObject = CurrentInternalTransaction;
-                return transactionObject != null && transactionObject.Committable;
+                // if we are in an ambient System.Transactions transaction then we are in a transaction!
+                return Transaction.Current != null;
             }
         }
 
