@@ -337,8 +337,9 @@ namespace Neo4jClient.Serialization
             typeMappings = typeMappings.ToArray();
             var dict = (IDictionary)Activator.CreateInstance(type);
             var valueType = type.GetGenericArguments()[1];
-            foreach (JProperty child in elements)
+            foreach (var jToken in elements)
             {
+                var child = (JProperty) jToken;
                 var key = child.Name;
                 var item = CreateAndMap(context, valueType, child.Value, typeMappings, nestingLevel + 1);
                 dict.Add(key, item);
