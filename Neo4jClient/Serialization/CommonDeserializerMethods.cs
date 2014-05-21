@@ -182,6 +182,9 @@ namespace Neo4jClient.Serialization
 
         public static object CreateAndMap(DeserializationContext context, Type type, JToken element, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
+            if (element.Type == JTokenType.Null)
+                return null;
+
             object instance;
             typeMappings = typeMappings.ToArray();
 

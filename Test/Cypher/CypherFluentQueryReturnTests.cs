@@ -260,6 +260,17 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ShouldUseSetResultModeForSimpleLambdaReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(item => item.As<object>())
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
         public void ShouldUseSetResultModeForSingleFunctionReturn()
         {
             var client = Substitute.For<IRawGraphClient>();
