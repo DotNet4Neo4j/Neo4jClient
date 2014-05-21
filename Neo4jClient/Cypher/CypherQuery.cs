@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Neo4jClient.Serialization;
 
 namespace Neo4jClient.Cypher
