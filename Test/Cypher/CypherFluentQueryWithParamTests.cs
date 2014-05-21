@@ -107,9 +107,9 @@ namespace Neo4jClient.Test.Cypher
             // Assert
             Assert.AreEqual("START n=node(3)" +
                             "\r\nCREATE UNIQUE n-[:X]-(leaf {" +
-                            "\r\n  Id: 123," +
-                            "\r\n  Name: \"Bar\"," +
-                            "\r\n  Currency: 12.143" +
+                            "\r\n  \"Id\": 123," +
+                            "\r\n  \"Name\": \"Bar\"," +
+                            "\r\n  \"Currency\": 12.143" +
                             "\r\n})", query.DebugQueryText);
             Assert.AreEqual(2, query.QueryParameters.Count);
         }

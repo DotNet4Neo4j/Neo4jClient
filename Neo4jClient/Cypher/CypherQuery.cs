@@ -38,7 +38,7 @@ namespace Neo4jClient.Cypher
             get { return resultMode; }
         }
 
-        CustomJsonSerializer BuildSerializer()
+        static CustomJsonSerializer BuildSerializer()
         {
             return new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
         }
@@ -47,6 +47,7 @@ namespace Neo4jClient.Cypher
         {
             get
             {
+                var serializer = BuildSerializer();
                 var text = queryParameters
                     .Keys
                     .Aggregate(
@@ -54,20 +55,7 @@ namespace Neo4jClient.Cypher
                         (current, paramName) =>
                         {
                             var value = queryParameters[paramName];
-                            var targetType = value.GetType();
-                            if (targetType.IsClass && targetType != typeof (string))
-                            {
-                                value = BuildSerializer().Serialize(value);
-                                value = Regex.Replace(
-                                    value.ToString(),
-                                    "\"\\w+\":",
-                                    match =>
-                                    {
-                                        var val = match.ToString().Replace("\"", "");
-                                        return val;
-                                    });
-                            }
-
+                            value = serializer.Serialize(value);
                             return current.Replace("{" + paramName + "}", value.ToString());
                         });
 
