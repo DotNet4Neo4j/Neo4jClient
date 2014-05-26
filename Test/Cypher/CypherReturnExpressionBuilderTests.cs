@@ -349,6 +349,23 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        [Description("https://github.com/Readify/Neo4jClient/pull/56#issuecomment-44158504")]
+        public void ReturnComplexTupleWithValueTypesAndCustomExpressions()
+        {
+            Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, object>> expression = (ping, reviews, reviewer) => new
+            Tuple<long, string, string, long, long, IEnumerable<string>>(
+                Return.As<long>("ping.Id"),
+                Return.As<string>("ping.Image"),
+                Return.As<string>("ping.Description"),
+                reviews.As<long>(),
+                reviewer.CountDistinct(),
+                Return.As<IEnumerable<string>>("collect(distinct reviewer.Avatar)[0..{maxAvatars}]")
+            );
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters);
+            Assert.AreEqual("ping.Id AS Item1, ping.Image AS Item2, ping.Description AS Item3, reviews AS Item4, count(distinct reviewer) AS Item5, collect(distinct reviewer.Avatar)[0..{maxAvatars}] AS Item6", returnExpression.Text);
+        }
+
+        [Test]
         public void ReturnLabelsInAnonymousType()
         {
             // MATCH (a:User)
