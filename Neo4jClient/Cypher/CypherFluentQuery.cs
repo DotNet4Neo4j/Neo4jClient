@@ -276,6 +276,11 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
+        public ICypherFluentQuery Unwind(string collectionName, string columnName)
+        {
+            return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+        }
+
         public ICypherFluentQuery Union()
         {
             return Mutate(w => w.AppendClause("UNION"));

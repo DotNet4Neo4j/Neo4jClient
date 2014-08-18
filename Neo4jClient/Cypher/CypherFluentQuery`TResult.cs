@@ -13,6 +13,11 @@ namespace Neo4jClient.Cypher
             : base(client, writer)
         {}
 
+        public new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName)
+        {
+            return Mutate<TResult>(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+        }
+
         public new ICypherFluentQuery<TResult> Limit(int? limit)
         {
             return limit.HasValue
