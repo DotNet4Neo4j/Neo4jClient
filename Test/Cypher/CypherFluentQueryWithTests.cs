@@ -132,7 +132,7 @@ namespace Neo4jClient.Test.Cypher
                     Commodity = a.As<Commodity>()
                 })
                 .Query;
-
+            
             Assert.AreEqual("WITH a AS Commodity", query.QueryText);
         }
 
