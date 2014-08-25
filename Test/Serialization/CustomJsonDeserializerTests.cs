@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Gremlin;
@@ -255,6 +256,16 @@ namespace Neo4jClient.Test.Serialization
             {
                 CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator = currentNumberDecimalSeparator;
             }
+        }
+
+        [Test]
+        public void TempTest()
+        {
+            var s = new CustomJsonSerializer();
+            s.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            //var st = s.Serialize(CreateComplexObjForWithParamTest());
+            var d = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters, resolver: new CamelCasePropertyNamesContractResolver());
+            //var o = d.Deserialize<ComplexObjForWithParamTest>(st);
         }
     }
 }

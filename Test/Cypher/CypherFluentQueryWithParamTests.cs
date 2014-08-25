@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Serialization;
+﻿using System.Globalization;
+using Neo4jClient.Serialization;
+using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using NSubstitute;
 using Neo4jClient.Cypher;

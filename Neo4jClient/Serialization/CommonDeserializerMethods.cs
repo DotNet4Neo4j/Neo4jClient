@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -301,11 +302,21 @@ namespace Neo4jClient.Serialization
             return item;
         }
 
+        public static Dictionary<string, PropertyInfo> ApplyPropertyCasing(DeserializationContext context, Dictionary<string, PropertyInfo> properties)
+        {
+            if (context.JsonContractResolver is CamelCasePropertyNamesContractResolver)
+            {
+                var camel = new Func<string, string>(name => string.Format("{0}{1}", name.Substring(0,1).ToLowerInvariant(), name.Substring(1, name.Length-1)));
+                return properties.Select(x => new { Key = camel(x.Key), x.Value }).ToDictionary(x => x.Key, x => x.Value);    
+            }
+            return properties;
+        } 
+
         public static void Map(DeserializationContext context, object targetObject, JToken parentJsonToken, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
             typeMappings = typeMappings.ToArray();
             var objType = targetObject.GetType();
-            var props = GetPropertiesForType(objType);
+            var props = ApplyPropertyCasing(context, GetPropertiesForType(objType));
             IDictionary<string, JToken> dictionary = parentJsonToken as JObject;
             if (dictionary != null && props.Keys.All(dictionary.ContainsKey) == false && dictionary.ContainsKey("data")) {
                parentJsonToken = parentJsonToken["data"];
