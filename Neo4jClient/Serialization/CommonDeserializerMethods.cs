@@ -316,7 +316,7 @@ namespace Neo4jClient.Serialization
         {
             typeMappings = typeMappings.ToArray();
             var objType = targetObject.GetType();
-            var props = ApplyPropertyCasing(context, GetPropertiesForType(objType));
+            var props = GetPropertiesForType(context, objType);
             IDictionary<string, JToken> dictionary = parentJsonToken as JObject;
             if (dictionary != null && props.Keys.All(dictionary.ContainsKey) == false && dictionary.ContainsKey("data")) {
                parentJsonToken = parentJsonToken["data"];
@@ -453,7 +453,7 @@ namespace Neo4jClient.Serialization
 
         static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
         static readonly object PropertyInfoCacheLock = new object();
-        static Dictionary<string, PropertyInfo> GetPropertiesForType(Type objType)
+        static Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context, Type objType)
         {
             Dictionary<string, PropertyInfo> result;
             if (PropertyInfoCache.TryGetValue(objType, out result))
@@ -478,7 +478,10 @@ namespace Neo4jClient.Serialization
                         };
                     });
 
-                return properties.ToDictionary(p => p.Name, p => p.Property);
+                var camelCase = (context.JsonContractResolver is CamelCasePropertyNamesContractResolver);
+                var camel = new Func<string, string>(name => string.Format("{0}{1}", name.Substring(0,1).ToLowerInvariant(), name.Length>1? name.Substring(1, name.Length-1):string.Empty));
+
+                return properties.ToDictionary(p => camelCase ? camel(p.Name) : p.Name, p => p.Property);
             }
         }
     }

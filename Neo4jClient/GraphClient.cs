@@ -572,9 +572,9 @@ namespace Neo4jClient
 
             if (changeCallback != null)
             {
-                var originalValuesDictionary = new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(originalValuesString);
+                var originalValuesDictionary = new CustomJsonDeserializer(JsonConverters,resolver:JsonContractResolver).Deserialize<Dictionary<string, string>>(originalValuesString);
                 var newValuesString = serializer.Serialize(node.Data);
-                var newValuesDictionary = new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(newValuesString);
+                var newValuesDictionary = new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<Dictionary<string, string>>(newValuesString);
                 var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
                 changeCallback(differences);
             }
@@ -1198,7 +1198,7 @@ namespace Neo4jClient
                 HttpGet(indexResource),
                 HttpStatusCode.OK);
 
-            var data = new CustomJsonDeserializer(JsonConverters).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
+            var data = new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
 
             return data == null
                 ? Enumerable.Empty<Node<TNode>>()
@@ -1237,7 +1237,7 @@ namespace Neo4jClient
                 HttpGet(indexResource),
                 HttpStatusCode.OK);
 
-            var data = new CustomJsonDeserializer(JsonConverters).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
+            var data = new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
 
             return data == null
                 ? Enumerable.Empty<Node<TNode>>()

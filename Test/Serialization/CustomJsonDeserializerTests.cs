@@ -258,14 +258,76 @@ namespace Neo4jClient.Test.Serialization
             }
         }
 
-        [Test]
-        public void TempTest()
+        public class CamelModel
         {
-            var s = new CustomJsonSerializer();
-            s.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
-            //var st = s.Serialize(CreateComplexObjForWithParamTest());
-            var d = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters, resolver: new CamelCasePropertyNamesContractResolver());
-            //var o = d.Deserialize<ComplexObjForWithParamTest>(st);
+            public string FirstName { get; set; }
+            public Gender Gender { get; set; }
+            public DateTimeOffset DateOfBirth { get; set; }
+            public string S { get; set; }
+        }
+
+        [Test]
+        public void CamelCaseTest()
+        {
+            //setup
+            var model = new CamelModel
+            {
+                FirstName = "first",
+                DateOfBirth = new DateTime(1980, 4, 1),
+                Gender = Gender.Male,
+                S = "short property"
+            };
+            var serializer = new CustomJsonSerializer();
+            serializer.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var st = serializer.Serialize(model);
+            
+            //act
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters, resolver: (DefaultContractResolver)serializer.JsonContractResolver);
+            var output = deserializer.Deserialize<CamelModel>(st);
+
+            //assert
+            AssertCamelModel(model, output);
+        }
+
+        private void AssertCamelModel(CamelModel expected, CamelModel actual)
+        {
+            Assert.AreEqual(expected.FirstName, actual.FirstName);
+            Assert.AreEqual(expected.DateOfBirth, actual.DateOfBirth);
+            Assert.AreEqual(expected.Gender, actual.Gender);
+        }
+
+
+        [Test]
+        public void CamelCaseListTest()
+        {
+            //setup
+            var model =  new List<CamelModel>
+            {
+                new CamelModel
+                {
+                    FirstName = "first",
+                    DateOfBirth = new DateTime(1980, 4, 1),
+                    Gender = Gender.Male
+                },
+                new CamelModel
+                {
+                    FirstName = "second",
+                    DateOfBirth = new DateTime(1981, 4, 1),
+                    Gender = Gender.Female
+                }
+            };
+
+            var serializer = new CustomJsonSerializer();
+            serializer.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var st = serializer.Serialize(model);
+
+            //act
+            var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters, resolver: (DefaultContractResolver)serializer.JsonContractResolver);
+            var output = deserializer.Deserialize<List<CamelModel>>(st);
+            
+            //assert
+            AssertCamelModel(model[0], output[0]);
+            AssertCamelModel(model[1], output[1]);
         }
     }
 }
