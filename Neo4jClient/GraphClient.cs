@@ -18,6 +18,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
@@ -32,6 +33,9 @@ namespace Neo4jClient
             new TimeZoneInfoConverter(),
             new EnumValueConverter()
         };
+
+        public static readonly DefaultContractResolver DefaultJsonContractResolver  = new DefaultContractResolver();
+
 
         internal readonly Uri RootUri;
         readonly IHttpClient httpClient;
@@ -68,6 +72,7 @@ namespace Neo4jClient
 
             JsonConverters = new List<JsonConverter>();
             JsonConverters.AddRange(DefaultJsonConverters);
+            JsonContractResolver = DefaultJsonContractResolver;
         }
 
         internal string UserAgent { get { return userAgent; } }
@@ -417,7 +422,7 @@ namespace Neo4jClient
 
         CustomJsonSerializer BuildSerializer()
         {
-            return new CustomJsonSerializer { JsonConverters = JsonConverters };
+            return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
         }
 
         public void DeleteRelationship(RelationshipReference reference)
@@ -1266,5 +1271,7 @@ namespace Neo4jClient
                 throw new NeoException(exceptionResponse);
             }
         }
+
+        public DefaultContractResolver JsonContractResolver { get; set; }
     }
 }
