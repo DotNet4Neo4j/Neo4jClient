@@ -41,6 +41,11 @@ namespace Neo4jClient.Cypher
             get { return resultMode; }
         }
 
+        public IContractResolver JsonContractResolver
+        {
+            get { return jsonContractResolver; }
+        }
+
         CustomJsonSerializer BuildSerializer()
         {
             return new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters, JsonContractResolver = jsonContractResolver };
