@@ -185,7 +185,7 @@ namespace Neo4jClient
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes) where T : new()
         {
             var response = SendHttpRequest(request, commandDescription, expectedStatusCodes);
-            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters);
+            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters, JsonContractResolver);
         }
 
         public virtual void Connect()
@@ -416,7 +416,7 @@ namespace Neo4jClient
 
             return response
                 .Content
-                .ReadAsJson<RelationshipApiResponse<object>>(JsonConverters)
+                .ReadAsJson<RelationshipApiResponse<object>>(JsonConverters,JsonContractResolver)
                 .ToRelationshipReference(this);
         }
 
@@ -475,7 +475,7 @@ namespace Neo4jClient
 
                     return response
                         .Content
-                        .ReadAsJson<NodeApiResponse<TNode>>(JsonConverters)
+                        .ReadAsJson<NodeApiResponse<TNode>>(JsonConverters,JsonContractResolver)
                         .ToNode(this);
                 });
         }
@@ -513,7 +513,7 @@ namespace Neo4jClient
 
                     return response
                         .Content
-                        .ReadAsJson<RelationshipApiResponse<TData>>(JsonConverters)
+                        .ReadAsJson<RelationshipApiResponse<TData>>(JsonConverters,JsonContractResolver)
                         .ToRelationshipInstance(this);
                 });
         }
@@ -966,7 +966,7 @@ namespace Neo4jClient
             if(response.StatusCode == HttpStatusCode.NoContent)
                 return new Dictionary<string, IndexMetaData>();
 
-            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>(JsonConverters);
+            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>(JsonConverters,JsonContractResolver);
 
             return result;
         }
