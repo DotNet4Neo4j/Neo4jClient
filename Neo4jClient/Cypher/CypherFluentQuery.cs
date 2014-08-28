@@ -319,7 +319,7 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery Query
         {
-            get { return QueryWriter.ToCypherQuery(); }
+            get { return QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver); }
         }
 
         public void ExecuteWithoutResults()
