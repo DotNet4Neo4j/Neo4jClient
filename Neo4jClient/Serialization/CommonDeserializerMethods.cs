@@ -464,6 +464,9 @@ namespace Neo4jClient.Serialization
                 if (PropertyInfoCache.TryGetValue(objType, out result))
                     return result;
 
+                var camelCase = (context.JsonContractResolver is CamelCasePropertyNamesContractResolver);
+                var camel = new Func<string, string>(name => string.Format("{0}{1}", name.Substring(0, 1).ToLowerInvariant(), name.Length > 1 ? name.Substring(1, name.Length - 1) : string.Empty));
+
                 var properties = objType
                     .GetProperties()
                     .Where(p => p.CanWrite)
@@ -473,15 +476,12 @@ namespace Neo4jClient.Serialization
                             (JsonPropertyAttribute[])p.GetCustomAttributes(typeof(JsonPropertyAttribute), true);
                         return new
                         {
-                            Name = attributes.Any() && attributes.Single().PropertyName  != null ? attributes.Single().PropertyName : p.Name,
+                            Name = attributes.Any() && attributes.Single().PropertyName != null ? attributes.Single().PropertyName : camelCase ? camel(p.Name) : p.Name, //only camelcase if json property doesn't exist
                             Property = p
                         };
                     });
 
-                var camelCase = (context.JsonContractResolver is CamelCasePropertyNamesContractResolver);
-                var camel = new Func<string, string>(name => string.Format("{0}{1}", name.Substring(0,1).ToLowerInvariant(), name.Length>1? name.Substring(1, name.Length-1):string.Empty));
-
-                return properties.ToDictionary(p => camelCase ? camel(p.Name) : p.Name, p => p.Property);
+                return properties.ToDictionary(p => p.Name, p => p.Property);
             }
         }
     }
