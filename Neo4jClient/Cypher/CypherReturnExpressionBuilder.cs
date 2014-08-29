@@ -35,7 +35,8 @@ namespace Neo4jClient.Cypher
         public static ReturnExpression BuildText(
             LambdaExpression expression,
             CypherCapabilities capabilities,
-            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse,
+            bool camelCaseProperties = false)
         {
             capabilities = capabilities ?? CypherCapabilities.Default;
 
@@ -52,11 +53,11 @@ namespace Neo4jClient.Cypher
             {
                 case ExpressionType.MemberInit:
                     var memberInitExpression = (MemberInitExpression) body;
-                    text = BuildText(memberInitExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
+                    text = BuildText(memberInitExpression, capabilities, jsonConvertersThatTheDeserializerWillUse,camelCaseProperties);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.New:
                     var newExpression = (NewExpression) body;
-                    text = BuildText(newExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
+                    text = BuildText(newExpression, capabilities, jsonConvertersThatTheDeserializerWillUse, camelCaseProperties);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.Call:
                     var methodCallExpression = (MethodCallExpression) body;
@@ -64,7 +65,7 @@ namespace Neo4jClient.Cypher
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
                 case ExpressionType.MemberAccess:
                     var memberExpression = (MemberExpression) body;
-                    text = BuildText(memberExpression, capabilities, jsonConvertersThatTheDeserializerWillUse);
+                    text = BuildText(memberExpression, capabilities, jsonConvertersThatTheDeserializerWillUse, camelCaseProperties);
                     return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
                     throw new ArgumentException(ReturnExpressionShouldBeOneOfExceptionMessage, "expression");
@@ -84,7 +85,8 @@ namespace Neo4jClient.Cypher
         static string BuildText(
             MemberInitExpression expression,
             CypherCapabilities capabilities,
-            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse,
+            bool camelCaseProperties)
         {
             if (expression.NewExpression.Constructor == null)
             {
@@ -102,7 +104,7 @@ namespace Neo4jClient.Cypher
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
                 var memberAssignment = (MemberAssignment)binding;
-                return BuildStatement(memberAssignment.Expression, binding.Member, capabilities, jsonConvertersThatTheDeserializerWillUse);
+                return BuildStatement(memberAssignment.Expression, binding.Member, capabilities, jsonConvertersThatTheDeserializerWillUse,camelCaseProperties);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -124,7 +126,8 @@ namespace Neo4jClient.Cypher
         static string BuildText(
             NewExpression expression,
             CypherCapabilities capabilities,
-            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse,
+            bool camelCaseProperties)
         {
             var constructor = expression.Constructor;
             if (constructor == null)
@@ -148,7 +151,7 @@ namespace Neo4jClient.Cypher
             var bindingTexts = expression.Members.Select((member, index) =>
             {
                 var argument = expression.Arguments[index];
-                return BuildStatement(argument, member, capabilities, jsonConvertersThatTheDeserializerWillUse);
+                return BuildStatement(argument, member, capabilities, jsonConvertersThatTheDeserializerWillUse,camelCaseProperties);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -171,7 +174,8 @@ namespace Neo4jClient.Cypher
         static string BuildText(
             MemberExpression expression,
             CypherCapabilities capabilities,
-            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse, 
+            bool camelCaseProperties)
         {
             var innerExpression = expression.Expression as MethodCallExpression;
             if (innerExpression == null ||
@@ -180,7 +184,7 @@ namespace Neo4jClient.Cypher
                 throw new ArgumentException("Member expressions are only supported off ICypherResultItem.As<TData>(). For example: Return(foo => foo.As<Bar>().Baz).", "expression");
 
             var baseStatement = BuildStatement(innerExpression, false, capabilities, jsonConvertersThatTheDeserializerWillUse);
-            var statement = string.Format("{0}.{1}", baseStatement, expression.Member.Name);
+            var statement = string.Format("{0}.{1}", baseStatement, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, expression.Member.Name));
 
             return statement;
         }
@@ -189,13 +193,14 @@ namespace Neo4jClient.Cypher
             Expression sourceExpression,
             MemberInfo targetMember,
             CypherCapabilities capabilities,
-            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
+            IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse,
+            bool camelCaseProperties)
         {
             var unwrappedExpression = UnwrapImplicitCasts(sourceExpression);
 
             var memberExpression = unwrappedExpression as MemberExpression;
             if (memberExpression != null)
-                return BuildStatement(memberExpression, targetMember, capabilities);
+                return BuildStatement(memberExpression, targetMember, capabilities, camelCaseProperties);
 
             var methodCallExpression = unwrappedExpression as MethodCallExpression;
             if (methodCallExpression != null)
@@ -238,7 +243,8 @@ namespace Neo4jClient.Cypher
         static string BuildStatement(
             MemberExpression memberExpression,
             MemberInfo targetMember,
-            CypherCapabilities capabilities)
+            CypherCapabilities capabilities,
+            bool camelCaseProperties)
         {
             MethodCallExpression methodCallExpression;
             MemberInfo memberInfo;
@@ -271,7 +277,7 @@ namespace Neo4jClient.Cypher
                 if (isNullable) optionalIndicator = "?";
             }
 
-            return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, memberInfo.Name, optionalIndicator, targetMember.Name);
+            return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, memberInfo.Name), optionalIndicator, targetMember.Name);
         }
 
         static string BuildStatement(
