@@ -161,10 +161,10 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery UsingIndex(string index)
         {
-			if (string.IsNullOrEmpty(index))
-			{
-				throw new ArgumentException("Index description is required");
-			}
+            if (string.IsNullOrEmpty(index))
+            {
+                throw new ArgumentException("Index description is required");
+            }
 
             return Mutate(w =>
                 w.AppendClause("USING INDEX " + index));
