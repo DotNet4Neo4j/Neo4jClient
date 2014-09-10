@@ -159,6 +159,17 @@ namespace Neo4jClient.Cypher
                 w.AppendClause("MATCH " + string.Join(", ", matchText)));
         }
 
+        public ICypherFluentQuery UsingIndex(string index)
+        {
+			if (string.IsNullOrEmpty(index))
+			{
+				throw new ArgumentException("Index description is required");
+			}
+
+            return Mutate(w =>
+                w.AppendClause("USING INDEX " + index));
+        }
+
         public ICypherFluentQuery OptionalMatch(string pattern)
         {
             return Mutate(w =>
