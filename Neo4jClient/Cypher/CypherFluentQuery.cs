@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Collections;
+using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
 {
@@ -346,6 +347,11 @@ namespace Neo4jClient.Cypher
         public void ExecuteWithoutResults()
         {
             Client.ExecuteCypher(Query);
+        }
+
+        public Task ExecuteWithoutResultsAsync()
+        {
+            return Client.ExecuteCypherAsync(Query);
         }
 
         IGraphClient IAttachedReference.Client
