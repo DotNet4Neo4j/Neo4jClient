@@ -865,20 +865,20 @@ namespace Neo4jClient
                 HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
                 string.Format("The query was: {0}", query.QueryText),
                 HttpStatusCode.OK)
-				.ContinueWith(t =>
-				{
+                .ContinueWith(t =>
+                {
                     // Rethrow any exception (instead of using TaskContinuationOptions.OnlyOnRanToCompletion, which for failures, returns a canceled task instead of a faulted task)
                     var _ = t.Result;
                         
-					stopwatch.Stop();
-					OnOperationCompleted(new OperationCompletedEventArgs
-					{
-						QueryText = query.DebugQueryText,
-						ResourcesReturned = 0,
-						TimeTaken = stopwatch.Elapsed
-					});
-				})
-			;
+                    stopwatch.Stop();
+                    OnOperationCompleted(new OperationCompletedEventArgs
+                    {
+                        QueryText = query.DebugQueryText,
+                        ResourcesReturned = 0,
+                        TimeTaken = stopwatch.Elapsed
+                    });
+                })
+            ;
         }
 
         [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
