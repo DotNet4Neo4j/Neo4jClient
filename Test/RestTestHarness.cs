@@ -72,8 +72,7 @@ namespace Neo4jClient.Test
                 .ReturnsForAnyArgs(ci =>
                 {
                     var request = ci.Arg<HttpRequestMessage>();
-                    var response = HandleRequest(request, baseUri);
-                    var task = new Task<HttpResponseMessage>(() => response);
+                    var task = new Task<HttpResponseMessage>(() => HandleRequest(request, baseUri));
                     task.Start();
                     return task;
                 });

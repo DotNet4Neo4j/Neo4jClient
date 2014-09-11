@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
 {
@@ -325,6 +326,11 @@ namespace Neo4jClient.Cypher
         public void ExecuteWithoutResults()
         {
             Client.ExecuteCypher(Query);
+        }
+
+        public Task ExecuteWithoutResultsAsync()
+        {
+            return Client.ExecuteCypherAsync(Query);
         }
 
         IGraphClient IAttachedReference.Client

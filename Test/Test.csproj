@@ -90,6 +90,8 @@
     <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
     <Compile Include="Cypher\QueryWriterTests.cs" />
     <Compile Include="Cypher\StartBitFormatterTests.cs" />
+    <Compile Include="MockResponseThrows.cs" />
+    <Compile Include="MockResponseThrowsException.cs" />
     <Compile Include="Serialization\CypherJsonDeserializerTests.cs" />
     <Compile Include="Serialization\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />
