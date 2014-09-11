@@ -9,7 +9,7 @@ namespace Neo4jClient.Cypher
     {
         CypherQuery Query { get; }
         void ExecuteWithoutResults();
-		Task ExecuteWithoutResultsAsync();
+        Task ExecuteWithoutResultsAsync();
 
         ICypherFluentQuery WithParam(string key, object value);
         ICypherFluentQuery WithParams(IDictionary<string,object> parameters);
