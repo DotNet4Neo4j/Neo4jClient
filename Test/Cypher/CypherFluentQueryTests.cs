@@ -10,6 +10,51 @@ namespace Neo4jClient.Test.Cypher
     public class CypherFluentQueryTests
     {
         [Test]
+        public void ExecutesQuery()
+        {
+            // Arrange
+            var client = Substitute.For<IRawGraphClient>();
+            CypherQuery executedQuery = null;
+            client
+                .When(c => c.ExecuteCypher(Arg.Any<CypherQuery>()))
+                .Do(ci => { executedQuery = ci.Arg<CypherQuery>(); });
+
+            // Act
+            new CypherFluentQuery(client)
+                .Start("n", (NodeReference) 5)
+                .Delete("n")
+                .ExecuteWithoutResults();
+
+            // Assert
+            Assert.IsNotNull(executedQuery, "Query was not executed against graph client");
+            Assert.AreEqual("START n=node({p0})\r\nDELETE n", executedQuery.QueryText);
+            Assert.AreEqual(5, executedQuery.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void ExecutesQueryAsync()
+        {
+            // Arrange
+            var client = Substitute.For<IRawGraphClient>();
+            CypherQuery executedQuery = null;
+            client
+                .When(c => c.ExecuteCypherAsync(Arg.Any<CypherQuery>()))
+                .Do(ci => { executedQuery = ci.Arg<CypherQuery>(); });
+
+            // Act
+            var task = new CypherFluentQuery(client)
+                .Start("n", (NodeReference) 5)
+                .Delete("n")
+                .ExecuteWithoutResultsAsync();
+            task.Wait();
+
+            // Assert
+            Assert.IsNotNull(executedQuery, "Query was not executed against graph client");
+            Assert.AreEqual("START n=node({p0})\r\nDELETE n", executedQuery.QueryText);
+            Assert.AreEqual(5, executedQuery.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void ShouldBuildQueriesAsImmutableStepsInsteadOfCorruptingPreviousOnes()
         {
             var client = Substitute.For<IRawGraphClient>();
