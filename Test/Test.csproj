@@ -77,6 +77,8 @@
     <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
     <Compile Include="Cypher\CypherQueryTests.cs" />
     <Compile Include="Cypher\DocumentationExamples.cs" />
+    <Compile Include="Cypher\EntityExtension\CypherExtensionTests.cs" />
+    <Compile Include="Cypher\EntityExtension\CypherTypeItemHelperTests.cs" />
     <Compile Include="Cypher\UnionTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWhereTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWithTests.cs" />
