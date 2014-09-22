@@ -18,6 +18,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
@@ -32,6 +33,9 @@ namespace Neo4jClient
             new TimeZoneInfoConverter(),
             new EnumValueConverter()
         };
+
+        public static readonly DefaultContractResolver DefaultJsonContractResolver  = new DefaultContractResolver();
+
 
         internal readonly Uri RootUri;
         readonly IHttpClient httpClient;
@@ -68,6 +72,7 @@ namespace Neo4jClient
 
             JsonConverters = new List<JsonConverter>();
             JsonConverters.AddRange(DefaultJsonConverters);
+            JsonContractResolver = DefaultJsonContractResolver;
         }
 
         internal string UserAgent { get { return userAgent; } }
@@ -180,7 +185,7 @@ namespace Neo4jClient
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes) where T : new()
         {
             var response = SendHttpRequest(request, commandDescription, expectedStatusCodes);
-            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters);
+            return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters, JsonContractResolver);
         }
 
         public virtual void Connect()
@@ -411,13 +416,13 @@ namespace Neo4jClient
 
             return response
                 .Content
-                .ReadAsJson<RelationshipApiResponse<object>>(JsonConverters)
+                .ReadAsJson<RelationshipApiResponse<object>>(JsonConverters,JsonContractResolver)
                 .ToRelationshipReference(this);
         }
 
         CustomJsonSerializer BuildSerializer()
         {
-            return new CustomJsonSerializer { JsonConverters = JsonConverters };
+            return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
         }
 
         public void DeleteRelationship(RelationshipReference reference)
@@ -470,7 +475,7 @@ namespace Neo4jClient
 
                     return response
                         .Content
-                        .ReadAsJson<NodeApiResponse<TNode>>(JsonConverters)
+                        .ReadAsJson<NodeApiResponse<TNode>>(JsonConverters,JsonContractResolver)
                         .ToNode(this);
                 });
         }
@@ -508,7 +513,7 @@ namespace Neo4jClient
 
                     return response
                         .Content
-                        .ReadAsJson<RelationshipApiResponse<TData>>(JsonConverters)
+                        .ReadAsJson<RelationshipApiResponse<TData>>(JsonConverters,JsonContractResolver)
                         .ToRelationshipInstance(this);
                 });
         }
@@ -567,9 +572,9 @@ namespace Neo4jClient
 
             if (changeCallback != null)
             {
-                var originalValuesDictionary = new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(originalValuesString);
+                var originalValuesDictionary = new CustomJsonDeserializer(JsonConverters,resolver:JsonContractResolver).Deserialize<Dictionary<string, string>>(originalValuesString);
                 var newValuesString = serializer.Serialize(node.Data);
-                var newValuesDictionary = new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(newValuesString);
+                var newValuesDictionary = new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<Dictionary<string, string>>(newValuesString);
                 var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary, newValuesDictionary);
                 changeCallback(differences);
             }
@@ -961,7 +966,7 @@ namespace Neo4jClient
             if(response.StatusCode == HttpStatusCode.NoContent)
                 return new Dictionary<string, IndexMetaData>();
 
-            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>(JsonConverters);
+            var result = response.Content.ReadAsJson<Dictionary<string, IndexMetaData>>(JsonConverters,JsonContractResolver);
 
             return result;
         }
@@ -1193,7 +1198,7 @@ namespace Neo4jClient
                 HttpGet(indexResource),
                 HttpStatusCode.OK);
 
-            var data = new CustomJsonDeserializer(JsonConverters).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
+            var data = new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
 
             return data == null
                 ? Enumerable.Empty<Node<TNode>>()
@@ -1232,7 +1237,7 @@ namespace Neo4jClient
                 HttpGet(indexResource),
                 HttpStatusCode.OK);
 
-            var data = new CustomJsonDeserializer(JsonConverters).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
+            var data = new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<List<NodeApiResponse<TNode>>>(response.Content.ReadAsString());
 
             return data == null
                 ? Enumerable.Empty<Node<TNode>>()
@@ -1266,5 +1271,7 @@ namespace Neo4jClient
                 throw new NeoException(exceptionResponse);
             }
         }
+
+        public DefaultContractResolver JsonContractResolver { get; set; }
     }
 }

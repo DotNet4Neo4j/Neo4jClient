@@ -8,6 +8,7 @@ using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -67,7 +68,8 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             var context = new DeserializationContext
                 {
                     Culture = culture,
-                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
+                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
+                    JsonContractResolver = client.JsonContractResolver
                 };
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 

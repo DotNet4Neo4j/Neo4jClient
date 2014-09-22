@@ -37,7 +37,7 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery<TResult> Return<TResult>(LambdaExpression expression)
         {
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, Client.CypherCapabilities, Client.JsonConverters);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, Client.CypherCapabilities, Client.JsonConverters, camelCaseProperties);
 
             return Mutate<TResult>(w =>
             {
@@ -48,7 +48,7 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
         {
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, Client.CypherCapabilities, Client.JsonConverters);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, Client.CypherCapabilities, Client.JsonConverters, camelCaseProperties);
 
             return Mutate<TResult>(w =>
             {
