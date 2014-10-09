@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -301,11 +302,21 @@ namespace Neo4jClient.Serialization
             return item;
         }
 
+        public static Dictionary<string, PropertyInfo> ApplyPropertyCasing(DeserializationContext context, Dictionary<string, PropertyInfo> properties)
+        {
+            if (context.JsonContractResolver is CamelCasePropertyNamesContractResolver)
+            {
+                var camel = new Func<string, string>(name => string.Format("{0}{1}", name.Substring(0,1).ToLowerInvariant(), name.Substring(1, name.Length-1)));
+                return properties.Select(x => new { Key = camel(x.Key), x.Value }).ToDictionary(x => x.Key, x => x.Value);    
+            }
+            return properties;
+        } 
+
         public static void Map(DeserializationContext context, object targetObject, JToken parentJsonToken, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
             typeMappings = typeMappings.ToArray();
             var objType = targetObject.GetType();
-            var props = GetPropertiesForType(objType);
+            var props = GetPropertiesForType(context, objType);
             IDictionary<string, JToken> dictionary = parentJsonToken as JObject;
             if (dictionary != null && props.Keys.All(dictionary.ContainsKey) == false && dictionary.ContainsKey("data")) {
                parentJsonToken = parentJsonToken["data"];
@@ -442,7 +453,7 @@ namespace Neo4jClient.Serialization
 
         static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
         static readonly object PropertyInfoCacheLock = new object();
-        static Dictionary<string, PropertyInfo> GetPropertiesForType(Type objType)
+        static Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context, Type objType)
         {
             Dictionary<string, PropertyInfo> result;
             if (PropertyInfoCache.TryGetValue(objType, out result))
@@ -453,6 +464,9 @@ namespace Neo4jClient.Serialization
                 if (PropertyInfoCache.TryGetValue(objType, out result))
                     return result;
 
+                var camelCase = (context.JsonContractResolver is CamelCasePropertyNamesContractResolver);
+                var camel = new Func<string, string>(name => string.Format("{0}{1}", name.Substring(0, 1).ToLowerInvariant(), name.Length > 1 ? name.Substring(1, name.Length - 1) : string.Empty));
+
                 var properties = objType
                     .GetProperties()
                     .Where(p => p.CanWrite)
@@ -462,7 +476,7 @@ namespace Neo4jClient.Serialization
                             (JsonPropertyAttribute[])p.GetCustomAttributes(typeof(JsonPropertyAttribute), true);
                         return new
                         {
-                            Name = attributes.Any() && attributes.Single().PropertyName  != null ? attributes.Single().PropertyName : p.Name,
+                            Name = attributes.Any() && attributes.Single().PropertyName != null ? attributes.Single().PropertyName : camelCase ? camel(p.Name) : p.Name, //only camelcase if json property doesn't exist
                             Property = p
                         };
                     });
