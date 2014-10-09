@@ -10,11 +10,11 @@ namespace Neo4jClient.Cypher.EntityExtension
     {
         private readonly ConcurrentDictionary<CypherTypeItem, List<CypherProperty>> _typeProperties = new ConcurrentDictionary<CypherTypeItem, List<CypherProperty>>();
 
-        public CypherTypeItem AddKeyAttribute<TEntity, TAttr>(ICypherExtensionContext context)
+        public CypherTypeItem AddKeyAttribute<TEntity, TAttr>(ICypherExtensionContext context, TEntity entity)
             where TAttr : CypherExtensionAttribute
             where TEntity : class
         {
-            var type = typeof(TEntity);
+            var type = entity.GetType();
             var key = new CypherTypeItem { Type = type, AttributeType = typeof(TAttr) };
             //check cache
             if (!_typeProperties.ContainsKey(key))
@@ -27,19 +27,19 @@ namespace Neo4jClient.Cypher.EntityExtension
             return key;
         }
 
-        public List<CypherProperty> PropertiesForPurpose<TEntity, TAttr>(ICypherExtensionContext context)
+        public List<CypherProperty> PropertiesForPurpose<TEntity, TAttr>(ICypherExtensionContext context, TEntity entity)
             where TEntity : class
             where TAttr : CypherExtensionAttribute
         {
-            var key = AddKeyAttribute<TEntity, TAttr>(context);
+            var key = AddKeyAttribute<TEntity, TAttr>(context, entity);
             return _typeProperties[key];
         }
 
-        public List<CypherProperty> PropertiesForPurpose<TEntity, TAttr>()
+        public List<CypherProperty> PropertiesForPurpose<TEntity, TAttr>(TEntity entity)
             where TEntity : class
             where TAttr : CypherExtensionAttribute
         {
-            return PropertiesForPurpose<TEntity, TAttr>(CypherExtension.DefaultExtensionContext);
+            return PropertiesForPurpose<TEntity, TAttr>(CypherExtension.DefaultExtensionContext,entity);
         }
     }
 }

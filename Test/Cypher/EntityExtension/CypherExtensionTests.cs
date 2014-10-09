@@ -281,6 +281,23 @@ namespace Neo4jClient.Test.Cypher.EntityExtension
         }
 
         [Test]
+        public void MergeRelationshipDownCastTest()
+        {
+            //setup
+            var helper = new CypherExtensionTestHelper().SetupGraphClient();
+
+            var model = (BaseRelationship) new ComponentOf("from", "to");
+
+            //act
+            var q = helper.Query.MergeRelationship(model);
+
+            Console.WriteLine(q.GetFormattedDebugText());
+
+            //assert
+            Assert.AreEqual("MERGE (from)-[fromto:COMPONENT_OF {quantity:{fromto}.quantity,unitOfMeasure:{fromto}.unitOfMeasure,factor:{fromto}.factor,instructionText:{fromto}.instructionText}]->(to)\r\nON MATCH\r\nSET fromto.quantity={fromto}.quantity,fromto.unitOfMeasure={fromto}.unitOfMeasure,fromto.factor={fromto}.factor,fromto.instructionText={fromto}.instructionText", q.Query.QueryText);
+        }
+
+        [Test]
         public void MergeRelationshipMergeOverrideTest()
         {
             //setup

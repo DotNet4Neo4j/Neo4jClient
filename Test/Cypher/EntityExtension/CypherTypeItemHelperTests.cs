@@ -14,7 +14,7 @@ namespace Neo4jClient.Test.Cypher.EntityExtension
             var helper = new CypherTypeItemHelper();
             
             //act
-            var key = helper.AddKeyAttribute<CypherModel, CypherMatchAttribute>(CypherExtension.DefaultExtensionContext);
+            var key = helper.AddKeyAttribute<CypherModel, CypherMatchAttribute>(CypherExtension.DefaultExtensionContext, new CypherModel());
 
             //assert
             Assert.AreEqual(new CypherTypeItem(){ Type = typeof(CypherModel), AttributeType = typeof(CypherMatchAttribute)}, key);
@@ -27,7 +27,7 @@ namespace Neo4jClient.Test.Cypher.EntityExtension
             var helper = new CypherTypeItemHelper();
 
             //act
-            var result = helper.PropertiesForPurpose<CypherModel, CypherMatchAttribute>();
+            var result = helper.PropertiesForPurpose<CypherModel, CypherMatchAttribute>(new CypherModel());
 
             //assert
             Assert.AreEqual("id",result[0].TypeName);

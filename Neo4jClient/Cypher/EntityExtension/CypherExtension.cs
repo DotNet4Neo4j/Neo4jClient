@@ -15,8 +15,9 @@ namespace Neo4jClient.Cypher.EntityExtension
 
         public static string EntityLabel<T>(this T entity)
         {
-            var label = typeof(T).GetCustomAttributes(typeof(CypherLabelAttribute),true).FirstOrDefault() as CypherLabelAttribute;
-            return label == null ? typeof(T).Name : label.Name;
+            var entityType = entity.GetType();
+            var label = entityType.GetCustomAttributes(typeof(CypherLabelAttribute),true).FirstOrDefault() as CypherLabelAttribute;
+            return label == null ? entityType.Name : label.Name;
         }
 
         public static string ToCypherString<TEntity>(this TEntity entity, ICypherExtensionContext context, List<CypherProperty> useProperties, string paramKey)
@@ -36,12 +37,12 @@ namespace Neo4jClient.Cypher.EntityExtension
             where TAttr : CypherExtensionAttribute
             where TEntity : class
         {
-            return entity.ToCypherString(context, useProperties?? CypherTypeItemHelper.PropertiesForPurpose<TEntity,TAttr>(), paramKey);
+            return entity.ToCypherString(context, useProperties?? CypherTypeItemHelper.PropertiesForPurpose<TEntity,TAttr>(entity), paramKey);
         }
         
         public static Dictionary<string, object> CreateDynamic<TEntity>(this TEntity entity, List<CypherProperty> properties) where TEntity : class
         {
-            var type = typeof(TEntity);
+            var type = entity.GetType();
             return properties.Select(prop => new { Key = prop.JsonName, Value = type.GetProperty(prop.TypeName).GetValue(entity, null) }).ToDictionary(x => x.Key, x => x.Value);
         } 
 
@@ -50,7 +51,7 @@ namespace Neo4jClient.Cypher.EntityExtension
             paramKey = paramKey ?? entity.EntityLabel().ToLowerInvariant();
             var cql = string.Format("{0}({1}){2}", preCql, entity.ToCypherString<T, CypherMatchAttribute>(CypherExtensionContext.Create(query), paramKey, propertyOverride), postCql);
             //create a dynamic object for the type
-            dynamic cutdown = entity.CreateDynamic(propertyOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMatchAttribute>());
+            dynamic cutdown = entity.CreateDynamic(propertyOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMatchAttribute>(entity));
             return query.Match(cql).WithParam(paramKey, cutdown);
         }
 
@@ -71,9 +72,9 @@ namespace Neo4jClient.Cypher.EntityExtension
         private static ICypherFluentQuery CommonMerge<T>(this ICypherFluentQuery query, T entity, string key, string cql, List<CypherProperty> mergeOverride = null, List<CypherProperty> onMatchOverride = null, List<CypherProperty> onCreateOverride = null) where T : class
         {
             //A merge requires the properties of both merge, create and match in the cutdown object
-            var merge = mergeOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMergeAttribute>();
-            var create = onCreateOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMergeOnCreateAttribute>();
-            var match = onMatchOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMergeOnMatchAttribute>();
+            var merge = mergeOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMergeAttribute>(entity);
+            var create = onCreateOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMergeOnCreateAttribute>(entity);
+            var match = onMatchOverride ?? CypherTypeItemHelper.PropertiesForPurpose<T, CypherMergeOnMatchAttribute>(entity);
             var compare = new CypherPropertyComparer();
             var propertyOverride = create.Union(match.Union(merge.Union(create, compare), compare), compare).ToList();
 
