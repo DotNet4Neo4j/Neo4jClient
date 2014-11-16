@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json.Serialization;
+using System.Collections;
 
 namespace Neo4jClient.Cypher
 {
@@ -280,14 +281,14 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
-        public ICypherFluentQuery Unwind(string collectionName, string columnName)
+        public ICypherFluentQuery Unwind(string collectionName, string identity)
         {
-            return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+            return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, identity)));
         }
 
-        public ICypherFluentQuery Unwind<TType>(IEnumerable<TType> collection, string alias)
+        public ICypherFluentQuery Unwind(IEnumerable collection, string identity)
         {
-            return Mutate(w => w.AppendClause(string.Format("UNWIND {{{0}}} AS {1}", alias, alias)).CreateParameter(alias, collection));
+            return Mutate(w => w.AppendClause("UNWIND {0} AS " + identity, collection));
         }
 
         public ICypherFluentQuery Union()

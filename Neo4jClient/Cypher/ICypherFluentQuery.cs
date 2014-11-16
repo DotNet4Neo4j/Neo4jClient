@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -44,8 +45,8 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery Remove(string removeText);
         ICypherFluentQuery ForEach(string text);
-        ICypherFluentQuery Unwind(string collection, string columnName);
-        ICypherFluentQuery Unwind<TType>(IEnumerable<TType> collection, string alias);        
+        ICypherFluentQuery Unwind(string collection, string identity);
+        ICypherFluentQuery Unwind(IEnumerable collection, string identity);
         ICypherFluentQuery Union();
         ICypherFluentQuery UnionAll();
         ICypherFluentQuery Limit(int? limit);
