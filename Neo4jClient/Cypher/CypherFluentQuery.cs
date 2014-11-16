@@ -285,6 +285,11 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
         }
 
+        public ICypherFluentQuery Unwind<TType>(IEnumerable<TType> collection, string alias)
+        {
+            return Mutate(w => w.AppendClause(string.Format("UNWIND {{{0}}} AS {1}", alias, alias)).CreateParameter(alias, collection));
+        }
+
         public ICypherFluentQuery Union()
         {
             return Mutate(w => w.AppendClause("UNION"));
