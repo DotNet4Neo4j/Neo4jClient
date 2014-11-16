@@ -32,5 +32,19 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("WITH collection\r\nUNWIND collection AS column", query.QueryText);
         }
+
+        [Test]
+        public void TestUnwindUsingCollection()
+        {
+            var collection = new[] { 1, 2, 3 };
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Unwind(collection, "alias")
+                .Query;
+
+            Assert.AreEqual("UNWIND {p0} AS alias", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters.Count);
+            Assert.AreEqual(collection, query.QueryParameters["p0"]);
+        }
     }
 }

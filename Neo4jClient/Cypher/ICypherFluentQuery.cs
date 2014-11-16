@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace Neo4jClient.Cypher
         [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameterText);
         ICypherFluentQuery Match(params string[] matchText);
+        ICypherFluentQuery UsingIndex(string index);
         ICypherFluentQuery OptionalMatch(string pattern);
         ICypherFluentQuery Merge(string mergeText);
         ICypherFluentQuery OnCreate();
@@ -46,7 +48,8 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery Remove(string removeText);
         ICypherFluentQuery ForEach(string text);
-        ICypherFluentQuery Unwind(string collection, string columnName);
+        ICypherFluentQuery Unwind(string collection, string identity);
+        ICypherFluentQuery Unwind(IEnumerable collection, string identity);
         ICypherFluentQuery Union();
         ICypherFluentQuery UnionAll();
         ICypherFluentQuery Limit(int? limit);
