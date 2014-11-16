@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using Newtonsoft.Json.Serialization;
+using System.Collections;
 
 namespace Neo4jClient.Cypher
 {
@@ -15,6 +17,7 @@ namespace Neo4jClient.Cypher
         private readonly Version minimumCypherParserVersion = new Version(1, 9);
         protected readonly IRawGraphClient Client;
         protected readonly QueryWriter QueryWriter;
+        protected readonly bool camelCaseProperties = false;
 
         public CypherFluentQuery(IGraphClient client)
         {
@@ -23,6 +26,7 @@ namespace Neo4jClient.Cypher
 
             Client = (IRawGraphClient)client;
             QueryWriter = new QueryWriter();
+            camelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
         }
 
         protected CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
@@ -32,6 +36,7 @@ namespace Neo4jClient.Cypher
 
             Client = (IRawGraphClient)client;
             QueryWriter = queryWriter;
+            camelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
         }
 
         ICypherFluentQuery Mutate(Action<QueryWriter> callback)
@@ -159,6 +164,17 @@ namespace Neo4jClient.Cypher
                 w.AppendClause("MATCH " + string.Join(", ", matchText)));
         }
 
+        public ICypherFluentQuery UsingIndex(string index)
+        {
+            if (string.IsNullOrEmpty(index))
+            {
+                throw new ArgumentException("Index description is required");
+            }
+
+            return Mutate(w =>
+                w.AppendClause("USING INDEX " + index));
+        }
+
         public ICypherFluentQuery OptionalMatch(string pattern)
         {
             return Mutate(w =>
@@ -276,9 +292,14 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
-        public ICypherFluentQuery Unwind(string collectionName, string columnName)
+        public ICypherFluentQuery Unwind(string collectionName, string identity)
         {
-            return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+            return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, identity)));
+        }
+
+        public ICypherFluentQuery Unwind(IEnumerable collection, string identity)
+        {
+            return Mutate(w => w.AppendClause("UNWIND {0} AS " + identity, collection));
         }
 
         public ICypherFluentQuery Union()
@@ -319,7 +340,7 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery Query
         {
-            get { return QueryWriter.ToCypherQuery(); }
+            get { return QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver); }
         }
 
         public void ExecuteWithoutResults()
@@ -343,6 +364,13 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery ParserVersion(int major, int minor)
         {
             return ParserVersion(new Version(major, minor));
+        }
+
+        public static string ApplyCamelCase(bool isCamelCase, string propertyName)
+        {
+            return isCamelCase
+                ? string.Format("{0}{1}", propertyName.Substring(0, 1).ToLowerInvariant(),propertyName.Length > 1 ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty)
+                : propertyName;
         }
     }
 }

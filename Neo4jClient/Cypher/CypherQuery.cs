@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Neo4jClient.Serialization;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -11,15 +12,18 @@ namespace Neo4jClient.Cypher
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
         readonly CypherResultMode resultMode;
+        readonly IContractResolver jsonContractResolver;
 
         public CypherQuery(
             string queryText,
             IDictionary<string, object> queryParameters,
-            CypherResultMode resultMode)
+            CypherResultMode resultMode, 
+            IContractResolver contractResolver = null)
         {
             this.queryText = queryText;
             this.queryParameters = queryParameters;
             this.resultMode = resultMode;
+            jsonContractResolver = contractResolver ?? GraphClient.DefaultJsonContractResolver;
         }
 
         public IDictionary<string, object> QueryParameters
@@ -37,9 +41,14 @@ namespace Neo4jClient.Cypher
             get { return resultMode; }
         }
 
-        static CustomJsonSerializer BuildSerializer()
+        public IContractResolver JsonContractResolver
         {
-            return new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
+            get { return jsonContractResolver; }
+        }
+
+        CustomJsonSerializer BuildSerializer()
+        {
+            return new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters, JsonContractResolver = jsonContractResolver };
         }
 
         public string DebugQueryText

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -41,7 +42,7 @@ namespace Neo4jClient.Cypher
             return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode);
         }
 
-        public CypherQuery ToCypherQuery()
+        public CypherQuery ToCypherQuery(IContractResolver contractResolver = null)
         {
             var queryText = queryTextBuilder
                 .ToString()
@@ -50,7 +51,8 @@ namespace Neo4jClient.Cypher
             return new CypherQuery(
                 queryText,
                 new Dictionary<string, object>(queryParameters),
-                resultMode);
+                resultMode, 
+                contractResolver);
         }
 
         public string CreateParameter(object paramValue)

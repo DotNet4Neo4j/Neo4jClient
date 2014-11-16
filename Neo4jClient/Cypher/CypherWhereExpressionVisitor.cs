@@ -19,13 +19,15 @@ namespace Neo4jClient.Cypher
 
         readonly Func<object, string> createParameterCallback;
         readonly CypherCapabilities capabilities;
+        readonly bool camelCaseProperties;
 
         public StringBuilder TextOutput { get; private set; }
 
-        public CypherWhereExpressionVisitor(Func<object, string> createParameterCallback, CypherCapabilities capabilities)
+        public CypherWhereExpressionVisitor(Func<object, string> createParameterCallback, CypherCapabilities capabilities, bool camelCaseProperties)
         {
             this.createParameterCallback = createParameterCallback;
             this.capabilities = capabilities;
+            this.camelCaseProperties = camelCaseProperties;
             TextOutput = new StringBuilder();
         }
 
@@ -209,7 +211,7 @@ namespace Neo4jClient.Cypher
                 if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
             }
 
-            lastWrittenMemberName = string.Format("{0}.{1}{2}", identity, node.Member.Name, nullIdentifier);
+            lastWrittenMemberName = string.Format("{0}.{1}{2}", identity, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, node.Member.Name), nullIdentifier);
             TextOutput.Append(lastWrittenMemberName);
         }
 
