@@ -13,17 +13,20 @@ namespace Neo4jClient.Cypher
         readonly IDictionary<string, object> queryParameters;
         readonly CypherResultMode resultMode;
         readonly IContractResolver jsonContractResolver;
+        readonly int? maxExecutionTime;
 
         public CypherQuery(
             string queryText,
             IDictionary<string, object> queryParameters,
             CypherResultMode resultMode, 
-            IContractResolver contractResolver = null)
+            IContractResolver contractResolver = null,
+            int? maxExecutionTime = null)
         {
             this.queryText = queryText;
             this.queryParameters = queryParameters;
             this.resultMode = resultMode;
             jsonContractResolver = contractResolver ?? GraphClient.DefaultJsonContractResolver;
+            this.maxExecutionTime = maxExecutionTime;
         }
 
         public IDictionary<string, object> QueryParameters
@@ -44,6 +47,11 @@ namespace Neo4jClient.Cypher
         public IContractResolver JsonContractResolver
         {
             get { return jsonContractResolver; }
+        }
+
+        public int? MaxExecutionTime
+        {
+            get { return maxExecutionTime; }
         }
 
         CustomJsonSerializer BuildSerializer()

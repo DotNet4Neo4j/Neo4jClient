@@ -70,6 +70,7 @@
     <Compile Include="Cypher\CypherFluentQueryDropTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryConstraintTest.cs" />
     <Compile Include="Cypher\CypherFluentQueryParserVersionTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryMaxExecutionTimeTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryMergeTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryMatchTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryRemoveTests.cs" />

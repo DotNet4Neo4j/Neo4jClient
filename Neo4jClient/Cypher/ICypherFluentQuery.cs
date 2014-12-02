@@ -17,6 +17,8 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery ParserVersion(Version version);
         ICypherFluentQuery ParserVersion(int major, int minor);
 
+        ICypherFluentQuery MaxExecutionTime(int milliseconds);
+
         ICypherFluentQuery Start(object startBits);
         ICypherFluentQuery Start(IDictionary<string, object> startBits);
         [Obsolete("Use Start(new { identity = startText }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]

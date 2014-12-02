@@ -5,6 +5,9 @@ using System.Net;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
+using System.Globalization;
+using System.Net.Http;
+using NSubstitute;
 
 namespace Neo4jClient.Test.GraphClientTests.Cypher
 {
@@ -684,6 +687,124 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                     "org.neo4j.server.rest.security.SecurityFilter.doFilter(SecurityFilter.java:112)"
                 };
                 CollectionAssert.AreEqual(expectedStack, ex.NeoStackTrace);
+            }
+        }
+
+        [Test]
+        public void SendsCommandWithCorrectTimeout()
+        {
+            const int expectedMaxExecutionTime = 100;
+
+            const string queryText = @"START d=node({p0}), e=node({p1})
+                                        MATCH p = allShortestPaths( d-[*..15]-e )
+                                        RETURN p";
+
+            var parameters = new Dictionary<string, object>
+                {
+                    {"p0", 215},
+                    {"p1", 219}
+                };
+
+            
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, maxExecutionTime: expectedMaxExecutionTime);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot()
+                },
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Json(HttpStatusCode.OK,
+                    @"{
+                              'data' : [ [ {
+                                'start' : 'http://foo/db/data/node/215',
+                                'nodes' : [ 'http://foo/db/data/node/215', 'http://foo/db/data/node/0', 'http://foo/db/data/node/219' ],
+                                'length' : 2,
+                                'relationships' : [ 'http://foo/db/data/relationship/247', 'http://foo/db/data/relationship/257' ],
+                                'end' : 'http://foo/db/data/node/219'
+                              } ], [ {
+                                'start' : 'http://foo/db/data/node/215',
+                                'nodes' : [ 'http://foo/db/data/node/215', 'http://foo/db/data/node/1', 'http://foo/db/data/node/219' ],
+                                'length' : 2,
+                                'relationships' : [ 'http://foo/db/data/relationship/248', 'http://foo/db/data/relationship/258' ],
+                                'end' : 'http://foo/db/data/node/219'
+                              } ] ],
+                              'columns' : [ 'p' ]
+                            }")
+                }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
+                var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
+                graphClient.Connect();
+
+                httpClient.ClearReceivedCalls();
+                ((IRawGraphClient) graphClient).ExecuteGetCypherResults<object>(cypherQuery);
+
+                var call = httpClient.ReceivedCalls().Single();
+                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var maxExecutionTimeHeader = requestMessage.Headers.Single(h => h.Key == "max-execution-time");
+                Assert.AreEqual(expectedMaxExecutionTime.ToString(CultureInfo.InvariantCulture), maxExecutionTimeHeader.Value.Single());
+            }
+        }
+
+        [Test]
+        public void DoesntSendMaxExecutionTime_WhenNotAddedToQuery()
+        {
+            const string queryText = @"START d=node({p0}), e=node({p1})
+                                        MATCH p = allShortestPaths( d-[*..15]-e )
+                                        RETURN p";
+
+            var parameters = new Dictionary<string, object>
+                {
+                    {"p0", 215},
+                    {"p1", 219}
+                };
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot()
+                },
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Json(HttpStatusCode.OK,
+                    @"{
+                              'data' : [ [ {
+                                'start' : 'http://foo/db/data/node/215',
+                                'nodes' : [ 'http://foo/db/data/node/215', 'http://foo/db/data/node/0', 'http://foo/db/data/node/219' ],
+                                'length' : 2,
+                                'relationships' : [ 'http://foo/db/data/relationship/247', 'http://foo/db/data/relationship/257' ],
+                                'end' : 'http://foo/db/data/node/219'
+                              } ], [ {
+                                'start' : 'http://foo/db/data/node/215',
+                                'nodes' : [ 'http://foo/db/data/node/215', 'http://foo/db/data/node/1', 'http://foo/db/data/node/219' ],
+                                'length' : 2,
+                                'relationships' : [ 'http://foo/db/data/relationship/248', 'http://foo/db/data/relationship/258' ],
+                                'end' : 'http://foo/db/data/node/219'
+                              } ] ],
+                              'columns' : [ 'p' ]
+                            }")
+                }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
+                var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
+                graphClient.Connect();
+
+                httpClient.ClearReceivedCalls();
+                ((IRawGraphClient)graphClient).ExecuteGetCypherResults<object>(cypherQuery);
+
+                var call = httpClient.ReceivedCalls().Single();
+                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                Assert.IsFalse(requestMessage.Headers.Any(h => h.Key == "max-execution-time"));
             }
         }
     }

@@ -366,6 +366,12 @@ namespace Neo4jClient.Cypher
             return ParserVersion(new Version(major, minor));
         }
 
+        public ICypherFluentQuery MaxExecutionTime(int milliseconds)
+        {
+            QueryWriter.MaxExecutionTime = milliseconds;
+            return this;
+        }
+
         public static string ApplyCamelCase(bool isCamelCase, string propertyName)
         {
             return isCamelCase
