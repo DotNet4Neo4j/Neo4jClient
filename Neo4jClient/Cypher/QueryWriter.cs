@@ -35,11 +35,13 @@ namespace Neo4jClient.Cypher
             set { resultMode = value; }
         }
 
+        public int? MaxExecutionTime { get; set; }
+
         public QueryWriter Clone()
         {
             var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
             var clonedParameters = new Dictionary<string, object>(queryParameters);
-            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode);
+            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode){MaxExecutionTime = this.MaxExecutionTime};
         }
 
         public CypherQuery ToCypherQuery(IContractResolver contractResolver = null)
@@ -52,7 +54,8 @@ namespace Neo4jClient.Cypher
                 queryText,
                 new Dictionary<string, object>(queryParameters),
                 resultMode, 
-                contractResolver);
+                contractResolver,
+                MaxExecutionTime);
         }
 
         public string CreateParameter(object paramValue)
