@@ -14,6 +14,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery WithParams(IDictionary<string,object> parameters);
         ICypherFluentQuery WithParams(object parameters);
 
+        ICypherFluentQuery ParserVersion(string version);
         ICypherFluentQuery ParserVersion(Version version);
         ICypherFluentQuery ParserVersion(int major, int minor);
 

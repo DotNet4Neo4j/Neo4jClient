@@ -8,6 +8,23 @@ namespace Neo4jClient.Test.Cypher
     public class CypherFluentQueryParserVersionTests
     {
         [Test]
+        public void SetsVersionToFreeTextGiven()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .ParserVersion("2.1.experimental")
+                .Start(new
+                {
+                    n = All.Nodes,
+                })
+                .Return<object>("n")
+                .Query;
+
+            Assert.AreEqual("CYPHER 2.1.experimental\r\nSTART n=node(*)\r\nRETURN n", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters.Count);   
+        }
+
+        [Test]
         public void SetsVersion_WhenUsingVersionOverload()
         {
             var client = Substitute.For<IRawGraphClient>();
