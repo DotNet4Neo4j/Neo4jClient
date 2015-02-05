@@ -293,13 +293,27 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
+        protected void CheckForUnwindCapabilities()
+        {
+            CypherCapabilities capabilities = Client.CypherCapabilities ?? CypherCapabilities.Default;
+
+            if (!capabilities.SupportsUnwindOperator)
+            {
+                throw new NotSupportedException("The UNWIND operator is only supported from version 2.0.4 onwards.");
+            }
+        }
+
         public ICypherFluentQuery Unwind(string collectionName, string identity)
         {
+            CheckForUnwindCapabilities();
+
             return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, identity)));
         }
 
         public ICypherFluentQuery Unwind(IEnumerable collection, string identity)
         {
+            CheckForUnwindCapabilities();
+
             return Mutate(w => w.AppendClause("UNWIND {0} AS " + identity, collection));
         }
 
