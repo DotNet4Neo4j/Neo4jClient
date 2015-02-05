@@ -108,7 +108,23 @@ namespace Neo4jClient.Test.GraphClientTests
             using (var testHarness = new RestTestHarness())
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                Assert.AreEqual(CypherCapabilities.Cypher19, graphClient.CypherCapabilities);
+                Assert.AreEqual(CypherCapabilities.Cypher190, graphClient.CypherCapabilities);
+            }
+        }
+
+        [Test]
+        public void ShouldReturnCypher204Capabilities()
+        {
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot204()
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                Assert.AreEqual(CypherCapabilities.Cypher204, graphClient.CypherCapabilities);
             }
         }
 
@@ -124,7 +140,7 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                Assert.AreEqual(CypherCapabilities.Cypher20, graphClient.CypherCapabilities);
+                Assert.AreEqual(CypherCapabilities.Cypher203, graphClient.CypherCapabilities);
             }
         }
 

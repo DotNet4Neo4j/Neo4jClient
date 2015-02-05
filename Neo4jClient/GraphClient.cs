@@ -229,7 +229,13 @@ namespace Neo4jClient
             jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);
 
             if (RootApiResponse.Version < new Version(2, 0))
-                cypherCapabilities = CypherCapabilities.Cypher19;
+            {
+                cypherCapabilities = CypherCapabilities.Cypher190;
+            }
+            else if (RootApiResponse.Version < new Version(2, 0, 4))
+            {
+                cypherCapabilities = CypherCapabilities.Cypher203;
+            }
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs

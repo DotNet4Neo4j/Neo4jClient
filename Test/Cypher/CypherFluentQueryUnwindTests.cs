@@ -1,4 +1,5 @@
-﻿using Neo4jClient.Cypher;
+﻿using System;
+using Neo4jClient.Cypher;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -10,6 +11,27 @@ namespace Neo4jClient.Test.Cypher
     [TestFixture]
     public class CypherFluentQueryUnwindTests
     {
+        [Test]
+        public void CheckThatUnwindIsNotSupportedFor203()
+        {
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot20()
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectGraphClient();
+
+                Assert.Throws<NotSupportedException>(() =>
+                {
+                    var query = new CypherFluentQuery(client)
+                        .Unwind("a", "b");
+                });
+            }
+        }
+
         [Test]
         public void TestUnwindConstruction()
         {

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -15,7 +17,16 @@ namespace Neo4jClient.Cypher
 
         public new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName)
         {
+            CheckForUnwindCapabilities();
+
             return Mutate<TResult>(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+        }
+
+        public new ICypherFluentQuery<TResult> Unwind(IEnumerable collection, string identity)
+        {
+            CheckForUnwindCapabilities();
+
+            return Mutate<TResult>(w => w.AppendClause("UNWIND {0} AS " + identity, collection));
         }
 
         public new ICypherFluentQuery<TResult> Limit(int? limit)

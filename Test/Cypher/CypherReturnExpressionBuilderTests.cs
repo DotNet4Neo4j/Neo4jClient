@@ -128,7 +128,7 @@ namespace Neo4jClient.Test.Cypher
                     NumberOfCats = n.As<Foo>().NumberOfCats
                 };
 
-            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Cypher19, GraphClient.DefaultJsonConverters);
+            var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Cypher190, GraphClient.DefaultJsonConverters);
 
             Assert.AreEqual("n.Age AS Age, n.NumberOfCats? AS NumberOfCats", returnExpression.Text);
         }
