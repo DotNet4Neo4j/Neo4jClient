@@ -37,9 +37,6 @@ namespace Neo4jClient.Cypher
                 return base.Visit(node);
             }
 
-            //dynamic think = method.Arguments.Select(0);//.IndexOf(0);//.Arguments();
-            dynamic think2 = m.Arguments.ToList();
-
             dynamic left = method.Arguments[0];
             dynamic right = method.Arguments[1];
 
