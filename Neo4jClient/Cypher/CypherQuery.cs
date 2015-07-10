@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Neo4jClient.Serialization;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -17,13 +19,15 @@ namespace Neo4jClient.Cypher
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
         readonly CypherResultMode resultMode;
-        private readonly CypherResultFormat resultFormat;
+        readonly CypherResultFormat resultFormat;
+		readonly IContractResolver jsonContractResolver;
 
         public CypherQuery(
             string queryText,
             IDictionary<string, object> queryParameters,
-            CypherResultMode resultMode) :
-            this(queryText, queryParameters, resultMode, CypherResultFormat.DependsOnEnvironment)
+            CypherResultMode resultMode,
+			IContractResolver contractResolver = null) :
+            this(queryText, queryParameters, resultMode, CypherResultFormat.DependsOnEnvironment, contractResolver)
         {
         }
 
@@ -31,12 +35,14 @@ namespace Neo4jClient.Cypher
             string queryText,
             IDictionary<string, object> queryParameters,
             CypherResultMode resultMode,
-            CypherResultFormat resultFormat)
+            CypherResultFormat resultFormat,
+			IContractResolver contractResolver = null)
         {
             this.queryText = queryText;
             this.queryParameters = queryParameters;
             this.resultMode = resultMode;
             this.resultFormat = resultFormat;
+            jsonContractResolver = contractResolver ?? GraphClient.DefaultJsonContractResolver;
         }
 
         public IDictionary<string, object> QueryParameters
@@ -59,15 +65,31 @@ namespace Neo4jClient.Cypher
             get { return resultMode; }
         }
 
-        protected string DebugQueryText
+        public IContractResolver JsonContractResolver
+        {
+            get { return jsonContractResolver; }
+        }
+
+        CustomJsonSerializer BuildSerializer()
+        {
+            return new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters, JsonContractResolver = jsonContractResolver };
+        }
+
+        public string DebugQueryText
         {
             get
             {
+                var serializer = BuildSerializer();
                 var text = queryParameters
                     .Keys
-                    .Aggregate(queryText, (current, paramName)
-                        => current.Replace("{" + paramName + "}", queryParameters[paramName].ToString()))
-                    .Replace("\r\n", "   ");
+                    .Aggregate(
+                        queryText,
+                        (current, paramName) =>
+                        {
+                            var value = queryParameters[paramName];
+                            value = serializer.Serialize(value);
+                            return current.Replace("{" + paramName + "}", value.ToString());
+                        });
 
                 return text;
             }

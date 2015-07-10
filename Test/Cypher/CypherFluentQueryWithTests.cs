@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
@@ -63,6 +64,30 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             Assert.AreEqual("WITH a.Name", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldReturnSpecificPropertyOnItsOwnCamelAs()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .With(a => new Commodity(){ Name = a.As<Commodity>().Name})
+                .Query;
+
+            Assert.AreEqual("WITH a.name? AS Name", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldReturnSpecificPropertyOnItsOwnCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .With(a => a.As<Commodity>().Name)
+                .Query;
+
+            Assert.AreEqual("WITH a.name", query.QueryText);
         }
 
         [Test]

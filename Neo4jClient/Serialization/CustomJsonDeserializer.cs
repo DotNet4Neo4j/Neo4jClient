@@ -5,6 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -12,15 +13,17 @@ namespace Neo4jClient.Serialization
     {
         readonly IEnumerable<JsonConverter> jsonConverters;
         readonly CultureInfo culture;
+        readonly DefaultContractResolver jsonResolver;
 
         public CustomJsonDeserializer(IEnumerable<JsonConverter> jsonConverters) : this(jsonConverters, null)
         {
         }
 
-        public CustomJsonDeserializer(IEnumerable<JsonConverter> jsonConverters, CultureInfo cultureInfo)
+        public CustomJsonDeserializer(IEnumerable<JsonConverter> jsonConverters, CultureInfo cultureInfo = null, DefaultContractResolver resolver = null)
         {
             this.jsonConverters = jsonConverters;
             culture = cultureInfo ?? CultureInfo.InvariantCulture;
+            jsonResolver = resolver ?? GraphClient.DefaultJsonContractResolver;
         }
 
         public T Deserialize<T>(string content) where T : new()
@@ -28,7 +31,8 @@ namespace Neo4jClient.Serialization
             var context = new DeserializationContext
                 {
                     Culture = culture,
-                    JsonConverters = (jsonConverters ?? new List<JsonConverter>(0)).Reverse().ToArray()
+                    JsonConverters = (jsonConverters ?? new List<JsonConverter>(0)).Reverse().ToArray(),
+                    JsonContractResolver = jsonResolver
                 };
 
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);

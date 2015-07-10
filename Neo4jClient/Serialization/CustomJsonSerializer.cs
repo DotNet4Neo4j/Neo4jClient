@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -14,12 +15,14 @@ namespace Neo4jClient.Serialization
         public string RootElement { get; set; }
         public NullValueHandling NullHandling {get; set;}
         public bool QuoteName { get; set; }
+        public IContractResolver JsonContractResolver { get; set; }
 
         public CustomJsonSerializer()
         {
             ContentType = "application/json";
             NullHandling = NullValueHandling.Ignore;
             QuoteName = true;
+            JsonContractResolver = GraphClient.DefaultJsonContractResolver;
         }
 
         public string Serialize(object obj)
@@ -28,7 +31,8 @@ namespace Neo4jClient.Serialization
             {
                 MissingMemberHandling = MissingMemberHandling.Ignore,
                 NullValueHandling = NullHandling,
-                DefaultValueHandling = DefaultValueHandling.Include
+                DefaultValueHandling = DefaultValueHandling.Include,
+                ContractResolver = JsonContractResolver
             };
 
             if (JsonConverters != null)

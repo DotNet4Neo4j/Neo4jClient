@@ -8,10 +8,11 @@ using Neo4jClient.Execution;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
-    public interface IGraphClient
+    public interface IGraphClient : ICypherGraphClient
     {
         [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
         RootNode RootNode { get; }
@@ -116,8 +117,6 @@ namespace Neo4jClient
 
         event OperationCompletedEventHandler OperationCompleted;
 
-        ICypherFluentQuery Cypher { get; }
-
         CypherCapabilities CypherCapabilities { get; }
 
         [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
@@ -146,6 +145,6 @@ namespace Neo4jClient
         void Connect();
 
         List<JsonConverter> JsonConverters { get; }
-       
+        DefaultContractResolver JsonContractResolver { get; set; }
     }
 }

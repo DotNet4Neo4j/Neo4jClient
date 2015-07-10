@@ -1,3 +1,4 @@
+using System.Net;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.ApiModels
@@ -12,5 +13,11 @@ namespace Neo4jClient.ApiModels
 
         [JsonProperty("location")]
         public string Location { get; set; }
+
+        [JsonProperty("status")]
+        public HttpStatusCode Status { get; set; }
+
+        [JsonProperty("body")]
+        public string Body { get; set; }
     }
 }

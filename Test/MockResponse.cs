@@ -4,8 +4,6 @@ namespace Neo4jClient.Test
 {
     public class MockResponse
     {
-        MockResponse() {}
-
         public HttpStatusCode StatusCode { get; set; }
 
         public string StatusDescription
@@ -14,7 +12,7 @@ namespace Neo4jClient.Test
         }
 
         public string ContentType { get; set; }
-        public string Content { get; set; }
+        public virtual string Content { get; set; }
         public string Location { get; set; }
 
         public static MockResponse Json(int statusCode, string json)
@@ -98,6 +96,11 @@ namespace Neo4jClient.Test
             {
                 StatusCode = (HttpStatusCode)statusCode
             };
+        }
+
+        public static MockResponse Throws()
+        {
+            return new MockResponseThrows();
         }
     }
 }

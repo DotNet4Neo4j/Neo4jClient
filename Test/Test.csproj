@@ -34,9 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NSubstitute, Version=1.6.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -75,7 +75,9 @@
     <Compile Include="Cypher\CypherFluentQueryMatchTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryRemoveTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryUnwindTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryUsingIndexTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
+    <Compile Include="Cypher\CypherQueryTests.cs" />
     <Compile Include="Cypher\DocumentationExamples.cs" />
     <Compile Include="Cypher\UnionTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWhereTests.cs" />
@@ -90,6 +92,8 @@
     <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
     <Compile Include="Cypher\QueryWriterTests.cs" />
     <Compile Include="Cypher\StartBitFormatterTests.cs" />
+    <Compile Include="MockResponseThrows.cs" />
+    <Compile Include="MockResponseThrowsException.cs" />
     <Compile Include="Serialization\CypherJsonDeserializerTests.cs" />
     <Compile Include="Serialization\CustomJsonDeserializerTests.cs" />
     <Compile Include="Domain\Product.cs" />

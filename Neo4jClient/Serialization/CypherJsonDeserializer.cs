@@ -9,6 +9,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -49,7 +50,8 @@ namespace Neo4jClient.Serialization
                 var context = new DeserializationContext
                 {
                     Culture = culture,
-                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
+                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
+                    JsonContractResolver = client.JsonContractResolver
                 };
                 content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
@@ -97,6 +99,76 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 }
 
                 throw new ArgumentException(message, "content", ex);
+            }
+        }
+		
+		IEnumerable<TResult> DeserializeInternal(string content)
+        {
+            var context = new DeserializationContext
+                {
+                    Culture = culture,
+                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
+                    JsonContractResolver = client.JsonContractResolver
+                };
+            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+
+            var reader = new JsonTextReader(new StringReader(content))
+            {
+                DateParseHandling = DateParseHandling.DateTimeOffset
+            };
+            var root = JToken.ReadFrom(reader).Root;
+
+            var columnsArray = (JArray)root["columns"];
+            var columnNames = columnsArray
+                .Children()
+                .Select(c => c.AsString())
+                .ToArray();
+
+            var jsonTypeMappings = new List<TypeMapping>
+            {
+                new TypeMapping
+                {
+                    ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                        type.IsGenericType &&
+                        type.GetGenericTypeDefinition() == typeof(Node<>),
+                    DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                    {
+                        var nodeType = t.GetGenericArguments();
+                        return typeof (NodeApiResponse<>).MakeGenericType(nodeType);
+                    },
+                    MutationCallback = n => n.GetType().GetMethod("ToNode").Invoke(n, new object[] { client })
+                },
+                new TypeMapping
+                {
+                    ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                        type.IsGenericType &&
+                        type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
+                    DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                    {
+                        var relationshipType = t.GetGenericArguments();
+                        return typeof (RelationshipApiResponse<>).MakeGenericType(relationshipType);
+                    },
+                    MutationCallback = n => n.GetType().GetMethod("ToRelationshipInstance").Invoke(n, new object[] { client })
+                }
+            };
+
+            switch (resultMode)
+            {
+                case CypherResultMode.Set:
+                    return ParseInSingleColumnMode(context, root, columnNames, jsonTypeMappings.ToArray());
+                case CypherResultMode.Projection:
+                    jsonTypeMappings.Add(new TypeMapping
+                    {
+                        ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                            nestingLevel == 0 && type.IsClass,
+                        DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                            typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
+                        MutationCallback = n =>
+                            n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
+                    });
+                    return ParseInProjectionMode(context, root, columnNames, jsonTypeMappings.ToArray());
+                default:
+                    throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
             }
         }
 

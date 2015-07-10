@@ -821,6 +821,23 @@ namespace Neo4jClient.Test.Serialization
         }
 
         [Test]
+        [Description("http://stackoverflow.com/questions/23764217/argumentexception-when-result-is-empty")]
+        public void DeserializeShouldMapNullResult()
+        {
+            // Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<object>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
+            var content = @"{ 'columns' : [ 'db' ], 'data' : [ [ null ] ] }".Replace("'", "\"");
+
+            // Act
+            var results = deserializer.Deserialize(content).ToArray();
+
+            // Assert
+            Assert.AreEqual(1, results.Count());
+            Assert.IsNull(results[0]);
+        }
+
+        [Test]
         public void DeserializeShouldMapProjectionIntoAnonymousType()
         {
             DeserializeShouldMapProjectionIntoAnonymousType(new { Name = "", Population = 0 });

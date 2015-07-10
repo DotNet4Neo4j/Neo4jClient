@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
@@ -18,6 +20,7 @@ using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
@@ -33,6 +36,9 @@ namespace Neo4jClient
             new TimeZoneInfoConverter(),
             new EnumValueConverter()
         };
+
+        public static readonly DefaultContractResolver DefaultJsonContractResolver  = new DefaultContractResolver();
+
 
         private ITransactionManager transactionManager;
         private IExecutionPolicyFactory policyFactory;
@@ -64,7 +70,7 @@ namespace Neo4jClient
             RootUri = rootUri;
             JsonConverters = new List<JsonConverter>();
             JsonConverters.AddRange(DefaultJsonConverters);
-
+			JsonContractResolver = DefaultJsonContractResolver;
             ExecutionConfiguration = new ExecutionConfiguration
             {
                 HttpClient = httpClient,
@@ -105,6 +111,7 @@ namespace Neo4jClient
                 return;
             }
 
+           //return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters, JsonContractResolver);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -277,6 +284,7 @@ namespace Neo4jClient
 
             var batchResponse = ExecuteBatch(batchSteps, policy);
             var createResponse = batchResponse[createNodeStep];
+			EnsureNodeWasCreated(createResponse);
             var nodeId = long.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
 
@@ -352,12 +360,18 @@ namespace Neo4jClient
                     targetNode.Id))
                 )
                 .Execute()
+				//.ReadAsJson<RelationshipApiResponse<object>>(JsonConverters,JsonContractResolver)
                 .ToRelationshipReference(this);
+        }
+
+        CustomJsonSerializer BuildSerializer()
+        {
+            return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
         }
 
         public ISerializer Serializer
         {
-            get { return new CustomJsonSerializer {JsonConverters = JsonConverters}; }
+            get { return new CustomJsonSerializer { JsonConverters = JsonConverters , JsonContractResolver = JsonContractResolver}; }
         }
 
         public void DeleteRelationship(RelationshipReference reference)
@@ -408,6 +422,7 @@ namespace Neo4jClient
                 .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
                 .WithDefault()
                 .ExecuteAsync(nodeMessage => nodeMessage.Result != null ? nodeMessage.Result.ToNode(this) : null);
+                        //.ReadAsJson<NodeApiResponse<TNode>>(JsonConverters)
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
@@ -508,11 +523,11 @@ namespace Neo4jClient
             if (changeCallback != null)
             {
                 var originalValuesDictionary =
-                    new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(
+                    new CustomJsonDeserializer(JsonConverters,resolver:JsonContractResolver).Deserialize<Dictionary<string, string>>(
                         originalValuesString);
                 var newValuesString = serializer.Serialize(node.Data);
                 var newValuesDictionary =
-                    new CustomJsonDeserializer(JsonConverters).Deserialize<Dictionary<string, string>>(newValuesString);
+                    new CustomJsonDeserializer(JsonConverters,resolver:JsonContractResolver).Deserialize<Dictionary<string, string>>(newValuesString);
                 var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary,
                     newValuesDictionary);
                 changeCallback(differences);
@@ -994,6 +1009,30 @@ namespace Neo4jClient
             });
         }
 
+        Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
+        {
+            CheckRoot();
+            var policy = policyFactory.GetPolicy(PolicyType.Cypher);
+            CheckTransactionEnvironmentWithPolicy(policy);
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            return PrepareCypherRequest<object>(query, policy).ContinueWith(t =>
+            {
+                // Rethrow any exception (instead of using TaskContinuationOptions.OnlyOnRanToCompletion, which for failures, returns a canceled task instead of a faulted task)
+                var _ = t.Result;
+                policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(t.Result.ResponseObject), null);
+                stopwatch.Stop();
+                OnOperationCompleted(new OperationCompletedEventArgs
+                {
+                    QueryText = query.QueryText,
+                    ResourcesReturned = 0,
+                    TimeTaken = stopwatch.Elapsed
+                });
+            });
+        }
+
         void IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries)
         {
             CheckRoot();
@@ -1359,6 +1398,7 @@ namespace Neo4jClient
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ParseAs<List<NodeApiResponse<TNode>>>()
                 .Execute()
+//CDS: , resolver: JsonContractResolver
                 .Select(nodeResponse => nodeResponse.ToNode(this));
         }
 
@@ -1387,6 +1427,7 @@ namespace Neo4jClient
                 .Get(indexResource)
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ParseAs<List<NodeApiResponse<TNode>>>()
+//CDS: Resolver
                 .Execute()
                 .Select(query => query.ToNode(this));
         }
@@ -1408,6 +1449,19 @@ namespace Neo4jClient
                 eventInstance(this, args);
         }
 
+        private void EnsureNodeWasCreated(BatchStepResult createResponse)
+        {
+            if (createResponse.Status == HttpStatusCode.BadRequest && createResponse.Body != null)
+            {
+                var exceptionResponse = JsonConvert.DeserializeObject<ExceptionResponse>(createResponse.Body);
+
+                if (exceptionResponse == null || string.IsNullOrEmpty(exceptionResponse.Message) || string.IsNullOrEmpty(exceptionResponse.Exception))
+                    throw new ApplicationException(string.Format("Response from Neo4J: {0}", createResponse.Body));
+
+                throw new NeoException(exceptionResponse);
+			}
+		}
+		
         public void Dispose()
         {
             if (transactionManager != null)
@@ -1416,7 +1470,9 @@ namespace Neo4jClient
             }
         }
 
-        public ITransactionManager TransactionManager
+		public DefaultContractResolver JsonContractResolver { get; set; }
+
+		public ITransactionManager TransactionManager
         {
             get { return transactionManager; }
         }

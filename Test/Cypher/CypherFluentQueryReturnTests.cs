@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Cypher;
@@ -243,6 +244,18 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ShouldReturnSpecificPropertyOnItsOwnCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Return(a => a.As<Commodity>().Name)
+                .Query;
+
+            Assert.AreEqual("RETURN a.name", query.QueryText);
+        }
+
+        [Test]
         public void ShouldThrowForMemberExpressionOffMethodOtherThanAs()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -272,6 +285,17 @@ ORDER BY common.FirstName", query.QueryText);
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
             Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
+        }
+
+        [Test]
+        public void ShouldUseSetResultModeForSimpleLambdaReturn()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(item => item.As<object>())
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
         }
 
         [Test]
@@ -311,6 +335,18 @@ ORDER BY common.FirstName", query.QueryText);
         }
 
         [Test]
+        public void ShouldUseSetResultModeForSpecificPropertyReturnCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Return(a => a.As<Commodity>().Name)
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+        }
+
+        [Test]
         public void ShouldUseProjectionResultModeForAnonymousObjectReturn()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -332,6 +368,18 @@ ORDER BY common.FirstName", query.QueryText);
 
             Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
             Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
+        }
+
+        [Test]
+        public void ShouldUseProjectionResultModeForNamedObjectReturnCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Return(a => new ProjectionResult { Commodity = a.As<Commodity>() })
+                .Query;
+
+            Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
         }
 
         [Test]
@@ -416,6 +464,115 @@ ORDER BY common.FirstName", query.QueryText);
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
 
+                var results = graphClient
+                    .Cypher
+                    .Start("root", graphClient.RootNode)
+                    .Match("root-->other")
+                    .Return(other => new
+                    {
+                        Foo = other.As<Commodity>()
+                    })
+                    .Results
+                    .ToList();
+
+                Assert.AreEqual(3, results.Count());
+
+                var result = results[0];
+                Assert.AreEqual("Antimony", result.Foo.Name);
+                Assert.AreEqual(38, result.Foo.UniqueId);
+
+                result = results[1];
+                Assert.AreEqual("Bauxite", result.Foo.Name);
+                Assert.AreEqual(24, result.Foo.UniqueId);
+
+                result = results[2];
+                Assert.AreEqual("Bismuth", result.Foo.Name);
+                Assert.AreEqual(37, result.Foo.UniqueId);
+            }
+        }
+
+        [Test]
+        public void ShouldSupportAnonymousReturnTypesEndToEndCamel()
+        {
+            const string queryText = "START root=node({p0})\r\nMATCH root-->other\r\nRETURN other AS Foo";
+            var parameters = new Dictionary<string, object>
+            {
+                {"p0", 123}
+            };
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Json(HttpStatusCode.OK, @"{
+  'columns' : [ 'Foo' ],
+  'data' : [ [ {
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/748/relationships/out',
+    'data' : {
+      'name' : 'Antimony',
+      'uniqueId' : 38
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/748/traverse/{returnType}',
+    'self' : 'http://localhost:8000/db/data/node/748',
+    'property' : 'http://localhost:8000/db/data/node/748/properties/{key}',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/748/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/748/relationships/in',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/748/relationships',
+    'paged_traverse' : 'http://localhost:8000/db/data/node/748/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/748/relationships/all',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/in/{-list|&|types}'
+  } ], [ {
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/610/relationships/out',
+    'data' : {
+      'name' : 'Bauxite',
+      'uniqueId' : 24
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/610/traverse/{returnType}',
+    'self' : 'http://localhost:8000/db/data/node/610',
+    'property' : 'http://localhost:8000/db/data/node/610/properties/{key}',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/610/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/610/relationships/in',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/610/relationships',
+    'paged_traverse' : 'http://localhost:8000/db/data/node/610/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/610/relationships/all',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/in/{-list|&|types}'
+  } ], [ {
+    'outgoing_relationships' : 'http://localhost:8000/db/data/node/749/relationships/out',
+    'data' : {
+      'name' : 'Bismuth',
+      'uniqueId' : 37
+    },
+    'all_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/all/{-list|&|types}',
+    'traverse' : 'http://localhost:8000/db/data/node/749/traverse/{returnType}',
+    'self' : 'http://localhost:8000/db/data/node/749',
+    'property' : 'http://localhost:8000/db/data/node/749/properties/{key}',
+    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/out/{-list|&|types}',
+    'properties' : 'http://localhost:8000/db/data/node/749/properties',
+    'incoming_relationships' : 'http://localhost:8000/db/data/node/749/relationships/in',
+    'extensions' : {
+    },
+    'create_relationship' : 'http://localhost:8000/db/data/node/749/relationships',
+    'paged_traverse' : 'http://localhost:8000/db/data/node/749/paged/traverse/{returnType}{?pageSize,leaseTime}',
+    'all_relationships' : 'http://localhost:8000/db/data/node/749/relationships/all',
+    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/in/{-list|&|types}'
+  } ] ]
+}")
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+                graphClient.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
                 var results = graphClient
                     .Cypher
                     .Start("root", graphClient.RootNode)
