@@ -1398,7 +1398,6 @@ namespace Neo4jClient
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ParseAs<List<NodeApiResponse<TNode>>>()
                 .Execute()
-//CDS: , resolver: JsonContractResolver
                 .Select(nodeResponse => nodeResponse.ToNode(this));
         }
 
@@ -1427,7 +1426,6 @@ namespace Neo4jClient
                 .Get(indexResource)
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ParseAs<List<NodeApiResponse<TNode>>>()
-//CDS: Resolver
                 .Execute()
                 .Select(query => query.ToNode(this));
         }
@@ -1461,13 +1459,19 @@ namespace Neo4jClient
                 throw new NeoException(exceptionResponse);
 			}
 		}
-		
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing) return;
+
+            if (transactionManager != null)
+                transactionManager.Dispose();
+        }
+
         public void Dispose()
         {
-            if (transactionManager != null)
-            {
-                transactionManager.Dispose();
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
 		public DefaultContractResolver JsonContractResolver { get; set; }
