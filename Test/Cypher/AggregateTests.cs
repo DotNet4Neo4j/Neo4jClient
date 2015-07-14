@@ -18,6 +18,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN length(n) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -30,6 +31,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN type(n) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -42,6 +44,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN id(n) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -54,6 +57,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN count(n) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
  
@@ -69,6 +73,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN count(distinct n) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -84,6 +89,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN count(*) AS Foo", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -98,6 +104,24 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN count(*) AS Foo", resultQuery.QueryText);
             Assert.AreEqual(0, resultQuery.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, resultQuery.ResultFormat);
+        }
+
+        [Test]
+        public void CountAllWithOtherIdentitiesWithNode()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(bar => new
+                {
+                    Foo = All.Count(),
+                    Baz = bar.CollectAs<Node<object>>()
+                })
+                .Query;
+
+            Assert.AreEqual("RETURN count(*) AS Foo, collect(bar) AS Baz", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.Rest, query.ResultFormat);
         }
 
         [Test]
@@ -114,6 +138,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("RETURN count(*) AS Foo, collect(bar) AS Baz", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count());
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
     }
 }

@@ -25,35 +25,35 @@ namespace Neo4jClient.Test.Serialization
             }}";
 
         [Test]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "", null)]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "rekjre", null)]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(abcs)/", null)]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Set, SetModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "", null)]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "rekjre", null)]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(abcs)/", null)]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Projection, ProjectionModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
-        public void DeserializeShouldPreserveOffsetValues(CypherResultMode resultMode, string contentFormat, string input, string expectedResult)
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "", null)]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "rekjre", null)]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(abcs)/", null)]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(abcs+0000)/", null)]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "", null)]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "rekjre", null)]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(abcs)/", null)]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(abcs+0000)/", null)]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
+        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
+        public void DeserializeShouldPreserveOffsetValues(CypherResultMode resultMode, CypherResultFormat format, string contentFormat, string input, string expectedResult)
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<DateTimeOffsetModel>(client, resultMode);
+            var deserializer = new CypherJsonDeserializer<DateTimeOffsetModel>(client, resultMode, format);
             var content = string.Format(contentFormat, input);
 
             // Act
@@ -81,7 +81,8 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<Node<City>>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<Node<City>>(client, CypherResultMode.Set,
+                CypherResultFormat.Rest);
             var content = @"{
                   'data' : [ [ {
                     'outgoing_relationships' : 'http://localhost:7474/db/data/node/5/relationships/out',
@@ -165,7 +166,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<RelationshipInstance<City>>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<RelationshipInstance<City>>(client, CypherResultMode.Set, CypherResultFormat.Rest);
             var content = @"{
                   'data' : [ [ {
                     'start' : 'http://localhost:7474/db/data/node/55872',
@@ -228,7 +229,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<Projection>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<Projection>(client, CypherResultMode.Projection, CypherResultFormat.Rest);
             var content = @"{
                   'data' : [ [ {
                     'outgoing_relationships' : 'http://localhost:7474/db/data/node/55745/relationships/out',
@@ -365,7 +366,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection, CypherResultFormat.Rest);
             var content = @"{
                       'data' : [ [ [ {
                         'outgoing_relationships' : 'http://foo/db/data/node/920/relationships/out',
@@ -429,7 +430,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ProjectionFeedItem>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<ProjectionFeedItem>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             
             //The sample query that generated this data:
             /*
@@ -555,7 +556,7 @@ namespace Neo4jClient.Test.Serialization
         {
 
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<ResultWithNestedNodeDto>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content =
                         @"{
                       'data' : [ [ [ null ] ] ],
@@ -576,7 +577,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
                   'columns' : [ 'Names' ]
@@ -595,7 +596,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<People>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [ [ [ ] ] ],
                   'columns' : [ 'Names' ]
@@ -613,7 +614,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<IEnumerable<string>>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<IEnumerable<string>>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
                   'columns' : [ 'Names' ]
@@ -632,7 +633,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<string[]>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<string[]>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [ [ [ 'Ben Tu', 'Romiko Derbynew' ] ] ],
                   'columns' : [ 'Names' ]
@@ -651,7 +652,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<int[]>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<int[]>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [ [ [ '666', '777' ] ] ],
                   'columns' : [ 'Names' ]
@@ -670,7 +671,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<int>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<int>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                           'data' : [ [ 666 ] ],
                           'columns' : [ 'count(distinct registration)' ]
@@ -689,7 +690,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<UserWithJsonPropertyAttribute>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<UserWithJsonPropertyAttribute>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
   'columns' : [ 'Foo' ],
   'data' : [ [ {
@@ -726,7 +727,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
   'columns' : [ 'Fans', 'Poster' ],
   'data' : [ [ [ null ], {
@@ -769,7 +770,7 @@ namespace Neo4jClient.Test.Serialization
 
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<AppAlternatives>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<AppAlternatives>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
   'columns' : [ 'Application', 'Alternatives' ],
   'data' : [ [ {
@@ -808,7 +809,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<ModelWithCollect>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{'columns':['Fans'],'data':[[[null,null]]]}".Replace("'", "\"");
 
             // Act
@@ -825,7 +826,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<object>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<object>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{ 'columns' : [ 'db' ], 'data' : [ [ null ] ] }".Replace("'", "\"");
 
             // Act
@@ -848,7 +849,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                 'data' : [
                     [ 'Tokyo', 13000000 ],
@@ -890,7 +891,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<TAnon>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                 'data' : [
                     [ 'Jim', [null] ]
@@ -991,12 +992,269 @@ namespace Neo4jClient.Test.Serialization
             public string Name { get; set; }
         }
 
+        private class CityAndLabel
+        {
+            public City City { get; set; }
+            public IEnumerable<string> Labels { get; set; }
+        }
+
+        private class State
+        {
+            public string Name { get; set; }
+        }
+
+        private class StateCityAndLabel
+        {
+            public State State { get; set; }
+            public IEnumerable<string> Labels { get; set; }
+            public IEnumerable<City> Cities { get; set; }
+        }
+
+        private class StateCityAndLabelWithNode
+        {
+            public State State { get; set; }
+            public IEnumerable<string> Labels { get; set; }
+            public IEnumerable<Node<City>> Cities { get; set; }
+        }
+
+        [Test]
+        public void DeserializeNestedObjectsInTransactionReturningNode()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<StateCityAndLabelWithNode>(client, CypherResultMode.Projection, CypherResultFormat.Rest, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'State','Labels','Cities'
+                    ],
+                    'data':[
+                        {
+                            'rest':[
+                                {'Name':'Baja California'},
+                                ['State'],
+                                [
+                                    {
+                    'outgoing_relationships' : 'http://localhost:7474/db/data/node/5/relationships/out',
+                    'data' : {
+                      'Name' : 'Tijuana',
+                      'Population': 1300000
+                    },
+                    'all_typed_relationships' : 'http://localhost:7474/db/data/node/5/relationships/all/{-list|&|types}',
+                    'traverse' : 'http://localhost:7474/db/data/node/5/traverse/{returnType}',
+                    'self' : 'http://localhost:7474/db/data/node/5',
+                    'property' : 'http://localhost:7474/db/data/node/5/properties/{key}',
+                    'outgoing_typed_relationships' : 'http://localhost:7474/db/data/node/5/relationships/out/{-list|&|types}',
+                    'properties' : 'http://localhost:7474/db/data/node/5/properties',
+                    'incoming_relationships' : 'http://localhost:7474/db/data/node/5/relationships/in',
+                    'extensions' : {
+                    },
+                    'create_relationship' : 'http://localhost:7474/db/data/node/5/relationships',
+                    'paged_traverse' : 'http://localhost:7474/db/data/node/5/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                    'all_relationships' : 'http://localhost:7474/db/data/node/5/relationships/all',
+                    'incoming_typed_relationships' : 'http://localhost:7474/db/data/node/5/relationships/in/{-list|&|types}'
+                  } , {
+                    'outgoing_relationships' : 'http://localhost:7474/db/data/node/4/relationships/out',
+                    'data' : {
+                      'Name' : 'Mexicali',
+                      'Population': 500000
+                    },
+                    'all_typed_relationships' : 'http://localhost:7474/db/data/node/4/relationships/all/{-list|&|types}',
+                    'traverse' : 'http://localhost:7474/db/data/node/4/traverse/{returnType}',
+                    'self' : 'http://localhost:7474/db/data/node/4',
+                    'property' : 'http://localhost:7474/db/data/node/4/properties/{key}',
+                    'outgoing_typed_relationships' : 'http://localhost:7474/db/data/node/4/relationships/out/{-list|&|types}',
+                    'properties' : 'http://localhost:7474/db/data/node/4/properties',
+                    'incoming_relationships' : 'http://localhost:7474/db/data/node/4/relationships/in',
+                    'extensions' : {
+                    },
+                    'create_relationship' : 'http://localhost:7474/db/data/node/4/relationships',
+                    'paged_traverse' : 'http://localhost:7474/db/data/node/4/paged/traverse/{returnType}{?pageSize,leaseTime}',
+                    'all_relationships' : 'http://localhost:7474/db/data/node/4/relationships/all',
+                    'incoming_typed_relationships' : 'http://localhost:7474/db/data/node/4/relationships/in/{-list|&|types}'
+                  }
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            var result = results[0];
+            Assert.AreEqual("Baja California", result.State.Name);
+            Assert.AreEqual("State", result.Labels.First());
+
+            var cities = result.Cities.ToArray();
+            Assert.AreEqual(2, cities.Length);
+
+            var city = cities[0];
+            Assert.AreEqual("Tijuana", city.Data.Name);
+            Assert.AreEqual(1300000, city.Data.Population);
+
+            city = cities[1];
+            Assert.AreEqual("Mexicali", city.Data.Name);
+            Assert.AreEqual(500000, city.Data.Population);
+        }
+
+        [Test]
+        public void DeserializeNestedObjectsInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<StateCityAndLabel>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'State','Labels','Cities'
+                    ],
+                    'data':[
+                        {
+                            'row':[
+                                {'Name':'Baja California'},
+                                ['State'],
+                                [
+                                    {'Name':'Tijuana', 'Population': 1300000},
+                                    {'Name':'Mexicali', 'Population': 500000}
+                                ]
+                            ]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            var result = results[0];
+            Assert.AreEqual("Baja California", result.State.Name);
+            Assert.AreEqual("State", result.Labels.First());
+
+            var cities = result.Cities.ToArray();
+            Assert.AreEqual(2, cities.Length);
+
+            var city = cities[0];
+            Assert.AreEqual("Tijuana", city.Name);
+            Assert.AreEqual(1300000, city.Population);
+
+            city = cities[1];
+            Assert.AreEqual("Mexicali", city.Name);
+            Assert.AreEqual(500000, city.Population);
+        }
+
+
+        [Test]
+        public void DeserializerTwoLevelProjectionInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<CityAndLabel>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'City', 'Labels'
+                    ],
+                    'data':[
+                        {
+                            'row': [{ 'Name': 'Sydney', 'Population': 4000000}, ['City1']]
+                        },
+                        {
+                            'row': [{ 'Name': 'Tijuana', 'Population': 1300000}, ['City2']]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(2, results.Length);
+            var city = results[0];
+            Assert.AreEqual("Sydney", city.City.Name);
+            Assert.AreEqual(4000000, city.City.Population);
+            Assert.AreEqual("City1", city.Labels.First());
+            city = results[1];
+            Assert.AreEqual("Tijuana", city.City.Name);
+            Assert.AreEqual(1300000, city.City.Population);
+            Assert.AreEqual("City2", city.Labels.First());
+        }
+
+        [Test]
+        public void DeserializerProjectionInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'Name', 'Population'
+                    ],
+                    'data':[
+                        {
+                            'row': ['Sydney', 4000000]
+                        },
+                        {
+                            'row': ['Tijuana', 1300000]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(2, results.Length);
+            var city = results[0];
+            Assert.AreEqual("Sydney", city.Name);
+            Assert.AreEqual(4000000, city.Population);
+            city = results[1];
+            Assert.AreEqual("Tijuana", city.Name);
+            Assert.AreEqual(1300000, city.Population);
+        }
+
+        [Test]
+        public void DeserializeSimpleSetInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<int>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'count(n)'
+                    ],
+                    'data':[
+                        {
+                            'row': [3]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            Assert.AreEqual(3, results[0]);
+        }
+
+        [Test]
+        public void DeserializeResultsSetInTransaction()
+        {
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, true);
+            var content = @"{'results':[
+                {
+                    'columns':[
+                        'c'
+                    ],
+                    'data':[
+                        {
+                            'row': [{
+                                'Name': 'Sydney', 'Population': 4000000
+                            }]
+                        }
+                    ]
+                }
+            ]}";
+            var results = deserializer.Deserialize(content).ToArray();
+            Assert.AreEqual(1, results.Length);
+            var city = results[0];
+            Assert.AreEqual("Sydney", city.Name);
+            Assert.AreEqual(4000000, city.Population);
+        }
+
         [Test]
         public void DeserializeShouldPreserveUtf8Characters()
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<City>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [
                     [ { 'Name': '東京', 'Population': 13000000 } ],
@@ -1030,7 +1288,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"
                     {
                         'data' : [ [ {
@@ -1095,7 +1353,7 @@ namespace Neo4jClient.Test.Serialization
         public void BadJsonShouldThrowExceptionThatIncludesJson()
         {
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             const string content = @"xyz-json-zyx";
 
             var ex = Assert.Throws<ArgumentException>(() =>
@@ -1108,7 +1366,7 @@ namespace Neo4jClient.Test.Serialization
         public void BadJsonShouldThrowExceptionThatIncludesFullNameOfTargetType()
         {
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<Asset>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
 
             var ex = Assert.Throws<ArgumentException>(() =>
                 deserializer.Deserialize("xyz-json-zyx")
@@ -1120,7 +1378,7 @@ namespace Neo4jClient.Test.Serialization
         public void ClassWithoutDefaultPublicConstructorShouldThrowExceptionThatExplainsThis()
         {
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ClassWithoutDefaultPublicConstructor>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<ClassWithoutDefaultPublicConstructor>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                   'data' : [
                     [ { 'Name': 'Tokyo', 'Population': 13000000 } ],
@@ -1156,7 +1414,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<long?>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<long?>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                           'data' : [ [ 123 ] ],
                           'columns' : [ 'count(distinct registration)' ]
@@ -1180,7 +1438,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<ModelWithByteArray>(client, CypherResultMode.Projection);
+            var deserializer = new CypherJsonDeserializer<ModelWithByteArray>(client, CypherResultMode.Projection, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                           'data' : [ [ 'AQIDBA==' ] ],
                           'columns' : [ 'Array' ]
@@ -1199,7 +1457,7 @@ namespace Neo4jClient.Test.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new CypherJsonDeserializer<byte[]>(client, CypherResultMode.Set);
+            var deserializer = new CypherJsonDeserializer<byte[]>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
             var content = @"{
                           'data' : [ [ 'AQIDBA==' ] ],
                           'columns' : [ 'column1' ]

@@ -50,6 +50,7 @@
     <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -63,12 +64,15 @@
     <Compile Include="ApiModels\BatchStep.cs" />
     <Compile Include="ApiModels\BatchStepExtensions.cs" />
     <Compile Include="ApiModels\BatchStepResult.cs" />
+    <Compile Include="ApiModels\Cypher\CypherStatementList.cs" />
+    <Compile Include="ApiModels\Cypher\CypherTransactionStatement.cs" />
     <Compile Include="ApiModels\ExceptionResponse.cs" />
     <Compile Include="ApiModels\NodeOrRelationshipApiResponse.cs" />
     <Compile Include="ApiModels\Cypher\CypherApiQuery.cs" />
     <Compile Include="ApiModels\Cypher\PathsResult.cs" />
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="CypherPartialResult.cs" />
     <Compile Include="Cypher\All.cs" />
     <Compile Include="Cypher\CypherCapabilities.cs" />
     <Compile Include="Cypher\CypherFluentQuery`With.cs" />
@@ -87,14 +91,40 @@
     <Compile Include="Cypher\ReturnExpression.cs" />
     <Compile Include="Cypher\StartBit.cs" />
     <Compile Include="Cypher\StartBitFormatter.cs" />
+    <Compile Include="Execution\BatchExecutionPolicy.cs" />
+    <Compile Include="Execution\CypherExecutionPolicy.cs" />
+    <Compile Include="Execution\CypherTransactionExecutionPolicy.cs" />
+    <Compile Include="Execution\EndpointBuilderExtension.cs" />
+    <Compile Include="Execution\ErrorGenerator.cs" />
+    <Compile Include="Execution\ExecutionConfiguration.cs" />
+    <Compile Include="Execution\ExecutionPolicyFactory.cs" />
+    <Compile Include="Execution\GraphClientBasedExecutionPolicy.cs" />
+    <Compile Include="Execution\GremlinExecutionPolicy.cs" />
+    <Compile Include="Execution\HttpResponseMessageExtensions.cs" />
+    <Compile Include="Execution\IExecutionPolicy.cs" />
+    <Compile Include="Execution\IExecutionPolicyFactory.cs" />
+    <Compile Include="Execution\IHttpClient.cs" />
     <Compile Include="ICypherGraphClient.cs" />
+    <Compile Include="Execution\IRequestTypeBuilder.cs" />
+    <Compile Include="Execution\IRequestWithPendingContentBuilder.cs" />
+    <Compile Include="Execution\IResponseBuilder.cs" />
+    <Compile Include="Execution\IResponseBuilder`TResult.cs" />
+    <Compile Include="Execution\IResponseFailBuilder.cs" />
+    <Compile Include="Execution\NodeIndexExecutionPolicy.cs" />
+    <Compile Include="Execution\RelationshipIndexExecutionPolicy.cs" />
+    <Compile Include="Execution\Request.cs" />
+    <Compile Include="Execution\RequestTypeBuilder.cs" />
+    <Compile Include="Execution\RequestWithPendingContentBuilder.cs" />
+    <Compile Include="Execution\ResponseBuilder.cs" />
+    <Compile Include="Execution\ResponseBuilder`TParse.cs" />
+    <Compile Include="Execution\ResponseFailBuilder.cs" />
+    <Compile Include="Execution\ResponseFailBuilder`TParse.cs" />
+    <Compile Include="Execution\RestExecutionPolicy.cs" />
     <Compile Include="NeoException.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
-    <Compile Include="HttpResponseMessageExtensions.cs" />
     <Compile Include="IHasNodeReference.cs" />
-    <Compile Include="IHttpClient.cs" />
     <Compile Include="IRawGraphClient.cs" />
     <Compile Include="JTokenExtensions.cs" />
     <Compile Include="RelationshipReference`TData.cs" />
@@ -115,6 +145,8 @@
     <Compile Include="Cypher\ICypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\ICypherResultItem.cs" />
     <Compile Include="Serialization\DeserializationException.cs" />
+    <Compile Include="Serialization\ISerializer.cs" />
+    <Compile Include="Serialization\PartialDeserializationContext.cs" />
     <Compile Include="Serialization\TypeMapping.cs" />
     <Compile Include="Gremlin\AggregateStep.cs" />
     <Compile Include="Gremlin\EmitPropertyStep.cs" />
@@ -199,6 +231,25 @@
     <Compile Include="Serialization\EnumValueConverter.cs" />
     <Compile Include="Serialization\NullableEnumValueConverter.cs" />
     <Compile Include="Serialization\TimeZoneInfoConverter.cs" />
+    <Compile Include="OrphanedTransactionException.cs" />
+    <Compile Include="Transactions\ClosedTransactionException.cs" />
+    <Compile Include="Transactions\IInternalTransactionalGraphClient.cs" />
+    <Compile Include="Transactions\INeo4jTransaction.cs" />
+    <Compile Include="Transactions\ITransaction.cs" />
+    <Compile Include="Transactions\ITransactionalGraphClient.cs" />
+    <Compile Include="Transactions\ITransactionManager.cs" />
+    <Compile Include="Transactions\ITransactionResourceManager.cs" />
+    <Compile Include="Transactions\Neo4jTransaction.cs" />
+    <Compile Include="Transactions\Neo4jTransactionProxy.cs" />
+    <Compile Include="Transactions\Neo4jTransactionResourceManager.cs" />
+    <Compile Include="Transactions\SuppressTransactionProxy.cs" />
+    <Compile Include="Transactions\TransactionConnectionContext.cs" />
+    <Compile Include="Transactions\TransactionContext.cs" />
+    <Compile Include="Transactions\TransactionExecutionEnvironment.cs" />
+    <Compile Include="Transactions\TransactionHttpUtils.cs" />
+    <Compile Include="Transactions\TransactionManager.cs" />
+    <Compile Include="Transactions\TransactionScopeProxy.cs" />
+    <Compile Include="Transactions\TransactionSinglePhaseNotification.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

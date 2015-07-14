@@ -27,6 +27,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("START n=node({p0})\r\nRETURN distinct n", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -42,6 +43,7 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node({p0})\r\nRETURN distinct n\r\nLIMIT {p1}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -58,6 +60,7 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node({p0})\r\nRETURN distinct n\r\nORDER BY n.Foo\r\nLIMIT {p1}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -71,6 +74,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.AreEqual("START n=node({p0})\r\nRETURN n", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -86,6 +90,7 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node({p0})\r\nRETURN n\r\nLIMIT {p1}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -102,6 +107,7 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node({p0})\r\nRETURN n\r\nORDER BY n.Foo\r\nLIMIT {p1}", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(5, query.QueryParameters["p1"]);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -129,6 +135,7 @@ ORDER BY common.FirstName", query.QueryText);
             Assert.AreEqual(123, query.QueryParameters["p0"]);
             Assert.AreEqual(456, query.QueryParameters["p1"]);
             Assert.AreEqual(5, query.QueryParameters["p2"]);
+            Assert.AreEqual(CypherResultFormat.Rest, query.ResultFormat);
         }
 
         [Test]
@@ -140,6 +147,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("RETURN count(item)", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -152,6 +160,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("MATCH (n0),(n1)\r\nRETURN [n0,n1]", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -164,6 +173,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("MATCH (n0),(n1)\r\nRETURN [n0,n1]", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
         
         [Test]
@@ -206,6 +216,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("RETURN count(*)", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -217,6 +228,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("RETURN sum(foo.bar)", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -228,6 +240,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("RETURN a.Name", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -259,6 +272,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -270,6 +284,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -292,6 +307,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -303,6 +319,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -314,6 +331,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Set, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -337,6 +355,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -348,6 +367,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual(CypherResultMode.Projection, query.ResultMode);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -371,7 +391,7 @@ ORDER BY common.FirstName", query.QueryText);
                 {"p0", 123}
             };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest);
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -590,6 +610,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("MATCH (a)\r\nRETURN a IS NOT NULL AS NotNull", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]
@@ -602,6 +623,7 @@ ORDER BY common.FirstName", query.QueryText);
                 .Query;
 
             Assert.AreEqual("MATCH (a)\r\nRETURN a IS NULL AS IsNull", query.QueryText);
+            Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
         [Test]

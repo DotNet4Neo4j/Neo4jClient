@@ -48,7 +48,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery Remove(string removeText);
         ICypherFluentQuery ForEach(string text);
-        ICypherFluentQuery Unwind(string collection, string identity);
+        ICypherFluentQuery Unwind(string collection, string columnName);
         ICypherFluentQuery Unwind(IEnumerable collection, string identity);
         ICypherFluentQuery Union();
         ICypherFluentQuery UnionAll();
@@ -59,7 +59,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery<TResult> Return<TResult>(string identity);
         [Obsolete("This was an internal that never should have been exposed. If you want to create a projection, you should be using the lambda overload instead. See the 'Using Functions in Return Clauses' and 'Using Custom Text in Return Clauses' sections of https://bitbucket.org/Readify/neo4jclient/wiki/cypher for details of how to do this.", true)]
         ICypherFluentQuery<TResult> Return<TResult>(string identity, CypherResultMode resultMode);
-        ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<TResult>> expression);
+		ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<TResult>> expression);
         ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);
@@ -77,8 +77,9 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);
 
-        ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity);
-        ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression);
+		ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity);
+//        ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<TResult>> expression);
+		ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);

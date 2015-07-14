@@ -6,23 +6,42 @@ using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
+    public enum CypherResultFormat
+    {
+        Rest,
+        Transactional,
+        DependsOnEnvironment
+    }
+
     [DebuggerDisplay("{DebugQueryText}")]
     public class CypherQuery
     {
         readonly string queryText;
         readonly IDictionary<string, object> queryParameters;
         readonly CypherResultMode resultMode;
-        readonly IContractResolver jsonContractResolver;
+        readonly CypherResultFormat resultFormat;
+		readonly IContractResolver jsonContractResolver;
 
         public CypherQuery(
             string queryText,
             IDictionary<string, object> queryParameters,
-            CypherResultMode resultMode, 
-            IContractResolver contractResolver = null)
+            CypherResultMode resultMode,
+			IContractResolver contractResolver = null) :
+            this(queryText, queryParameters, resultMode, CypherResultFormat.DependsOnEnvironment, contractResolver)
+        {
+        }
+
+        public CypherQuery(
+            string queryText,
+            IDictionary<string, object> queryParameters,
+            CypherResultMode resultMode,
+            CypherResultFormat resultFormat,
+			IContractResolver contractResolver = null)
         {
             this.queryText = queryText;
             this.queryParameters = queryParameters;
             this.resultMode = resultMode;
+            this.resultFormat = resultFormat;
             jsonContractResolver = contractResolver ?? GraphClient.DefaultJsonContractResolver;
         }
 
@@ -34,6 +53,11 @@ namespace Neo4jClient.Cypher
         public string QueryText
         {
             get { return queryText; }
+        }
+
+        public CypherResultFormat ResultFormat
+        {
+            get { return resultFormat; }
         }
 
         public CypherResultMode ResultMode

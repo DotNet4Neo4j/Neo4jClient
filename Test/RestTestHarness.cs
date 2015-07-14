@@ -2,8 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
+using Neo4jClient.Execution;
+using Neo4jClient.Transactions;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -12,19 +17,36 @@ namespace Neo4jClient.Test
     public class RestTestHarness : IEnumerable, IDisposable
     {
         readonly IDictionary<MockRequest, MockResponse> recordedResponses = new Dictionary<MockRequest, MockResponse>();
+        readonly List<MockRequest> requestsThatShouldNotBeProcessed = new List<MockRequest>();
         readonly IList<MockRequest> processedRequests = new List<MockRequest>();
         readonly IList<string> unservicedRequests = new List<string>();
         public readonly string BaseUri = "http://foo/db/data";
+        private readonly bool assertConstraintsAreMet;
+
+        public RestTestHarness() : this(true)
+        {
+        }
+
+        public RestTestHarness(bool assertConstraintsAreMet)
+        {
+            this.assertConstraintsAreMet = assertConstraintsAreMet;
+        }
 
         public void Add(MockRequest request, MockResponse response)
         {
             recordedResponses.Add(request, response);
         }
 
-        public GraphClient CreateGraphClient()
+        public RestTestHarness ShouldNotBeCalled(params MockRequest[] requests)
+        {
+            requestsThatShouldNotBeProcessed.AddRange(requests);
+            return this;
+        }
+
+        public GraphClient CreateGraphClient(bool neo4j2)
         {
             if (!recordedResponses.Keys.Any(r => r.Resource == "" || r.Resource == "/"))
-                Add(MockRequest.Get(""), MockResponse.NeoRoot());
+                Add(MockRequest.Get(""), neo4j2 ? MockResponse.NeoRoot20() : MockResponse.NeoRoot());
 
             var httpClient = GenerateHttpClient(BaseUri);
 
@@ -32,9 +54,16 @@ namespace Neo4jClient.Test
             return graphClient;
         }
 
+        public ITransactionalGraphClient CreateAndConnectTransactionalGraphClient()
+        {
+            var graphClient = CreateGraphClient(true);
+            graphClient.Connect();
+            return graphClient;
+        }
+
         public IRawGraphClient CreateAndConnectGraphClient()
         {
-            var graphClient = CreateGraphClient();
+            var graphClient = CreateGraphClient(false);
             graphClient.Connect();
             return graphClient;
         }
@@ -44,16 +73,28 @@ namespace Neo4jClient.Test
             throw new NotSupportedException("This is just here to support dictionary style collection initializers for this type. Nothing more than syntactic sugar. Do not try and enumerate this type.");
         }
 
-        public void AssertAllRequestsWereReceived()
+        public void AssertRequestConstraintsAreMet()
         {
             if (unservicedRequests.Any())
                 Assert.Fail(string.Join("\r\n\r\n", unservicedRequests.ToArray()));
 
             var resourcesThatWereNeverRequested = recordedResponses
                 .Select(r => r.Key)
-                .Where(r => !processedRequests.Contains(r))
+                .Where(r => !(processedRequests.Contains(r) || requestsThatShouldNotBeProcessed.Contains(r)))
                 .Select(r => string.Format("{0} {1}", r.Method, r.Resource))
                 .ToArray();
+
+            var processedResourcesThatShouldntHaveBeenRequested = requestsThatShouldNotBeProcessed
+                .Where(r => processedRequests.Contains(r))
+                .Select(r => string.Format("{0} {1}", r.Method, r.Resource))
+                .ToArray();
+
+            if (processedResourcesThatShouldntHaveBeenRequested.Any())
+            {
+                Assert.Fail(
+                    "The test should not have made REST requests for the following resources: {0}",
+                    string.Join(", ", processedResourcesThatShouldntHaveBeenRequested));
+            }
 
             if (!resourcesThatWereNeverRequested.Any())
                 return;
@@ -80,7 +121,7 @@ namespace Neo4jClient.Test
             return httpClient;
         }
 
-        HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
+        protected virtual HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
         {
             // User info isn't transmitted over the wire, so we need to strip it here too
             var requestUri = request.RequestUri;
@@ -130,12 +171,20 @@ namespace Neo4jClient.Test
 
             var response = result.Value;
 
-            return new HttpResponseMessage
+            var httpResponse = new HttpResponseMessage
             {
                 StatusCode = response.StatusCode,
                 ReasonPhrase = response.StatusDescription,
                 Content = string.IsNullOrEmpty(response.Content) ? null : new StringContent(response.Content, null, response.ContentType)
             };
+
+            if (string.IsNullOrEmpty(response.Location))
+            {
+                return httpResponse;
+            }
+
+            httpResponse.Headers.Location = new Uri(response.Location);
+            return httpResponse;
         }
 
         static bool IsJsonEquivalent(string lhs, string rhs)
@@ -162,7 +211,10 @@ namespace Neo4jClient.Test
 
         public void Dispose()
         {
-            AssertAllRequestsWereReceived();
+            if (assertConstraintsAreMet)
+            {
+                AssertRequestConstraintsAreMet();
+            }
         }
     }
 }

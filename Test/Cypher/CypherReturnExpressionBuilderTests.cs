@@ -203,33 +203,6 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("collect(a) AS Foo", returnExpression.Text);
         }
 
-        [Test]
-        [Description("https://bitbucket.org/Readify/neo4jclient/issue/118/collectas-causes-argumentnullexception")]
-        public void PreventDoubleNodeWrappedCollectAs()
-        {
-            Expression<Func<ICypherResultItem, object>> expression =
-                a => new
-                {
-                    Foo = a.CollectAs<Node<Foo>>()
-                };
-
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
-            StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsShouldNotBeNodeTExceptionMessage, ex.Message);
-        }
-
-        [Test]
-        [Description("https://bitbucket.org/Readify/neo4jclient/issue/118/collectas-causes-argumentnullexception")]
-        public void PreventDoubleNodeWrappedCollectAsDistinct()
-        {
-            Expression<Func<ICypherResultItem, object>> expression =
-                a => new
-                {
-                    Foo = a.CollectAsDistinct<Node<Foo>>()
-                };
-
-            var ex = Assert.Throws<ArgumentException>(() => CypherReturnExpressionBuilder.BuildText(expression, CypherCapabilities.Default, GraphClient.DefaultJsonConverters));
-            StringAssert.StartsWith(CypherReturnExpressionBuilder.CollectAsDistinctShouldNotBeNodeTExceptionMessage, ex.Message);
-        }
 
         [Test]
         public void ReturnCollectedDistinctNodesInColumn()
@@ -443,7 +416,6 @@ namespace Neo4jClient.Test.Cypher
                 {
                     Foo = a
                         .CollectAs<Foo>()
-                        .Select(f => f.Data)
                         .ToList()
                 };
 
