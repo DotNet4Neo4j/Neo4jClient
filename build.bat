@@ -12,11 +12,11 @@ if not "%PackageVersion%" == "" (
 set nunit="tools\nunit\nunit-console.exe"
 
 REM Build
-%WINDIR%\Microsoft.NET\Framework\v4.0.30319\msbuild Neo4jClient.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false
+%WINDIR%\Microsoft.NET\Framework\v4.0.30319\msbuild Neo4jClient.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false /p:nowarn=1574,0618
 if not "%errorlevel%"=="0" goto failure
 
 REM Unit tests
-%nunit% Test\bin\%config%\Neo4jClient.Test.dll
+%nunit% Test\Test.csproj
 if not "%errorlevel%"=="0" goto failure
 
 REM Package
