@@ -1058,15 +1058,7 @@ namespace Neo4jClient.Test.Cypher
 // ReSharper restore InconsistentNaming
                 .Query;
 
-            Assert.AreEqual(@"START me=node:`node_auto_index`(name = {p0})
-MATCH me-[r?:STATUS]-secondlatestupdate
-DELETE r
-WITH me, secondlatestupdate
-CREATE me-[:STATUS]->(latest_update {update})
-WITH latest_update,secondlatestupdate
-CREATE latest_update-[:NEXT]-secondlatestupdate
-WHERE secondlatestupdate <> null
-RETURN latest_update.text AS new_status", query.QueryText);
+            Assert.AreEqual(string.Format("START me=node:`node_auto_index`(name = {{p0}}){0}MATCH me-[r?:STATUS]-secondlatestupdate{0}DELETE r{0}WITH me, secondlatestupdate{0}CREATE me-[:STATUS]->(latest_update {{update}}){0}WITH latest_update,secondlatestupdate{0}CREATE latest_update-[:NEXT]-secondlatestupdate{0}WHERE secondlatestupdate <> null{0}RETURN latest_update.text AS new_status", Environment.NewLine), query.QueryText);
             Assert.AreEqual("Bob", query.QueryParameters["p0"]);
             Assert.AreEqual(update, query.QueryParameters["update"]);
         }
