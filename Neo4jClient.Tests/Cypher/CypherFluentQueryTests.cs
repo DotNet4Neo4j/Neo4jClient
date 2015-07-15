@@ -384,10 +384,7 @@ namespace Neo4jClient.Test.Cypher
                 })
                 .Query;
 
-            const string expected = @"
-START a=node({p0})
-MATCH (a)-->(b)
-RETURN b.Age AS SomeAge, b.Name AS SomeName";
+            string expected = string.Format("START a=node({{p0}}){0}MATCH (a)-->(b){0}RETURN b.Age AS SomeAge, b.Name AS SomeName", Environment.NewLine);
 
             Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
@@ -408,10 +405,7 @@ RETURN b.Age AS SomeAge, b.Name AS SomeName";
                 })
                 .Query;
 
-            const string expected = @"
-START a=node({p0})
-MATCH (a)-->(b)
-RETURN b.Age AS Age, b.Name AS Name";
+            string expected = string.Format("START a=node({{p0}}){0}MATCH (a)-->(b){0}RETURN b.Age AS Age, b.Name AS Name", Environment.NewLine);
 
             Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
@@ -432,10 +426,7 @@ RETURN b.Age AS Age, b.Name AS Name";
                 })
                 .Query;
 
-            const string expected = @"
-START a=node({p0})
-MATCH (a)-->(b)-->(c)
-RETURN b.Age AS Age, c.Name AS Name";
+            string expected = "START a=node({p0})" + Environment.NewLine + "MATCH (a)-->(b)-->(c)" + Environment.NewLine + "RETURN b.Age AS Age, c.Name AS Name";
 
             Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
@@ -455,10 +446,7 @@ RETURN b.Age AS Age, c.Name AS Name";
                 })
                 .Query;
 
-            const string expected = @"
-START a=node({p0})
-MATCH (a)-->(b)
-RETURN b AS NodeB";
+            string expected = "START a=node({p0})" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN b AS NodeB";
 
             Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
@@ -478,10 +466,7 @@ RETURN b AS NodeB";
                 })
                 .Query;
 
-            const string expected = @"
-START a=node({p0})
-MATCH (a)-->(b)
-RETURN b AS NodeB";
+            string expected = string.Format("START a=node({{p0}}){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
 
             Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);
@@ -501,10 +486,7 @@ RETURN b AS NodeB";
                 })
                 .Query;
 
-            const string expected = @"
-START a=node({p0})
-MATCH (a)-->(b)
-RETURN b AS NodeB";
+            string expected = string.Format("START a=node({{p0}}){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
 
             Assert.AreEqual(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.AreEqual(1, query.QueryParameters["p0"]);

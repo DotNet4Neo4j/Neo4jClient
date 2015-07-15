@@ -3,6 +3,8 @@ using Neo4jClient.Cypher;
 
 namespace Neo4jClient.Test.Cypher
 {
+    using System;
+
     [TestFixture]
     public class QueryWriterTests
     {
@@ -116,8 +118,7 @@ namespace Neo4jClient.Test.Cypher
             writer.AppendClause("{0} qoo {1} zoo", "abc", "xyz");
 
             var query = writer.ToCypherQuery();
-            const string expectedText = @"foo {p0} bar {p1}
-{p2} qoo {p3} zoo";
+            string expectedText = string.Format("foo {{p0}} bar {{p1}}{0}{{p2}} qoo {{p3}} zoo", Environment.NewLine);
             Assert.AreEqual(expectedText, query.QueryText);
             Assert.AreEqual(4, query.QueryParameters.Count);
             Assert.AreEqual("baz", query.QueryParameters["p0"]);
