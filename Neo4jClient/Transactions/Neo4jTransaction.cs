@@ -201,8 +201,8 @@ namespace Neo4jClient.Transactions
                 commitUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient =  new HttpClientWrapper(),
-                    JsonConverters = GraphClient.DefaultJsonConverters,
+                    HttpClient =  GraphClient.StaticExecutionConfiguration.HttpClient,
+                    JsonConverters = GraphClient.StaticExecutionConfiguration.JsonConverters,
                     UseJsonStreaming =  transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },
@@ -224,8 +224,8 @@ namespace Neo4jClient.Transactions
                     rollbackUri,
                     new ExecutionConfiguration
                     {
-                        HttpClient = new HttpClientWrapper(),
-                        JsonConverters = GraphClient.DefaultJsonConverters,
+                        HttpClient = GraphClient.StaticExecutionConfiguration.HttpClient,
+                        JsonConverters = GraphClient.StaticExecutionConfiguration.JsonConverters,
                         UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                         UserAgent = transactionExecutionEnvironment.UserAgent
                     });
@@ -249,8 +249,8 @@ namespace Neo4jClient.Transactions
                 keepAliveUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient = new HttpClientWrapper(),
-                    JsonConverters = GraphClient.DefaultJsonConverters,
+                    HttpClient = GraphClient.StaticExecutionConfiguration.HttpClient,
+                    JsonConverters = GraphClient.StaticExecutionConfiguration.JsonConverters,
                     UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },

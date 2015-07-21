@@ -39,15 +39,23 @@ namespace Neo4jClient
 
         public static readonly DefaultContractResolver DefaultJsonContractResolver  = new DefaultContractResolver();
 
+        internal static ExecutionConfiguration StaticExecutionConfiguration { get; private set; }
 
         private ITransactionManager transactionManager;
         private IExecutionPolicyFactory policyFactory;
-        public ExecutionConfiguration ExecutionConfiguration { get; private set; }
+
+        public ExecutionConfiguration ExecutionConfiguration
+        {
+            get { return StaticExecutionConfiguration; }
+            private set { StaticExecutionConfiguration = value; }
+        }
+
         internal readonly Uri RootUri;
         internal RootApiResponse RootApiResponse;
         private RootNode rootNode;
 
         private CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
+        
 
         public bool UseJsonStreamingIfAvailable { get; set; }
 
