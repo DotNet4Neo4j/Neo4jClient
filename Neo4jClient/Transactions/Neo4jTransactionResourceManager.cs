@@ -6,6 +6,8 @@ using System.Transactions;
 
 namespace Neo4jClient.Transactions
 {
+    using Neo4jClient.Execution;
+
     /// <summary>
     /// When <c>TransactionPromotableSinglePhaseNotification</c> fails to register as PSPE, then this class will
     /// be registered, and all the necessary work will be done in here
@@ -78,6 +80,8 @@ namespace Neo4jClient.Transactions
 
     internal class Neo4jTransactionResourceManager : MarshalByRefObject, ITransactionResourceManager
     {
+        internal static ExecutionConfiguration ExecutionConfiguration { get; set; }
+
         private readonly IDictionary<int, CommittableTransaction> _transactions = new Dictionary<int, CommittableTransaction>();
 
         public void Enlist(ITransactionExecutionEnvironment transactionExecutionEnvironment, byte[] transactionToken)

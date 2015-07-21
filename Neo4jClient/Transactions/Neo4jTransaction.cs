@@ -201,8 +201,8 @@ namespace Neo4jClient.Transactions
                 commitUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient =  GraphClient.StaticExecutionConfiguration.HttpClient,
-                    JsonConverters = GraphClient.StaticExecutionConfiguration.JsonConverters,
+                    HttpClient =  Neo4jTransactionResourceManager.ExecutionConfiguration.HttpClient,
+                    JsonConverters = Neo4jTransactionResourceManager.ExecutionConfiguration.JsonConverters,
                     UseJsonStreaming =  transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },
@@ -224,8 +224,8 @@ namespace Neo4jClient.Transactions
                     rollbackUri,
                     new ExecutionConfiguration
                     {
-                        HttpClient = GraphClient.StaticExecutionConfiguration.HttpClient,
-                        JsonConverters = GraphClient.StaticExecutionConfiguration.JsonConverters,
+                        HttpClient = Neo4jTransactionResourceManager.ExecutionConfiguration.HttpClient,
+                        JsonConverters = Neo4jTransactionResourceManager.ExecutionConfiguration.JsonConverters,
                         UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                         UserAgent = transactionExecutionEnvironment.UserAgent
                     });
@@ -249,8 +249,8 @@ namespace Neo4jClient.Transactions
                 keepAliveUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient = GraphClient.StaticExecutionConfiguration.HttpClient,
-                    JsonConverters = GraphClient.StaticExecutionConfiguration.JsonConverters,
+                    HttpClient = Neo4jTransactionResourceManager.ExecutionConfiguration.HttpClient,
+                    JsonConverters = Neo4jTransactionResourceManager.ExecutionConfiguration.JsonConverters,
                     UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },

@@ -8,8 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
@@ -39,15 +37,18 @@ namespace Neo4jClient
 
         public static readonly DefaultContractResolver DefaultJsonContractResolver  = new DefaultContractResolver();
 
-        internal static ExecutionConfiguration StaticExecutionConfiguration { get; private set; }
-
         private ITransactionManager transactionManager;
-        private IExecutionPolicyFactory policyFactory;
+        private readonly IExecutionPolicyFactory policyFactory;
 
+        private ExecutionConfiguration executionConfiguration;
         public ExecutionConfiguration ExecutionConfiguration
         {
-            get { return StaticExecutionConfiguration; }
-            private set { StaticExecutionConfiguration = value; }
+            get { return executionConfiguration; }
+            private set
+            {
+                executionConfiguration = value;
+                Neo4jTransactionResourceManager.ExecutionConfiguration = value;
+            }
         }
 
         internal readonly Uri RootUri;

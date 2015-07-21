@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Neo4jClient.Test</RootNamespace>
-    <AssemblyName>Neo4jClient.Test</AssemblyName>
+    <AssemblyName>Neo4jClient.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -166,6 +166,7 @@
     <Compile Include="Serialization\CustomJsonSerializerTests.cs" />
     <Compile Include="CultureInfoSetupFixture.cs" />
     <Compile Include="Serialization\UserSuppliedSerializationTests.cs" />
+    <Compile Include="Transactions\Neo4jTransactionResourceManagerTests.cs" />
     <Compile Include="Transactions\QueriesInTransactionTests.cs" />
     <Compile Include="Transactions\RestCallScenarioTests.cs" />
     <Compile Include="Transactions\TransactionManagementTests.cs" />
