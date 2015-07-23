@@ -16,11 +16,17 @@ namespace Neo4jClient.Transactions
         public int TransactionId { get; set; }
         public bool UseJsonStreaming { get; set; }
         public string UserAgent { get; set; }
+        public IEnumerable<JsonConverter> JsonConverters { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
 
         public TransactionExecutionEnvironment(ExecutionConfiguration executionConfiguration)
         {
             UserAgent = executionConfiguration.UserAgent;
             UseJsonStreaming = executionConfiguration.UseJsonStreaming;
+            Username = executionConfiguration.Username;
+            Password = executionConfiguration.Password;
+            JsonConverters = executionConfiguration.JsonConverters;
         }
 
     }
@@ -31,5 +37,8 @@ namespace Neo4jClient.Transactions
         int TransactionId { get; }
         bool UseJsonStreaming { get; set; }
         string UserAgent { get; set; }
+        IEnumerable<JsonConverter> JsonConverters { get; set; }
+        string Username { get; set; }
+        string Password { get; set; }
     }
 }

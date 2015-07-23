@@ -40,16 +40,7 @@ namespace Neo4jClient
         private ITransactionManager transactionManager;
         private readonly IExecutionPolicyFactory policyFactory;
 
-        private ExecutionConfiguration executionConfiguration;
-        public ExecutionConfiguration ExecutionConfiguration
-        {
-            get { return executionConfiguration; }
-            private set
-            {
-                executionConfiguration = value;
-                Neo4jTransactionResourceManager.ExecutionConfiguration = value;
-            }
-        }
+        public ExecutionConfiguration ExecutionConfiguration { get; private set; }
 
         internal readonly Uri RootUri;
         internal RootApiResponse RootApiResponse;
@@ -60,15 +51,15 @@ namespace Neo4jClient
 
         public bool UseJsonStreamingIfAvailable { get; set; }
 
-        public GraphClient(Uri rootUri)
-            : this(rootUri, new HttpClientWrapper())
+        public GraphClient(Uri rootUri, string username = null, string password = null)
+            : this(rootUri, new HttpClientWrapper(username, password))
         {
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.UseNagleAlgorithm = false;
         }
 
-        public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm)
-            : this(rootUri, new HttpClientWrapper())
+        public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm, string username = null, string password = null)
+            : this(rootUri, new HttpClientWrapper(username, password))
         {
             ServicePointManager.Expect100Continue = expect100Continue;
             ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
@@ -79,13 +70,15 @@ namespace Neo4jClient
             RootUri = rootUri;
             JsonConverters = new List<JsonConverter>();
             JsonConverters.AddRange(DefaultJsonConverters);
-			JsonContractResolver = DefaultJsonContractResolver;
+            JsonContractResolver = DefaultJsonContractResolver;
             ExecutionConfiguration = new ExecutionConfiguration
             {
                 HttpClient = httpClient,
                 UserAgent = string.Format("Neo4jClient/{0}", GetType().Assembly.GetName().Version),
                 UseJsonStreaming = true,
-                JsonConverters = JsonConverters
+                JsonConverters = JsonConverters,
+                Username = httpClient == null ? null : httpClient.Username,
+                Password = httpClient == null ? null : httpClient.Password
             };
             UseJsonStreamingIfAvailable = true;
             policyFactory = new ExecutionPolicyFactory(this);
@@ -293,7 +286,7 @@ namespace Neo4jClient
 
             var batchResponse = ExecuteBatch(batchSteps, policy);
             var createResponse = batchResponse[createNodeStep];
-			EnsureNodeWasCreated(createResponse);
+            EnsureNodeWasCreated(createResponse);
             var nodeId = long.Parse(GetLastPathSegment(createResponse.Location));
             var nodeReference = new NodeReference<TNode>(nodeId, this);
 
@@ -369,7 +362,7 @@ namespace Neo4jClient
                     targetNode.Id))
                 )
                 .Execute()
-				//.ReadAsJson<RelationshipApiResponse<object>>(JsonConverters,JsonContractResolver)
+                //.ReadAsJson<RelationshipApiResponse<object>>(JsonConverters,JsonContractResolver)
                 .ToRelationshipReference(this);
         }
 
@@ -1466,8 +1459,8 @@ namespace Neo4jClient
                     throw new ApplicationException(string.Format("Response from Neo4J: {0}", createResponse.Body));
 
                 throw new NeoException(exceptionResponse);
-			}
-		}
+            }
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -1483,9 +1476,9 @@ namespace Neo4jClient
             GC.SuppressFinalize(this);
         }
 
-		public DefaultContractResolver JsonContractResolver { get; set; }
+        public DefaultContractResolver JsonContractResolver { get; set; }
 
-		public ITransactionManager TransactionManager
+        public ITransactionManager TransactionManager
         {
             get { return transactionManager; }
         }

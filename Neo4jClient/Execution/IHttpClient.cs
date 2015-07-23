@@ -6,5 +6,7 @@ namespace Neo4jClient.Execution
     public interface IHttpClient
     {
         Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
+        string Username { get; }
+        string Password { get; }
     }
 }

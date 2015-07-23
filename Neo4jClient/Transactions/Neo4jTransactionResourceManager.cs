@@ -80,8 +80,6 @@ namespace Neo4jClient.Transactions
 
     internal class Neo4jTransactionResourceManager : MarshalByRefObject, ITransactionResourceManager
     {
-        internal static ExecutionConfiguration ExecutionConfiguration { get; set; }
-
         private readonly IDictionary<int, CommittableTransaction> _transactions = new Dictionary<int, CommittableTransaction>();
 
         public void Enlist(ITransactionExecutionEnvironment transactionExecutionEnvironment, byte[] transactionToken)

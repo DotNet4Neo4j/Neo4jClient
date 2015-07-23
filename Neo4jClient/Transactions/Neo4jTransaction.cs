@@ -191,7 +191,6 @@ namespace Neo4jClient.Transactions
         /// <summary>
         /// Commits a transaction given the ID
         /// </summary>
-        /// <param name="transactionId">The transaction ID</param>
         /// <param name="transactionExecutionEnvironment">The transaction execution environment</param>
         internal static void DoCommit(ITransactionExecutionEnvironment transactionExecutionEnvironment)
         {
@@ -201,8 +200,8 @@ namespace Neo4jClient.Transactions
                 commitUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient =  Neo4jTransactionResourceManager.ExecutionConfiguration.HttpClient,
-                    JsonConverters = Neo4jTransactionResourceManager.ExecutionConfiguration.JsonConverters,
+                    HttpClient =  new HttpClientWrapper(transactionExecutionEnvironment.Username, transactionExecutionEnvironment.Password),
+                    JsonConverters = GraphClient.DefaultJsonConverters,
                     UseJsonStreaming =  transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },
@@ -212,7 +211,6 @@ namespace Neo4jClient.Transactions
         /// <summary>
         /// Rolls back a transaction given the ID
         /// </summary>
-        /// <param name="transactionId">The transaction ID</param>
         /// <param name="transactionExecutionEnvironment">The transaction execution environment</param>
         internal static void DoRollback(ITransactionExecutionEnvironment transactionExecutionEnvironment)
         {
@@ -224,8 +222,8 @@ namespace Neo4jClient.Transactions
                     rollbackUri,
                     new ExecutionConfiguration
                     {
-                        HttpClient = Neo4jTransactionResourceManager.ExecutionConfiguration.HttpClient,
-                        JsonConverters = Neo4jTransactionResourceManager.ExecutionConfiguration.JsonConverters,
+                        HttpClient = new HttpClientWrapper(transactionExecutionEnvironment.Username, transactionExecutionEnvironment.Password),
+                        JsonConverters = GraphClient.DefaultJsonConverters,
                         UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                         UserAgent = transactionExecutionEnvironment.UserAgent
                     });
@@ -239,7 +237,6 @@ namespace Neo4jClient.Transactions
         /// <summary>
         /// Keeps alive a transaction given the ID
         /// </summary>
-        /// <param name="transactionId">The transaction ID</param>
         /// <param name="transactionExecutionEnvironment">The transaction execution environment</param>
         internal static void DoKeepAlive(ITransactionExecutionEnvironment transactionExecutionEnvironment)
         {
@@ -249,8 +246,8 @@ namespace Neo4jClient.Transactions
                 keepAliveUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient = Neo4jTransactionResourceManager.ExecutionConfiguration.HttpClient,
-                    JsonConverters = Neo4jTransactionResourceManager.ExecutionConfiguration.JsonConverters,
+                    HttpClient = new HttpClientWrapper(transactionExecutionEnvironment.Username, transactionExecutionEnvironment.Password),
+                    JsonConverters = GraphClient.DefaultJsonConverters,
                     UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },

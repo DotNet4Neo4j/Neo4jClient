@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Neo4jClient.Cypher;
@@ -159,7 +160,7 @@ namespace Neo4jClient.Test.GraphClientTests
             }
             // ReSharper restore EmptyGeneralCatchClause
 
-            var httpCall = httpClient.ReceivedCalls().First();
+            var httpCall = httpClient.ReceivedCalls().Last();
             var httpRequest = (HttpRequestMessage) httpCall.GetArguments()[0];
 
             StringAssert.AreEqualIgnoringCase("Basic", httpRequest.Headers.Authorization.Scheme);
@@ -230,6 +231,19 @@ namespace Neo4jClient.Test.GraphClientTests
             var graphClient = new GraphClient(new Uri("http://localhost"));
             var userAgent = graphClient.ExecutionConfiguration.UserAgent;
             Assert.IsTrue(Regex.IsMatch(userAgent, @"Neo4jClient/\d+\.\d+\.\d+\.\d+"), "User agent should be in format Neo4jClient/1.2.3.4");
+        }
+
+        [Test]
+        public void ShouldFormatAuthorisationHeaderCorrectly()
+        {
+            const string username = "user";
+            const string password = "password";
+            var expectedHeader = Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", username, password)));
+
+            var graphClient = new GraphClient(new Uri("http://localhost"), username, password);
+            var httpClient = (HttpClientWrapper) graphClient.ExecutionConfiguration.HttpClient;
+            
+            Assert.AreEqual(expectedHeader, httpClient.AuthenticationHeaderValue.Parameter);
         }
     }
 }
