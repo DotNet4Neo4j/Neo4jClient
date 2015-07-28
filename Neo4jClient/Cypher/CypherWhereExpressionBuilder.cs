@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Neo4jClient.Cypher
@@ -17,8 +18,9 @@ namespace Neo4jClient.Cypher
                 expression.Body.NodeType == ExpressionType.MemberAccess)
                 throw new NotSupportedException("Member access expressions, like Where(f => f.Foo), are not supported because these become ambiguous between C# and Cypher based on how Neo4j handles null values. Use a comparison instead, like Where(f => f.Foo == true).");
 
-            var myVisitor = new CypherWhereExpressionVisitor(createParameterCallback, capabilities,camelCaseProperties);
-            myVisitor.Visit(expression);
+            var myVisitor = new CypherWhereExpressionVisitor(createParameterCallback, capabilities, camelCaseProperties);
+            Expression newExpression = new VbCompareReplacer().Visit(expression);
+            myVisitor.Visit(newExpression);
             return myVisitor.TextOutput.ToString();
         }
     }

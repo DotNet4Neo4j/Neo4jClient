@@ -38,8 +38,14 @@ namespace Neo4jClient.Cypher
 
             switch (node.NodeType)
             {
+                case ExpressionType.And:
+                    TextOutput.Append(" AND ");
+                    break;
                 case ExpressionType.AndAlso:
                     TextOutput.Append(" AND ");
+                    break;
+                case ExpressionType.Or:
+                    TextOutput.Append(" OR ");
                     break;
                 case ExpressionType.OrElse:
                     TextOutput.Append(" OR ");
