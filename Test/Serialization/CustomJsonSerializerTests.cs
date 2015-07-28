@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using NUnit.Framework;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
@@ -50,7 +51,7 @@ namespace Neo4jClient.Test.Serialization
         {
             //Arrange
             var serializer = new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
-            var model = new DateModel
+            var model = new DateOffsetModel
                 {
                     DateTime = DateTimeOffset.Parse("2012-08-31T00:11:00.3642578+10:00"),
                     DateTimeNullable = DateTimeOffset.Parse("2012-08-31T00:11:00.3642578+10:00")
@@ -62,6 +63,28 @@ namespace Neo4jClient.Test.Serialization
             //Assert
             const string expected =
                 "{\r\n  \"DateTime\": \"2012-08-31T00:11:00.3642578+10:00\",\r\n  \"DateTimeNullable\": \"2012-08-31T00:11:00.3642578+10:00\"\r\n}";
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        [TestCase("2012-08-31T00:11:00.3642578")]
+        [TestCase("2012-08-31T00:11:00Z")]
+        public void ShouldSerializeDateTimeInCorrectStringFormat(string dateTimeStr)
+        {
+            //Arrange
+            var serializer = new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters };
+            var model = new DateModel
+            {
+                DateTime = DateTime.Parse(dateTimeStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal),
+                DateTimeNullable = DateTime.Parse(dateTimeStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal)
+            };
+
+            //Act
+            var actual = serializer.Serialize(model);
+
+            //Assert
+            var expected =
+                "{\r\n  \"DateTime\": \"" + dateTimeStr + "\",\r\n  \"DateTimeNullable\": \"" + dateTimeStr + "\"\r\n}";
             Assert.AreEqual(expected, actual);
         }
 
@@ -153,10 +176,16 @@ namespace Neo4jClient.Test.Serialization
             public TimeSpan Foo { get; set; }
         }
 
-        public class DateModel
+        public class DateOffsetModel
         {
             public DateTimeOffset DateTime { get; set; }
             public DateTimeOffset? DateTimeNullable { get; set; }
+        }
+
+        public class DateModel
+        {
+            public DateTime DateTime { get; set; }
+            public DateTime? DateTimeNullable { get; set; }
         }
 
         public enum Gender{Male, Female, Unknown}
