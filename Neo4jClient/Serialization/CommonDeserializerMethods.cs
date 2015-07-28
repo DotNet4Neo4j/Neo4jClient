@@ -55,6 +55,39 @@ namespace Neo4jClient.Serialization
             return reader.ReadAsDateTimeOffset();
         }
 
+        public static DateTime? ParseDateTime(JToken value)
+        {
+            var jValue = value as JValue;
+            if (jValue != null)
+            {
+                if (jValue.Value == null)
+                    return null;
+
+                if (jValue.Value is DateTime)
+                    return jValue.Value<DateTime>();
+            }
+
+            var rawValue = value.AsString();
+
+            if (string.IsNullOrWhiteSpace(rawValue))
+                return null;
+
+            rawValue = rawValue.Replace("NeoDate", "Date");
+
+            if (!DateRegex.IsMatch(rawValue))
+            {
+                DateTime parsed;
+                if (!DateTime.TryParse(rawValue, out parsed))
+                    return null;
+            }
+
+            var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
+            var reader = new JsonTextReader(new StringReader(text));
+            reader.Read(); // JsonToken.StartObject
+            reader.Read(); // JsonToken.PropertyName
+            return reader.ReadAsDateTime();
+        }
+
         public static object CoerceValue(DeserializationContext context, PropertyInfo propertyInfo, JToken value, IEnumerable<TypeMapping> typeMappings, int nestingLevel)
         {
             if (value == null || value.Type == JTokenType.Null)
@@ -106,7 +139,7 @@ namespace Neo4jClient.Serialization
 
             if (propertyType == typeof(DateTime))
             {
-                throw new NotSupportedException("DateTime values are not supported. Use DateTimeOffset instead.");
+                return ParseDateTime(value);
             }
 
             if (propertyType == typeof(DateTimeOffset))

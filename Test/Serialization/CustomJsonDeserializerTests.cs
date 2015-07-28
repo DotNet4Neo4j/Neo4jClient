@@ -25,6 +25,8 @@ namespace Neo4jClient.Test.Serialization
         [TestCase("/Date(1315271562384+1000)/", "2011-09-06T11:12:42.3840000+10:00")]
         [TestCase("/Date(-2187290565386+0000)/", "1900-09-09T03:17:14.6140000+00:00")]
         [TestCase("2011-09-06T01:12:42+10:00", "2011-09-06T01:12:42.0000000+10:00")]
+        [TestCase("2011-09-06T01:12:42+09:00", "2011-09-06T01:12:42.0000000+09:00")]
+        [TestCase("2011-09-06T01:12:42-07:00", "2011-09-06T01:12:42.0000000-07:00")]
         [TestCase("2011-09-06T01:12:42+00:00", "2011-09-06T01:12:42.0000000+00:00")]
         [TestCase("2012-08-31T10:11:00.3642578+10:00", "2012-08-31T10:11:00.3642578+10:00")]
         [TestCase("2012-08-31T00:11:00.3642578+00:00", "2012-08-31T00:11:00.3642578+00:00")]
@@ -50,6 +52,43 @@ namespace Neo4jClient.Test.Serialization
                 else
                 {
                     Assert.IsNotNull(result.Foo);
+                    Assert.AreEqual(expectedResult, result.Foo.Value.ToString("o", CultureInfo.InvariantCulture));
+                }
+            }
+        }
+
+        [Test]
+        [TestCase("", null, DateTimeKind.Utc)]
+        [TestCase("rekjre", null, DateTimeKind.Utc)]
+        [TestCase("/Date(abcs)/", null, DateTimeKind.Utc)]
+        [TestCase("/Date(1315271562384)/", "2011-09-06T01:12:42.3840000Z", DateTimeKind.Utc)]
+        [TestCase("/Date(-2187290565386)/", "1900-09-09T03:17:14.6140000Z", DateTimeKind.Utc)]
+        [TestCase("2015-07-27T22:30:35Z", "2015-07-27T22:30:35.0000000Z", DateTimeKind.Utc)]
+        [TestCase("2011-09-06T01:12:42", "2011-09-06T01:12:42.0000000", DateTimeKind.Unspecified)]
+        [TestCase("2012-08-31T10:11:00.3642578", "2012-08-31T10:11:00.3642578", DateTimeKind.Unspecified)]
+        [TestCase("2011/09/06 10:11:00", "2011-09-06T10:11:00.0000000", DateTimeKind.Unspecified)]
+        [TestCase("2011/09/06 10:11:00 AM", "2011-09-06T10:11:00.0000000", DateTimeKind.Unspecified)]
+        [TestCase("2011/09/06 12:11:00 PM", "2011-09-06T12:11:00.0000000", DateTimeKind.Unspecified)]
+        public void DeserializeShouldPreserveValuesUsingIso8601Format(string input, string expectedResult, DateTimeKind expectedKind)
+        {
+            var culturesToTest = new[] { "en-AU", "en-US" };
+
+            foreach (var cultureName in culturesToTest)
+            {
+                // Arrange
+                var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters, new CultureInfo(cultureName));
+                var content = string.Format("{{'Foo':'{0}'}}", input);
+
+                // Act
+                var result = deserializer.Deserialize<DateTimeModel>(content);
+
+                // Assert
+                if (expectedResult == null)
+                    Assert.IsNull(result.Foo);
+                else
+                {
+                    Assert.IsNotNull(result.Foo);
+                    Assert.AreEqual(expectedKind, result.Foo.Value.Kind);
                     Assert.AreEqual(expectedResult, result.Foo.Value.ToString("o", CultureInfo.InvariantCulture));
                 }
             }
@@ -95,6 +134,11 @@ namespace Neo4jClient.Test.Serialization
         public class DateTimeOffsetModel
         {
             public DateTimeOffset? Foo { get; set; }
+        }
+
+        public class DateTimeModel
+        {
+            public DateTime? Foo { get; set; }
         }
 
         public class TimeZoneModel
