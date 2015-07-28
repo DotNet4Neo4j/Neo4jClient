@@ -39,7 +39,7 @@ namespace Neo4jClient.Serialization
 
             var reader = new JsonTextReader(new StringReader(content))
             {
-                DateParseHandling = DateParseHandling.DateTimeOffset
+                DateParseHandling = DateParseHandling.None
             };
 
             var target = new T();
