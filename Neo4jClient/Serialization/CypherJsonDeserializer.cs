@@ -75,7 +75,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 
             var reader = new JsonTextReader(new StringReader(content))
             {
-                DateParseHandling = DateParseHandling.DateTimeOffset
+                DateParseHandling = DateParseHandling.None
             };
             var root = JToken.ReadFrom(reader).Root;
 
