@@ -57,16 +57,6 @@ namespace Neo4jClient.Serialization
 
         public static DateTime? ParseDateTime(JToken value)
         {
-            var jValue = value as JValue;
-            if (jValue != null)
-            {
-                if (jValue.Value == null)
-                    return null;
-
-                if (jValue.Value is DateTime)
-                    return jValue.Value<DateTime>();
-            }
-
             var rawValue = value.AsString();
 
             if (string.IsNullOrWhiteSpace(rawValue))
