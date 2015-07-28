@@ -240,6 +240,61 @@ namespace Neo4jClient
             });
         }
 
+        public virtual Task ConnectAsync()
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            return SendHttpRequestAsync(HttpGet(""), HttpStatusCode.OK).Then<HttpResponseMessage>(response =>
+            {
+                var result = response.Content.ReadAsJson<RootApiResponse>(JsonConverters, JsonContractResolver);
+
+                var rootUriWithoutUserInfo = RootUri;
+                if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
+                    rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) { UserName = "", Password = "" }.Uri;
+                var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+
+                RootApiResponse = result;
+                RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
+                RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
+                RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
+                RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
+                RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
+                RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
+
+                if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
+                {
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
+                        RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
+                }
+
+                if (RootApiResponse.Cypher != null)
+                {
+                    RootApiResponse.Cypher =
+                        RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
+                }
+
+                rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
+                    ? null
+                    : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
+
+                // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
+                jsonStreamingAvailable = RootApiResponse.Version >= new Version(1, 8);
+
+                if (RootApiResponse.Version < new Version(2, 0))
+                    cypherCapabilities = CypherCapabilities.Cypher19;
+
+                stopwatch.Stop();
+                OnOperationCompleted(new OperationCompletedEventArgs
+                {
+                    QueryText = "Connect",
+                    ResourcesReturned = 0,
+                    TimeTaken = stopwatch.Elapsed
+                });
+
+            }, runSynchronously: true).Finally(() => stopwatch.Stop(), runSynchronously: true);
+        }
+
         [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
         public virtual RootNode RootNode
         {
