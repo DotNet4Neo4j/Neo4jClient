@@ -69,6 +69,8 @@
     <Compile Include="ApiModels\Cypher\PathsResult.cs" />
     <Compile Include="ApiModels\FieldChange.cs" />
     <Compile Include="ApiModels\Gremlin\GremlinTableCapResponse.cs" />
+    <Compile Include="App_Packages\TaskHelpers.Sources.0.3\TaskHelpers.cs" />
+    <Compile Include="App_Packages\TaskHelpers.Sources.0.3\TaskHelpersExtensions.cs" />
     <Compile Include="Cypher\All.cs" />
     <Compile Include="Cypher\CypherCapabilities.cs" />
     <Compile Include="Cypher\CypherFluentQuery`With.cs" />
