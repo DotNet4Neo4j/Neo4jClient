@@ -149,7 +149,7 @@ namespace Neo4jClient
             return task.Result;
         }
 
-        Task<HttpResponseMessage> SendHttpRequestAsync(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        async Task<HttpResponseMessage> SendHttpRequestAsync(HttpRequestMessage request, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
         {
             if (UseJsonStreamingIfAvailable && jsonStreamingAvailable)
             {
@@ -167,14 +167,10 @@ namespace Neo4jClient
                 request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
             }
 
-            var baseTask = httpClient.SendAsync(request);
-            var continuationTask = baseTask.ContinueWith(requestTask =>
-            {
-                var response = requestTask.Result;
-                response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
-                return response;
-            });
-            return continuationTask;
+            var response = await httpClient.SendAsync(request).ConfigureAwait(false);
+            response.EnsureExpectedStatusCode(commandDescription, expectedStatusCodes);
+
+            return response;
         }
 
         T SendHttpRequestAndParseResultAs<T>(HttpRequestMessage request, params HttpStatusCode[] expectedStatusCodes) where T : new()
@@ -459,25 +455,20 @@ namespace Neo4jClient
             return task.Result;
         }
 
-        public virtual Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
+        public virtual async Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
         {
             CheckRoot();
 
             var nodeEndpoint = ResolveEndpoint(reference);
-            return
-                SendHttpRequestAsync(HttpGet(nodeEndpoint), HttpStatusCode.OK, HttpStatusCode.NotFound)
-                .ContinueWith(responseTask =>
-                {
-                    var response = responseTask.Result;
+            var response = await SendHttpRequestAsync(HttpGet(nodeEndpoint), HttpStatusCode.OK, HttpStatusCode.NotFound).ConfigureAwait(false);
 
-                    if (response.StatusCode == HttpStatusCode.NotFound)
-                        return (Node<TNode>)null;
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (Node<TNode>)null;
 
-                    return response
-                        .Content
-                        .ReadAsJson<NodeApiResponse<TNode>>(JsonConverters,JsonContractResolver)
-                        .ToNode(this);
-                });
+            return response
+                .Content
+                .ReadAsJson<NodeApiResponse<TNode>>(JsonConverters, JsonContractResolver)
+                .ToNode(this);
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
@@ -497,25 +488,20 @@ namespace Neo4jClient
             return task.Result;
         }
 
-        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
+        public virtual async Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
         {
             CheckRoot();
 
             var endpoint = ResolveEndpoint(reference);
-            return
-                SendHttpRequestAsync(HttpGet(endpoint), HttpStatusCode.OK, HttpStatusCode.NotFound)
-                .ContinueWith(responseTask =>
-                {
-                    var response = responseTask.Result;
+            var response = await SendHttpRequestAsync(HttpGet(endpoint), HttpStatusCode.OK, HttpStatusCode.NotFound).ConfigureAwait(false);
 
-                    if (response.StatusCode == HttpStatusCode.NotFound)
-                        return (RelationshipInstance<TData>)null;
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (RelationshipInstance<TData>)null;
 
-                    return response
-                        .Content
-                        .ReadAsJson<RelationshipApiResponse<TData>>(JsonConverters,JsonContractResolver)
-                        .ToRelationshipInstance(this);
-                });
+            return response
+                .Content
+                .ReadAsJson<RelationshipApiResponse<TData>>(JsonConverters, JsonContractResolver)
+                .ToRelationshipInstance(this);
         }
 
         public void Update<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
@@ -806,36 +792,32 @@ namespace Neo4jClient
             return task.Result;
         }
 
-        Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsAsync<TResult>(CypherQuery query)
+        async Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsAsync<TResult>(CypherQuery query)
         {
             CheckRoot();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            return
-                SendHttpRequestAsync(
-                    HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
-                    string.Format("The query was: {0}", query.QueryText),
-                    HttpStatusCode.OK)
-                .ContinueWith(responseTask =>
-                {
-                    var response = responseTask.Result;
-                    var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
-                    var results = deserializer
-                        .Deserialize(response.Content.ReadAsString())
-                        .ToList();
+            var response = await SendHttpRequestAsync(
+                HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
+                string.Format("The query was: {0}", query.QueryText),
+                HttpStatusCode.OK).ConfigureAwait(false);
 
-                    stopwatch.Stop();
-                    OnOperationCompleted(new OperationCompletedEventArgs
-                    {
-                        QueryText = query.DebugQueryText,
-                        ResourcesReturned = results.Count(),
-                        TimeTaken = stopwatch.Elapsed
-                    });
+            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode);
+            var results = deserializer
+                .Deserialize(response.Content.ReadAsString())
+                .ToList();
 
-                    return (IEnumerable<TResult>)results;
-                });
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.DebugQueryText,
+                ResourcesReturned = results.Count(),
+                TimeTaken = stopwatch.Elapsed
+            });
+
+            return (IEnumerable<TResult>)results;
         }
 
         void IRawGraphClient.ExecuteCypher(CypherQuery query)
@@ -859,31 +841,25 @@ namespace Neo4jClient
             });
         }
 
-        Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
+        async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
             CheckRoot();
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            return SendHttpRequestAsync(
+            await SendHttpRequestAsync(
                 HttpPostAsJson(RootApiResponse.Cypher, new CypherApiQuery(query)),
                 string.Format("The query was: {0}", query.QueryText),
-                HttpStatusCode.OK)
-                .ContinueWith(t =>
-                {
-                    // Rethrow any exception (instead of using TaskContinuationOptions.OnlyOnRanToCompletion, which for failures, returns a canceled task instead of a faulted task)
-                    var _ = t.Result;
-                        
-                    stopwatch.Stop();
-                    OnOperationCompleted(new OperationCompletedEventArgs
-                    {
-                        QueryText = query.DebugQueryText,
-                        ResourcesReturned = 0,
-                        TimeTaken = stopwatch.Elapsed
-                    });
-                })
-            ;
+                HttpStatusCode.OK).ConfigureAwait(false);
+
+            stopwatch.Stop();
+            OnOperationCompleted(new OperationCompletedEventArgs
+            {
+                QueryText = query.DebugQueryText,
+                ResourcesReturned = 0,
+                TimeTaken = stopwatch.Elapsed
+            });
         }
 
         [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
