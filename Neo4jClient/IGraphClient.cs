@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
+using Neo4jClient.Execution;
 using Neo4jClient.Gremlin;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -109,7 +112,7 @@ namespace Neo4jClient
         IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id);
         IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id);
 
-        [Obsolete("This method depends on Cypher, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management.")]
+        [Obsolete("This method depends on Gremlin, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management.")]
         void ShutdownServer();
 
         event OperationCompletedEventHandler OperationCompleted;
@@ -121,8 +124,27 @@ namespace Neo4jClient
 
         Version ServerVersion { get; }
 
-        List<JsonConverter> JsonConverters { get; }
+        Uri RootEndpoint { get; }
 
+        Uri BatchEndpoint { get; }
+
+        Uri CypherEndpoint { get; }
+
+        Uri GremlinEndpoint { get; }
+
+        Uri NodeIndexEndpoint { get; }
+
+        Uri RelationshipIndexEndpoint { get; }
+
+        ISerializer Serializer { get; }
+
+        ExecutionConfiguration ExecutionConfiguration { get; }
+
+        bool IsConnected { get; }
+
+        void Connect();
+
+        List<JsonConverter> JsonConverters { get; }
         DefaultContractResolver JsonContractResolver { get; set; }
     }
 }

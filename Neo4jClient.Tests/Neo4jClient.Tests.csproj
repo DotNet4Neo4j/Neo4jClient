@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2724A871-4B4F-4C83-8E0F-2439F69CADA2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Neo4jClient.Test</RootNamespace>
+    <AssemblyName>Neo4jClient.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NSubstitute, Version=1.8.2.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
+      <HintPath>..\packages\NSubstitute.1.8.2.0\lib\net40\NSubstitute.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
+    <Compile Include="ApiModels\RootApiResponseTests.cs" />
+    <Compile Include="Cypher\AggregateTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryForEachTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryDropTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryConstraintTest.cs" />
+    <Compile Include="Cypher\CypherFluentQueryParserVersionTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryMergeTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryMatchTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryRemoveTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryUnwindTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryUsingIndexTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
+    <Compile Include="Cypher\CypherQueryTests.cs" />
+    <Compile Include="Cypher\DocumentationExamples.cs" />
+    <Compile Include="Cypher\UnionTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryWhereTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryWithTests.cs" />
+    <Compile Include="Cypher\CypherFluentQuerySkipTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryLimitTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryDeleteTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryReturnTests.cs" />
+    <Compile Include="Cypher\CypherFluentQuerySetTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryStartTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryCreateUniqueTests.cs" />
+    <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
+    <Compile Include="Cypher\QueryWriterTests.cs" />
+    <Compile Include="Cypher\StartBitFormatterTests.cs" />
+    <Compile Include="MockResponseThrows.cs" />
+    <Compile Include="MockResponseThrowsException.cs" />
+    <Compile Include="Serialization\CypherJsonDeserializerTests.cs" />
+    <Compile Include="Serialization\CustomJsonDeserializerTests.cs" />
+    <Compile Include="Domain\Product.cs" />
+    <Compile Include="Cypher\CypherFluentQueryResultsTests.cs" />
+    <Compile Include="Cypher\CypherReturnExpressionBuilderTests.cs" />
+    <Compile Include="GraphClientTests\ReIndexRelationshipsTests.cs" />
+    <Compile Include="GraphClientTests\Cypher\ExecuteCypherTests.cs" />
+    <Compile Include="GraphClientTests\LookupIndexTests.cs" />
+    <Compile Include="GraphClientTests\ServerVersionTests.cs" />
+    <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
+    <Compile Include="IndexEntryTests.cs" />
+    <Compile Include="MockRequest.cs" />
+    <Compile Include="MockResponse.cs" />
+    <Compile Include="GraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryTests.cs" />
+    <Compile Include="RestTestHarness.cs" />
+    <Compile Include="GraphClientTests\UpdateRelationshipTests.cs" />
+    <Compile Include="GraphClientTests\DeleteIndexTests.cs" />
+    <Compile Include="GraphClientTests\IndexExistsTests.cs" />
+    <Compile Include="GraphClientTests\GetIndexesTests.cs" />
+    <Compile Include="GraphClientTests\CreateIndexTests.cs" />
+    <Compile Include="GraphClientTests\Gremlin\ExecuteGetAllRelationshipsGremlinTests.cs" />
+    <Compile Include="GraphClientTests\DeleteRelationshipTests.cs" />
+    <Compile Include="GraphClientTests\QueryNodeIndexTests.cs" />
+    <Compile Include="GraphClientTests\ReIndexNodesTests.cs" />
+    <Compile Include="GraphClientTests\RootNodeTests.cs" />
+    <Compile Include="GraphClientTests\UpdateNodeTests.cs" />
+    <Compile Include="GraphClientTests\Gremlin\ExecuteGetAllNodesGremlinTests.cs" />
+    <Compile Include="GraphClientTests\DeleteNodeTests.cs" />
+    <Compile Include="Gremlin\AggregateStepTests.cs" />
+    <Compile Include="Gremlin\BackTests.cs" />
+    <Compile Include="Gremlin\BasicStepsTests.cs" />
+    <Compile Include="Gremlin\AsStepTests.cs" />
+    <Compile Include="Gremlin\EmitPropertyStepTests.cs" />
+    <Compile Include="Gremlin\GremlinClientTests.cs" />
+    <Compile Include="Gremlin\IfThenElseTests.cs" />
+    <Compile Include="Gremlin\GremlinHasNextStepTests.cs" />
+    <Compile Include="Gremlin\PrintLineStatementTests.cs" />
+    <Compile Include="Gremlin\StoreStepTests.cs" />
+    <Compile Include="Gremlin\GremlinDistinctStepTests.cs" />
+    <Compile Include="Gremlin\ExhaustMergeStepTests.cs" />
+    <Compile Include="Gremlin\FairMergeStepTests.cs" />
+    <Compile Include="Gremlin\CopySplitStepTests.cs" />
+    <Compile Include="Gremlin\ExceptStepTests.cs" />
+    <Compile Include="Gremlin\RetainStepTests.cs" />
+    <Compile Include="Gremlin\TableTests.cs" />
+    <Compile Include="Gremlin\LoopStepTests.cs" />
+    <Compile Include="Gremlin\GremlinPagedEnumeratorTests.cs" />
+    <Compile Include="Gremlin\IteratorTests.cs" />
+    <Compile Include="Gremlin\FormatGremlinFilterTests.cs" />
+    <Compile Include="Gremlin\GremlinNodeEnumerableTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Gremlin\TranslateFilterTests.cs" />
+    <Compile Include="NodeTests.cs" />
+    <Compile Include="RelationshipTests.cs" />
+    <Compile Include="GraphClientTests\Gremlin\ExecuteScalarGremlinTests.cs" />
+    <Compile Include="Relationships\OwnedBy.cs" />
+    <Compile Include="Relationships\Requires.cs" />
+    <Compile Include="Relationships\StoredIn.cs" />
+    <Compile Include="Domain\StorageLocation.cs" />
+    <Compile Include="ApiUsageIdeas.cs" />
+    <Compile Include="RelationshipReferenceTests.cs" />
+    <Compile Include="GraphClientTests\ConnectTests.cs" />
+    <Compile Include="GraphClientTests\CreateNodeTests.cs" />
+    <Compile Include="GraphClientTests\GetNodeTests.cs" />
+    <Compile Include="NodeReferenceTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Domain\User.cs" />
+    <Compile Include="Serialization\CustomJsonSerializerTests.cs" />
+    <Compile Include="CultureInfoSetupFixture.cs" />
+    <Compile Include="Serialization\UserSuppliedSerializationTests.cs" />
+    <Compile Include="Transactions\Neo4jTransactionResourceManagerTests.cs" />
+    <Compile Include="Transactions\QueriesInTransactionTests.cs" />
+    <Compile Include="Transactions\RestCallScenarioTests.cs" />
+    <Compile Include="Transactions\TransactionManagementTests.cs" />
+    <Compile Include="UtilitiesTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Neo4jClient\Neo4jClient.csproj">
+      <Project>{343B9889-6DDF-4474-A1EC-05508A652E5A}</Project>
+      <Name>Neo4jClient</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
