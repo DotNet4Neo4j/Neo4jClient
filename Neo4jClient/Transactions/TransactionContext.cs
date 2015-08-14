@@ -119,7 +119,7 @@ namespace Neo4jClient.Transactions
             if (_taskQueue.Count > 0)
             {
                 _cancellationTokenSource.Cancel();
-                throw new InvalidOperationException("Cannot commit unless all exceptions have been completed");
+                throw new InvalidOperationException("Cannot commit unless all tasks have been completed");
             }
             Transaction.Commit();
         }

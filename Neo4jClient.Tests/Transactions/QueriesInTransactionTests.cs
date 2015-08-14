@@ -922,7 +922,7 @@ namespace Neo4jClient.Test.Transactions
 
         
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [ExpectedException(typeof(InvalidOperationException), ExpectedMessage = "Cannot commit unless all tasks have been completed")]
         public void CommitFailsOnPendingAsyncRequests()
         {
             const string queryText = @"MATCH (n) RETURN count(n) as Total";
@@ -948,8 +948,6 @@ namespace Neo4jClient.Test.Transactions
                 }
 
             }
-
-            Assert.Fail("Commit did not fail with pending tasks");
         }
     }
 }
