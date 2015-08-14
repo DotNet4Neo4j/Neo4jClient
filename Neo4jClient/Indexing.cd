@@ -8,11 +8,12 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Neo4jClient.IndexEntry">
-    <Position X="6.25" Y="0.5" Width="1.5" />
+    <Position X="4.5" Y="5.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAIAAAAAAAACABAAAAAAAIQAAAAAAAAEAAAAAAAAAAA=</HashCode>
       <FileName>IndexEntry.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="Neo4jClient.IndexMetaData">
     <Position X="4.5" Y="2" Width="1.5" />
@@ -21,36 +22,29 @@
       <FileName>IndexMetaData.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Neo4jClient.NodeApiResponse&lt;TNode&gt;">
-    <Position X="6.25" Y="4.5" Width="2.25" />
-    <TypeIdentifier>
-      <HashCode>AAAAEAAAAAAAAAAAAAABAAAAAAAAABAABAAAAAAAAAA=</HashCode>
-      <FileName>NodeApiResponse.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Interface Name="Neo4jClient.IGraphClient">
     <Position X="0.5" Y="0.5" Width="3.25" />
     <TypeIdentifier>
-      <HashCode>AgQSAAABAAAAACBAADAAAAAAAAEAQEAAIAgAAAAAABQ=</HashCode>
+      <HashCode>AgQSAAgDBQAAADBDADAAQYAEAgEgQUAAIAiIIAAAATQ=</HashCode>
       <FileName>IGraphClient.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Enum Name="Neo4jClient.IndexFor">
-    <Position X="6.25" Y="2" Width="1.5" />
+    <Position X="8" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEAAAA=</HashCode>
       <FileName>IndexFor.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Neo4jClient.IndexProvider">
-    <Position X="6.25" Y="3.25" Width="1.5" />
+    <Position X="8" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IndexProvider.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Neo4jClient.IndexType">
-    <Position X="4.5" Y="4" Width="1.5" />
+    <Position X="8" Y="2.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAA=</HashCode>
       <FileName>IndexType.cs</FileName>
