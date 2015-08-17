@@ -930,66 +930,7 @@ namespace Neo4jClient
                     ResponseObject = response.Result
                 });
         }
-
-
-        class ExecutionContext
-        {
-            private GraphClient owner;
-
-            private readonly Stopwatch stopwatch;
-
-            public IExecutionPolicy Policy { get; set; }
-
-            private ExecutionContext()
-            {
-                stopwatch = Stopwatch.StartNew();
-            }
-
-            public static ExecutionContext Begin(GraphClient owner)
-            {
-                owner.CheckRoot();
-                var policy = owner.policyFactory.GetPolicy(PolicyType.Cypher);
-
-                owner.CheckTransactionEnvironmentWithPolicy(policy);
-
-                var executionContext = new ExecutionContext
-                {
-                    owner = owner,
-                    Policy = policy
-                };
-
-                return executionContext;
-            }
-
-            public void Complete(CypherQuery query)
-            {
-                Complete(query.QueryText, 0, null);
-            }
-
-            public void Complete(CypherQuery query, int resultsCount)
-            {
-                Complete(query.QueryText, resultsCount, null);
-            }
-
-            public void Complete(CypherQuery query, Exception exception)
-            {
-                Complete(query.QueryText, -1, exception);
-            }
-
-            public void Complete(string queryText, int resultsCount = -1, Exception exception = null)
-            {
-                var args = new OperationCompletedEventArgs
-                {
-                    QueryText = queryText,
-                    ResourcesReturned = resultsCount,
-                    TimeTaken = stopwatch.Elapsed,
-                    Exception = exception
-                };
-
-                owner.OnOperationCompleted(args);
-            }
-        }
-
+        
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
             var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
@@ -1019,12 +960,27 @@ namespace Neo4jClient
                 bool inTransaction = InTransaction;
 
                 var response = await PrepareCypherRequest<TResult>(query, context.Policy).ConfigureAwait(false);
-                var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, inTransaction);
+                var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat,
+                    inTransaction);
                 if (inTransaction)
-                    results = deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext).ToList();
+                    results =
+                        deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext).ToList();
                 else
                     results = deserializer.Deserialize(response.ResponseObject.Content.ReadAsString()).ToList();
 
+            }
+            catch (AggregateException aggregateException)
+            {
+                Exception unwrappedException;
+                if (aggregateException.TryUnwrap(out unwrappedException))
+                {
+                    context.Complete(query, unwrappedException);
+                }
+                else
+                {
+                    context.Complete(query, aggregateException);
+                }
+                throw;
             }
             catch (Exception e)
             {
@@ -1048,11 +1004,11 @@ namespace Neo4jClient
             }
             catch (AggregateException ex)
             {
-                if (ex.InnerExceptions.Count() == 1)
+                Exception unwrappedException;
+                if (ex.TryUnwrap(out unwrappedException))
                 {
-                    var innerEx = ex.InnerExceptions.Single();
-                    context.Complete(query, innerEx);
-                    throw innerEx;
+                    context.Complete(query, unwrappedException);
+                    throw unwrappedException;
                 }
 
                 context.Complete(query, ex);
@@ -1512,5 +1468,66 @@ namespace Neo4jClient
         {
             get { return transactionManager; }
         }
+
+        #region ExecutionContext class
+        private class ExecutionContext
+        {
+            private GraphClient owner;
+
+            private readonly Stopwatch stopwatch;
+
+            public IExecutionPolicy Policy { get; set; }
+
+            private ExecutionContext()
+            {
+                stopwatch = Stopwatch.StartNew();
+            }
+
+            public static ExecutionContext Begin(GraphClient owner)
+            {
+                owner.CheckRoot();
+                var policy = owner.policyFactory.GetPolicy(PolicyType.Cypher);
+
+                owner.CheckTransactionEnvironmentWithPolicy(policy);
+
+                var executionContext = new ExecutionContext
+                {
+                    owner = owner,
+                    Policy = policy
+                };
+
+                return executionContext;
+            }
+
+            public void Complete(CypherQuery query)
+            {
+                Complete(query.QueryText, 0, null);
+            }
+
+            public void Complete(CypherQuery query, int resultsCount)
+            {
+                Complete(query.QueryText, resultsCount, null);
+            }
+
+            public void Complete(CypherQuery query, Exception exception)
+            {
+                Complete(query.QueryText, -1, exception);
+            }
+
+            public void Complete(string queryText, int resultsCount = -1, Exception exception = null)
+            {
+                var args = new OperationCompletedEventArgs
+                {
+                    QueryText = queryText,
+                    ResourcesReturned = resultsCount,
+                    TimeTaken = stopwatch.Elapsed,
+                    Exception = exception
+                };
+
+                owner.OnOperationCompleted(args);
+            }
+        }
+
+        #endregion
     }
 }

@@ -71,6 +71,10 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
             }
         }
 
+        /// <summary>
+        /// This predates #106. Given Tatham's guidance that the event should fire irrespective is this test proving correct behaviour?
+        /// In any case the sync method calls async so it might be hard to avoid double firing an event.
+        /// </summary>
         [Test]
         public void WhenAsyncCommandFails_ShouldNotRaiseCompleted()
         {
@@ -105,6 +109,86 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 task.Wait();
 
                 Assert.IsFalse(raisedEvent, "Raised OperationCompleted");
+            }
+        }
+
+        /// <summary>
+        /// #106
+        /// </summary>
+        [Test]
+        public void WhenExecuteGetCypherResultsFails_ShouldRaiseCompletedWithException()
+        {
+            // Arrange
+            const string queryText = @"return 1";
+            var parameters = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Throws()
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                OperationCompletedEventArgs eventArgs = null;
+
+                graphClient.OperationCompleted += (sender, e) => { eventArgs = e; };
+
+                //Act
+                Assert.Throws<MockResponseThrowsException>(() =>
+                {
+                    graphClient.ExecuteGetCypherResults<ExecuteGetCypherResultsTests.SimpleResultDto>(cypherQuery);
+                }, "We should expect an exception");
+                
+                Assert.IsNotNull(eventArgs, "but we should also have received the completion event");
+                Assert.IsTrue(eventArgs.HasException);
+                Assert.AreEqual(typeof(MockResponseThrowsException), eventArgs.Exception.GetType());
+                Assert.AreEqual(-1, eventArgs.ResourcesReturned);
+            }
+        }
+
+        /// <summary>
+        /// #106
+        /// </summary>
+        [Test]
+        public void WhenExecuteCypherFails_ShouldRaiseCompletedWithException()
+        {
+            // Arrange
+            const string queryText = @"bad cypher";
+            var parameters = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Throws()
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                OperationCompletedEventArgs eventArgs = null;
+
+                graphClient.OperationCompleted += (sender, e) => { eventArgs = e; };
+
+                //Act
+                Assert.Throws<MockResponseThrowsException>(() =>
+                {
+                    graphClient.ExecuteCypher(cypherQuery);
+                }, "We should expect an exception");
+
+                Assert.IsNotNull(eventArgs, "but we should also have received the completion event");
+                Assert.IsTrue(eventArgs.HasException);
+                Assert.AreEqual(typeof(MockResponseThrowsException), eventArgs.Exception.GetType());
+                Assert.AreEqual(-1, eventArgs.ResourcesReturned);
             }
         }
     }
