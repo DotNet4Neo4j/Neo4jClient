@@ -245,5 +245,30 @@ namespace Neo4jClient.Test.GraphClientTests
             
             Assert.AreEqual(expectedHeader, httpClient.AuthenticationHeaderValue.Parameter);
         }
+
+        [Test]
+        public void ShouldFireOnCompletedEvenWhenException()
+        {
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(callInfo => { throw new NotImplementedException(); });
+
+            var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpClient);
+            OperationCompletedEventArgs operationCompletedArgs = null;
+
+            graphClient.OperationCompleted+= (s, e) =>
+            {
+                operationCompletedArgs = e;
+            };
+
+            // act
+            Assert.Throws<NotImplementedException>(() => graphClient.Connect());
+
+            Assert.NotNull(operationCompletedArgs);
+            Assert.That(operationCompletedArgs.HasException);
+            Assert.AreEqual(typeof(NotImplementedException), operationCompletedArgs.Exception.GetType());
+        }
+
     }
 }
