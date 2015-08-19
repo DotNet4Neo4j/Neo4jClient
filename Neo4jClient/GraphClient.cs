@@ -113,66 +113,79 @@ namespace Neo4jClient
                 return;
             }
 
-           //return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters, JsonContractResolver);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var result = Request.With(ExecutionConfiguration)
-                .Get(BuildUri(""))
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
-                .ParseAs<RootApiResponse>()
-                .Execute();
-
-            var rootUriWithoutUserInfo = RootUri;
-            if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
-                rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
-            var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
-
-            RootApiResponse = result;
-            RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
-            RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
-            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
-            RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
-            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
-            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
-
-            if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
-            {
-                RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
-                transactionManager = new TransactionManager(this);
-            }
-
-            if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
-            {
-                RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-            }
-
-            if (RootApiResponse.Cypher != null)
-            {
-                RootApiResponse.Cypher =
-                    RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
-            }
-
-            rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
-                ? null
-                : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
-
-            // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
-            ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
-                                                      RootApiResponse.Version >= new Version(1, 8);
-
-            if (RootApiResponse.Version < new Version(2, 0))
-                cypherCapabilities = CypherCapabilities.Cypher19;
-
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
+            var stopwatch = Stopwatch.StartNew();
+            var operationCompletedArgs = new OperationCompletedEventArgs
             {
                 QueryText = "Connect",
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
+                ResourcesReturned = 0
+            };
+
+            Action stopTimerAndNotifyCompleted = () =>
+            {
+                stopwatch.Stop();
+                operationCompletedArgs.TimeTaken = stopwatch.Elapsed;
+                OnOperationCompleted(operationCompletedArgs);
+            };
+
+            try
+            {
+                var result = Request.With(ExecutionConfiguration)
+                    .Get(BuildUri(""))
+                    .WithExpectedStatusCodes(HttpStatusCode.OK)
+                    .ParseAs<RootApiResponse>()
+                    .Execute();
+
+                var rootUriWithoutUserInfo = RootUri;
+                if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
+                    rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
+                var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+
+                RootApiResponse = result;
+                RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
+                RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
+                RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
+                RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
+                RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
+                RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
+
+                if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
+                {
+                    RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
+                    transactionManager = new TransactionManager(this);
+                }
+
+                if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
+                {
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
+                        RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
+                }
+
+                if (RootApiResponse.Cypher != null)
+                {
+                    RootApiResponse.Cypher =
+                        RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
+                }
+
+                rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
+                    ? null
+                    : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
+
+                // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
+                ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
+                                                          RootApiResponse.Version >= new Version(1, 8);
+
+                if (RootApiResponse.Version < new Version(2, 0))
+                    cypherCapabilities = CypherCapabilities.Cypher19;
+
+            }
+            catch(Exception e)
+            {
+                operationCompletedArgs.Exception = e;
+                stopTimerAndNotifyCompleted();
+                throw;
+            }
+
+            stopTimerAndNotifyCompleted();
         }
 
         [Obsolete(

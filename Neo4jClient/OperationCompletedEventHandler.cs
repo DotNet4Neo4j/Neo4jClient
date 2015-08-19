@@ -11,5 +11,10 @@ namespace Neo4jClient
         public TimeSpan TimeTaken { get; set; }
         public Exception Exception { get; set; }
         public bool HasException { get { return Exception != null; } }
+
+        public override string ToString()
+        {
+            return string.Format("HasException={0}, QueryText={1}", HasException, QueryText);
+        }
     }
 }
