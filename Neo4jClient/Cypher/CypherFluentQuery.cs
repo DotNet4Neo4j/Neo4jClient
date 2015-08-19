@@ -359,12 +359,17 @@ namespace Neo4jClient.Cypher
             get { return Client; }
         }
 
+        public ICypherFluentQuery ParserVersion(string version)
+        {
+            return Mutate(w => w.AppendClause(string.Format("CYPHER {0}", version)));
+        }
+
         public ICypherFluentQuery ParserVersion(Version version)
         {
             if (version < minimumCypherParserVersion)
-                return Mutate(w => w.AppendClause("CYPHER LEGACY"));
+                return ParserVersion("LEGACY");
             
-            return Mutate(w => w.AppendClause(string.Format("CYPHER {0}.{1}", version.Major, version.Minor)));
+            return ParserVersion(string.Format("{0}.{1}", version.Major, version.Minor));
         }
 
         public ICypherFluentQuery ParserVersion(int major, int minor)

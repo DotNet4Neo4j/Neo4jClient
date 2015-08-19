@@ -1062,7 +1062,7 @@ namespace Neo4jClient
                                     transactionManager.CurrentDtcTransaction;
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
             
-            context.Complete(string.Join(", ", queryList.Select(query => query.QueryText)));
+            context.Complete(string.Join(", ", queryList.Select(query => query.DebugQueryText)));
         }
 
         [Obsolete(
@@ -1514,17 +1514,17 @@ namespace Neo4jClient
 
             public void Complete(CypherQuery query)
             {
-                Complete(query.QueryText, 0, null);
+                Complete(query.DebugQueryText, 0, null);
             }
 
             public void Complete(CypherQuery query, int resultsCount)
             {
-                Complete(query.QueryText, resultsCount, null);
+                Complete(query.DebugQueryText, resultsCount, null);
             }
 
             public void Complete(CypherQuery query, Exception exception)
             {
-                Complete(query.QueryText, -1, exception);
+                Complete(query.DebugQueryText, -1, exception);
             }
 
             public void Complete(string queryText, int resultsCount = -1, Exception exception = null)
