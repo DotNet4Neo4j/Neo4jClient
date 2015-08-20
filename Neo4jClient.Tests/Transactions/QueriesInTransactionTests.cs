@@ -920,9 +920,14 @@ namespace Neo4jClient.Test.Transactions
             }
         }
 
-        
+        /// <summary>
+        /// This test is flakey. If run in Resharper as a group, it fails. If run by itself it passes.
+        /// Appears to be a race condition where for the test to pass the ExecuteGetCypherResultsAsync() call needs to still be in progress before the Commit() is called.
+        /// If stepped through, the test will fail since the call easily finishes. Flakeyness observable as early as [bdc1c45]
+        /// Perhaps need to insert simulated delay into MockResponse?
+        /// </summary>
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [ExpectedException(typeof(InvalidOperationException), ExpectedMessage = "Cannot commit unless all tasks have been completed")]
         public void CommitFailsOnPendingAsyncRequests()
         {
             const string queryText = @"MATCH (n) RETURN count(n) as Total";
@@ -948,8 +953,6 @@ namespace Neo4jClient.Test.Transactions
                 }
 
             }
-
-            Assert.Fail("Commit did not fail with pending tasks");
         }
     }
 }

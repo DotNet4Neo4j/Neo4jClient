@@ -113,66 +113,79 @@ namespace Neo4jClient
                 return;
             }
 
-           //return response.Content == null ? default(T) : response.Content.ReadAsJson<T>(JsonConverters, JsonContractResolver);
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var result = Request.With(ExecutionConfiguration)
-                .Get(BuildUri(""))
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
-                .ParseAs<RootApiResponse>()
-                .Execute();
-
-            var rootUriWithoutUserInfo = RootUri;
-            if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
-                rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
-            var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
-
-            RootApiResponse = result;
-            RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
-            RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
-            RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
-            RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
-            RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
-            RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
-
-            if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
-            {
-                RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
-                transactionManager = new TransactionManager(this);
-            }
-
-            if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
-            {
-                RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-            }
-
-            if (RootApiResponse.Cypher != null)
-            {
-                RootApiResponse.Cypher =
-                    RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
-            }
-
-            rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
-                ? null
-                : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
-
-            // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
-            ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
-                                                      RootApiResponse.Version >= new Version(1, 8);
-
-            if (RootApiResponse.Version < new Version(2, 0))
-                cypherCapabilities = CypherCapabilities.Cypher19;
-
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
+            var stopwatch = Stopwatch.StartNew();
+            var operationCompletedArgs = new OperationCompletedEventArgs
             {
                 QueryText = "Connect",
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
+                ResourcesReturned = 0
+            };
+
+            Action stopTimerAndNotifyCompleted = () =>
+            {
+                stopwatch.Stop();
+                operationCompletedArgs.TimeTaken = stopwatch.Elapsed;
+                OnOperationCompleted(operationCompletedArgs);
+            };
+
+            try
+            {
+                var result = Request.With(ExecutionConfiguration)
+                    .Get(BuildUri(""))
+                    .WithExpectedStatusCodes(HttpStatusCode.OK)
+                    .ParseAs<RootApiResponse>()
+                    .Execute();
+
+                var rootUriWithoutUserInfo = RootUri;
+                if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
+                    rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
+                var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+
+                RootApiResponse = result;
+                RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
+                RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
+                RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
+                RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
+                RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
+                RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
+
+                if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
+                {
+                    RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
+                    transactionManager = new TransactionManager(this);
+                }
+
+                if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
+                {
+                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
+                        RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
+                }
+
+                if (RootApiResponse.Cypher != null)
+                {
+                    RootApiResponse.Cypher =
+                        RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
+                }
+
+                rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
+                    ? null
+                    : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
+
+                // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
+                ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
+                                                          RootApiResponse.Version >= new Version(1, 8);
+
+                if (RootApiResponse.Version < new Version(2, 0))
+                    cypherCapabilities = CypherCapabilities.Cypher19;
+
+            }
+            catch(Exception e)
+            {
+                operationCompletedArgs.Exception = e;
+                stopTimerAndNotifyCompleted();
+                throw;
+            }
+
+            stopTimerAndNotifyCompleted();
         }
 
         [Obsolete(
@@ -930,7 +943,7 @@ namespace Neo4jClient
                     ResponseObject = response.Result
                 });
         }
-
+        
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
             var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
@@ -945,97 +958,93 @@ namespace Neo4jClient
                     throw unwrappedException;
                 throw;
             }
+            
             return task.Result;
         }
 
         async Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsAsync<TResult>(CypherQuery query)
         {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Cypher);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            // the transaction handling is handled by a thread-local variable (ThreadStatic) so we need
-            // to know if we are in a transaction right now because our deserializer will run in another thread
-            bool inTransaction = InTransaction;
-
-            var response = await PrepareCypherRequest<TResult>(query, policy).ConfigureAwait(false);
-            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, inTransaction);
+            var context = ExecutionContext.Begin(this);
             List<TResult> results;
-            if (inTransaction)
-                results = deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext).ToList();
-            else
-                results = deserializer.Deserialize(response.ResponseObject.Content.ReadAsString()).ToList();
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
+            try
             {
-                QueryText = query.DebugQueryText,
-                ResourcesReturned = results.Count(),
-                TimeTaken = stopwatch.Elapsed
-            });
+                // the transaction handling is handled by a thread-local variable (ThreadStatic) so we need
+                // to know if we are in a transaction right now because our deserializer will run in another thread
+                bool inTransaction = InTransaction;
+
+                var response = await PrepareCypherRequest<TResult>(query, context.Policy).ConfigureAwait(false);
+                var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat,
+                    inTransaction);
+                if (inTransaction)
+                    results =
+                        deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext).ToList();
+                else
+                    results = deserializer.Deserialize(response.ResponseObject.Content.ReadAsString()).ToList();
+
+            }
+            catch (AggregateException aggregateException)
+            {
+                Exception unwrappedException;
+                if (aggregateException.TryUnwrap(out unwrappedException))
+                {
+                    context.Complete(query, unwrappedException);
+                }
+                else
+                {
+                    context.Complete(query, aggregateException);
+                }
+                throw;
+            }
+            catch (Exception e)
+            {
+                context.Complete(query, e);
+                throw;
+            }
+
+            context.Complete(query, results.Count());
 
             return results;
         }
-
+        
         void IRawGraphClient.ExecuteCypher(CypherQuery query)
         {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Cypher);
-            CheckTransactionEnvironmentWithPolicy(policy);
+            var context = ExecutionContext.Begin(this);
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var task = PrepareCypherRequest<object>(query, policy);
+            var task = PrepareCypherRequest<object>(query, context.Policy);
             try
             {
                 Task.WaitAll(task);
             }
             catch (AggregateException ex)
             {
-                if (ex.InnerExceptions.Count() == 1)
-                    throw ex.InnerExceptions.Single();
+                Exception unwrappedException;
+                if (ex.TryUnwrap(out unwrappedException))
+                {
+                    context.Complete(query, unwrappedException);
+                    throw unwrappedException;
+                }
+
+                context.Complete(query, ex);
                 throw;
             }
-            policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(task.Result.ResponseObject), null);
+            context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(task.Result.ResponseObject), null);
 
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query.DebugQueryText,
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
+            context.Complete(query);
         }
 
         async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Cypher);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var response = await PrepareCypherRequest<object>(query, policy);
-            policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = query.DebugQueryText,
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
+            var context = ExecutionContext.Begin(this);
+            
+            var response = await PrepareCypherRequest<object>(query, context.Policy);
+            context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
+            
+            context.Complete(query);
         }
 
         void IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries)
         {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Transaction);
-            CheckTransactionEnvironmentWithPolicy(policy);
+            var context = ExecutionContext.Begin(this);
 
             var queryList = queries.ToList();
             string queriesInText = string.Join(", ", queryList.Select(query => query.QueryText));
@@ -1044,22 +1053,16 @@ namespace Neo4jClient
             stopwatch.Start();
 
             var response = Request.With(ExecutionConfiguration)
-                .Post(policy.BaseEndpoint)
+                .Post(context.Policy.BaseEndpoint)
                 .WithJsonContent(SerializeAsJson(new CypherStatementList(queryList)))
                 .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
                 .Execute("Executing multiple queries: " + queriesInText);
 
             var transactionObject = transactionManager.CurrentNonDtcTransaction ??
                                     transactionManager.CurrentDtcTransaction;
-            policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = string.Join(", ", queryList.Select(query => query.DebugQueryText)),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
+            context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
+            
+            context.Complete(string.Join(", ", queryList.Select(query => query.DebugQueryText)));
         }
 
         [Obsolete(
@@ -1478,5 +1481,66 @@ namespace Neo4jClient
         {
             get { return transactionManager; }
         }
+
+        #region ExecutionContext class
+        private class ExecutionContext
+        {
+            private GraphClient owner;
+
+            private readonly Stopwatch stopwatch;
+
+            public IExecutionPolicy Policy { get; set; }
+
+            private ExecutionContext()
+            {
+                stopwatch = Stopwatch.StartNew();
+            }
+
+            public static ExecutionContext Begin(GraphClient owner)
+            {
+                owner.CheckRoot();
+                var policy = owner.policyFactory.GetPolicy(PolicyType.Cypher);
+
+                owner.CheckTransactionEnvironmentWithPolicy(policy);
+
+                var executionContext = new ExecutionContext
+                {
+                    owner = owner,
+                    Policy = policy
+                };
+
+                return executionContext;
+            }
+
+            public void Complete(CypherQuery query)
+            {
+                Complete(query.DebugQueryText, 0, null);
+            }
+
+            public void Complete(CypherQuery query, int resultsCount)
+            {
+                Complete(query.DebugQueryText, resultsCount, null);
+            }
+
+            public void Complete(CypherQuery query, Exception exception)
+            {
+                Complete(query.DebugQueryText, -1, exception);
+            }
+
+            public void Complete(string queryText, int resultsCount = -1, Exception exception = null)
+            {
+                var args = new OperationCompletedEventArgs
+                {
+                    QueryText = queryText,
+                    ResourcesReturned = resultsCount,
+                    TimeTaken = stopwatch.Elapsed,
+                    Exception = exception
+                };
+
+                owner.OnOperationCompleted(args);
+            }
+        }
+
+        #endregion
     }
 }
