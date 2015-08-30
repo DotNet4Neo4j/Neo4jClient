@@ -976,10 +976,16 @@ namespace Neo4jClient
                 var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat,
                     inTransaction);
                 if (inTransaction)
+                {
+                    response.DeserializationContext.DeserializationContext.JsonContractResolver =
+                        query.JsonContractResolver;
                     results =
                         deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext).ToList();
+                }
                 else
+                {
                     results = deserializer.Deserialize(response.ResponseObject.Content.ReadAsString()).ToList();
+                }
 
             }
             catch (AggregateException aggregateException)

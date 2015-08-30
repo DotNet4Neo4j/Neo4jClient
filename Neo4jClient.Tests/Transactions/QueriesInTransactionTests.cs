@@ -9,6 +9,7 @@ using System.Transactions;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
+using Newtonsoft.Json.Serialization;
 using NUnit.Framework;
 using TransactionScopeOption = System.Transactions.TransactionScopeOption;
 
@@ -600,6 +601,47 @@ namespace Neo4jClient.Test.Transactions
                         .SingleOrDefault();
 
                     Assert.AreEqual(1, total);
+
+                    msTransaction.Complete();
+                }
+
+                Assert.IsFalse(client.InTransaction);
+            }
+        }
+
+        [Test]
+        public void TestTransactionScopeWithComplexDeserialization()
+        {
+            const string queryText = @"MATCH (dt:DummyTotal) RETURN dt";
+            const string resultColumn = @"{'columns':['dt'],'data':[{'row':[{'total':1234}]}]}";
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+                using (var msTransaction = new TransactionScope())
+                {
+                    Assert.IsTrue(client.InTransaction);
+
+                    var results = client.Cypher.Match("(dt:DummyTotal)")
+                        .Return(dt => dt.As<DummyTotal>())
+                        .Results
+                        .ToList();
+
+                    Assert.AreEqual(1, results.Count());
+                    Assert.AreEqual(1234, results.First().Total);
 
                     msTransaction.Complete();
                 }
