@@ -9,10 +9,6 @@
     <projectUrl>https://github.com/Readify/Neo4jClient</projectUrl>
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
     <tags>neo4j nosql cypher</tags>
-    <dependencies>
-      <dependency id="Microsoft.Net.Http" />
-      <dependency id="Newtonsoft.Json" version="6.0.3" />
-    </dependencies>
   </metadata>
   <files>
     <file src="bin\Release\Neo4jClient.dll" target="lib\net45" />
