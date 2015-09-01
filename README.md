@@ -11,8 +11,6 @@ The official neo4jclient build and nuget package is automated via MyGet [build s
 
 ### Stable [![neo4jclient-tx MyGet Build Status](https://www.myget.org/BuildSource/Badge/neo4jclient-tx?identifier=57c22856-7609-4211-a432-a1ecdf6f1497)](https://www.myget.org/)
 
-### Pre-Release [![neo4jclient-tx MyGet Build Status](https://www.myget.org/BuildSource/Badge/neo4jclient-tx?identifier=d0ddcfa5-4a79-4e0b-84ac-9cf11135c7b1)](https://www.myget.org/)
-
 #### Breaking Changes in 1.1 
 
 * `CollectAs` now returns `IEnumerable<T>` and not `IEnumerable<Node<T>>`
