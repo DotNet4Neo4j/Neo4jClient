@@ -17,6 +17,6 @@ namespace Neo4jClient.Transactions
         ITransaction BeginTransaction(TransactionScopeOption option);
         void EndTransaction();
         void RegisterToTransactionIfNeeded();
-        Task<HttpResponseMessage> EnqueueCypherRequest(string commandDescription, IGraphClient client, CypherQuery query);
+        Task<HttpResponseMessage> EnqueueCypherRequest(string commandDescription, IGraphClient graphClient, CypherQuery query);
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -18,6 +15,73 @@ namespace Neo4jClient.Test.Transactions
     [TestFixture]
     public class TransactionManagementTests
     {
+        [Test]
+        public void EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsEmpty()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                client.Connect();
+
+                var tm = new Neo4jClient.Transactions.TransactionManager(client)
+                {
+                    ScopedTransactions = new Stack<TransactionScopeProxy>()
+                };
+                Assert.AreEqual(0, tm.ScopedTransactions.Count);
+                tm.EndTransaction();
+            }
+        }
+
+        [Test]
+        public void EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsNull()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                client.Connect();
+
+                var tm = new Neo4jClient.Transactions.TransactionManager(client)
+                {
+                    ScopedTransactions = null
+                };
+                
+                tm.EndTransaction();
+            }
+        }
+
+        [Test]
+        public void CurrentInternalTransaction_ReturnsNullWhenEmpty()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                client.Connect();
+
+                var tm = new Neo4jClient.Transactions.TransactionManager(client)
+                {
+                    ScopedTransactions = new Stack<TransactionScopeProxy>()
+                };
+                Assert.AreEqual(0, tm.ScopedTransactions.Count);
+                Assert.IsNull(tm.CurrentInternalTransaction);
+            }
+        }
+
+        [Test]
+        public void CurrentInternalTransaction_ReturnsNullWhenScopedTransactionsIsNull()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                client.Connect();
+
+                var tm = new Neo4jClient.Transactions.TransactionManager(client)
+                {
+                    ScopedTransactions = null
+                };
+                Assert.IsNull(tm.CurrentInternalTransaction);
+            }
+        }
+
         [Test]
         [ExpectedException(typeof (NotSupportedException))]
         public void BeginTransactionShouldFailWithLower20Versions()
