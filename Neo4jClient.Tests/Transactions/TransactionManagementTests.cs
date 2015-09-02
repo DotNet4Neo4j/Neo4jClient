@@ -88,7 +88,7 @@ namespace Neo4jClient.Test.Transactions
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateGraphClient(false);
+                var client = testHarness.CreateGraphClient(RestTestHarness.Neo4jVersion.Neo19);
                 client.Connect();
                 client.BeginTransaction();
             }

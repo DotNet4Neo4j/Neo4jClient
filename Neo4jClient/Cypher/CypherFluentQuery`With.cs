@@ -12,7 +12,7 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery<TResult> With<TResult>(LambdaExpression expression)
         {
-            var withExpression = CypherWithExpressionBuilder.BuildText(expression, camelCaseProperties);
+            var withExpression = CypherWithExpressionBuilder.BuildText(expression, CamelCaseProperties);
 
             return Mutate<TResult>(w =>
             {
