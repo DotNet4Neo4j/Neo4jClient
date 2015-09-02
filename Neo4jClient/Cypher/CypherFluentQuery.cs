@@ -18,7 +18,7 @@ namespace Neo4jClient.Cypher
         private readonly Version minimumCypherParserVersion = new Version(1, 9);
         protected readonly IRawGraphClient Client;
         protected readonly QueryWriter QueryWriter;
-        protected readonly bool camelCaseProperties = false;
+        protected readonly bool CamelCaseProperties;
 
         public CypherFluentQuery(IGraphClient client)
         {
@@ -27,7 +27,7 @@ namespace Neo4jClient.Cypher
 
             Client = (IRawGraphClient)client;
             QueryWriter = new QueryWriter();
-            camelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
+            CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
         }
 
         protected CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
@@ -37,7 +37,7 @@ namespace Neo4jClient.Cypher
 
             Client = (IRawGraphClient)client;
             QueryWriter = queryWriter;
-            camelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
+            CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
         }
 
         ICypherFluentQuery Mutate(Action<QueryWriter> callback)
@@ -377,10 +377,34 @@ namespace Neo4jClient.Cypher
             return ParserVersion(new Version(major, minor));
         }
 
+        public ICypherFluentQuery Planner(string planner)
+        {
+            if(!Client.CypherCapabilities.SupportsPlanner)
+                throw new InvalidOperationException("PLANNER not supported in Neo4j versions older than 2.2");
+
+            return Mutate(w => w.AppendClause(string.Format("PLANNER {0}", planner)));
+        }
+
+        public ICypherFluentQuery Planner(CypherPlanner planner)
+        {
+            switch (planner)
+            {
+                case CypherPlanner.Rule:
+                    return Planner("RULE");
+                case CypherPlanner.CostIdp:
+                    return Planner("IDP");
+                case CypherPlanner.CostGreedy:
+                    return Planner("COST");
+                default:
+                    throw new ArgumentOutOfRangeException("planner", planner, null);
+            }
+        }
+
         public static string ApplyCamelCase(bool isCamelCase, string propertyName)
         {
-            return isCamelCase
-                ? string.Format("{0}{1}", propertyName.Substring(0, 1).ToLowerInvariant(),propertyName.Length > 1 ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty)
+            return isCamelCase ? 
+                string.Format("{0}{1}", propertyName.Substring(0, 1).ToLowerInvariant(), propertyName.Length > 1 
+                    ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty) 
                 : propertyName;
         }
     }

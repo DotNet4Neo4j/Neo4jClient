@@ -16,6 +16,13 @@ namespace Neo4jClient.Test
 {
     public class RestTestHarness : IEnumerable, IDisposable
     {
+        public enum Neo4jVersion
+        {
+            Neo19,
+            Neo20,
+            Neo22
+        }
+
         readonly IDictionary<MockRequest, MockResponse> recordedResponses = new Dictionary<MockRequest, MockResponse>();
         readonly List<MockRequest> requestsThatShouldNotBeProcessed = new List<MockRequest>();
         readonly IList<MockRequest> processedRequests = new List<MockRequest>();
@@ -43,10 +50,27 @@ namespace Neo4jClient.Test
             return this;
         }
 
-        public GraphClient CreateGraphClient(bool neo4j2)
+        public GraphClient CreateGraphClient(Neo4jVersion neoVersion)
         {
             if (!recordedResponses.Keys.Any(r => r.Resource == "" || r.Resource == "/"))
-                Add(MockRequest.Get(""), neo4j2 ? MockResponse.NeoRoot20() : MockResponse.NeoRoot());
+            {
+                MockResponse response;
+                switch (neoVersion)
+                {
+                    case Neo4jVersion.Neo19:
+                        response = MockResponse.NeoRoot();
+                        break;
+                    case Neo4jVersion.Neo20:
+                        response = MockResponse.NeoRoot20();
+                        break;
+                    case Neo4jVersion.Neo22:
+                        response = MockResponse.NeoRoot22();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException("neoVersion", neoVersion, null);
+                }
+                Add(MockRequest.Get(""), response);
+            }
 
             var httpClient = GenerateHttpClient(BaseUri);
 
@@ -56,14 +80,14 @@ namespace Neo4jClient.Test
 
         public ITransactionalGraphClient CreateAndConnectTransactionalGraphClient()
         {
-            var graphClient = CreateGraphClient(true);
+            var graphClient = CreateGraphClient(Neo4jVersion.Neo20);
             graphClient.Connect();
             return graphClient;
         }
 
-        public IRawGraphClient CreateAndConnectGraphClient()
+        public IRawGraphClient CreateAndConnectGraphClient(Neo4jVersion version = Neo4jVersion.Neo19)
         {
-            var graphClient = CreateGraphClient(false);
+            var graphClient = CreateGraphClient(version);
             graphClient.Connect();
             return graphClient;
         }
@@ -78,45 +102,32 @@ namespace Neo4jClient.Test
             if (unservicedRequests.Any())
                 Assert.Fail(string.Join("\r\n\r\n", unservicedRequests.ToArray()));
 
-            var resourcesThatWereNeverRequested = recordedResponses
-                .Select(r => r.Key)
-                .Where(r => !(processedRequests.Contains(r) || requestsThatShouldNotBeProcessed.Contains(r)))
-                .Select(r => string.Format("{0} {1}", r.Method, r.Resource))
-                .ToArray();
+            var resourcesThatWereNeverRequested = recordedResponses.Select(r => r.Key).Where(r => !(processedRequests.Contains(r) || requestsThatShouldNotBeProcessed.Contains(r))).Select(r => string.Format("{0} {1}", r.Method, r.Resource)).ToArray();
 
-            var processedResourcesThatShouldntHaveBeenRequested = requestsThatShouldNotBeProcessed
-                .Where(r => processedRequests.Contains(r))
-                .Select(r => string.Format("{0} {1}", r.Method, r.Resource))
-                .ToArray();
+            var processedResourcesThatShouldntHaveBeenRequested = requestsThatShouldNotBeProcessed.Where(r => processedRequests.Contains(r)).Select(r => string.Format("{0} {1}", r.Method, r.Resource)).ToArray();
 
             if (processedResourcesThatShouldntHaveBeenRequested.Any())
             {
-                Assert.Fail(
-                    "The test should not have made REST requests for the following resources: {0}",
-                    string.Join(", ", processedResourcesThatShouldntHaveBeenRequested));
+                Assert.Fail("The test should not have made REST requests for the following resources: {0}", string.Join(", ", processedResourcesThatShouldntHaveBeenRequested));
             }
 
             if (!resourcesThatWereNeverRequested.Any())
                 return;
 
-            Assert.Fail(
-                "The test expected REST requests for the following resources, but they were never made: {0}",
-                string.Join(", ", resourcesThatWereNeverRequested));
+            Assert.Fail("The test expected REST requests for the following resources, but they were never made: {0}", string.Join(", ", resourcesThatWereNeverRequested));
         }
 
         public IHttpClient GenerateHttpClient(string baseUri)
         {
             var httpClient = Substitute.For<IHttpClient>();
 
-            httpClient
-                .SendAsync(Arg.Any<HttpRequestMessage>())
-                .ReturnsForAnyArgs(ci =>
-                {
-                    var request = ci.Arg<HttpRequestMessage>();
-                    var task = new Task<HttpResponseMessage>(() => HandleRequest(request, baseUri));
-                    task.Start();
-                    return task;
-                });
+            httpClient.SendAsync(Arg.Any<HttpRequestMessage>()).ReturnsForAnyArgs(ci =>
+            {
+                var request = ci.Arg<HttpRequestMessage>();
+                var task = new Task<HttpResponseMessage>(() => HandleRequest(request, baseUri));
+                task.Start();
+                return task;
+            });
 
             return httpClient;
         }
@@ -128,9 +139,7 @@ namespace Neo4jClient.Test
             if (!string.IsNullOrEmpty(requestUri.UserInfo))
                 requestUri = new UriBuilder(requestUri) {UserName = "", Password = ""}.Uri;
 
-            var matchingRequests = recordedResponses
-                .Where(can => requestUri.AbsoluteUri == baseUri + can.Key.Resource)
-                .Where(can => request.Method.ToString().Equals(can.Key.Method.ToString(), StringComparison.OrdinalIgnoreCase));
+            var matchingRequests = recordedResponses.Where(can => requestUri.AbsoluteUri == baseUri + can.Key.Resource).Where(can => request.Method.ToString().Equals(can.Key.Method.ToString(), StringComparison.OrdinalIgnoreCase));
 
             string requestBody = null;
             if (request.Content != null)
@@ -142,14 +151,13 @@ namespace Neo4jClient.Test
 
             if (request.Method == HttpMethod.Post)
             {
-                matchingRequests = matchingRequests
-                    .Where(can =>
-                    {
-                        var cannedRequest = can.Key;
-                        var cannedRequestBody = cannedRequest.Body;
-                        cannedRequestBody = cannedRequestBody ?? "";
-                        return IsJsonEquivalent(cannedRequestBody, requestBody);
-                    });
+                matchingRequests = matchingRequests.Where(can =>
+                {
+                    var cannedRequest = can.Key;
+                    var cannedRequestBody = cannedRequest.Body;
+                    cannedRequestBody = cannedRequestBody ?? "";
+                    return IsJsonEquivalent(cannedRequestBody, requestBody);
+                });
             }
 
             var results = matchingRequests.ToArray();
@@ -173,9 +181,7 @@ namespace Neo4jClient.Test
 
             var httpResponse = new HttpResponseMessage
             {
-                StatusCode = response.StatusCode,
-                ReasonPhrase = response.StatusDescription,
-                Content = string.IsNullOrEmpty(response.Content) ? null : new StringContent(response.Content, null, response.ContentType)
+                StatusCode = response.StatusCode, ReasonPhrase = response.StatusDescription, Content = string.IsNullOrEmpty(response.Content) ? null : new StringContent(response.Content, null, response.ContentType)
             };
 
             if (string.IsNullOrEmpty(response.Location))
@@ -187,26 +193,19 @@ namespace Neo4jClient.Test
             return httpResponse;
         }
 
-        static bool IsJsonEquivalent(string lhs, string rhs)
+        private static bool IsJsonEquivalent(string lhs, string rhs)
         {
             lhs = NormalizeJson(lhs);
             rhs = NormalizeJson(rhs);
             return lhs == rhs;
         }
 
-        static string NormalizeJson(string input)
+        private static string NormalizeJson(string input)
         {
-            if (input.First() == '"' &&
-                input.Last() == '"')
+            if (input.First() == '"' && input.Last() == '"')
                 input = input.Substring(1, input.Length - 2);
 
-            return input
-                .Replace(" ", "")
-                .Replace("'", "\"")
-                .Replace("\r", "")
-                .Replace("\\r", "")
-                .Replace("\n", "")
-                .Replace("\\n", "");
+            return input.Replace(" ", "").Replace("'", "\"").Replace("\r", "").Replace("\\r", "").Replace("\n", "").Replace("\\n", "");
         }
 
         public void Dispose()

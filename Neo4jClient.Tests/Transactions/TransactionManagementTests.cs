@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -24,7 +21,7 @@ namespace Neo4jClient.Test.Transactions
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateGraphClient(false);
+                var client = testHarness.CreateGraphClient(RestTestHarness.Neo4jVersion.Neo19);
                 client.Connect();
                 client.BeginTransaction();
             }

@@ -8,19 +8,19 @@ namespace Neo4jClient.Cypher
         internal ICypherFluentQuery Where(LambdaExpression expression)
         {
             return Mutate(w =>
-                w.AppendClause("WHERE " + CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, camelCaseProperties)));
+                w.AppendClause("WHERE " + CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties)));
         }
 
         internal ICypherFluentQuery AndWhere(LambdaExpression expression)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("AND {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, camelCaseProperties))));
+                w.AppendClause(string.Format("AND {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties))));
         }
 
         internal ICypherFluentQuery OrWhere(LambdaExpression expression)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("OR {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, camelCaseProperties))));
+                w.AppendClause(string.Format("OR {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties))));
         }
 
         public ICypherFluentQuery Where(string text)

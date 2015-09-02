@@ -20,13 +20,13 @@ namespace Neo4jClient.Cypher
         readonly IDictionary<string, object> queryParameters;
         readonly CypherResultMode resultMode;
         readonly CypherResultFormat resultFormat;
-		readonly IContractResolver jsonContractResolver;
+        readonly IContractResolver jsonContractResolver;
 
         public CypherQuery(
             string queryText,
             IDictionary<string, object> queryParameters,
             CypherResultMode resultMode,
-			IContractResolver contractResolver = null) :
+            IContractResolver contractResolver = null) :
             this(queryText, queryParameters, resultMode, CypherResultFormat.DependsOnEnvironment, contractResolver)
         {
         }
@@ -36,7 +36,7 @@ namespace Neo4jClient.Cypher
             IDictionary<string, object> queryParameters,
             CypherResultMode resultMode,
             CypherResultFormat resultFormat,
-			IContractResolver contractResolver = null)
+            IContractResolver contractResolver = null)
         {
             this.queryText = queryText;
             this.queryParameters = queryParameters;

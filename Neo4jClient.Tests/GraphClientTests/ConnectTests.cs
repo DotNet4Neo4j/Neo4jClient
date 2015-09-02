@@ -115,6 +115,16 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void ShouldSetCypher22CapabilitiesForPost22Version()
+        {
+            using (var testHarness = new RestTestHarness())
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient(RestTestHarness.Neo4jVersion.Neo22);
+                Assert.AreEqual(CypherCapabilities.Cypher22, graphClient.CypherCapabilities);
+            }
+        }
+
+        [Test]
         public void ShouldReturnCypher19CapabilitiesForVersion20()
         {
             using (var testHarness = new RestTestHarness

@@ -177,6 +177,8 @@ namespace Neo4jClient
                 if (RootApiResponse.Version < new Version(2, 0))
                     cypherCapabilities = CypherCapabilities.Cypher19;
 
+                if (RootApiResponse.Version >= new Version(2, 2))
+                    cypherCapabilities = CypherCapabilities.Cypher22;
             }
             catch(Exception e)
             {

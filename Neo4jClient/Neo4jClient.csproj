@@ -75,6 +75,7 @@
     <Compile Include="Cypher\All.cs" />
     <Compile Include="Cypher\CypherCapabilities.cs" />
     <Compile Include="Cypher\CypherFluentQuery`With.cs" />
+    <Compile Include="Cypher\CypherPlanner.cs" />
     <Compile Include="Cypher\CypherWithExpressionBuilder.cs" />
     <Compile Include="Cypher\ICypherFluentQuery`Where.cs" />
     <Compile Include="Cypher\ICypherFluentQuery`With.cs" />
