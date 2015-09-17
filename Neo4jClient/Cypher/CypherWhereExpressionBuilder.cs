@@ -17,7 +17,7 @@ namespace Neo4jClient.Cypher
                 expression.Body.NodeType == ExpressionType.MemberAccess)
                 throw new NotSupportedException("Member access expressions, like Where(f => f.Foo), are not supported because these become ambiguous between C# and Cypher based on how Neo4j handles null values. Use a comparison instead, like Where(f => f.Foo == true).");
 
-            var myVisitor = new CypherWhereExpressionVisitor(createParameterCallback, capabilities,camelCaseProperties);
+            var myVisitor = new CypherWhereExpressionVisitor(createParameterCallback, capabilities, camelCaseProperties);
             myVisitor.Visit(expression);
             return myVisitor.TextOutput.ToString();
         }

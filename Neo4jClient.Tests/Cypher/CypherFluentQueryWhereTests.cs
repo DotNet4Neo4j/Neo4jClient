@@ -2,6 +2,7 @@
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Cypher
 {
@@ -27,6 +28,21 @@ namespace Neo4jClient.Test.Cypher
         class MockWithNullField
         {
             public string NullField { get; set; }
+        }
+
+        class FooWithJsonProperties
+        {
+            [JsonProperty("bar")]
+            public string Bar { get; set; }
+        }
+
+        [Test]
+        public void UsesJsonPropertyNameOverPropertyName()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar == "Bar").Query;
+
+            Assert.AreEqual("WHERE (foo.bar = {p0})", query.QueryText);
         }
 
         [Test]

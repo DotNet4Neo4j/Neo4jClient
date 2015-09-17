@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Neo4jClient.Extensions;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
@@ -252,7 +253,7 @@ namespace Neo4jClient.Cypher
                 throw new ArgumentException("Member expressions are only supported off ICypherResultItem.As<TData>(). For example: Return(foo => foo.As<Bar>().Baz).", "expression");
 
             var baseStatement = BuildStatement(innerExpression, false, capabilities, jsonConvertersThatTheDeserializerWillUse);
-            var statement = string.Format("{0}.{1}", baseStatement.ExpressionText, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, expression.Member.Name));
+            var statement = string.Format("{0}.{1}", baseStatement.ExpressionText, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, expression.Member.GetNameUsingJsonProperty()));
 
             return new ExpressionBuild(statement, baseStatement.ResultFormat);
         }
