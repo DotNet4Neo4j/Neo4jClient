@@ -3,6 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Neo4jClient.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -211,9 +214,11 @@ namespace Neo4jClient.Cypher
                 if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
             }
 
-            lastWrittenMemberName = string.Format("{0}.{1}{2}", identity, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, node.Member.Name), nullIdentifier);
+            var nodeMemberName = node.Member.GetNameUsingJsonProperty();
+            lastWrittenMemberName = string.Format("{0}.{1}{2}", identity, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, nodeMemberName), nullIdentifier);
             TextOutput.Append(lastWrittenMemberName);
         }
+
 
         void VisitConstantMember(MemberExpression node)
         {

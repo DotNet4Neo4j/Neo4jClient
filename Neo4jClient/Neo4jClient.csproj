@@ -104,6 +104,7 @@
     <Compile Include="Execution\IExecutionPolicy.cs" />
     <Compile Include="Execution\IExecutionPolicyFactory.cs" />
     <Compile Include="Execution\IHttpClient.cs" />
+    <Compile Include="Extensions\MemberInfoExtensions.cs" />
     <Compile Include="ICypherGraphClient.cs" />
     <Compile Include="Execution\IRequestTypeBuilder.cs" />
     <Compile Include="Execution\IRequestWithPendingContentBuilder.cs" />

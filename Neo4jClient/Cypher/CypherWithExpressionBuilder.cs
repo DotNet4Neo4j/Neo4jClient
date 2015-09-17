@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Neo4jClient.Extensions;
 
 namespace Neo4jClient.Cypher
 {
@@ -142,7 +143,7 @@ namespace Neo4jClient.Cypher
                 throw new ArgumentException("Member expressions are only supported off ICypherResultItem.As<TData>(). For example: Return(foo => foo.As<Bar>().Baz).", "expression");
 
             var baseStatement = BuildStatement(innerExpression, false);
-            var statement = string.Format("{0}.{1}", baseStatement, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, expression.Member.Name));
+            var statement = string.Format("{0}.{1}", baseStatement, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, expression.Member.GetNameUsingJsonProperty()));
 
             return statement;
         }

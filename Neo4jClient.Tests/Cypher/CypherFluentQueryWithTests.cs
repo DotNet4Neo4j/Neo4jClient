@@ -3,6 +3,7 @@ using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Cypher
 {
@@ -53,6 +54,17 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             Assert.AreEqual("WITH sum(foo.bar) AS baz", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldReturnSpecificPropertyTakingIntoAccountJsonProperty()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .With(a => a.As<Cypher.FooWithJsonProperties>().Bar)
+                .Query;
+
+            Assert.AreEqual("WITH a.bar", query.QueryText);
         }
 
         [Test]
@@ -175,6 +187,11 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("WITH a AS Foo", query.QueryText);
         }
 
+        class FooWithJsonProperties
+        {
+            [JsonProperty("bar")]
+            public string Bar { get; set; }
+        }
         public class Commodity
         {
             public string Name { get; set; }

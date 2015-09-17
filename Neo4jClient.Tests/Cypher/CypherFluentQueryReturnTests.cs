@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Test.Cypher
 {
-    using System.Linq.Expressions;
-    using System.Text.RegularExpressions;
+    
+    class FooWithJsonProperties
+    {
+        [JsonProperty("bar")]
+        public string Bar { get; set; }
+    }
 
     [TestFixture]
     public class CypherFluentQueryReturnTests
@@ -75,6 +81,17 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("START n=node({p0})\r\nRETURN n", query.QueryText);
             Assert.AreEqual(3, query.QueryParameters["p0"]);
             Assert.AreEqual(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
+        }
+
+        [Test]
+        public void ReturnsUsingJsonPropertyValueForNameOfProperty()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return(c => c.As<FooWithJsonProperties>().Bar)
+                .Query;
+
+            Assert.AreEqual("RETURN c.bar", query.QueryText);
         }
 
         [Test]
