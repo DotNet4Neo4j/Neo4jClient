@@ -6,10 +6,8 @@ using System.Linq;
 using System.Reflection;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
-using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization
 {
@@ -57,7 +55,7 @@ namespace Neo4jClient.Serialization
 
                 var reader = new JsonTextReader(new StringReader(content))
                 {
-                    DateParseHandling = DateParseHandling.DateTimeOffset
+                    DateParseHandling = DateParseHandling.None
                 };
 
                 // Force the deserialization to happen now, not later, as there's
