@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
@@ -23,6 +24,19 @@ namespace Neo4jClient.Test.Serialization
                 'columns' : [ 'Foo', 'Bar' ],
                 'data' : [ [ '{0}', 'Bar' ] ]
             }}";
+
+        private class DateTimeTestCasesFactory
+        {
+            private static IEnumerable TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData("2015-06-01T15:03:39.1462808", DateTimeKind.Unspecified);
+                    yield return new TestCaseData("2015-06-01T15:03:39.1462808Z", DateTimeKind.Utc);
+                    yield return new TestCaseData("2015-06-01T15:03:39.1462808+00:00", DateTimeKind.Local);
+                }
+            }
+        }
 
         [Test]
         [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "", null)]
@@ -70,9 +84,47 @@ namespace Neo4jClient.Test.Serialization
             }
         }
 
+        [Test]
+        [TestCaseSource(typeof(DateTimeTestCasesFactory), "TestCases")]
+        public void DeserializeDateShouldPreserveKind(string dateTime, DateTimeKind kind)
+        {
+            //Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<DateTimeModel>(client, CypherResultMode.Projection, CypherResultFormat.Rest);
+            var content = string.Format(ProjectionModeContentFormat, dateTime);
+
+            //Act
+            var result = deserializer.Deserialize(content).Single();
+
+            //Assert
+            Assert.AreEqual(result.Foo.Kind, kind);
+        }
+
+        [Test]
+        [TestCaseSource(typeof(DateTimeTestCasesFactory), "TestCases")]
+        public void DeserializeDateShouldPreservePointInTime(string dateTime, DateTimeKind kind)
+        {
+            //Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<DateTimeModel>(client, CypherResultMode.Projection, CypherResultFormat.Rest);
+            var content = string.Format(ProjectionModeContentFormat, dateTime);
+
+            //Act
+            var result = deserializer.Deserialize(content).Single();
+
+            //Assert
+            Assert.AreEqual(result.Foo.ToUniversalTime(), DateTime.Parse(dateTime).ToUniversalTime());
+        }
+
         public class DateTimeOffsetModel
         {
             public DateTimeOffset? Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        private class DateTimeModel
+        {
+            public DateTime Foo { get; set; }
             public string Bar { get; set; }
         }
 
