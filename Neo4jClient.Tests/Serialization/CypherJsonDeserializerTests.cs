@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
@@ -24,31 +25,56 @@ namespace Neo4jClient.Test.Serialization
                 'data' : [ [ '{0}', 'Bar' ] ]
             }}";
 
+        private class DateTimeTestCasesFactory
+        {
+            private static IEnumerable TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData("2015-06-01T15:03:39.1462808", DateTimeKind.Unspecified);
+                    yield return new TestCaseData("2015-06-01T15:03:39.1462808Z", DateTimeKind.Utc);
+                    yield return new TestCaseData("2015-06-01T15:03:39.1462808+00:00", DateTimeKind.Local);
+                }
+            }
+        }
+
+
+        private class DateTimeOffsetCasesFactory
+        {
+            private static IEnumerable TestCases
+            {
+                get
+                {
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "", null);
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "rekjre", null);
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(abcs)/", null);
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(abcs+0000)/", null);
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "", null);
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "rekjre", null);
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(abcs)/", null);
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(abcs+0000)/", null);
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00");
+                    yield return new TestCaseData(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00");
+                }
+            }
+        }          
+                    
         [Test]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "", null)]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "rekjre", null)]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(abcs)/", null)]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Set, CypherResultFormat.Rest, SetModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "", null)]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "rekjre", null)]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(abcs)/", null)]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(abcs+0000)/", null)]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+0000)/", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+0200)/", "2011-09-06 03:12:42 +02:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(1315271562384+1000)/", "2011-09-06 11:12:42 +10:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "/Date(-2187290565386+0000)/", "1900-09-09 03:17:14 +00:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2011-09-06T01:12:42+10:00", "2011-09-06 01:12:42 +10:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2011-09-06T01:12:42+00:00", "2011-09-06 01:12:42 +00:00")]
-        [TestCase(CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00")]
+        [TestCaseSource(typeof(DateTimeOffsetCasesFactory), "TestCases")]
         public void DeserializeShouldPreserveOffsetValues(CypherResultMode resultMode, CypherResultFormat format, string contentFormat, string input, string expectedResult)
         {
             // Arrange
@@ -70,9 +96,47 @@ namespace Neo4jClient.Test.Serialization
             }
         }
 
+        [Test]
+        [TestCaseSource(typeof(DateTimeTestCasesFactory), "TestCases")]
+        public void DeserializeDateShouldPreserveKind(string dateTime, DateTimeKind kind)
+        {
+            //Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<DateTimeModel>(client, CypherResultMode.Projection, CypherResultFormat.Rest);
+            var content = string.Format(ProjectionModeContentFormat, dateTime);
+
+            //Act
+            var result = deserializer.Deserialize(content).Single();
+
+            //Assert
+            Assert.AreEqual(result.Foo.Kind, kind);
+        }
+
+        [Test]
+        [TestCaseSource(typeof(DateTimeTestCasesFactory), "TestCases")]
+        public void DeserializeDateShouldPreservePointInTime(string dateTime, DateTimeKind kind)
+        {
+            //Arrange
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<DateTimeModel>(client, CypherResultMode.Projection, CypherResultFormat.Rest);
+            var content = string.Format(ProjectionModeContentFormat, dateTime);
+
+            //Act
+            var result = deserializer.Deserialize(content).Single();
+
+            //Assert
+            Assert.AreEqual(result.Foo.ToUniversalTime(), DateTime.Parse(dateTime).ToUniversalTime());
+        }
+
         public class DateTimeOffsetModel
         {
             public DateTimeOffset? Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        private class DateTimeModel
+        {
+            public DateTime Foo { get; set; }
             public string Bar { get; set; }
         }
 
