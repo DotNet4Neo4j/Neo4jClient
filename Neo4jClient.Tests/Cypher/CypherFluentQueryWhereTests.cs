@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Serialization;
+﻿using System;
+using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
 using Neo4jClient.Cypher;
@@ -22,18 +23,41 @@ namespace Neo4jClient.Test.Cypher
             public int a { get; set; }
             public int B { get; set; }
         }
-        // ReSharper restore ClassNeverInstantiated.Local
-        // ReSharper restore UnusedAutoPropertyAccessor.Local
-
-        class MockWithNullField
-        {
-            public string NullField { get; set; }
-        }
 
         class FooWithJsonProperties
         {
             [JsonProperty("bar")]
             public string Bar { get; set; }
+        }
+
+        class MockWithNullField
+        {
+            public string NullField { get; set; }
+        }
+        // ReSharper restore ClassNeverInstantiated.Local
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
+
+
+        [Test]
+        public void CreatesStartWithQuery()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher23);
+            const string startsWith = "Bar";
+            var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.StartsWith(startsWith)).Query;
+
+            Assert.AreEqual("WHERE (foo.bar STARTS WITH {p0})", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters.Count);
+            Assert.AreEqual(startsWith, query.QueryParameters["p0"]);
+        }
+
+        [Test, ExpectedException(typeof(NotSupportedException))]
+        public void ThrowsNotSupportedException_WhenNeo4jInstanceIsLowerThan23()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher22);
+            const string startsWith = "Bar";
+            new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.StartsWith(startsWith));
         }
 
         [Test]
