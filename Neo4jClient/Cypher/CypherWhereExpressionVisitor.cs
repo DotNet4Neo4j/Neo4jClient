@@ -11,18 +11,18 @@ namespace Neo4jClient.Cypher
 {
     internal class CypherWhereExpressionVisitor : ExpressionVisitor
     {
-        const string NotEqual = " <> ";
-        const string Equal = " = ";
-        const string GreaterThan = " > ";
-        const string GreaterThanOrEqual = " >= ";
-        const string LessThan = " < ";
-        const string LessThanOrEqual = " <= ";
+        private const string NotEqual = " <> ";
+        private const string Equal = " = ";
+        private const string GreaterThan = " > ";
+        private const string GreaterThanOrEqual = " >= ";
+        private const string LessThan = " < ";
+        private const string LessThanOrEqual = " <= ";
 
-        string lastWrittenMemberName;
+        private string lastWrittenMemberName;
 
-        readonly Func<object, string> createParameterCallback;
-        readonly CypherCapabilities capabilities;
-        readonly bool camelCaseProperties;
+        private readonly Func<object, string> createParameterCallback;
+        private readonly CypherCapabilities capabilities;
+        private readonly bool camelCaseProperties;
 
         public StringBuilder TextOutput { get; private set; }
 
@@ -32,6 +32,33 @@ namespace Neo4jClient.Cypher
             this.capabilities = capabilities;
             this.camelCaseProperties = camelCaseProperties;
             TextOutput = new StringBuilder();
+        }
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method.Name == "StartsWith")
+                return VisitStartsWithMethod(node);
+
+            return base.VisitMethodCall(node);
+        }
+
+        private Expression VisitStartsWithMethod(MethodCallExpression node)
+        {
+            if (capabilities.SupportsStartsWith)
+            {
+                TextOutput.Append("(");
+                Visit(node.Object);
+                TextOutput.Append(" STARTS WITH ");
+                Visit(node.Arguments[0]);
+                TextOutput.Append(")");
+            }
+            else
+            {
+                throw new NotSupportedException("Neo4j doesn't support STARTS WITH in versions lower than 2.3.0. Instead you have to use a Lucene query like: WHERE n.Property =~ 'Tob.*'.");
+            }
+
+
+            return node;
         }
 
         protected override Expression VisitBinary(BinaryExpression node)
