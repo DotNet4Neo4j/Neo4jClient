@@ -27,7 +27,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, QueryHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     rollbackTransactionRequest, MockResponse.Json(404, "{\"results\":[],\"errors\":[{\"code\":\"Neo.ClientError.Transaction.UnknownId\",\"message\":\"Unrecognized transaction id. Transaction may have timed out and been rolled back.\"}]}")
@@ -65,7 +65,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, QueryHelper.GenerateCypherErrorResponse(1, "{\"code\":\"Neo.ClientError.Schema.ConstraintViolation\",\"message\":\"Node 19572 already exists with label User and property.\"}"), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateCypherErrorResponse(1, "{\"code\":\"Neo.ClientError.Schema.ConstraintViolation\",\"message\":\"Node 19572 already exists with label User and property.\"}"), "http://foo/db/data/transaction/1")
                 },
                 {
                     rollbackTransactionRequest, MockResponse.Json(404, "{\"results\":[],\"errors\":[{\"code\":\"Neo.ClientError.Transaction.UnknownId\",\"message\":\"Unrecognized transaction id. Transaction may have timed out and been rolled back.\"}]}")
@@ -92,7 +92,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, QueryHelper.GenerateCypherErrorResponse(1, "{\"code\":\"Neo.ClientError.Schema.ConstraintViolation\",\"message\":\"Node 19572 already exists with label User and property.\"}"), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateCypherErrorResponse(1, "{\"code\":\"Neo.ClientError.Schema.ConstraintViolation\",\"message\":\"Node 19572 already exists with label User and property.\"}"), "http://foo/db/data/transaction/1")
                 },
                 {
                     rollbackTransactionRequest, MockResponse.Json(404, "{\"results\":[],\"errors\":[{\"code\":\"Neo.ClientError.Transaction.UnknownId\",\"message\":\"Unrecognized transaction id. Transaction may have timed out and been rolled back.\"}]}")
