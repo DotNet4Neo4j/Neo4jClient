@@ -15,6 +15,106 @@ namespace Neo4jClient.Test.Transactions
     [TestFixture]
     public class TransactionManagementTests
     {
+
+        [Test]
+        //https://github.com/Readify/Neo4jClient/issues/127
+        public void ReturnsThe404_WhenVersionIs_2_2_6_Plus_WhenActuallyTimingOut([Values(RestTestHarness.Neo4jVersion.Neo226, RestTestHarness.Neo4jVersion.Neo23)] RestTestHarness.Neo4jVersion version)
+        {
+            var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
+            var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
+            using (var testHarness = new RestTestHarness()
+            {
+                {
+                    initTransactionRequest,
+                    MockResponse.Json(201, QueryHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                },
+                {
+                    rollbackTransactionRequest, MockResponse.Json(404, "{\"results\":[],\"errors\":[{\"code\":\"Neo.ClientError.Transaction.UnknownId\",\"message\":\"Unrecognized transaction id. Transaction may have timed out and been rolled back.\"}]}")
+                }
+            })
+            {
+                var client = testHarness.CreateGraphClient(version);
+                client.Connect();
+                try
+                {
+                    using (var transaction = client.BeginTransaction())
+                    {
+                        client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
+                    }
+                    Assert.Fail("Should not reach this code, as there is an expected exception.");
+                }
+                catch (ApplicationException ex)
+                {
+                    Assert.That(ex.Message.Contains("404"));
+                }
+            }
+        }
+
+
+        [Test]
+        [ExpectedException(typeof(NeoException))]
+        //https://github.com/Readify/Neo4jClient/issues/127
+        public void ReturnsCorrectError_WhenTransactionIsAutomaticallyRolledBack_ViaNeo4j_2_2_6_Plus([Values(RestTestHarness.Neo4jVersion.Neo226/*, RestTestHarness.Neo4jVersion.Neo23*/)] RestTestHarness.Neo4jVersion version)
+        {
+            /* In 2.2.6 ClientErrors (Constraint Violations etc) were changed to Automatically rollback. This created a 404 error when *we* tried to rollback on an error, as the transaction no longer existed. */
+            var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
+            var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    initTransactionRequest,
+                    MockResponse.Json(201, QueryHelper.GenerateCypherErrorResponse(1, "{\"code\":\"Neo.ClientError.Schema.ConstraintViolation\",\"message\":\"Node 19572 already exists with label User and property.\"}"), "http://foo/db/data/transaction/1")
+                },
+                {
+                    rollbackTransactionRequest, MockResponse.Json(404, "{\"results\":[],\"errors\":[{\"code\":\"Neo.ClientError.Transaction.UnknownId\",\"message\":\"Unrecognized transaction id. Transaction may have timed out and been rolled back.\"}]}")
+                }
+            })
+            {
+                var client = testHarness.CreateGraphClient(version);
+                client.Connect();
+                using (var transaction = client.BeginTransaction())
+                {
+                    client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
+                }
+            }
+        }
+
+        [Test]
+        //https://github.com/Readify/Neo4jClient/issues/127
+        public void ReturnsThe404_WhenVersionIsLessThan_2_2_6([Values(RestTestHarness.Neo4jVersion.Neo20, RestTestHarness.Neo4jVersion.Neo22, RestTestHarness.Neo4jVersion.Neo225)] RestTestHarness.Neo4jVersion version)
+        {
+            var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
+            var rollbackTransactionRequest = MockRequest.Delete("/transaction/1");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    initTransactionRequest,
+                    MockResponse.Json(201, QueryHelper.GenerateCypherErrorResponse(1, "{\"code\":\"Neo.ClientError.Schema.ConstraintViolation\",\"message\":\"Node 19572 already exists with label User and property.\"}"), "http://foo/db/data/transaction/1")
+                },
+                {
+                    rollbackTransactionRequest, MockResponse.Json(404, "{\"results\":[],\"errors\":[{\"code\":\"Neo.ClientError.Transaction.UnknownId\",\"message\":\"Unrecognized transaction id. Transaction may have timed out and been rolled back.\"}]}")
+                }
+            })
+            {
+                var client = testHarness.CreateGraphClient(version);
+                client.Connect();
+                try
+                {
+                    using (var transaction = client.BeginTransaction())
+                    {
+                        client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
+                    }
+                }
+                catch (ApplicationException ex)
+                {
+                    Assert.That(ex.Message.Contains("404"));
+                }
+            }
+        }
+
         [Test]
         public void EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsEmpty()
         {

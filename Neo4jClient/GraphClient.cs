@@ -180,6 +180,9 @@ namespace Neo4jClient
                 if (RootApiResponse.Version >= new Version(2, 2))
                     cypherCapabilities = CypherCapabilities.Cypher22;
 
+                if (RootApiResponse.Version >= new Version(2, 2, 6))
+                    cypherCapabilities = CypherCapabilities.Cypher226;
+
                 if (RootApiResponse.Version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
             }
@@ -1028,6 +1031,9 @@ namespace Neo4jClient
             }
             catch (AggregateException ex)
             {
+                if (InTransaction)
+                    ExecutionConfiguration.HasErrors = true;
+
                 Exception unwrappedException;
                 if (ex.TryUnwrap(out unwrappedException))
                 {
@@ -1038,6 +1044,7 @@ namespace Neo4jClient
                 context.Complete(query, ex);
                 throw;
             }
+     
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(task.Result.ResponseObject), null);
 
             context.Complete(query);
@@ -1501,6 +1508,7 @@ namespace Neo4jClient
             private readonly Stopwatch stopwatch;
 
             public IExecutionPolicy Policy { get; set; }
+            public static bool HasErrors { get; set; }
 
             private ExecutionContext()
             {
