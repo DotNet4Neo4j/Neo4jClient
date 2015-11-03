@@ -18,25 +18,6 @@ namespace Neo4jClient.Test.Transactions
     [TestFixture]
     public class QueriesInTransactionTests
     {
-        private static string ResetTransactionTimer()
-        {
-            return new DateTime().AddSeconds(60).ToString("ddd, dd, MMM yyyy HH:mm:ss +0000");
-        }
-
-        private string GenerateInitTransactionResponse(int id, string results)
-        {
-            return string.Format(
-                @"{{'commit': 'http://foo/db/data/transaction/{0}/commit', 'results': [{1}], 'errors': [], 'transaction': {{ 'expires': '{2}' }} }}",
-                id,
-                results,
-                ResetTransactionTimer()
-            );
-        }
-
-        private string GenerateInitTransactionResponse(int id)
-        {
-            return GenerateInitTransactionResponse(id, string.Empty);
-        }
 
         [Test]
         public void CommitWithoutRequestsShouldNotGenerateMessage()
@@ -46,7 +27,7 @@ namespace Neo4jClient.Test.Transactions
             using (var testHarness = new RestTestHarness
             {
                 {
-                    initTransactionRequest, MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    initTransactionRequest, MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitTransactionRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -71,7 +52,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     keepAliveRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -96,7 +77,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     rollbackTransactionRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -122,7 +103,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     rollbackTransactionRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -155,7 +136,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -200,7 +181,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -242,7 +223,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     secondClientRequest,
@@ -250,7 +231,7 @@ namespace Neo4jClient.Test.Transactions
                 },
                 {
                     afterPspeFailRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(2), "http://foo/db/data/transaction/2")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(2), "http://foo/db/data/transaction/2")
                 },
                 {
                     promoteRequest,
@@ -295,7 +276,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitTransactionRequest,
@@ -345,7 +326,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitTransactionRequest,
@@ -391,7 +372,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     secondRequest,
@@ -435,7 +416,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     deleteRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -471,11 +452,11 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherQueryMsTxStatement),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
                 },
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherQueryTxStatement),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(2, resultColumn), "http://foo/db/data/transaction/2")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(2, resultColumn), "http://foo/db/data/transaction/2")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -530,7 +511,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -582,7 +563,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -622,7 +603,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -660,7 +641,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -691,7 +672,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -730,7 +711,7 @@ namespace Neo4jClient.Test.Transactions
             using (var testHarness = new RestTestHarness
             {
                 {
-                    initTransactionRequest, MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    initTransactionRequest, MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     keepAliveRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -766,7 +747,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     deserializationRequest,
@@ -807,7 +788,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     initTransactionRequest,
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
                 },
                 {
                     rollbackTransactionRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -844,7 +825,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
                 },
                 {
                     commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
@@ -918,7 +899,7 @@ namespace Neo4jClient.Test.Transactions
 
             testHarness.Add(
                 MockRequest.PostObjectAsJson("/transaction", apiQueries[0]),
-                MockResponse.Json(201, GenerateInitTransactionResponse(1, string.Format(resultColumnBase, 0)),
+                MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, string.Format(resultColumnBase, 0)),
                     "http://foo/db/data/transaction/1")
                 );
             testHarness.Add(
@@ -982,7 +963,7 @@ namespace Neo4jClient.Test.Transactions
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
-                    MockResponse.Json(201, GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
                 }
             })
             {

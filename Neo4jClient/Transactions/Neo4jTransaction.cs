@@ -110,9 +110,14 @@ namespace Neo4jClient.Transactions
                 return;
             }
 
+            //This change is due to: https://github.com/Readify/Neo4jClient/issues/127 and https://github.com/neo4j/neo4j/issues/5806 - 
+            HttpStatusCode[] expectedStatusCodes = {HttpStatusCode.OK};
+            if (_client.CypherCapabilities.AutoRollsBackOnError && _client.ExecutionConfiguration.HasErrors)
+                    expectedStatusCodes = new [] {HttpStatusCode.OK, HttpStatusCode.NotFound};
+
             Request.With(_client.ExecutionConfiguration)
                 .Delete(Endpoint)
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
+                .WithExpectedStatusCodes(expectedStatusCodes)
                 .Execute();
 
             CleanupAfterClosedTransaction();

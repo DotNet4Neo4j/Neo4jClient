@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace Neo4jClient.Test
 {
@@ -76,20 +77,21 @@ namespace Neo4jClient.Test
             }");
         }
 
-        public static MockResponse NeoRoot22()
+        public static MockResponse NeoRoot(int v1, int v2, int v3)
         {
-            return Json(HttpStatusCode.OK, @"{
+            var version = string.Format("{0}.{1}.{2}", v1, v2, v3);
+            return Json(HttpStatusCode.OK, string.Format(@"{{
                 'cypher' : 'http://foo/db/data/cypher',
                 'batch' : 'http://foo/db/data/batch',
                 'node' : 'http://foo/db/data/node',
                 'node_index' : 'http://foo/db/data/index/node',
                 'relationship_index' : 'http://foo/db/data/index/relationship',
                 'reference_node' : 'http://foo/db/data/node/123',
-                'neo4j_version' : '2.2.1',
+                'neo4j_version' : '{0}',
                 'transaction': 'http://foo/db/data/transaction',
                 'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {}
-            }");
+                'extensions' : {{}}
+            }}", version));
         }
 
         public static MockResponse NeoRootPre15M02()

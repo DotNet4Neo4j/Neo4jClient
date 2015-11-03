@@ -20,7 +20,11 @@ namespace Neo4jClient.Test
         {
             Neo19,
             Neo20,
-            Neo22
+            Neo22,
+            Neo225,
+            Neo226,
+            Neo23,
+            Neo30
         }
 
         readonly IDictionary<MockRequest, MockResponse> recordedResponses = new Dictionary<MockRequest, MockResponse>();
@@ -64,7 +68,16 @@ namespace Neo4jClient.Test
                         response = MockResponse.NeoRoot20();
                         break;
                     case Neo4jVersion.Neo22:
-                        response = MockResponse.NeoRoot22();
+                        response = MockResponse.NeoRoot(2,2,0);
+                        break;
+                    case Neo4jVersion.Neo225:
+                        response = MockResponse.NeoRoot(2,2,5);
+                        break;
+                    case Neo4jVersion.Neo226:
+                        response = MockResponse.NeoRoot(2,2,6);
+                        break;
+                    case Neo4jVersion.Neo23:
+                        response = MockResponse.NeoRoot(2,3,0);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException("neoVersion", neoVersion, null);
