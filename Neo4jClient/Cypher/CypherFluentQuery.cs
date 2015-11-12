@@ -270,6 +270,18 @@ namespace Neo4jClient.Cypher
                 w.AppendClause(string.Format("DELETE {0}", identities)));
         }
 
+        public ICypherFluentQuery DetachDelete(string identities)
+        {
+            if (!Client.CypherCapabilities.SupportsStartsWith)
+                throw new InvalidOperationException("DETACH DELETE not supported in Neo4j versions older than 2.3.0");
+
+            if(identities.Contains("."))
+                throw new InvalidOperationException("Unable to DETACH DELETE properties, you can only delete nodes & relationships.");
+
+            return Mutate(w => 
+                w.AppendClause(string.Format("DETACH DELETE {0}", identities)));
+        }
+
         public ICypherFluentQuery Drop(string dropText)
         {
             return Mutate(w =>
