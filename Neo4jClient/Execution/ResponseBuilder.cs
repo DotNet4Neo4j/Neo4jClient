@@ -76,6 +76,8 @@ namespace Neo4jClient.Execution
                 _request.Headers.Accept.Clear();
                 _request.Headers.Remove("Accept");
                 _request.Headers.Add("Accept", "application/json;stream=true");
+                _request.Headers.Remove("X-Stream");
+                _request.Headers.Add("X-Stream", "true");
             }
 
             _request.Headers.Add("User-Agent", _executionConfiguration.UserAgent);

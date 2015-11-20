@@ -178,6 +178,64 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
+        public void PassesCorrectStreamHeader_WhenUseStreamIsTrue()
+        {
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(callInfo => { throw new NotImplementedException(); });
+
+            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
+
+            try
+            {
+                graphClient.Connect();
+            }
+            // ReSharper disable EmptyGeneralCatchClause
+            catch (NotImplementedException)
+            {
+                // This will fail because we're not giving it the right
+                // HTTP response, but we only care about the request for now
+            }
+            // ReSharper restore EmptyGeneralCatchClause
+
+            var httpCall = httpClient.ReceivedCalls().Last();
+            var httpRequest = (HttpRequestMessage)httpCall.GetArguments()[0];
+
+            Assert.IsTrue(httpRequest.Headers.Contains("X-Stream"));
+            Assert.Contains("true", httpRequest.Headers.GetValues("X-Stream").ToList());
+        }
+
+        [Test]
+        public void PassesCorrectStreamHeader_WhenUseStreamIsFalse()
+        {
+            var httpClient = Substitute.For<IHttpClient>();
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(callInfo => { throw new NotImplementedException(); });
+
+            var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
+            graphClient.ExecutionConfiguration.UseJsonStreaming = false;
+            try
+            {
+                graphClient.Connect();
+            }
+            // ReSharper disable EmptyGeneralCatchClause
+            catch (NotImplementedException)
+            {
+                // This will fail because we're not giving it the right
+                // HTTP response, but we only care about the request for now
+            }
+            // ReSharper restore EmptyGeneralCatchClause
+
+            var httpCall = httpClient.ReceivedCalls().Last();
+            var httpRequest = (HttpRequestMessage)httpCall.GetArguments()[0];
+
+            Assert.IsFalse(httpRequest.Headers.Contains("X-Stream"));
+        }
+
+
+        [Test]
         public void ShouldParseRootApiResponseFromAuthenticatedConnection()
         {
             using (var testHarness = new RestTestHarness()
