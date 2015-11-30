@@ -79,6 +79,36 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void ShouldReturnSpecificPropertyWithAliasWithNullableSuffixInCypher19()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher19);
+            var query = new CypherFluentQuery(client)
+                .With(a => new
+                {
+                    SomeAlias = a.As<Commodity>().Name
+                })
+                .Query;
+
+            Assert.AreEqual("WITH a.Name? AS SomeAlias", query.QueryText);
+        }
+
+        [Test]
+        public void ShouldReturnSpecificPropertyWithAliasWithoutNullableSuffixInCypher20()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher20);
+            var query = new CypherFluentQuery(client)
+                .With(a => new
+                {
+                    SomeAlias = a.As<Commodity>().Name
+                })
+                .Query;
+
+            Assert.AreEqual("WITH a.Name AS SomeAlias", query.QueryText);
+        }
+
+        [Test]
         public void ShouldReturnSpecificPropertyOnItsOwnCamelAs()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -87,7 +117,7 @@ namespace Neo4jClient.Test.Cypher
                 .With(a => new Commodity(){ Name = a.As<Commodity>().Name})
                 .Query;
 
-            Assert.AreEqual("WITH a.name? AS Name", query.QueryText);
+            Assert.AreEqual("WITH a.name AS Name", query.QueryText);
         }
 
         [Test]
