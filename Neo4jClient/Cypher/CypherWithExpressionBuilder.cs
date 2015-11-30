@@ -22,7 +22,16 @@ namespace Neo4jClient.Cypher
         // - a "statement" is something like "x.Foo? AS Bar"
         // - "text" is a collection of statements, like "x.Foo? AS Bar, y.Baz as Qak"
 
-        public static ReturnExpression BuildText(LambdaExpression expression, bool camelCaseProperties)
+        private readonly CypherCapabilities capabilities;
+        private readonly bool camelCaseProperties;
+
+        public CypherWithExpressionBuilder(CypherCapabilities capabilities, bool camelCaseProperties)
+        {
+            this.capabilities = capabilities ?? CypherCapabilities.Default;
+            this.camelCaseProperties = camelCaseProperties;
+        }
+
+        public ReturnExpression BuildText(LambdaExpression expression)
         {
             var body = expression.Body;
 
@@ -37,11 +46,11 @@ namespace Neo4jClient.Cypher
             {
                 case ExpressionType.MemberInit:
                     var memberInitExpression = (MemberInitExpression) body;
-                    text = BuildText(memberInitExpression, camelCaseProperties);
+                    text = BuildText(memberInitExpression);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.New:
                     var newExpression = (NewExpression) body;
-                    text = BuildText(newExpression,camelCaseProperties);
+                    text = BuildText(newExpression);
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Projection};
                 case ExpressionType.Call:
                     var methodCallExpression = (MethodCallExpression) body;
@@ -49,7 +58,7 @@ namespace Neo4jClient.Cypher
                     return new ReturnExpression {Text = text, ResultMode = CypherResultMode.Set};
                 case ExpressionType.MemberAccess:
                     var memberExpression = (MemberExpression) body;
-                    text = BuildText(memberExpression, camelCaseProperties);
+                    text = BuildText(memberExpression);
                     return new ReturnExpression { Text = text, ResultMode = CypherResultMode.Set };
                 default:
                     throw new ArgumentException(WithExpressionShouldBeOneOfExceptionMessage, "expression");
@@ -66,7 +75,7 @@ namespace Neo4jClient.Cypher
         /// 
         /// <see cref="BuildText(NewExpression)"/> caters to anonymous types.
         /// </remarks>
-        static string BuildText(MemberInitExpression expression,bool camelCaseProperties)
+        string BuildText(MemberInitExpression expression)
         {
             if (expression.NewExpression.Constructor.GetParameters().Any())
                 throw new ArgumentException(
@@ -79,7 +88,7 @@ namespace Neo4jClient.Cypher
                     throw new ArgumentException("All bindings must be assignments. For example: n => new MyResultType { Foo = n.Bar }", "expression");
 
                 var memberAssignment = (MemberAssignment)binding;
-                return BuildStatement(memberAssignment.Expression, binding.Member, camelCaseProperties);
+                return BuildStatement(memberAssignment.Expression, binding.Member);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -98,7 +107,7 @@ namespace Neo4jClient.Cypher
         /// 
         /// This is the scenario that this build method caters for.
         /// </remarks>
-        static string BuildText(NewExpression expression, bool camelCaseProperties)
+        string BuildText(NewExpression expression)
         {
             var resultingType = expression.Constructor.DeclaringType;
             Debug.Assert(resultingType != null, "resultingType != null");
@@ -117,7 +126,7 @@ namespace Neo4jClient.Cypher
             var bindingTexts = expression.Members.Select((member, index) =>
             {
                 var argument = expression.Arguments[index];
-                return BuildStatement(argument, member,camelCaseProperties);
+                return BuildStatement(argument, member);
             });
 
             return string.Join(", ", bindingTexts.ToArray());
@@ -126,7 +135,7 @@ namespace Neo4jClient.Cypher
         /// <remarks>
         /// This build method caters to expressions like: <code>item => item.Count()</code>
         /// </remarks>
-        static string BuildText(MethodCallExpression expression)
+        string BuildText(MethodCallExpression expression)
         {
             return BuildStatement(expression, false);
         }
@@ -134,7 +143,7 @@ namespace Neo4jClient.Cypher
         /// <remarks>
         /// This build method caters to expressions like: <code>item => item.As&lt;Foo&gt;().Bar</code>
         /// </remarks>
-        static string BuildText(MemberExpression expression, bool camelCaseProperties)
+        string BuildText(MemberExpression expression)
         {
             var innerExpression = expression.Expression as MethodCallExpression;
             if (innerExpression == null ||
@@ -148,13 +157,13 @@ namespace Neo4jClient.Cypher
             return statement;
         }
 
-        static string BuildStatement(Expression sourceExpression, MemberInfo targetMember, bool camelCaseProperties)
+        string BuildStatement(Expression sourceExpression, MemberInfo targetMember)
         {
             var unwrappedExpression = UnwrapImplicitCasts(sourceExpression);
 
             var memberExpression = unwrappedExpression as MemberExpression;
             if (memberExpression != null)
-                return BuildStatement(memberExpression, targetMember,camelCaseProperties);
+                return BuildStatement(memberExpression, targetMember);
 
             var methodCallExpression = unwrappedExpression as MethodCallExpression;
             if (methodCallExpression != null)
@@ -173,7 +182,7 @@ namespace Neo4jClient.Cypher
                 unwrappedExpression.GetType().FullName));
         }
 
-        static string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember, bool camelCaseProperties)
+        string BuildStatement(MemberExpression memberExpression, MemberInfo targetMember)
         {
             MethodCallExpression methodCallExpression;
             MemberInfo memberInfo;
@@ -198,10 +207,13 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException(
                     "Somehow targetObject ended up as null. We weren't expecting this to happen. Please raise an issue at http://hg.readify.net/neo4jclient including your query code.");
 
-            var isTargetMemberNullable = IsMemberNullable(targetMember);
-            var isNullable = isTargetMemberNullable || IsMemberNullable(memberInfo);
-
-            var optionalIndicator = isNullable ? "?" : "";
+            var optionalIndicator = string.Empty;
+            if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
+            {
+                var isTargetMemberNullable = IsMemberNullable(targetMember);
+                var isNullable = isTargetMemberNullable || IsMemberNullable(memberInfo);
+                if (isNullable) optionalIndicator = "?";
+            }
 
             return string.Format("{0}.{1}{2} AS {3}", targetObject.Name, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, memberInfo.Name), optionalIndicator, targetMember.Name);
         }
