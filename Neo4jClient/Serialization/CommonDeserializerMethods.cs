@@ -127,7 +127,7 @@ namespace Neo4jClient.Serialization
                 return raw;
             }
 
-            if (propertyType == typeof(DateTime))
+            if (propertyType == typeof(DateTime)) //Common neo4j deserializing
             {
                 return ParseDateTime(value);
             }
@@ -166,7 +166,7 @@ namespace Neo4jClient.Serialization
             }
 
             object jsonConversionResult;
-            if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
+            if (TryJsonConverters(context, propertyType, value, out jsonConversionResult)) //Using Converters
                 return jsonConversionResult;
 
             if (genericTypeDef == typeof(List<>))
