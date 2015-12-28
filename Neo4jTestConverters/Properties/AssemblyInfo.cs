@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Neo4jTest")]
+[assembly: AssemblyTitle("Neo4jTestConverters")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("EPAM Systems")]
-[assembly: AssemblyProduct("Neo4jTest")]
+[assembly: AssemblyProduct("Neo4jTestConverters")]
 [assembly: AssemblyCopyright("Copyright © EPAM Systems 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("1a7c1688-4726-4e0b-82d2-986c4e465fcf")]
+[assembly: Guid("cb213226-3369-476b-8f2a-b9c733484df3")]
 
 // Version information for an assembly consists of the following four values:
 //

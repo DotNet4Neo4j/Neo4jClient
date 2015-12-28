@@ -5,9 +5,8 @@ using Neo4jClient;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 
-namespace Neo4jTest
+namespace Neo4jTestConverters
 {
     public class CustomTypeConverterBasedJsonConverter : DateTimeConverterBase
     {
@@ -15,7 +14,7 @@ namespace Neo4jTest
         {
             Console.WriteLine("ReadJson From CustomTypeConverterBasedJsonConverter");
 
-            if (objectType.IsAssignableFrom(typeof (DateTime)))
+            if (objectType.IsAssignableFrom(typeof(DateTime)))
             {
                 return new DateTime(long.Parse(reader.Value.ToString()));
             }
@@ -25,9 +24,9 @@ namespace Neo4jTest
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if (value.GetType().IsAssignableFrom(typeof (DateTime)))
+            if (value.GetType().IsAssignableFrom(typeof(DateTime)))
             {
-                writer.WriteValue(((DateTime) value).Ticks);
+                writer.WriteValue(((DateTime)value).Ticks);
             }
 
             Console.WriteLine("WriteJson From CustomTypeConverterBasedJsonConverter");
@@ -77,7 +76,7 @@ namespace Neo4jTest
         {
             query
                 .Unwind(obj, "map")
-                .Create("(n:" + typeof (T).Name + ")")
+                .Create("(n:" + typeof(T).Name + ")")
                 .Set("n=map")
                 .ExecuteWithoutResults();
         }
