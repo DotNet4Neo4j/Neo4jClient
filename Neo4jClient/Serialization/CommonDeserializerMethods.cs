@@ -84,6 +84,10 @@ namespace Neo4jClient.Serialization
                 return null;
 
             var propertyType = propertyInfo.PropertyType;
+            object jsonConversionResult;
+            if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
+                return jsonConversionResult;
+            
             Type genericTypeDef = null;
 
             if (propertyType.IsGenericType)
@@ -164,10 +168,6 @@ namespace Neo4jClient.Serialization
             {
                 return Convert.FromBase64String(value.Value<string>());
             }
-
-            object jsonConversionResult;
-            if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
-                return jsonConversionResult;
 
             if (genericTypeDef == typeof(List<>))
             {

@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Neo4jClient.Test.Serialization
 {
@@ -207,6 +208,36 @@ namespace Neo4jClient.Test.Serialization
             // Assert
             Assert.AreEqual(expected, result);
         }
+
+        private class DateTimeDeserializer : DateTimeConverterBase
+        {
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                if (value.GetType().IsAssignableFrom(typeof(DateTime)))
+                    writer.WriteValue(((DateTime)value).Ticks);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                if (objectType.IsAssignableFrom(typeof(DateTime)))
+                    return new DateTime(long.Parse(reader.Value.ToString()));
+
+                return DateTime.MinValue;
+            }
+        }
+        
+        [Test]
+        public void DeserializeShouldUseCustomSerializerBeforeDefault()
+        {
+            var deserializer = new CustomJsonDeserializer(new List<JsonConverter>(GraphClient.DefaultJsonConverters) { new DateTimeDeserializer() });
+            var expected = new DateTime(2000, 1, 1).Date;
+
+            var deserializeDateTime = deserializer.Deserialize<DateTimeModel>("{\"Foo\":\"630822816000000000\"}");
+            
+            Assert.IsNotNull(deserializeDateTime.Foo);
+            Assert.AreEqual(expected, deserializeDateTime.Foo.Value);
+        }
+
 
         [Test]
         [TestCase("{\"Gender\": \"Female\"}", Gender.Female)]
