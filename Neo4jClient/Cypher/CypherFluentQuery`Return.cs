@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Microsoft.SqlServer.Server;
 
 namespace Neo4jClient.Cypher
 {
