@@ -1,0 +1,19 @@
+{
+    "version": "0.0.0",
+    "dependencies": {
+        "Newtonsoft.Json": "8.0.1"
+    },
+    "frameworks": {
+        "net45" : {
+            "dependencies": {
+                "Microsoft.Net.Http": "2.0.20710.0"
+            },
+            
+            "frameworkAssemblies": {
+                "System.ComponentModel.DataAnnotations": "",
+                "System.Transactions": "",
+                "System.Data": ""
+            }
+        }
+    }
+}
