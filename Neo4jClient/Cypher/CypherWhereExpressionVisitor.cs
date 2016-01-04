@@ -4,8 +4,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Neo4jClient.Extensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -201,19 +199,24 @@ namespace Neo4jClient.Cypher
         void VisitStaticMember(MemberExpression node)
         {
             object value;
-            switch (node.Member.MemberType)
+            
+            FieldInfo fieldInfo = node.Member as FieldInfo;
+            PropertyInfo propInfo = node.Member as PropertyInfo;
+            
+            if(fieldInfo != null)
             {
-                case MemberTypes.Field:
-                    value = ((FieldInfo)node.Member).GetValue(null);
-                    break;
-                case MemberTypes.Property:
-                    value = ((PropertyInfo)node.Member).GetValue(null, null);
-                    break;
-                default:
-                    throw new NotSupportedException(string.Format(
-                        "Unhandled member type {0} in static member expression: {1}",
-                        node.Member.MemberType,
-                        node));
+                value = fieldInfo.GetValue(null);
+            }
+            else if(propInfo != null) 
+            {
+                value = propInfo.GetValue(null, null);
+            }
+            else 
+            {
+                throw new NotSupportedException(string.Format(
+                    "Unhandled member type {0} in static member expression: {1}",
+                    node.Member.DeclaringType,
+                    node));
             }
 
             var valueWrappedInParameter = createParameterCallback(value);

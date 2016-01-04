@@ -127,7 +127,7 @@ namespace Neo4jClient.Gremlin
                     var expression = filter.Body as MemberExpression;
 
                     if (expression != null &&
-                        (expression.Member is PropertyInfo && expression.Member.MemberType == MemberTypes.Property))
+                        (expression.Member is PropertyInfo && expression.Member is PropertyInfo))
                     {
                         var newFilter = new Filter
                             {
@@ -226,8 +226,7 @@ namespace Neo4jClient.Gremlin
 
             var memberExpression = expression as MemberExpression;
             if (memberExpression != null &&
-                memberExpression.Member is PropertyInfo &&
-                memberExpression.Member.MemberType == MemberTypes.Property)
+                memberExpression.Member is PropertyInfo)
                 return new ExpressionKey
                 {
                     Name = memberExpression.Member.Name,
