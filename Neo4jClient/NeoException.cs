@@ -3,7 +3,7 @@ using Neo4jClient.ApiModels;
 
 namespace Neo4jClient
 {
-    public class NeoException : ApplicationException
+    public class NeoException : Exception
     {
         readonly string neoMessage;
         readonly string neoException;

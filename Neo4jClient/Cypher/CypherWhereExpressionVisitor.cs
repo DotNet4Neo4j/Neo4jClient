@@ -237,7 +237,7 @@ namespace Neo4jClient.Cypher
 
             if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
             {
-                var isNullable = propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
+                var isNullable = propertyType.GetTypeInfo().IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
                 if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
             }
 

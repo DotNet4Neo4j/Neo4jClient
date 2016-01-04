@@ -20,7 +20,7 @@ namespace Neo4jClient.Mappers
             try
             {
                 var validType = prop.PropertyType;
-                if (prop.PropertyType.IsGenericType &&
+                if (prop.PropertyType.GetTypeInfo().IsGenericType &&
                     prop.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
                 {
                     var nullableConverter = new NullableConverter(prop.PropertyType);
@@ -34,7 +34,7 @@ namespace Neo4jClient.Mappers
                 }
 
                 object convertedData;
-                if (validType.IsEnum)
+                if (validType.GetTypeInfo().IsEnum)
                 {
                     convertedData = Enum.Parse(validType, value, false);
                 }
