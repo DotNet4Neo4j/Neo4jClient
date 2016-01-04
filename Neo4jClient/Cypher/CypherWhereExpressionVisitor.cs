@@ -232,7 +232,12 @@ namespace Neo4jClient.Cypher
 
             var nullIdentifier = string.Empty;
 
+#if NET45
             var propertyParent = node.Member.ReflectedType;
+#else
+            var propertyParent = node.Member.DeclaringType;
+#endif
+            
             var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
 
             if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
