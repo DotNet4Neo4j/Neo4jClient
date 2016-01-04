@@ -110,13 +110,14 @@ namespace Neo4jClient.Cypher
         string BuildText(NewExpression expression)
         {
             var resultingType = expression.Constructor.DeclaringType;
+            var resultingTypeInfo = resultingType.GetTypeInfo();
             Debug.Assert(resultingType != null, "resultingType != null");
 
             var quacksLikeAnAnonymousType =
-                resultingType.IsSpecialName &&
-                resultingType.IsValueType &&
-                resultingType.IsNestedPrivate &&
-                !resultingType.IsGenericType;
+                resultingTypeInfo.IsSpecialName &&
+                resultingTypeInfo.IsValueType &&
+                resultingTypeInfo.IsNestedPrivate &&
+                !resultingTypeInfo.IsGenericType;
             if (expression.Members == null && !quacksLikeAnAnonymousType)
                 throw new ArgumentException(WithExpressionShouldBeOneOfExceptionMessage, "expression");
 
@@ -250,7 +251,7 @@ namespace Neo4jClient.Cypher
         static string BuildStatement(ParameterExpression expression, MemberInfo targetMember)
         {
             var statement = expression.Name;
-            if (!statement.Equals(targetMember.Name, StringComparison.InvariantCultureIgnoreCase))
+            if (!statement.Equals(targetMember.Name, StringComparison.OrdinalIgnoreCase))
                 statement += " AS " + targetMember.Name;
             return statement;
         }
@@ -322,7 +323,7 @@ namespace Neo4jClient.Cypher
         {
             if (!methodInfo.IsGenericMethod) throw new InvalidOperationException("Expected generic method, but it wasn't.");
             var methodType = methodInfo.GetGenericArguments().Single();
-            return methodType.IsGenericType && methodType.GetGenericTypeDefinition() == typeof(Node<>);
+            return methodType.GetTypeInfo().IsGenericType && methodType.GetGenericTypeDefinition() == typeof(Node<>);
         }
 
         static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)
@@ -422,7 +423,7 @@ namespace Neo4jClient.Cypher
         static bool IsTypeNullable(Type type)
         {
             if (type == null) return false;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
             if (type == typeof(string)) return true;
             return false;
         }

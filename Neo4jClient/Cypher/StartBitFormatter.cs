@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using CreateParameterCallback = System.Func<object, string>;
 
 namespace Neo4jClient.Cypher
@@ -71,9 +72,9 @@ namespace Neo4jClient.Cypher
         static bool IsCovariantlyEquivalentEnumerable(Type type1, Type type2)
         {
             return
-                type1.IsGenericType &&
+                type1.GetTypeInfo().IsGenericType &&
                 type1.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
-                type2.IsGenericType &&
+                type2.GetTypeInfo().IsGenericType &&
                 type2.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
                 type1.GetGenericArguments()[0].IsAssignableFrom(type2.GetGenericArguments()[0]);
         }

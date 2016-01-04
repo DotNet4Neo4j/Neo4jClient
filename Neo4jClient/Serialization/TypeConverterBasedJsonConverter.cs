@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Serialization
@@ -71,7 +72,7 @@ namespace Neo4jClient.Serialization
             var typeOfString = typeof (string);
             var typeConverter = TypeDescriptor.GetConverter(objectType);
             var result =
-                !objectType.IsPrimitive &&
+                !objectType.GetTypeInfo().IsPrimitive &&
                 !BuiltinTypes.Contains(objectType) &&
                 typeConverter.GetType() != typeof(TypeConverter) && // Ignore the default one
                 typeConverter.CanConvertTo(typeOfString) &&

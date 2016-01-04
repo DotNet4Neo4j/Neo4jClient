@@ -203,7 +203,7 @@ namespace Neo4jClient.Gremlin
             underlyingPropertyType = Nullable.GetUnderlyingType(key.PropertyType) ?? underlyingPropertyType;
 
             var convertedValue = underlyingPropertyType.GetTypeInfo().IsEnum
-                ? Enum.Parse(underlyingPropertyType, underlyingPropertyType.GetEnumName(constantValue))
+                ? Enum.Parse(underlyingPropertyType, Enum.GetName(underlyingPropertyType, constantValue))
                 : constantValue;
 
             return new[]

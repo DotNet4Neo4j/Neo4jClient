@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Neo4jClient
 {
@@ -21,7 +22,7 @@ namespace Neo4jClient
         static void CheckTNode()
         {
             var type = typeof (TNode);
-            if (!type.IsGenericType) return;
+            if (!type.GetTypeInfo().IsGenericType) return;
             if (type.GetGenericTypeDefinition() != typeof(Node<>)) return;
 
             throw new NotSupportedException(string.Format(

@@ -7,6 +7,7 @@ using System.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Collections;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Neo4jClient.Cypher
 {
@@ -218,7 +219,7 @@ namespace Neo4jClient.Cypher
                         throw new ArgumentException("Array includes a null entry", "objects");
 
                     var objectType = o.GetType();
-                    if (objectType.IsGenericType &&
+                    if (objectType.GetTypeInfo().IsGenericType &&
                         objectType.GetGenericTypeDefinition() == typeof(Node<>))
                     {
                         throw new ArgumentException(string.Format(
@@ -237,7 +238,7 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)
             where TNode : class 
         {
-            if (typeof(TNode).IsGenericType &&
+            if (typeof(TNode).GetTypeInfo().IsGenericType &&
                 typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>)) {
                 throw new ArgumentException(string.Format(
                    "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
