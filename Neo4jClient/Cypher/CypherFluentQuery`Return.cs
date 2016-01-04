@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.Linq;
 
 namespace Neo4jClient.Cypher
 {
@@ -19,12 +20,12 @@ namespace Neo4jClient.Cypher
             if (identity.Contains(",") && (!identityIsCollection))
                 throw new ArgumentException(IdentityLooksLikeAMultiColumnStatementExceptionMessage, "identity");
 
-            if(identityIsCollection && (typeof(TResult).GetInterface("IEnumerable") == null)) 
+            if(identityIsCollection && (typeof(TResult).GetTypeInfo().ImplementedInterfaces.Any(x => x.Name == "IEnumerable"))) 
                 throw new ArgumentException(IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, "identity");
             
             var resultType = typeof (TResult);
             
-            var restFormatNeeded = resultType.IsGenericType && (
+            var restFormatNeeded = resultType.GetTypeInfo().IsGenericType && (
                 resultType.GetGenericTypeDefinition() == typeof (Node<>) ||
                 resultType.GetGenericTypeDefinition() == typeof (RelationshipInstance<>) ||
                 resultType.GetGenericTypeDefinition() == typeof (Relationship<>));

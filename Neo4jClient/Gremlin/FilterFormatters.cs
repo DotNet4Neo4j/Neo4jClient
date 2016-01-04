@@ -13,7 +13,7 @@ namespace Neo4jClient.Gremlin
             filters = filters
                 .Select(f =>
                 {
-                    if (f.Value != null && f.Value.GetType().IsEnum)
+                    if (f.Value != null && f.Value.GetType().GetTypeInfo().IsEnum)
                         f.Value = f.Value.ToString();
                     return f;
                 })
@@ -202,7 +202,7 @@ namespace Neo4jClient.Gremlin
             var underlyingPropertyType = key.PropertyType;
             underlyingPropertyType = Nullable.GetUnderlyingType(key.PropertyType) ?? underlyingPropertyType;
 
-            var convertedValue = underlyingPropertyType.IsEnum
+            var convertedValue = underlyingPropertyType.GetTypeInfo().IsEnum
                 ? Enum.Parse(underlyingPropertyType, underlyingPropertyType.GetEnumName(constantValue))
                 : constantValue;
 

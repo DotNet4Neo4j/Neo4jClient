@@ -26,7 +26,10 @@
                 "System.Net.Http": "4.0.1-beta-23516",
                 "System.ComponentModel.Annotations": "4.0.11-beta-23516",
                 "System.Collections.Concurrent": "4.0.11-beta-23516",
-                "System.Runtime.Extensions": "4.0.11-beta-23516"
+                "System.Runtime.Extensions": "4.0.11-beta-23516",
+                "System.Text.Encoding": "4.0.11-beta-23516",
+                "System.ComponentModel.TypeConverter": "4.0.1-beta-23516",
+                "System.Reflection.TypeExtensions":  "4.0.1-beta-23409"
             }
         }
     }

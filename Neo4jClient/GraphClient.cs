@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
@@ -74,7 +75,7 @@ namespace Neo4jClient
             ExecutionConfiguration = new ExecutionConfiguration
             {
                 HttpClient = httpClient,
-                UserAgent = string.Format("Neo4jClient/{0}", GetType().Assembly.GetName().Version),
+                UserAgent = string.Format("Neo4jClient/{0}", GetType().GetTypeInfo().Assembly.GetName().Version),
                 UseJsonStreaming = true,
                 JsonConverters = JsonConverters,
                 Username = httpClient == null ? null : httpClient.Username,
