@@ -12,7 +12,7 @@ namespace Neo4jClient.Cypher
 {
     public class CypherReturnExpressionBuilder
     {
-        internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem, Neo4jClient.Cypher.All or Neo4jClient.Cypher.Return. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(…).Results.Select(r => …). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
+        internal const string ReturnExpressionCannotBeSerializedToCypherExceptionMessage = "The return expression that you have provided uses methods other than those defined by ICypherResultItem, Neo4jClient.Cypher.All or Neo4jClient.Cypher.Return. The return expression needs to be something that we can translate to Cypher, then send to the server to be executed. You can't use chains of methods, LINQ-to-objects, or other constructs like these. If you want to run client-side logic to reshape your data in .NET, use a Select call after the query has been executed, like .Return(ï¿½).Results.Select(r => ï¿½). This technique maintains a clear separation between what is being executed server-side (in Neo4j, via Cypher) versus client-side (back in .NET).";
 
         internal const string ReturnExpressionCannotBeStruct = "The expression must be constructed from an object initializer with a constructor without arguments. This means that structs cannot be used as part of the return expression.";
 
@@ -184,12 +184,14 @@ namespace Neo4jClient.Cypher
             }
 
             var resultingType = constructor.DeclaringType;
+            var resultingTypeInfo = resultingType.GetTypeInfo();
+            
             var quacksLikeAnAnonymousType =
                 resultingType != null &&
-                resultingType.IsSpecialName &&
-                resultingType.IsValueType &&
-                resultingType.IsNestedPrivate &&
-                !resultingType.IsGenericType;
+                resultingTypeInfo.IsSpecialName &&
+                resultingTypeInfo.IsValueType &&
+                resultingTypeInfo.IsNestedPrivate &&
+                !resultingTypeInfo.IsGenericType;
             var expressionMembers = expression.Members;
             if (expressionMembers == null && !quacksLikeAnAnonymousType)
             {
@@ -463,7 +465,9 @@ namespace Neo4jClient.Cypher
         static bool IsNodeOrRelationshipOfT(Type type)
         {
             if (type == null) throw new ArgumentNullException("type");
-            return type.IsGenericType && (
+            
+            var typeInfo = type.GetTypeInfo();
+            return typeInfo.IsGenericType && (
                 type.GetGenericTypeDefinition() == typeof (Node<>) ||
                 type.GetGenericTypeDefinition() == typeof (Relationship<>) ||
                 type.GetGenericTypeDefinition() == typeof (RelationshipInstance<>));
@@ -482,7 +486,8 @@ namespace Neo4jClient.Cypher
             if (type.IsArray)
                 return IsSupportedElementForAs(type.GetElementType(), jsonConvertersThatTheDeserializerWillUseAsArray);
 
-            if (type.IsGenericType)
+            var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericType)
             {
                 var genericTypeDefinition = type.GetGenericTypeDefinition();
                 if (genericTypeDefinition == typeof (IEnumerable<>)
@@ -520,7 +525,8 @@ namespace Neo4jClient.Cypher
             if (type == typeof(RelationshipInstance))
                 return true;
 
-            if (type.IsGenericType)
+            var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericType)
             {
                 var genericTypeDefinition = type.GetGenericTypeDefinition();
                 if ((genericTypeDefinition == typeof(RelationshipInstance<>)
@@ -628,7 +634,8 @@ namespace Neo4jClient.Cypher
         static bool IsTypeNullable(Type type)
         {
             if (type == null) return false;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
+            var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
             if (type == typeof(string)) return true;
             return false;
         }
