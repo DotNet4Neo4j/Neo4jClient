@@ -20,10 +20,14 @@ namespace Neo4jClient.Serialization
             }
             catch
             {
+#if NET45
                 Trace.WriteLine("Could not deserialize TimeZoneInfo, defaulting to Utc. Ensure the TimeZoneId is valid. Valid TimeZone Ids are:");
+#endif
                 foreach (var timeZone in TimeZoneInfo.GetSystemTimeZones())
                 {
+#if NET45
                     Trace.WriteLine(timeZone.Id);
+#endif
                 }
                 return TimeZoneInfo.Utc;
             }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Serialization
@@ -17,7 +18,7 @@ namespace Neo4jClient.Serialization
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType.IsEnum;
+            return objectType.GetTypeInfo().IsEnum;
         }
     }
 }

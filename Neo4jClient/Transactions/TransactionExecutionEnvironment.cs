@@ -6,11 +6,17 @@ using Newtonsoft.Json;
 
 namespace Neo4jClient.Transactions
 {
+#if !DOTNET5_4
+    internal partial class TransactionExecutionEnvironment : MarshalByRefObject
+    {
+    }
+#endif
+    
     /// <summary>
     /// Because the resource manager is held in another application domain, the transaction execution environment
     /// has to be serialized to cross app domain boundaries.
     /// </summary>
-    internal class TransactionExecutionEnvironment : MarshalByRefObject, ITransactionExecutionEnvironment
+    internal partial class TransactionExecutionEnvironment : ITransactionExecutionEnvironment
     {
         public Uri TransactionBaseEndpoint { get; set; }
         public int TransactionId { get; set; }

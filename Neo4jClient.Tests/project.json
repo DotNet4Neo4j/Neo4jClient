@@ -1,0 +1,21 @@
+{
+    "version": "0.0.0",
+    "dependencies": {
+        "Newtonsoft.Json": "8.0.1"
+    },
+    "frameworks": {
+        "dnx451": {
+            "dependencies": {
+                "Neo4jClient": "",
+                "Microsoft.Net.Http": "2.0.20710.0",
+                "NSubstitute": "1.8.2",
+                "NUnit": "2.6.2",
+                "NUnitTestAdapter": "2.0.0"
+            },
+            
+            "frameworkAssemblies": {
+                "System.Drawing": ""
+            }
+        }
+    }
+}

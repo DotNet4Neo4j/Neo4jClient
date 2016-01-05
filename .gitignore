@@ -11,3 +11,4 @@ packages
 *.ncrunchsolution
 *.Cache
 *.vs\
+project.lock.json

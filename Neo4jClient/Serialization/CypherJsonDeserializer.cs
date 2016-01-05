@@ -127,7 +127,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(Node<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -139,7 +139,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -158,7 +158,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     jsonTypeMappings.Add(new TypeMapping
                     {
                         ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                            nestingLevel == 0 && type.IsClass,
+                            nestingLevel == 0 && type.GetTypeInfo().IsClass,
                         DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                             typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
                         MutationCallback = n =>
@@ -183,7 +183,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(Node<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -195,7 +195,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -217,7 +217,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                         jsonTypeMappings.Add(new TypeMapping
                         {
                             ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                                nestingLevel == 0 && type.IsClass,
+                                nestingLevel == 0 && type.GetTypeInfo().IsClass,
                             DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                                 typeof (NodeOrRelationshipApiResponse<>).MakeGenericType(new[] {t}),
                             MutationCallback = n =>
@@ -380,7 +380,7 @@ This means no query was emitted, so a method that doesn't care about getting res
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead. If using the fluent Cypher interface, use the overload of Return that takes a lambda or object instead of single string. (The overload with a single string is for an identity, not raw query text: we can't map the columns back out if you just supply raw query text.)");
 
             var resultType = typeof(TResult);
-            var isResultTypeANodeOrRelationshipInstance = resultType.IsGenericType &&
+            var isResultTypeANodeOrRelationshipInstance = resultType.GetTypeInfo().IsGenericType &&
                                        (resultType.GetGenericTypeDefinition() == typeof(Node<>) ||
                                         resultType.GetGenericTypeDefinition() == typeof(RelationshipInstance<>));
             var mapping = jsonTypeMappings.SingleOrDefault(m => m.ShouldTriggerForPropertyType(0, resultType));
@@ -559,7 +559,7 @@ This means no query was emitted, so a method that doesn't care about getting res
             var propertyType = property.PropertyType;
 
             var isEnumerable =
-                propertyType.IsGenericType &&
+                propertyType.GetTypeInfo().IsGenericType &&
                 propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>);
 
             var isArrayOrEnumerable =

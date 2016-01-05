@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
@@ -54,15 +55,19 @@ namespace Neo4jClient
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
+#if NET45
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.UseNagleAlgorithm = false;
+#endif
         }
 
         public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
+#if NET45
             ServicePointManager.Expect100Continue = expect100Continue;
             ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
+#endif
         }
 
         public GraphClient(Uri rootUri, IHttpClient httpClient)
@@ -74,7 +79,7 @@ namespace Neo4jClient
             ExecutionConfiguration = new ExecutionConfiguration
             {
                 HttpClient = httpClient,
-                UserAgent = string.Format("Neo4jClient/{0}", GetType().Assembly.GetName().Version),
+                UserAgent = string.Format("Neo4jClient/{0}", GetType().GetTypeInfo().Assembly.GetName().Version),
                 UseJsonStreaming = true,
                 JsonConverters = JsonConverters,
                 Username = httpClient == null ? null : httpClient.Username,
@@ -214,7 +219,7 @@ namespace Neo4jClient
             IEnumerable<IndexEntry> indexEntries)
             where TNode : class
         {
-            if (typeof (TNode).IsGenericType &&
+            if (typeof (TNode).GetTypeInfo().IsGenericType &&
                 typeof (TNode).GetGenericTypeDefinition() == typeof (Node<>))
             {
                 throw new ArgumentException(string.Format(
@@ -377,7 +382,7 @@ namespace Neo4jClient
                 .WithExpectedStatusCodes(HttpStatusCode.Created, HttpStatusCode.NotFound)
                 .ParseAs<RelationshipApiResponse<object>>()
                 .FailOnCondition(responseMessage => responseMessage.StatusCode == HttpStatusCode.NotFound)
-                .WithError(responseMessage => new ApplicationException(string.Format(
+                .WithError(responseMessage => new Exception(string.Format(
                     "One of the nodes referenced in the relationship could not be found. Referenced nodes were {0} and {1}.",
                     sourceNode.Id,
                     targetNode.Id))
@@ -410,7 +415,7 @@ namespace Neo4jClient
                 .Delete(policy.BaseEndpoint.AddPath(reference, policy))
                 .WithExpectedStatusCodes(HttpStatusCode.NoContent, HttpStatusCode.NotFound)
                 .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
-                .WithError(response => new ApplicationException(string.Format(
+                .WithError(response => new Exception(string.Format(
                     "Unable to delete the relationship. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.ReasonPhrase)))
@@ -645,7 +650,7 @@ namespace Neo4jClient
                 .Delete(policy.BaseEndpoint.AddPath(reference, policy))
                 .WithExpectedStatusCodes(HttpStatusCode.NoContent, HttpStatusCode.Conflict)
                 .FailOnCondition(response => response.StatusCode == HttpStatusCode.Conflict)
-                .WithError(response => new ApplicationException(string.Format(
+                .WithError(response => new Exception(string.Format(
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
                     (int) response.StatusCode,
                     response.ReasonPhrase)))
@@ -849,7 +854,7 @@ namespace Neo4jClient
 
             if (RootApiResponse.Extensions.GremlinPlugin == null ||
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
-                throw new ApplicationException(GremlinPluginUnavailable);
+                throw new Exception(GremlinPluginUnavailable);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -1105,7 +1110,7 @@ namespace Neo4jClient
 
             if (RootApiResponse.Extensions.GremlinPlugin == null ||
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
-                throw new ApplicationException(GremlinPluginUnavailable);
+                throw new Exception(GremlinPluginUnavailable);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -1161,7 +1166,7 @@ namespace Neo4jClient
 
             if (RootApiResponse.Extensions.GremlinPlugin == null ||
                 RootApiResponse.Extensions.GremlinPlugin.ExecuteScript == null)
-                throw new ApplicationException(GremlinPluginUnavailable);
+                throw new Exception(GremlinPluginUnavailable);
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -1473,7 +1478,7 @@ namespace Neo4jClient
                 var exceptionResponse = JsonConvert.DeserializeObject<ExceptionResponse>(createResponse.Body);
 
                 if (exceptionResponse == null || string.IsNullOrEmpty(exceptionResponse.Message) || string.IsNullOrEmpty(exceptionResponse.Exception))
-                    throw new ApplicationException(string.Format("Response from Neo4J: {0}", createResponse.Body));
+                    throw new Exception(string.Format("Response from Neo4J: {0}", createResponse.Body));
 
                 throw new NeoException(exceptionResponse);
             }

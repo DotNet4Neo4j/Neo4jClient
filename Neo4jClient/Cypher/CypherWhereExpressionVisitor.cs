@@ -4,8 +4,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Neo4jClient.Extensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -201,19 +199,24 @@ namespace Neo4jClient.Cypher
         void VisitStaticMember(MemberExpression node)
         {
             object value;
-            switch (node.Member.MemberType)
+            
+            FieldInfo fieldInfo = node.Member as FieldInfo;
+            PropertyInfo propInfo = node.Member as PropertyInfo;
+            
+            if(fieldInfo != null)
             {
-                case MemberTypes.Field:
-                    value = ((FieldInfo)node.Member).GetValue(null);
-                    break;
-                case MemberTypes.Property:
-                    value = ((PropertyInfo)node.Member).GetValue(null, null);
-                    break;
-                default:
-                    throw new NotSupportedException(string.Format(
-                        "Unhandled member type {0} in static member expression: {1}",
-                        node.Member.MemberType,
-                        node));
+                value = fieldInfo.GetValue(null);
+            }
+            else if(propInfo != null) 
+            {
+                value = propInfo.GetValue(null, null);
+            }
+            else 
+            {
+                throw new NotSupportedException(string.Format(
+                    "Unhandled member type {0} in static member expression: {1}",
+                    node.Member.DeclaringType,
+                    node));
             }
 
             var valueWrappedInParameter = createParameterCallback(value);
@@ -232,12 +235,17 @@ namespace Neo4jClient.Cypher
 
             var nullIdentifier = string.Empty;
 
+#if NET45
             var propertyParent = node.Member.ReflectedType;
+#else
+            var propertyParent = node.Member.DeclaringType;
+#endif
+            
             var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
 
             if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
             {
-                var isNullable = propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
+                var isNullable = propertyType.GetTypeInfo().IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
                 if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
             }
 

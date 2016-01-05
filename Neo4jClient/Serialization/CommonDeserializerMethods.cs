@@ -84,13 +84,14 @@ namespace Neo4jClient.Serialization
                 return null;
 
             var propertyType = propertyInfo.PropertyType;
+            var propertyTypeInfo = propertyType.GetTypeInfo();
             object jsonConversionResult;
             if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
                 return jsonConversionResult;
             
             Type genericTypeDef = null;
 
-            if (propertyType.IsGenericType)
+            if (propertyTypeInfo.IsGenericType)
             {
                 genericTypeDef = propertyType.GetGenericTypeDefinition();
 
@@ -102,7 +103,7 @@ namespace Neo4jClient.Serialization
             }
 
             typeMappings = typeMappings.ToArray();
-            if (propertyType.IsPrimitive)
+            if (propertyTypeInfo.IsPrimitive)
             {
                 // no primitives can contain quotes so we can safely remove them
                 // allows converting a json value like {"index": "1"} to an int
@@ -111,7 +112,7 @@ namespace Neo4jClient.Serialization
                 return tmpVal;
             }
 
-            if (propertyType.IsEnum)
+            if (propertyTypeInfo.IsEnum)
             {
                 var raw = value.AsString();
                 var converted = Enum.Parse(propertyType, raw, false);
@@ -212,9 +213,10 @@ namespace Neo4jClient.Serialization
             object instance;
             typeMappings = typeMappings.ToArray();
 
+            var typeInfo = type.GetTypeInfo();
             Type genericTypeDefinition = null;
 
-            if (type.IsGenericType)
+            if (typeInfo.IsGenericType)
             {
                 genericTypeDefinition = type.GetGenericTypeDefinition();
                 if (genericTypeDefinition == typeof (Nullable<>))
@@ -258,7 +260,7 @@ namespace Neo4jClient.Serialization
             {
                 instance = Convert.FromBase64String(element.Value<string>());
             }
-            else if (type.BaseType == typeof(Array)) //One Dimensional Only
+            else if (typeInfo.BaseType == typeof(Array)) //One Dimensional Only
             {
                 var underlyingType = type.GetElementType();
                 var arrayType = typeof(ArrayList);
@@ -271,13 +273,13 @@ namespace Neo4jClient.Serialization
             else if (TryJsonConverters(context, type, element, out instance))
             {
             }
-            else if (type.IsValueType)
+            else if (typeInfo.IsValueType)
             {
                 if (type == typeof(Guid))
                 {
                     instance = Guid.Parse(element.ToString());
                 }
-                else if (type.BaseType == typeof(Enum))
+                else if (typeInfo.BaseType == typeof(Enum))
                 {
                     instance = Enum.Parse(type, element.ToString(), false);
                 }
@@ -388,13 +390,13 @@ namespace Neo4jClient.Serialization
             var list = (IList)Activator.CreateInstance(type);
             var itemType = type
                 .GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>))
+                .Where(i => i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>))
                 .Select(i => i.GetGenericArguments().First())
                 .Single();
 
             foreach (var element in elements)
             {
-                if (itemType.IsPrimitive)
+                if (itemType.GetTypeInfo().IsPrimitive)
                 {
                     var value = element as JValue;
                     if (value != null)
@@ -422,7 +424,7 @@ namespace Neo4jClient.Serialization
 
             foreach (var element in elements)
             {
-                if (itemType.IsPrimitive)
+                if (itemType.GetTypeInfo().IsPrimitive)
                 {
                     var value = element as JValue;
                     if (value != null)
@@ -452,7 +454,7 @@ namespace Neo4jClient.Serialization
 
             foreach (var element in elements)
             {
-                if (itemType.IsPrimitive)
+                if (itemType.GetTypeInfo().IsPrimitive)
                 {
                     var value = element as JValue;
                     if (value != null)

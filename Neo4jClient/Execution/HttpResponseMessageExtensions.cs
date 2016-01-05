@@ -38,7 +38,7 @@ namespace Neo4jClient.Execution
                 rawBody = string.Format("\r\n\r\nThe response from Neo4j (which might include useful detail!) was: {0}", rawContent);
             }
 
-            throw new ApplicationException(string.Format(
+            throw new Exception(string.Format(
                 "Received an unexpected HTTP status when executing the request.\r\n\r\n{0}The response status was: {1} {2}{3}",
                 commandDescription,
                 (int)response.StatusCode,
@@ -48,7 +48,7 @@ namespace Neo4jClient.Execution
 
         static NeoException TryBuildNeoException(HttpResponseMessage response)
         {
-            var isJson = response.Content.Headers.ContentType.MediaType.Equals("application/json", StringComparison.InvariantCulture);
+            var isJson = response.Content.Headers.ContentType.MediaType.Equals("application/json", StringComparison.OrdinalIgnoreCase);
             if (!isJson) return null;
 
             var exceptionResponse = response.Content.ReadAsJson<ExceptionResponse>(new JsonConverter[0]);

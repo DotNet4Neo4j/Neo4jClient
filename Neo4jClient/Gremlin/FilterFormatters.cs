@@ -13,7 +13,7 @@ namespace Neo4jClient.Gremlin
             filters = filters
                 .Select(f =>
                 {
-                    if (f.Value != null && f.Value.GetType().IsEnum)
+                    if (f.Value != null && f.Value.GetType().GetTypeInfo().IsEnum)
                         f.Value = f.Value.ToString();
                     return f;
                 })
@@ -127,7 +127,7 @@ namespace Neo4jClient.Gremlin
                     var expression = filter.Body as MemberExpression;
 
                     if (expression != null &&
-                        (expression.Member is PropertyInfo && expression.Member.MemberType == MemberTypes.Property))
+                        (expression.Member is PropertyInfo && expression.Member is PropertyInfo))
                     {
                         var newFilter = new Filter
                             {
@@ -202,8 +202,8 @@ namespace Neo4jClient.Gremlin
             var underlyingPropertyType = key.PropertyType;
             underlyingPropertyType = Nullable.GetUnderlyingType(key.PropertyType) ?? underlyingPropertyType;
 
-            var convertedValue = underlyingPropertyType.IsEnum
-                ? Enum.Parse(underlyingPropertyType, underlyingPropertyType.GetEnumName(constantValue))
+            var convertedValue = underlyingPropertyType.GetTypeInfo().IsEnum
+                ? Enum.Parse(underlyingPropertyType, Enum.GetName(underlyingPropertyType, constantValue))
                 : constantValue;
 
             return new[]
@@ -226,8 +226,7 @@ namespace Neo4jClient.Gremlin
 
             var memberExpression = expression as MemberExpression;
             if (memberExpression != null &&
-                memberExpression.Member is PropertyInfo &&
-                memberExpression.Member.MemberType == MemberTypes.Property)
+                memberExpression.Member is PropertyInfo)
                 return new ExpressionKey
                 {
                     Name = memberExpression.Member.Name,
