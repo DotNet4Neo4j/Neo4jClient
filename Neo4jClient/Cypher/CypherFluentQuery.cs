@@ -76,10 +76,10 @@ namespace Neo4jClient.Cypher
         {
             if (parameters == null) return this;
             var keyValuePairs = new Dictionary<string, object>();
-            foreach (PropertyDescriptor propertyDescriptor in TypeDescriptor.GetProperties(parameters))
+            foreach (var propertyInfo in parameters.GetType().GetProperties())
             {
-                var key = propertyDescriptor.Name;
-                var value = propertyDescriptor.GetValue(parameters);
+                var key = propertyInfo.Name;
+                var value = propertyInfo.GetValue(parameters);
                 keyValuePairs.Add(key, value);
             }
             return WithParams(keyValuePairs);
