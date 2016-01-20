@@ -41,7 +41,7 @@ namespace Neo4jClient.Cypher
         public new ICypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
             return Mutate<TResult>(w =>
-                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(", ", properties))));
+                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(" DESC, ", properties))));
         }
 
         public IEnumerable<TResult> Results
