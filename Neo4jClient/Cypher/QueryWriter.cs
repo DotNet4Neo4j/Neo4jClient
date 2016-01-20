@@ -111,6 +111,27 @@ namespace Neo4jClient.Cypher
 
             return this;
         }
+        public QueryWriter AppendToClause(string appendedData, params object[] paramValues)
+        {
+            if (paramValues.Any())
+            {
+                var paramPlaceholders = paramValues
+                    .Select(CreateParameterAndReturnPlaceholder)
+                    .Cast<object>()
+                    .ToArray();
+                appendedData = string.Format(appendedData, paramPlaceholders);
+            }
+
+            if (queryTextBuilder.Length > 0 &&
+                queryTextBuilder.ToString().EndsWith(Environment.NewLine))
+            {
+                queryTextBuilder.Remove(queryTextBuilder.Length - Environment.NewLine.Length, Environment.NewLine.Length);
+            }
+
+            queryTextBuilder.Append(appendedData);
+
+            return this;
+        }
 
         string CreateParameterAndReturnPlaceholder(object paramValue)
         {

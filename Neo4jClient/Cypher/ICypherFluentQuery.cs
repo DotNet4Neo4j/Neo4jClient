@@ -59,8 +59,8 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery UnionAll();
         ICypherFluentQuery Limit(int? limit);
         ICypherFluentQuery Skip(int? skip);
-        ICypherFluentQuery OrderBy(params string[] properties);
-        ICypherFluentQuery OrderByDescending(params string[] properties);
+        IOrderedCypherFluentQuery OrderBy(params string[] properties);
+        IOrderedCypherFluentQuery OrderByDescending(params string[] properties);
         ICypherFluentQuery<TResult> Return<TResult>(string identity);
         [Obsolete("This was an internal that never should have been exposed. If you want to create a projection, you should be using the lambda overload instead. See the 'Using Functions in Return Clauses' and 'Using Custom Text in Return Clauses' sections of https://bitbucket.org/Readify/neo4jclient/wiki/cypher for details of how to do this.", true)]
         ICypherFluentQuery<TResult> Return<TResult>(string identity, CypherResultMode resultMode);
