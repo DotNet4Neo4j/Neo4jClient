@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Globalization;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using NUnit.Framework;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
+using NSubstitute;
 
 namespace Neo4jClient.Test.GraphClientTests.Cypher
 {
@@ -189,6 +194,163 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
                 Assert.IsTrue(eventArgs.HasException);
                 Assert.AreEqual(typeof(MockResponseThrowsException), eventArgs.Exception.GetType());
                 Assert.AreEqual(-1, eventArgs.ResourcesReturned);
+            }
+        }
+
+        /// <summary>
+        /// #75
+        /// </summary>
+        [Test]
+        public void SendsCommandWithCorrectTimeout()
+        {
+            const string queryText = "MATCH n SET n.Value = 'value'";
+            const int expectedMaxExecutionTime = 100;
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set,CypherResultFormat.DependsOnEnvironment , maxExecutionTime: expectedMaxExecutionTime);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot()
+                },
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Http((int) HttpStatusCode.OK)
+                }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
+                var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
+                graphClient.Connect();
+
+                httpClient.ClearReceivedCalls();
+                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+
+                var call = httpClient.ReceivedCalls().Single();
+                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var maxExecutionTimeHeader = requestMessage.Headers.Single(h => h.Key == "max-execution-time");
+                Assert.AreEqual(expectedMaxExecutionTime.ToString(CultureInfo.InvariantCulture), maxExecutionTimeHeader.Value.Single());
+            }
+        }
+
+        /// <summary>
+        /// #75
+        /// </summary>
+        [Test]
+        public void DoesntSetMaxExecutionTime_WhenNotSet()
+        {
+            const string queryText = "MATCH n SET n.Value = 'value'";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot()
+                },
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Http((int) HttpStatusCode.OK)
+                }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
+                var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
+                graphClient.Connect();
+
+                httpClient.ClearReceivedCalls();
+                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+
+                var call = httpClient.ReceivedCalls().Single();
+                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                Assert.IsFalse(requestMessage.Headers.Any(h => h.Key == "max-execution-time"));
+            }
+        }
+
+        /// <summary>
+        /// #141
+        /// </summary>
+        [Test]
+        public void SendsCommandWithCustomHeaders()
+        {
+            const string queryText = "MATCH n SET n.Value = 'value'";
+            const int expectedMaxExecutionTime = 100;
+            const string headerName = "MyTestHeader";
+            const string headerValue = "myTestHeaderValue";
+            var customHeaders = new NameValueCollection();
+            customHeaders.Add(headerName, headerValue);
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, maxExecutionTime: expectedMaxExecutionTime, customHeaders: customHeaders);
+            
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot()
+                },
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Http((int) HttpStatusCode.OK)
+                }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
+                var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
+                graphClient.Connect();
+
+                httpClient.ClearReceivedCalls();
+                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+
+                var call = httpClient.ReceivedCalls().Single();
+                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var maxExecutionTimeHeader = requestMessage.Headers.Single(h => h.Key == "max-execution-time");
+                Assert.AreEqual(expectedMaxExecutionTime.ToString(CultureInfo.InvariantCulture), maxExecutionTimeHeader.Value.Single());
+                var customHeader = requestMessage.Headers.Single(h => h.Key == headerName);
+                Assert.IsNotNull(customHeader);
+                Assert.AreEqual(headerValue, customHeader.Value.Single());
+            }
+        }
+
+
+        /// <summary>
+        /// #141
+        /// </summary>
+        [Test]
+        public void DoesntSetHeaders_WhenNotSet()
+        {
+            const string queryText = "MATCH n SET n.Value = 'value'";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.Get(""),
+                    MockResponse.NeoRoot()
+                },
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Http((int) HttpStatusCode.OK)
+                }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
+                var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
+                graphClient.Connect();
+
+                httpClient.ClearReceivedCalls();
+                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+
+                var call = httpClient.ReceivedCalls().Single();
+                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                Assert.IsFalse(requestMessage.Headers.Any(h => h.Key == "max-execution-time"));
             }
         }
     }

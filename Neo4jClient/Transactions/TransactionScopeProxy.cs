@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Transactions;
+using System.Collections.Specialized;
 
 namespace Neo4jClient.Transactions
 {
@@ -37,6 +33,8 @@ namespace Neo4jClient.Transactions
             get { return _transactionContext.Endpoint; }
             set { _transactionContext.Endpoint = value; }
         }
+
+        public NameValueCollection CustomHeaders { get; set; }
 
         public virtual void Dispose()
         {

@@ -37,7 +37,6 @@ namespace Neo4jClient.Test.GraphClientTests
             using (var testHarness = new RestTestHarness())
             {
                 var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
-
                 Assert.AreEqual("/node", graphClient.RootApiResponse.Node);
                 Assert.AreEqual("/index/node", graphClient.RootApiResponse.NodeIndex);
                 Assert.AreEqual("/index/relationship", graphClient.RootApiResponse.RelationshipIndex);
@@ -186,7 +185,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 .Returns(callInfo => { throw new NotImplementedException(); });
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
-
+            
             try
             {
                 graphClient.Connect();

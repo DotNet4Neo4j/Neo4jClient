@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json.Serialization;
 using System.Collections;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
@@ -410,6 +411,19 @@ namespace Neo4jClient.Cypher
                 default:
                     throw new ArgumentOutOfRangeException("planner", planner, null);
             }
+        }
+
+
+        public ICypherFluentQuery MaxExecutionTime(int milliseconds)
+        {
+            QueryWriter.MaxExecutionTime = milliseconds;
+            return this;
+        }
+
+        public ICypherFluentQuery CustomHeaders(NameValueCollection headers)
+        {
+            QueryWriter.CustomHeaders = headers;
+            return this;
         }
 
         public static string ApplyCamelCase(bool isCamelCase, string propertyName)

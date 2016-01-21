@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Neo4jClient.Cypher;
 
@@ -14,7 +15,7 @@ namespace Neo4jClient
         IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
         Task<IEnumerable<TResult>> ExecuteGetCypherResultsAsync<TResult>(CypherQuery query);
         void ExecuteCypher(CypherQuery query);
-        void ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries);
+        void ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries, NameValueCollection customHeaders = null);
         Task ExecuteCypherAsync(CypherQuery query);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,7 +17,10 @@ namespace Neo4jClient.Execution
         protected readonly ISet<HttpStatusCode> _expectedStatusCodes;
         protected readonly Func<HttpResponseMessage, bool> _errorCondition;
         protected readonly Func<HttpResponseMessage, Exception> _errorGenerator;
-        protected readonly IList<ErrorGenerator> _errorGenerators; 
+        protected readonly IList<ErrorGenerator> _errorGenerators;
+        protected readonly NameValueCollection _customHeaders;
+        protected readonly int? _maxExecutionTime;
+        internal const string MaxExecutionTimeHeaderKey = "max-execution-time";
 
         public ISet<HttpStatusCode> ExpectedStatusCodes
         {
@@ -28,23 +32,25 @@ namespace Neo4jClient.Execution
             get { return _errorGenerators; }
         }
 
-        public ResponseBuilder(HttpRequestMessage request, ExecutionConfiguration executionConfiguration)
-            : this(request, new HashSet<HttpStatusCode>(), executionConfiguration)
+        public ResponseBuilder(HttpRequestMessage request, ExecutionConfiguration executionConfiguration, NameValueCollection nameValueCollection, int? maxExecutionTime = null)
+            : this(request, new HashSet<HttpStatusCode>(), executionConfiguration, new List<ErrorGenerator>(), nameValueCollection, maxExecutionTime )
         {
         }
 
         public ResponseBuilder(HttpRequestMessage request, ISet<HttpStatusCode> expectedStatusCodes, ExecutionConfiguration executionConfiguration) :
-            this(request, expectedStatusCodes, executionConfiguration, new List<ErrorGenerator>())
+            this(request, expectedStatusCodes, executionConfiguration, new List<ErrorGenerator>(), null, null)
         {
         }
 
         public ResponseBuilder(HttpRequestMessage request, ISet<HttpStatusCode> expectedStatusCodes,
-            ExecutionConfiguration executionConfiguration, IList<ErrorGenerator> errorGenerators)
+            ExecutionConfiguration executionConfiguration, IList<ErrorGenerator> errorGenerators, NameValueCollection customHeaders, int? maxExecutionTime = null)
         {
             _request = request;
             _expectedStatusCodes = expectedStatusCodes;
             _executionConfiguration = executionConfiguration;
             _errorGenerators = errorGenerators;
+            _customHeaders = customHeaders;
+            _maxExecutionTime = maxExecutionTime;
         }
 
         protected ISet<HttpStatusCode> UnionStatusCodes(
@@ -60,13 +66,13 @@ namespace Neo4jClient.Execution
         public IResponseBuilder WithExpectedStatusCodes(params HttpStatusCode[] statusCodes)
         {
             return new ResponseBuilder(_request, UnionStatusCodes(_expectedStatusCodes, statusCodes),
-                _executionConfiguration, _errorGenerators);
+                _executionConfiguration, _errorGenerators, _customHeaders, _maxExecutionTime);
         }
 
         public IResponseFailBuilder FailOnCondition(Func<HttpResponseMessage, bool> condition)
         {
             return new ResponseFailBuilder(_request, _expectedStatusCodes, _executionConfiguration, _errorGenerators,
-                condition);
+                condition, _customHeaders);
         }
 
         private Task<HttpResponseMessage> PrepareAsync(TaskFactory taskFactory)
@@ -81,6 +87,23 @@ namespace Neo4jClient.Execution
             }
 
             _request.Headers.Add("User-Agent", _executionConfiguration.UserAgent);
+
+            if (_maxExecutionTime.HasValue)
+            {
+                _request.Headers.Add(MaxExecutionTimeHeaderKey, _maxExecutionTime.Value.ToString());
+            }
+
+            if (_customHeaders != null && _customHeaders.Count > 0)
+            {
+                foreach (var customHeaderKey in _customHeaders.AllKeys)
+                {
+                    var headerValue = _customHeaders.Get(customHeaderKey);
+                    if (!string.IsNullOrWhiteSpace(headerValue))
+                    {
+                        _request.Headers.Add(customHeaderKey, headerValue);
+                    }
+                }
+            }
 
             var userInfo = _request.RequestUri.UserInfo;
             if (!string.IsNullOrEmpty(userInfo))

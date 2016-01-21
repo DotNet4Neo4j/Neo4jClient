@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace Neo4jClient.Transactions
             dtcContexts = new Dictionary<string, TransactionContext>();
         }
 
-        private TransactionContext GetOrCreateDtcTransactionContext()
+        private TransactionContext GetOrCreateDtcTransactionContext(NameValueCollection customHeaders = null)
         {
             // we need to lock as we could get other async requests to the same transaction
             var txId = Transaction.Current.TransactionInformation.LocalIdentifier;
@@ -50,14 +51,18 @@ namespace Neo4jClient.Transactions
                 }
 
                 // associate it with the ambient transaction
-                txContext = new TransactionContext(promotable.AmbientTransaction);
+                txContext = new TransactionContext(promotable.AmbientTransaction)
+                {
+                    Transaction = {CustomHeaders = customHeaders},
+                    CustomHeaders = customHeaders
+                };
                 dtcContexts[txId] = txContext;
-
+                
                 return txContext;
             }
         }
 
-        private TransactionContext GetContext()
+        private TransactionContext GetContext(NameValueCollection customHeaders = null)
         {
             var nonDtcTransaction = CurrentInternalTransaction;
             if (nonDtcTransaction != null && nonDtcTransaction.Committable)
@@ -66,7 +71,7 @@ namespace Neo4jClient.Transactions
             }
 
             // if we are not in a native transaction get the context of our ambient transaction
-            return GetOrCreateDtcTransactionContext();
+            return GetOrCreateDtcTransactionContext(customHeaders);
         }
 
         public bool InTransaction
@@ -225,8 +230,8 @@ namespace Neo4jClient.Transactions
             // we try to get the current dtc transaction. If we are in a System.Transactions transaction and it has
             // been "promoted" to be handled by DTC then transactionObject will be null, but it doesn't matter as
             // we don't care about updating the object.
-            var txContext = GetContext();
-
+            var txContext = GetContext(query.CustomHeaders);
+            txContext.CustomHeaders = query.CustomHeaders;
             // the main difference with a normal Request.With() call is that the request is associated with the
             // TX context.
             return txContext.EnqueueTask(commandDescription, graphClient, policy, query);

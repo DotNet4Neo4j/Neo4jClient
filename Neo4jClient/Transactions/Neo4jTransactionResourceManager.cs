@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Transactions;
 
 namespace Neo4jClient.Transactions
 {
-    using Neo4jClient.Execution;
 
     /// <summary>
     /// When <c>TransactionPromotableSinglePhaseNotification</c> fails to register as PSPE, then this class will

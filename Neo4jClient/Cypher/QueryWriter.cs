@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Serialization;
@@ -45,11 +46,19 @@ namespace Neo4jClient.Cypher
             set { resultFormat = value; }
         }
 
+        public int? MaxExecutionTime { get; set; }
+
+        public NameValueCollection CustomHeaders { get; set; }
+
         public QueryWriter Clone()
         {
             var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
             var clonedParameters = new Dictionary<string, object>(queryParameters);
-            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode, resultFormat);
+            return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode, resultFormat)
+            {
+                MaxExecutionTime = MaxExecutionTime,
+                CustomHeaders = CustomHeaders
+            };
         }
 
         public CypherQuery ToCypherQuery(IContractResolver contractResolver = null)
@@ -63,7 +72,10 @@ namespace Neo4jClient.Cypher
                 new Dictionary<string, object>(queryParameters),
                 resultMode,
                 resultFormat,
-				contractResolver);
+				contractResolver,
+                MaxExecutionTime,
+                CustomHeaders
+                );
         }
 
         public string CreateParameter(object paramValue)

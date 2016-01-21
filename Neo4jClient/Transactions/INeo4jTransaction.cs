@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 
 namespace Neo4jClient.Transactions
 {
@@ -12,5 +13,7 @@ namespace Neo4jClient.Transactions
         /// The Neo4j base endpoint for this transaction
         /// </summary>
         Uri Endpoint { get; set; }
+
+        NameValueCollection CustomHeaders { get; set; }
     }
 }

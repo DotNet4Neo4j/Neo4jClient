@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Specialized;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -33,6 +34,8 @@ namespace Neo4jClient.Transactions
         /// </summary>
         private BlockingCollection<Task> _taskQueue;
 
+        public NameValueCollection CustomHeaders { get; set; }
+
         /// <summary>
         /// Where the cancellation token generates
         /// </summary>
@@ -50,8 +53,9 @@ namespace Neo4jClient.Transactions
             // grab the endpoint in the same thread
             var txBaseEndpoint = policy.BaseEndpoint;
             var serializedQuery = policy.SerializeRequest(query);
+            CustomHeaders = query.CustomHeaders;
             var task = new Task<HttpResponseMessage>(() =>
-                Request.With(client.ExecutionConfiguration)
+                Request.With(client.ExecutionConfiguration, query.CustomHeaders, query.MaxExecutionTime)
                     .Post(Endpoint ?? txBaseEndpoint)
                     .WithJsonContent(serializedQuery)
                     // HttpStatusCode.Created may be returned when emitting the first query on a transaction
