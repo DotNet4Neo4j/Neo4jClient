@@ -11,7 +11,7 @@ namespace Neo4jClient.Cypher
         new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName);
         new ICypherFluentQuery<TResult> Limit(int? limit);
         new ICypherFluentQuery<TResult> Skip(int? skip);
-        new ICypherFluentQuery<TResult> OrderBy(params string[] properties);
-        new ICypherFluentQuery<TResult> OrderByDescending(params string[] properties);
+        new IOrderedCypherFluentQuery<TResult> OrderBy(params string[] properties);
+        new IOrderedCypherFluentQuery<TResult> OrderByDescending(params string[] properties);
     }
 }

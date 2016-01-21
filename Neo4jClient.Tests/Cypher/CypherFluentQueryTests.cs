@@ -310,6 +310,26 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void OrderNodesByMultiplePropertiesWithDifferentOrders()
+        {
+            // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-order-nodes-by-multiple-properties
+            // START n=node(3,1,2)
+            // RETURN n
+            // ORDER BY n.age, n.name, n.number DESC, n.male DESC, n.lastName
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return<object>("n")
+                .OrderBy("n.age", "n.name")
+                .ThenByDescending("n.number", "n.male")
+                .ThenBy("n.lastName")
+                .Query;
+
+            Assert.AreEqual("RETURN n\r\nORDER BY n.age, n.name, n.number DESC, n.male DESC, n.lastName", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters.Count);
+        }
+
+        [Test]
         public void ReturnColumnAlias()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias

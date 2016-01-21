@@ -80,6 +80,8 @@
     <Compile Include="Cypher\ICypherFluentQuery`Where.cs" />
     <Compile Include="Cypher\ICypherFluentQuery`With.cs" />
     <Compile Include="Cypher\IFluentCypherResultItem.cs" />
+    <Compile Include="Cypher\IOrderedCypherFluentQuery.cs" />
+    <Compile Include="Cypher\IOrderedCypherFluentQuery`TResult.cs" />
     <Compile Include="Cypher\Relationship.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookupWithSingleParameter.cs" />
     <Compile Include="Cypher\CypherStartBitWithNodeIndexLookup.cs" />
