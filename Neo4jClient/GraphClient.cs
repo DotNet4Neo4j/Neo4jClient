@@ -1082,7 +1082,7 @@ namespace Neo4jClient
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var response = Request.With(ExecutionConfiguration)
+            var response = Request.With(ExecutionConfiguration, customHeaders)
                 .Post(context.Policy.BaseEndpoint)
                 .WithJsonContent(SerializeAsJson(new CypherStatementList(queryList)))
                 .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
