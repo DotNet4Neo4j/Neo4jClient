@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using System.Net;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Execution;
@@ -16,6 +17,7 @@ namespace Neo4jClient.Transactions
         public bool IsOpen { get; private set; }
 
         public Uri Endpoint { get; set; }
+        public NameValueCollection CustomHeaders { get; set; }
 
         internal int Id
         {
@@ -93,7 +95,7 @@ namespace Neo4jClient.Transactions
                 return;
             }
 
-            DoCommit(Endpoint, _client.ExecutionConfiguration, _client.Serializer);
+            DoCommit(Endpoint, _client.ExecutionConfiguration, _client.Serializer, CustomHeaders);
             CleanupAfterClosedTransaction();
         }
 
@@ -147,8 +149,7 @@ namespace Neo4jClient.Transactions
             var transactionEndpoint = DoKeepAlive(
                 keepAliveUri, 
                 _client.ExecutionConfiguration,
-                _client.Serializer,
-                Endpoint == null);
+                _client.Serializer,newTransaction: Endpoint == null);
             
             if (Endpoint != null)
             {
@@ -157,20 +158,20 @@ namespace Neo4jClient.Transactions
             Endpoint = transactionEndpoint;
         }
 
-        private static void DoCommit(Uri commitUri, ExecutionConfiguration executionConfiguration, ISerializer serializer)
+        private static void DoCommit(Uri commitUri, ExecutionConfiguration executionConfiguration, ISerializer serializer, NameValueCollection customHeaders = null)
         {
-            Request.With(executionConfiguration)
+            Request.With(executionConfiguration, customHeaders)
                .Post(commitUri.AddPath("commit"))
                .WithJsonContent(serializer.Serialize(new CypherStatementList()))
                .WithExpectedStatusCodes(HttpStatusCode.OK)
                .Execute();
         }
 
-        private static void DoRollback(Uri rollbackUri, ExecutionConfiguration executionConfiguration)
+        private static void DoRollback(Uri rollbackUri, ExecutionConfiguration executionConfiguration, NameValueCollection customHeaders)
         {
             // not found is ok because it means our transaction either was committed or the timeout was expired
             // and it was rolled back for us
-            Request.With(executionConfiguration)
+            Request.With(executionConfiguration, customHeaders)
                 .Delete(rollbackUri)
                 .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
                 .Execute();
@@ -180,9 +181,10 @@ namespace Neo4jClient.Transactions
             Uri keepAliveUri,
             ExecutionConfiguration executionConfiguration,
             ISerializer serializer,
+            NameValueCollection customHeaders = null,
             bool newTransaction = false)
         {
-            var partialRequest = Request.With(executionConfiguration)
+            var partialRequest = Request.With(executionConfiguration, customHeaders)
                 .Post(keepAliveUri)
                 .WithJsonContent(serializer.Serialize(new CypherStatementList()));
             
@@ -197,10 +199,12 @@ namespace Neo4jClient.Transactions
         /// Commits a transaction given the ID
         /// </summary>
         /// <param name="transactionExecutionEnvironment">The transaction execution environment</param>
-        internal static void DoCommit(ITransactionExecutionEnvironment transactionExecutionEnvironment)
+        /// <param name="customHeaders">Custom headers to sent to the neo4j server</param>
+        internal static void DoCommit(ITransactionExecutionEnvironment transactionExecutionEnvironment, NameValueCollection customHeaders = null)
         {
             var commitUri = transactionExecutionEnvironment.TransactionBaseEndpoint.AddPath(
                 transactionExecutionEnvironment.TransactionId.ToString());
+            
             DoCommit(
                 commitUri,
                 new ExecutionConfiguration
@@ -210,14 +214,16 @@ namespace Neo4jClient.Transactions
                     UseJsonStreaming =  transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
                 },
-                new CustomJsonSerializer());
+                new CustomJsonSerializer(),
+                customHeaders
+                );
         }
 
         /// <summary>
         /// Rolls back a transaction given the ID
         /// </summary>
         /// <param name="transactionExecutionEnvironment">The transaction execution environment</param>
-        internal static void DoRollback(ITransactionExecutionEnvironment transactionExecutionEnvironment)
+        internal static void DoRollback(ITransactionExecutionEnvironment transactionExecutionEnvironment, NameValueCollection customHeaders = null)
         {
             try
             {
@@ -231,7 +237,8 @@ namespace Neo4jClient.Transactions
                         JsonConverters = GraphClient.DefaultJsonConverters,
                         UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                         UserAgent = transactionExecutionEnvironment.UserAgent
-                    });
+                    },
+                    customHeaders);
             }
             catch (Exception e)
             {
@@ -251,12 +258,13 @@ namespace Neo4jClient.Transactions
                 keepAliveUri,
                 new ExecutionConfiguration
                 {
-                    HttpClient = new HttpClientWrapper(transactionExecutionEnvironment.Username, transactionExecutionEnvironment.Password),
+                    HttpClient =
+                        new HttpClientWrapper(transactionExecutionEnvironment.Username,
+                            transactionExecutionEnvironment.Password),
                     JsonConverters = GraphClient.DefaultJsonConverters,
                     UseJsonStreaming = transactionExecutionEnvironment.UseJsonStreaming,
                     UserAgent = transactionExecutionEnvironment.UserAgent
-                },
-                new CustomJsonSerializer());
+                }, new CustomJsonSerializer(), null);
         }
 
         public void Dispose()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 
 namespace Neo4jClient
 {
@@ -11,6 +12,8 @@ namespace Neo4jClient
         public TimeSpan TimeTaken { get; set; }
         public Exception Exception { get; set; }
         public bool HasException { get { return Exception != null; } }
+        public int? MaxExecutionTime { get; set; }
+        public NameValueCollection CustomHeaders { get; set; }
 
         public override string ToString()
         {

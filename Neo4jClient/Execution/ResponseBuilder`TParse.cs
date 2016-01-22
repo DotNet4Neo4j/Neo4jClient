@@ -17,7 +17,7 @@ namespace Neo4jClient.Execution
 
         public ResponseBuilder(HttpRequestMessage request, ISet<HttpStatusCode> expectedStatusCodes,
             ExecutionConfiguration executionConfiguration, IList<ErrorGenerator> errorGenerators)
-            : base(request, expectedStatusCodes, executionConfiguration, errorGenerators)
+            : base(request, expectedStatusCodes, executionConfiguration, errorGenerators, null)
         {
         }
 

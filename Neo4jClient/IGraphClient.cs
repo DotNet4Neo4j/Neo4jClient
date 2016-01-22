@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;

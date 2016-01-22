@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -19,6 +20,20 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery ParserVersion(string version);
         ICypherFluentQuery ParserVersion(Version version);
         ICypherFluentQuery ParserVersion(int major, int minor);
+
+        ICypherFluentQuery MaxExecutionTime(int milliseconds);
+
+        /// <summary>
+        /// Custom headers to add to REST calls to Neo4j server.
+        /// Example usage: This can be used to provide extra information to a Neo4j Loadbalancer. 
+        /// </summary>
+        /// <remarks>
+        /// This settings is ignored when using <see cref="IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction"/>
+        /// Since it could create a race-condition. 
+        /// </remarks>
+        /// <param name="headers">Customheader added via: <see cref="NameValueCollection"/></param>
+        /// <returns></returns>
+        ICypherFluentQuery CustomHeaders(NameValueCollection headers);
 
         ICypherFluentQuery Planner(string planner);
         ICypherFluentQuery Planner(CypherPlanner planner);

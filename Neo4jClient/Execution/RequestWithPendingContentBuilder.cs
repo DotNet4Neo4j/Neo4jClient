@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Net.Http;
 using System.Text;
 
@@ -9,12 +10,16 @@ namespace Neo4jClient.Execution
         private readonly HttpMethod _httpMethod;
         private readonly Uri _endpoint;
         private readonly ExecutionConfiguration _executionConfiguration;
+        private readonly NameValueCollection _customHeaders;
+        private readonly int? _maxExecutionTime;
 
-        public RequestWithPendingContentBuilder(HttpMethod httpMethod, Uri endpoint, ExecutionConfiguration executionConfiguration)
+        public RequestWithPendingContentBuilder(HttpMethod httpMethod, Uri endpoint, ExecutionConfiguration executionConfiguration, NameValueCollection customHeaders, int? maxExecutionTime)
         {
             _httpMethod = httpMethod;
             _endpoint = endpoint;
             _executionConfiguration = executionConfiguration;
+            _customHeaders = customHeaders;
+            _maxExecutionTime = maxExecutionTime;
         }
 
         public IResponseBuilder WithContent(string content)
@@ -24,7 +29,9 @@ namespace Neo4jClient.Execution
                 {
                     Content = new StringContent(content, Encoding.UTF8)
                 },
-                _executionConfiguration
+                _executionConfiguration,
+                _customHeaders,
+                _maxExecutionTime
             );
         }
 
@@ -35,7 +42,9 @@ namespace Neo4jClient.Execution
                 {
                     Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
                 }, 
-                _executionConfiguration
+                _executionConfiguration,
+                _customHeaders,
+                _maxExecutionTime
             );
         }
     }

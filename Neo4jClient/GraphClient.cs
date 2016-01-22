@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -26,6 +27,7 @@ namespace Neo4jClient
     {
         internal const string GremlinPluginUnavailable =
             "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
+        internal const string MaxExecutionTimeHeaderKey = "max-execution-time";
 
         public static readonly JsonConverter[] DefaultJsonConverters =
         {
@@ -195,6 +197,8 @@ namespace Neo4jClient
 
             stopTimerAndNotifyCompleted();
         }
+
+        //public NameValueCollection CustomHeaders { get; set; }
 
         [Obsolete(
             "The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels."
@@ -942,7 +946,15 @@ namespace Neo4jClient
                     });
             }
 
-            return Request.With(ExecutionConfiguration)
+            int? maxExecutionTime = null;
+            NameValueCollection customHeaders = null;
+            if (query != null)
+            {
+                maxExecutionTime = query.MaxExecutionTime;
+                customHeaders = query.CustomHeaders;
+            }
+
+            return Request.With(ExecutionConfiguration, customHeaders, maxExecutionTime)
                 .Post(policy.BaseEndpoint)
                 .WithJsonContent(policy.SerializeRequest(query))
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
@@ -1049,7 +1061,7 @@ namespace Neo4jClient
 
             context.Complete(query);
         }
-
+        
         async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
             var context = ExecutionContext.Begin(this);
@@ -1060,7 +1072,7 @@ namespace Neo4jClient
             context.Complete(query);
         }
 
-        void IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries)
+        void IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries, NameValueCollection customHeaders)
         {
             var context = ExecutionContext.Begin(this);
 
@@ -1538,7 +1550,7 @@ namespace Neo4jClient
 
             public void Complete(CypherQuery query, int resultsCount)
             {
-                Complete(query.DebugQueryText, resultsCount, null);
+                Complete(query.DebugQueryText, resultsCount, null, query.CustomHeaders);
             }
 
             public void Complete(CypherQuery query, Exception exception)
@@ -1546,14 +1558,16 @@ namespace Neo4jClient
                 Complete(query.DebugQueryText, -1, exception);
             }
 
-            public void Complete(string queryText, int resultsCount = -1, Exception exception = null)
+            public void Complete(string queryText, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null)
             {
                 var args = new OperationCompletedEventArgs
                 {
                     QueryText = queryText,
                     ResourcesReturned = resultsCount,
                     TimeTaken = stopwatch.Elapsed,
-                    Exception = exception
+                    Exception = exception,
+                    CustomHeaders = customHeaders,
+                    MaxExecutionTime = maxExecutionTime
                 };
 
                 owner.OnOperationCompleted(args);
