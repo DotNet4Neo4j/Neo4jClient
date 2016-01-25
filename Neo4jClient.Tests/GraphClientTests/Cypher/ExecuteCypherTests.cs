@@ -15,6 +15,32 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
     [TestFixture]
     public class ExecuteCypherTests
     {
+        /// <summary>
+        ///     When executing cypher queries when no parameters are needed, the REST interface doesn't care if we don't send parameters.
+        /// </summary>
+        [Test]
+        public void SendingNullParametersShouldNotRaiseExceptionWhenExecutingCypher()
+        {
+            const string queryText = @"MATCH (d) RETURN d";
+            
+            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Http((int)HttpStatusCode.OK)
+                }
+            })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                // execute cypher with "null" parameters
+                graphClient.ExecuteCypher(cypherQuery);
+            }
+        }
+
         [Test]
         public void ShouldSendCommandAndNotCareAboutResults()
         {
