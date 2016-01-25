@@ -8,6 +8,15 @@ namespace Neo4jClient.Test.Cypher
     public class CypherQueryTests
     {
         [Test]
+        public void DebugQueryShouldBeSuccessfulWithNullAsParameters()
+        {
+            var query = new CypherQuery("MATCH (n) RETURN (n)", null, CypherResultMode.Set);
+
+            const string expected = "MATCH (n) RETURN (n)";
+            Assert.AreEqual(expected, query.DebugQueryText);
+        }
+
+        [Test]
         public void DebugQueryTextShouldPreserveNewLines()
         {
             var client = Substitute.For<IRawGraphClient>();
