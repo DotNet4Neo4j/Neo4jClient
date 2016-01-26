@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 
 namespace Neo4jClient.Transactions
 {
@@ -31,5 +32,11 @@ namespace Neo4jClient.Transactions
         /// Commit() or Rollback().
         /// </summary>
         bool IsOpen { get; }
+
+        /// <summary>
+        /// Customheader collection This will be the same for the entire transaction.
+        /// So the commit will use the same customheader(s) as the cypher customheader
+        /// </summary>
+        NameValueCollection CustomHeaders { get; set; }
     }
 }

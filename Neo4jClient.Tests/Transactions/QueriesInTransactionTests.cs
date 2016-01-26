@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +13,7 @@ using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json.Serialization;
+using NSubstitute;
 using NUnit.Framework;
 using TransactionScopeOption = System.Transactions.TransactionScopeOption;
 
@@ -167,6 +171,80 @@ namespace Neo4jClient.Test.Transactions
 
                     rawClient.ExecuteMultipleCypherQueriesInTransaction(queries);
                     transaction.Commit();
+                }
+            }
+        }
+
+        [Test]
+        public void ExecuteMultipleStatementInOneRequestHttpRequest()
+        {
+            const string headerName = "MyTestHeader";
+            const string headerValue = "myTestHeaderValue";
+            var customHeaders = new NameValueCollection { {headerName, headerValue} };
+            
+
+            var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
+                'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}, {'statement': 'MATCH t\r\nRETURN count(t)', 'resultDataContents':[], 'parameters': {}}]}");
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    initTransactionRequest,
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var response = MockResponse.NeoRoot20();
+                testHarness.Add(MockRequest.Get(""), response);
+                var httpClient = testHarness.GenerateHttpClient("http://foo/db/data");
+                testHarness.CreateAndConnectTransactionalGraphClient();
+                ITransactionalGraphClient client = new GraphClient(new Uri("http://foo/db/data"), httpClient);
+                client.Connect();
+                using (var transaction = client.BeginTransaction())
+                {
+                    // dummy query to generate request
+                    var rawClient = client as IRawGraphClient;
+                    if (rawClient == null)
+                    {
+                        Assert.Fail("ITransactionalGraphClient is not IRawGraphClient");
+                    }
+
+                    var queries = new List<CypherQuery>()
+                    {
+                        client.Cypher
+                            .Match("n")
+                            .Return(n => n.Count())
+                            .Query,
+                        client.Cypher
+                            .Match("t")
+                            .Return(t => t.Count())
+                            .Query
+                    };
+                    httpClient.ClearReceivedCalls();
+                    rawClient.ExecuteMultipleCypherQueriesInTransaction(queries, customHeaders);
+                    transaction.Commit();
+
+                    var calls = httpClient.ReceivedCalls().ToList();
+                    Assert.IsNotEmpty(calls);
+
+                    HttpRequestMessage requestMessage = null;
+
+                    foreach (var call in calls)
+                    {
+                        if (call.GetArguments().Single().GetType() == typeof (HttpRequestMessage))
+                        {
+                            requestMessage = (HttpRequestMessage) call.GetArguments().Single();
+                        }
+                    }
+
+                    Assert.IsNotNull(requestMessage);
+
+                    var customHeader = requestMessage.Headers.Single(h => h.Key == headerName);
+                    Assert.IsNotNull(customHeader);
+                    Assert.AreEqual(headerValue, customHeader.Value.Single());
                 }
             }
         }

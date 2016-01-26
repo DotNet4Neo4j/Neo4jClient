@@ -1090,9 +1090,14 @@ namespace Neo4jClient
 
             var transactionObject = transactionManager.CurrentNonDtcTransaction ??
                                     transactionManager.CurrentDtcTransaction;
+
+            if (customHeaders != null && customHeaders.Count > 0)
+            {
+                transactionObject.CustomHeaders = customHeaders;
+            }
+
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
-            
-            context.Complete(string.Join(", ", queryList.Select(query => query.DebugQueryText)));
+            context.Complete(string.Join(", ", queryList.Select(query => query.DebugQueryText)), -1, null, customHeaders);
         }
 
         [Obsolete(
