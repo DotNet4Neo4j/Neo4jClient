@@ -297,7 +297,7 @@ namespace Neo4jClient.Test.Cypher
             // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-order-nodes-in-descending-order
             // START n=node(3,1,2)
             // RETURN n
-            // ORDER BY n.age, n.name DESC
+            // ORDER BY n.age DESC, n.name DESC
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
@@ -305,7 +305,27 @@ namespace Neo4jClient.Test.Cypher
                 .OrderByDescending("n.age", "n.name")
                 .Query;
 
-            Assert.AreEqual("RETURN n\r\nORDER BY n.age, n.name DESC", query.QueryText);
+            Assert.AreEqual("RETURN n\r\nORDER BY n.age DESC, n.name DESC", query.QueryText);
+            Assert.AreEqual(0, query.QueryParameters.Count);
+        }
+
+        [Test]
+        public void OrderNodesByMultiplePropertiesWithDifferentOrders()
+        {
+            // http://docs.neo4j.org/chunked/stable/query-order.html#order-by-order-nodes-by-multiple-properties
+            // START n=node(3,1,2)
+            // RETURN n
+            // ORDER BY n.age, n.name, n.number DESC, n.male DESC, n.lastName
+
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Return<object>("n")
+                .OrderBy("n.age", "n.name")
+                .ThenByDescending("n.number", "n.male")
+                .ThenBy("n.lastName")
+                .Query;
+
+            Assert.AreEqual("RETURN n\r\nORDER BY n.age, n.name, n.number DESC, n.male DESC, n.lastName", query.QueryText);
             Assert.AreEqual(0, query.QueryParameters.Count);
         }
 

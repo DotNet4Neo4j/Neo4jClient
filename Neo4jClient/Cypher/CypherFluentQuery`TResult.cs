@@ -7,7 +7,7 @@ namespace Neo4jClient.Cypher
     [DebuggerDisplay("{Query.DebugQueryText}")]
     public class CypherFluentQuery<TResult> :
         CypherFluentQuery,
-        ICypherFluentQuery<TResult>
+        IOrderedCypherFluentQuery<TResult>
     {
         public CypherFluentQuery(IGraphClient client, QueryWriter writer)
             : base(client, writer)
@@ -32,16 +32,28 @@ namespace Neo4jClient.Cypher
                 : this;
         }
 
-        public new ICypherFluentQuery<TResult> OrderBy(params string[] properties)
+        public new IOrderedCypherFluentQuery<TResult> OrderBy(params string[] properties)
         {
-            return Mutate<TResult>(w =>
+            return MutateOrdered<TResult>(w =>
                 w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
         }
 
-        public new ICypherFluentQuery<TResult> OrderByDescending(params string[] properties)
+        public new IOrderedCypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
-            return Mutate<TResult>(w =>
-                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(", ", properties))));
+            return MutateOrdered<TResult>(w =>
+                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(" DESC, ", properties))));
+        }
+
+        public new IOrderedCypherFluentQuery<TResult> ThenBy(params string[] properties)
+        {
+            return MutateOrdered<TResult>(w =>
+                w.AppendToClause(string.Format(", {0}", string.Join(", ", properties))));
+        }
+
+        public new IOrderedCypherFluentQuery<TResult> ThenByDescending(params string[] properties)
+        {
+            return MutateOrdered<TResult>(w =>
+                w.AppendToClause(string.Format(", {0} DESC", string.Join(" DESC, ", properties))));
         }
 
         public IEnumerable<TResult> Results
