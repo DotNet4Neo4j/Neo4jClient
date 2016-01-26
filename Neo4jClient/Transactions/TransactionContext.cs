@@ -125,6 +125,10 @@ namespace Neo4jClient.Transactions
                 _cancellationTokenSource.Cancel();
                 throw new InvalidOperationException("Cannot commit unless all tasks have been completed");
             }
+            if (CustomHeaders != null)
+            {
+                Transaction.CustomHeaders = CustomHeaders;
+            }
             Transaction.Commit();
         }
 

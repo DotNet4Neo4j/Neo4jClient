@@ -60,6 +60,10 @@ namespace Neo4jClient.Transactions
         public void Commit()
         {
             _markCommitted = true;
+            if (CustomHeaders != null)
+            {
+                _transactionContext.CustomHeaders = CustomHeaders;
+            }
             DoCommit();
         }
 
