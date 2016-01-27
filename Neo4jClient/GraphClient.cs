@@ -1097,7 +1097,8 @@ namespace Neo4jClient
             }
 
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
-            context.Complete(string.Join(", ", queryList.Select(query => query.DebugQueryText)), -1, null, customHeaders);
+            context.Complete(OperationCompleted != null ? string.Join(", ", queryList.Select(query => query.DebugQueryText)) : string.Empty);
+            context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
         }
 
         [Obsolete(
@@ -1550,17 +1551,20 @@ namespace Neo4jClient
 
             public void Complete(CypherQuery query)
             {
-                Complete(query.DebugQueryText, 0, null);
+                // only parse the events when there's an event handler
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, 0, null);
             }
 
             public void Complete(CypherQuery query, int resultsCount)
             {
-                Complete(query.DebugQueryText, resultsCount, null, query.CustomHeaders);
+                // only parse the events when there's an event handler
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, resultsCount, null, query.CustomHeaders);
             }
 
             public void Complete(CypherQuery query, Exception exception)
             {
-                Complete(query.DebugQueryText, -1, exception);
+                // only parse the events when there's an event handler
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, -1, exception);
             }
 
             public void Complete(string queryText, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null)

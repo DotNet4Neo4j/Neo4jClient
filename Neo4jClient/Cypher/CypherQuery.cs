@@ -101,6 +101,11 @@ namespace Neo4jClient.Cypher
         {
             get
             {
+                if (queryParameters == null)
+                {
+                    return queryText;
+                }
+
                 var serializer = BuildSerializer();
                 var text = queryParameters
                     .Keys
