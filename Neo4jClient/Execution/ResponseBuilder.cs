@@ -15,8 +15,6 @@ namespace Neo4jClient.Execution
         protected readonly HttpRequestMessage _request;
         protected readonly ExecutionConfiguration _executionConfiguration;
         protected readonly ISet<HttpStatusCode> _expectedStatusCodes;
-        protected readonly Func<HttpResponseMessage, bool> _errorCondition;
-        protected readonly Func<HttpResponseMessage, Exception> _errorGenerator;
         protected readonly IList<ErrorGenerator> _errorGenerators;
         protected readonly NameValueCollection _customHeaders;
         protected readonly int? _maxExecutionTime;
@@ -33,12 +31,12 @@ namespace Neo4jClient.Execution
         }
 
         public ResponseBuilder(HttpRequestMessage request, ExecutionConfiguration executionConfiguration, NameValueCollection nameValueCollection, int? maxExecutionTime = null)
-            : this(request, new HashSet<HttpStatusCode>(), executionConfiguration, new List<ErrorGenerator>(), nameValueCollection, maxExecutionTime )
+            : this(request, new HashSet<HttpStatusCode>(), executionConfiguration, new List<ErrorGenerator>(), nameValueCollection, maxExecutionTime)
         {
         }
 
         public ResponseBuilder(HttpRequestMessage request, ISet<HttpStatusCode> expectedStatusCodes, ExecutionConfiguration executionConfiguration) :
-            this(request, expectedStatusCodes, executionConfiguration, new List<ErrorGenerator>(), null, null)
+            this(request, expectedStatusCodes, executionConfiguration, new List<ErrorGenerator>(), null)
         {
         }
 
@@ -75,7 +73,7 @@ namespace Neo4jClient.Execution
                 condition, _customHeaders);
         }
 
-        private Task<HttpResponseMessage> PrepareAsync(TaskFactory taskFactory)
+        private async Task<HttpResponseMessage> PrepareAsync(TaskFactory taskFactory)
         {
             if (_executionConfiguration.UseJsonStreaming)
             {
@@ -115,11 +113,11 @@ namespace Neo4jClient.Execution
             if (taskFactory == null)
             {
                 // use the standard factory
-                return _executionConfiguration.HttpClient.SendAsync(_request);
+                return await _executionConfiguration.HttpClient.SendAsync(_request).ConfigureAwait(false);
             }
 
             // use a custom task factory
-            return taskFactory.StartNew(() => _executionConfiguration.HttpClient.SendAsync(_request).Result);
+            return await taskFactory.StartNew(() => _executionConfiguration.HttpClient.SendAsync(_request).Result);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync()
@@ -174,8 +172,8 @@ namespace Neo4jClient.Execution
                 return response;
             });
 
-            return continuationFunction != null ? 
-                executionTask.ContinueWith(continuationFunction) : 
+            return continuationFunction != null ?
+                executionTask.ContinueWith(continuationFunction) :
                 executionTask;
         }
 
@@ -213,8 +211,9 @@ namespace Neo4jClient.Execution
             }
             catch (AggregateException ex)
             {
-                if (ex.InnerExceptions.Count() == 1)
-                    throw ex.InnerExceptions.Single();
+                Exception e;
+                if (ex.TryUnwrap(out e))
+                    throw e;
                 throw;
             }
             return task.Result;
