@@ -37,7 +37,7 @@ namespace Neo4jClient
             new EnumValueConverter()
         };
 
-        public static readonly DefaultContractResolver DefaultJsonContractResolver  = new DefaultContractResolver();
+        public static readonly DefaultContractResolver DefaultJsonContractResolver = new DefaultContractResolver();
 
         private ITransactionManager transactionManager;
         private readonly IExecutionPolicyFactory policyFactory;
@@ -49,7 +49,6 @@ namespace Neo4jClient
         private RootNode rootNode;
 
         private CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
-        
 
         public bool UseJsonStreamingIfAvailable { get; set; }
 
@@ -108,7 +107,7 @@ namespace Neo4jClient
             get { return RootApiResponse != null; }
         }
 
-        public virtual void Connect()
+        public virtual void Connect(NeoServerConfiguration configuration = null)
         {
             if (IsConnected)
             {
@@ -131,41 +130,17 @@ namespace Neo4jClient
 
             try
             {
-                var result = Request.With(ExecutionConfiguration)
-                    .Get(BuildUri(""))
-                    .WithExpectedStatusCodes(HttpStatusCode.OK)
-                    .ParseAs<RootApiResponse>()
-                    .Execute();
+                configuration = configuration ?? NeoServerConfiguration.GetConfiguration(
+                    RootUri,
+                    ExecutionConfiguration.Username,
+                    ExecutionConfiguration.Password,
+                    ExecutionConfiguration);
 
-                var rootUriWithoutUserInfo = RootUri;
-                if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
-                    rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
-                var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+                RootApiResponse = configuration.ApiConfig;
 
-                RootApiResponse = result;
-                RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
-                RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
-                RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
-                RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
-                RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
-                RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
-
-                if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
+                if (!string.IsNullOrWhiteSpace(RootApiResponse.Transaction))
                 {
-                    RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
                     transactionManager = new TransactionManager(this);
-                }
-
-                if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
-                {
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                        RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-                }
-
-                if (RootApiResponse.Cypher != null)
-                {
-                    RootApiResponse.Cypher =
-                        RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
                 }
 
                 rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
@@ -188,7 +163,7 @@ namespace Neo4jClient
                 if (RootApiResponse.Version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 operationCompletedArgs.Exception = e;
                 stopTimerAndNotifyCompleted();
@@ -218,12 +193,12 @@ namespace Neo4jClient
             IEnumerable<IndexEntry> indexEntries)
             where TNode : class
         {
-            if (typeof (TNode).IsGenericType &&
-                typeof (TNode).GetGenericTypeDefinition() == typeof (Node<>))
+            if (typeof(TNode).IsGenericType &&
+                typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>))
             {
                 throw new ArgumentException(string.Format(
                     "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
-                    typeof (TNode).GetGenericArguments()[0].Name),
+                    typeof(TNode).GetGenericArguments()[0].Name),
                     "node");
             }
 
@@ -243,7 +218,7 @@ namespace Neo4jClient
                 .Cast<Relationship>()
                 .Select(r => new
                 {
-                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof (TNode), r),
+                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof(TNode), r),
                     Relationship = r
                 })
                 .ToArray();
@@ -318,7 +293,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Create<{0}>", typeof (TNode).Name),
+                QueryText = string.Format("Create<{0}>", typeof(TNode).Name),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -398,7 +373,7 @@ namespace Neo4jClient
 
         public ISerializer Serializer
         {
-            get { return new CustomJsonSerializer { JsonConverters = JsonConverters , JsonContractResolver = JsonContractResolver}; }
+            get { return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver }; }
         }
 
         public void DeleteRelationship(RelationshipReference reference)
@@ -416,7 +391,7 @@ namespace Neo4jClient
                 .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
                 .WithError(response => new ApplicationException(string.Format(
                     "Unable to delete the relationship. The response status was: {0} {1}",
-                    (int) response.StatusCode,
+                    (int)response.StatusCode,
                     response.ReasonPhrase)))
                 .Execute();
 
@@ -460,13 +435,13 @@ namespace Neo4jClient
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
         {
-            return Get<TNode>((NodeReference) reference);
+            return Get<TNode>((NodeReference)reference);
         }
 
         public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference)
             where TData : class, new()
         {
-            return Get<TData>((RelationshipReference) reference);
+            return Get<TData>((RelationshipReference)reference);
         }
 
         public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference reference)
@@ -528,7 +503,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof (TNode).Name, nodeReference.Id),
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -547,7 +522,7 @@ namespace Neo4jClient
 
             var node = Get(nodeReference);
 
-            var indexEntries = new IndexEntry[] {};
+            var indexEntries = new IndexEntry[] { };
 
             if (indexEntriesCallback != null)
             {
@@ -563,11 +538,11 @@ namespace Neo4jClient
             if (changeCallback != null)
             {
                 var originalValuesDictionary =
-                    new CustomJsonDeserializer(JsonConverters,resolver:JsonContractResolver).Deserialize<Dictionary<string, string>>(
+                    new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<Dictionary<string, string>>(
                         originalValuesString);
                 var newValuesString = serializer.Serialize(node.Data);
                 var newValuesDictionary =
-                    new CustomJsonDeserializer(JsonConverters,resolver:JsonContractResolver).Deserialize<Dictionary<string, string>>(newValuesString);
+                    new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<Dictionary<string, string>>(newValuesString);
                 var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary,
                     newValuesDictionary);
                 changeCallback(differences);
@@ -587,7 +562,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof (TNode).Name, nodeReference.Id),
+                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -625,7 +600,7 @@ namespace Neo4jClient
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
             {
-                QueryText = string.Format("Update<{0}> {1}", typeof (TRelationshipData).Name, relationshipReference.Id),
+                QueryText = string.Format("Update<{0}> {1}", typeof(TRelationshipData).Name, relationshipReference.Id),
                 ResourcesReturned = 0,
                 TimeTaken = stopwatch.Elapsed
             });
@@ -651,7 +626,7 @@ namespace Neo4jClient
                 .FailOnCondition(response => response.StatusCode == HttpStatusCode.Conflict)
                 .WithError(response => new ApplicationException(string.Format(
                     "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
-                    (int) response.StatusCode,
+                    (int)response.StatusCode,
                     response.ReasonPhrase)))
                 .Execute();
 
@@ -895,7 +870,7 @@ namespace Neo4jClient
                 .ParseAs<List<List<GremlinTableCapResponse>>>()
                 .Execute(string.Format("The query was: {0}", query.QueryText));
 
-            var responses = response ?? new List<List<GremlinTableCapResponse>> {new List<GremlinTableCapResponse>()};
+            var responses = response ?? new List<List<GremlinTableCapResponse>> { new List<GremlinTableCapResponse>() };
 
             stopwatch.Stop();
             OnOperationCompleted(new OperationCompletedEventArgs
@@ -963,10 +938,10 @@ namespace Neo4jClient
                     ResponseObject = response.Result
                 });
         }
-        
+
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
-            var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
+            var task = ((IRawGraphClient)this).ExecuteGetCypherResultsAsync<TResult>(query);
             try
             {
                 Task.WaitAll(task);
@@ -978,7 +953,7 @@ namespace Neo4jClient
                     throw unwrappedException;
                 throw;
             }
-            
+
             return task.Result;
         }
 
@@ -1031,7 +1006,7 @@ namespace Neo4jClient
 
             return results;
         }
-        
+
         void IRawGraphClient.ExecuteCypher(CypherQuery query)
         {
             var context = ExecutionContext.Begin(this);
@@ -1056,19 +1031,19 @@ namespace Neo4jClient
                 context.Complete(query, ex);
                 throw;
             }
-     
+
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(task.Result.ResponseObject), null);
 
             context.Complete(query);
         }
-        
+
         async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
             var context = ExecutionContext.Begin(this);
-            
+
             var response = await PrepareCypherRequest<object>(query, context.Policy);
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
-            
+
             context.Complete(query);
         }
 
@@ -1307,7 +1282,7 @@ namespace Neo4jClient
             var updates = indexEntries
                 .SelectMany(
                     i => i.KeyValues,
-                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
+                    (i, kv) => new { IndexName = i.Name, kv.Key, kv.Value })
                 .Where(update => update.Value != null)
                 .ToList();
 
@@ -1386,8 +1361,8 @@ namespace Neo4jClient
         private string BuildRelativeIndexAddress(string indexName, IndexFor indexFor)
         {
             var baseUri = indexFor == IndexFor.Node
-                ? new UriBuilder() {Path = RootApiResponse.NodeIndex}
-                : new UriBuilder() {Path = RootApiResponse.RelationshipIndex};
+                ? new UriBuilder() { Path = RootApiResponse.NodeIndex }
+                : new UriBuilder() { Path = RootApiResponse.RelationshipIndex };
             return baseUri.Uri.AddPath(Uri.EscapeDataString(indexName)).LocalPath;
         }
 
@@ -1401,11 +1376,11 @@ namespace Neo4jClient
             string indexValue;
             if (value is DateTimeOffset)
             {
-                indexValue = ((DateTimeOffset) value).UtcTicks.ToString(CultureInfo.InvariantCulture);
+                indexValue = ((DateTimeOffset)value).UtcTicks.ToString(CultureInfo.InvariantCulture);
             }
             else if (value is DateTime)
             {
-                indexValue = ((DateTime) value).Ticks.ToString(CultureInfo.InvariantCulture);
+                indexValue = ((DateTime)value).Ticks.ToString(CultureInfo.InvariantCulture);
             }
             else
             {

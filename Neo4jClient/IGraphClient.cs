@@ -141,7 +141,7 @@ namespace Neo4jClient
 
         bool IsConnected { get; }
 
-        void Connect();
+        void Connect(NeoServerConfiguration configuration = null);
 
         List<JsonConverter> JsonConverters { get; }
         DefaultContractResolver JsonContractResolver { get; set; }

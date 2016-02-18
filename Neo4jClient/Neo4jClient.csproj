@@ -126,6 +126,7 @@
     <Compile Include="Execution\ResponseFailBuilder`TParse.cs" />
     <Compile Include="Execution\RestExecutionPolicy.cs" />
     <Compile Include="NeoException.cs" />
+    <Compile Include="NeoServerConfiguration.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContentExtensions.cs" />
