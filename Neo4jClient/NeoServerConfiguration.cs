@@ -9,6 +9,11 @@ namespace Neo4jClient
     {
         internal RootApiResponse ApiConfig { get; set; }
 
+        internal Uri RootUri { get; set; }
+
+        internal string Username { get; set; }
+        internal string Password { get; set; }
+
         private NeoServerConfiguration(RootApiResponse apiConfig)
         {
             ApiConfig = apiConfig;
@@ -83,7 +88,12 @@ namespace Neo4jClient
                 result.Cypher = result.Cypher.Substring(baseUriLengthToTrim);
             }
 
-            return new NeoServerConfiguration(result);
+            return new NeoServerConfiguration(result)
+            {
+                RootUri = rootUri,
+                Username = username,
+                Password = password
+            };
         }
     }
 }

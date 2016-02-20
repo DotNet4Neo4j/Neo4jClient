@@ -109,6 +109,7 @@
     <Compile Include="Execution\IExecutionPolicyFactory.cs" />
     <Compile Include="Execution\IHttpClient.cs" />
     <Compile Include="Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="GraphClientFactory.cs" />
     <Compile Include="ICypherGraphClient.cs" />
     <Compile Include="Execution\IRequestTypeBuilder.cs" />
     <Compile Include="Execution\IRequestWithPendingContentBuilder.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Execution\ResponseFailBuilder.cs" />
     <Compile Include="Execution\ResponseFailBuilder`TParse.cs" />
     <Compile Include="Execution\RestExecutionPolicy.cs" />
+    <Compile Include="IGraphClientFactory.cs" />
     <Compile Include="NeoException.cs" />
     <Compile Include="NeoServerConfiguration.cs" />
     <Compile Include="Serialization\DeserializationContext.cs" />
