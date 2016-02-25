@@ -78,8 +78,8 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the node. The node may still have relationships. The response status was: 409 Conflict")]
-        public void ShouldThrowApplicationExceptionWhenDeleteFails()
+        [ExpectedException(typeof(Exception), ExpectedMessage = "Unable to delete the node. The node may still have relationships. The response status was: 409 Conflict")]
+        public void ShouldThrowExceptionWhenDeleteFails()
         {
             using (var testHarness = new RestTestHarness
             {

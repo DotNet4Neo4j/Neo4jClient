@@ -44,7 +44,7 @@ namespace Neo4jClient.Test.Transactions
                     }
                     Assert.Fail("Should not reach this code, as there is an expected exception.");
                 }
-                catch (ApplicationException ex)
+                catch (Exception ex)
                 {
                     Assert.That(ex.Message.Contains("404"));
                 }
@@ -108,7 +108,7 @@ namespace Neo4jClient.Test.Transactions
                         client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
                     }
                 }
-                catch (ApplicationException ex)
+                catch (Exception ex)
                 {
                     Assert.That(ex.Message.Contains("404"));
                 }

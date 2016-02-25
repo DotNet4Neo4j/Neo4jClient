@@ -6,7 +6,7 @@
     <SharedGUID>c5b928ca-3e8e-4181-bacd-48ced40cefde</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Neo4jClient.Shared</Import_RootNamespace>
+    <Import_RootNamespace>Neo4jClient</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AggregateExceptionExtensions.cs" />
@@ -190,24 +190,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TimeZoneInfoConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeConverterBasedJsonConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\ClosedTransactionException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\IInternalTransactionalGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\INeo4jTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransactionalGraphClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransactionExecutionEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransactionManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransactionResourceManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\Neo4jTransaction.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\Neo4jTransactionProxy.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\Neo4jTransactionResourceManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\SuppressTransactionProxy.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionConnectionContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionExecutionEnvironment.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionHttpUtils.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionScopeProxy.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionSinglePhaseNotification.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

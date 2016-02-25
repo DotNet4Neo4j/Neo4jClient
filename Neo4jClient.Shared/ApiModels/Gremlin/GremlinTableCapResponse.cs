@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Neo4jClient.Mappers;
 using Newtonsoft.Json;
 

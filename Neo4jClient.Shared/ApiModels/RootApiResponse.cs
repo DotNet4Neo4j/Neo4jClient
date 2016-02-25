@@ -49,7 +49,7 @@ namespace Neo4jClient.ApiModels
             get
             {
                 if (string.IsNullOrEmpty(neo4j_version))
-                    return new Version();
+                    return new Version(0,0);
 
                 var numericalVersionString = Regex.Replace(
                     neo4j_version,

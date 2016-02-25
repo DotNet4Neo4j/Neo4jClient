@@ -140,7 +140,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
             {
                 var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 
-                var ex = Assert.Throws<ApplicationException>(
+                var ex = Assert.Throws<Exception>(
                     () => graphClient.ExecuteGetAllNodesGremlin<Foo>("foo bar query", null));
                 Assert.AreEqual(GraphClient.GremlinPluginUnavailable, ex.Message);
             }
