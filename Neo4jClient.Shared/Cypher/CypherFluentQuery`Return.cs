@@ -8,22 +8,20 @@ namespace Neo4jClient.Cypher
         internal const string IdentityLooksLikeAMultiColumnStatementExceptionMessage = "The overload you have called takes an identity (for example: foo), but it looks like you've tried to pass in a multiple column statement (for example: foo,bar). If you want to return multiple columns, use an anonymous type: Return((foo, bar) => new { Foo = foo.As<Foo>(), BarCount = bar.Count() }). If the function you want isn't available in the managed wrapper, you can use Return(() => new { Foo = Return.As<Bar>(\"function(foo)\") }).";
         internal const string IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage = "It looks like you've tried to pass in a collection statement (for example: [foo,bar]), but you aren't returning an IEnumerable derived type. If you want to return a collection, you should return an IEnumerable<T>.";
 
-
-
         public ICypherFluentQuery<TResult> Return<TResult>(string identity)
         {
             identity = identity.Trim();
             var identityIsCollection = identity.StartsWith("[") && identity.EndsWith("]");
 
-            if (identity.Contains(",") && (!identityIsCollection))
+            if (identity.Contains(",") && !identityIsCollection)
                 throw new ArgumentException(IdentityLooksLikeAMultiColumnStatementExceptionMessage, "identity");
 
-            if(identityIsCollection && (typeof(TResult).GetInterface("IEnumerable") == null)) 
+            if (identityIsCollection && !typeof (TResult).GetInterfaces().Any(i => i.Name == "IEnumerable"))
                 throw new ArgumentException(IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, "identity");
-            
+
             var resultType = typeof (TResult);
-            
-            var restFormatNeeded = resultType.IsGenericType && (
+
+            var restFormatNeeded = resultType.GetTypeInfo().IsGenericType && (
                 resultType.GetGenericTypeDefinition() == typeof (Node<>) ||
                 resultType.GetGenericTypeDefinition() == typeof (RelationshipInstance<>) ||
                 resultType.GetGenericTypeDefinition() == typeof (Relationship<>));
@@ -63,167 +61,167 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return Return<TResult>((LambdaExpression)expression);
+            return Return<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression)
         {
-            return ReturnDistinct<TResult>((LambdaExpression)expression);
+            return ReturnDistinct<TResult>((LambdaExpression) expression);
         }
     }
 }
