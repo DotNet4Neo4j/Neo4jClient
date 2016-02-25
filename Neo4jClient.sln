@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neo4jClient", "Neo4jClient\Neo4jClient.csproj", "{343B9889-6DDF-4474-A1EC-05508A652E5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neo4jClient.Full", "Neo4jClient.Full\Neo4jClient.Full.csproj", "{343B9889-6DDF-4474-A1EC-05508A652E5A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{4BDBC8A7-BD54-412B-B8C9-95F4BA6C0F7A}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,7 +18,14 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Neo4jClient.Vb.Tests", "Neo
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Neo4jClient.Shared", "Neo4jClient.Shared\Neo4jClient.Shared.shproj", "{C5B928CA-3E8E-4181-BACD-48CED40CEFDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neo4jClient.Pcl", "Neo4jClient.Pcl\Neo4jClient.Pcl.csproj", "{E568B54B-F463-4346-818E-9EC8348C6470}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neo4jClient", "Neo4jClient\Neo4jClient.csproj", "{E568B54B-F463-4346-818E-9EC8348C6470}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A6744547-9D7F-4FF5-B7C5-A184CFBF1E06}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		Neo4jClient.nuspec = Neo4jClient.nuspec
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

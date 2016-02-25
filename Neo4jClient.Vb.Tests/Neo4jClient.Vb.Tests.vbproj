@@ -136,9 +136,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Neo4jClient\Neo4jClient.csproj">
+    <ProjectReference Include="..\Neo4jClient.Full\Neo4jClient.Full.csproj">
       <Project>{343b9889-6ddf-4474-a1ec-05508a652e5a}</Project>
-      <Name>Neo4jClient</Name>
+      <Name>Neo4jClient.Full</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
