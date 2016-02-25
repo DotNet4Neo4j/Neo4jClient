@@ -331,7 +331,7 @@ namespace Neo4jClient.Gremlin
 
             int result;
             if (!int.TryParse(scalarResult, out result))
-                throw new ApplicationException(string.Format(
+                throw new Exception(string.Format(
                     "Query returned an unexpected value. Expected an integer. Received: {0}",
                     scalarResult));
 

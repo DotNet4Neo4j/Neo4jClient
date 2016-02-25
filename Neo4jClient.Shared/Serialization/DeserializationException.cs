@@ -2,7 +2,7 @@
 
 namespace Neo4jClient.Serialization
 {
-    public class DeserializationException : ApplicationException
+    public class DeserializationException : Exception
     {
         public DeserializationException(string message)
             : base(message)

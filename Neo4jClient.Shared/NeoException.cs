@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Neo4jClient.ApiModels;
 
 namespace Neo4jClient
 {
-    [Serializable]
-    public class NeoException : ApplicationException
+    [DataContract]
+    public class NeoException : Exception
     {
         readonly string neoMessage;
         readonly string neoException;

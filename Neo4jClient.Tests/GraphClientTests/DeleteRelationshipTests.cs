@@ -31,8 +31,8 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NotFound")]
-        public void ShouldThrowApplicationExceptionWhenDeleteFails()
+        [ExpectedException(typeof(Exception), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NotFound")]
+        public void ShouldThrowExceptionWhenDeleteFails()
         {
             using (var testHarness = new RestTestHarness
             {

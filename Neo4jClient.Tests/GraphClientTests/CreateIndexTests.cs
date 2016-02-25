@@ -71,7 +71,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException))]
+        [ExpectedException(typeof(Exception))]
         [TestCase(
             IndexFor.Node,
             IndexProvider.lucene,
@@ -108,7 +108,7 @@ namespace Neo4jClient.Test.GraphClientTests
                 'name': 'foo',
                 'config': { 'type': 'exact', 'provider': 'lucene' }
             }")]
-        public void ShouldThrowApplicationExceptionIfHttpCodeIsNot201(
+        public void ShouldThrowExceptionIfHttpCodeIsNot201(
             IndexFor indexFor,
             IndexProvider indexProvider,
             IndexType indexType,
