@@ -97,6 +97,7 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -145,6 +146,26 @@
           "lib/dotnet/System.Collections.Immutable.dll": {}
         }
       },
+      "System.Collections.NonGeneric/4.0.0": {
+        "dependencies": {
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.Collections.NonGeneric.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Collections.NonGeneric.dll": {}
+        }
+      },
       "System.ComponentModel/4.0.0": {
         "compile": {
           "ref/net45/_._": {}
@@ -159,6 +180,47 @@
         },
         "runtime": {
           "lib/net46/_._": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -768,6 +830,7 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -816,6 +879,26 @@
           "lib/dotnet/System.Collections.Immutable.dll": {}
         }
       },
+      "System.Collections.NonGeneric/4.0.0": {
+        "dependencies": {
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.Collections.NonGeneric.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Collections.NonGeneric.dll": {}
+        }
+      },
       "System.ComponentModel/4.0.0": {
         "compile": {
           "ref/net45/_._": {}
@@ -830,6 +913,47 @@
         },
         "runtime": {
           "lib/net46/_._": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -1463,6 +1587,7 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -1511,6 +1636,26 @@
           "lib/dotnet/System.Collections.Immutable.dll": {}
         }
       },
+      "System.Collections.NonGeneric/4.0.0": {
+        "dependencies": {
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.Collections.NonGeneric.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.Collections.NonGeneric.dll": {}
+        }
+      },
       "System.ComponentModel/4.0.0": {
         "compile": {
           "ref/net45/_._": {}
@@ -1525,6 +1670,47 @@
         },
         "runtime": {
           "lib/net46/_._": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "frameworkAssemblies": [
+          "mscorlib",
+          "System"
+        ],
+        "compile": {
+          "ref/net46/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/net46/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -2206,6 +2392,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -2259,6 +2446,22 @@
           "lib/dotnet/System.Collections.Immutable.dll": {}
         }
       },
+      "System.Collections.NonGeneric/4.0.0": {
+        "dependencies": {
+          "System.Diagnostics.Debug": "[4.0.10, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.Collections.NonGeneric.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.Collections.NonGeneric.dll": {}
+        }
+      },
       "System.ComponentModel/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.20, )"
@@ -2289,6 +2492,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -3049,6 +3285,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -3168,6 +3405,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.EventBasedAsync.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Debug/4.0.10": {
@@ -4300,6 +4570,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -4419,6 +4690,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.EventBasedAsync.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -5596,6 +5900,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Runtime": "[4.0.0, )"
@@ -5715,6 +6020,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.EventBasedAsync.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -6723,6 +7061,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -6835,6 +7174,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -7872,6 +8244,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -7984,6 +8357,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -9065,6 +9471,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -9177,6 +9584,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -10235,6 +10675,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -10347,6 +10788,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -11428,6 +11902,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -11540,6 +12015,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -12598,6 +13106,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -12710,6 +13219,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -13791,6 +14333,7 @@
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
         }
       },
+      "NuSpec.ReferenceGenerator/1.4.2": {},
       "System.AppContext/4.0.0": {
         "dependencies": {
           "System.Collections": "[4.0.0, )",
@@ -13903,6 +14446,39 @@
         },
         "runtime": {
           "lib/dotnet/System.ComponentModel.Annotations.dll": {}
+        }
+      },
+      "System.ComponentModel.Primitives/4.0.0": {
+        "dependencies": {
+          "System.ComponentModel": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.Primitives.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.Primitives.dll": {}
+        }
+      },
+      "System.ComponentModel.TypeConverter/4.0.0": {
+        "dependencies": {
+          "System.Collections": "[4.0.10, )",
+          "System.ComponentModel": "[4.0.0, )",
+          "System.ComponentModel.Primitives": "[4.0.0, )",
+          "System.Globalization": "[4.0.10, )",
+          "System.Reflection": "[4.0.10, )",
+          "System.Reflection.Extensions": "[4.0.0, )",
+          "System.Reflection.Primitives": "[4.0.0, )",
+          "System.Resources.ResourceManager": "[4.0.0, )",
+          "System.Runtime": "[4.0.20, )",
+          "System.Runtime.Extensions": "[4.0.10, )",
+          "System.Threading": "[4.0.10, )"
+        },
+        "compile": {
+          "ref/dotnet/System.ComponentModel.TypeConverter.dll": {}
+        },
+        "runtime": {
+          "lib/dotnet/System.ComponentModel.TypeConverter.dll": {}
         }
       },
       "System.Diagnostics.Contracts/4.0.0": {
@@ -15427,6 +16003,21 @@
         "tools/install.ps1"
       ]
     },
+    "NuSpec.ReferenceGenerator/1.4.2": {
+      "sha512": "0AA2wcMaE84hDxzQOdRi2K2SGgEnJQ4LG6MyTrPvyjjyzeOT1hpUJk/w9NX5QAJy1T5eE7r3wPLq1rALr5oPaQ==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "build/dotnet/NuSpec.ReferenceGenerator.targets",
+        "build/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/NuSpec.ReferenceGenerator.targets",
+        "NuSpec.ReferenceGenerator.nuspec",
+        "package/services/metadata/core-properties/73b5a943f8ce42ad90657060c9ff788c.psmdcp",
+        "tools/RefGen.exe",
+        "tools/RefGen.exe.config",
+        "tools/RefGen.pdb"
+      ]
+    },
     "System.AppContext/4.0.0": {
       "sha512": "gUoYgAWDC3+xhKeU5KSLbYDhTdBYk9GssrMSCcWUADzOglW+s0AmwVhOUGt2tL5xUl7ZXoYTPdA88zCgKrlG0A==",
       "type": "Package",
@@ -15667,6 +16258,70 @@
         "ref/xamarinios10/_._",
         "ref/xamarinmac20/_._",
         "System.ComponentModel.EventBasedAsync.nuspec"
+      ]
+    },
+    "System.ComponentModel.Primitives/4.0.0": {
+      "sha512": "8xElzEmEH5G6XK7qqxRLQ/2r1IuhXlkz0ZdgKNp6ViDD1ukadd+5hccqg1G/L4AYRy96ddMdvgyJjFW87Cegbw==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/dotnet/System.ComponentModel.Primitives.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.ComponentModel.Primitives.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "package/services/metadata/core-properties/3dd249feb8bc4c16b4ae3abc4acd1e9d.psmdcp",
+        "ref/dotnet/de/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/es/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/fr/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/it/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/ja/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/ko/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/ru/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/System.ComponentModel.Primitives.dll",
+        "ref/dotnet/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/zh-hans/System.ComponentModel.Primitives.xml",
+        "ref/dotnet/zh-hant/System.ComponentModel.Primitives.xml",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net46/System.ComponentModel.Primitives.dll",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "System.ComponentModel.Primitives.nuspec"
+      ]
+    },
+    "System.ComponentModel.TypeConverter/4.0.0": {
+      "sha512": "im3TpzE4j5M2ikOxV3/g2whofMzjpixyRlsr67KrX1fW6tC/iTsCmR54+Aqbh1qauKlgLbrbnC0bvij28LXS7g==",
+      "type": "Package",
+      "files": [
+        "[Content_Types].xml",
+        "_rels/.rels",
+        "lib/dotnet/System.ComponentModel.TypeConverter.dll",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.ComponentModel.TypeConverter.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "package/services/metadata/core-properties/9b527bedb69348cf9179c245b3c422ac.psmdcp",
+        "ref/dotnet/de/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/es/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/fr/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/it/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/ja/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/ko/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/ru/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/System.ComponentModel.TypeConverter.dll",
+        "ref/dotnet/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/zh-hans/System.ComponentModel.TypeConverter.xml",
+        "ref/dotnet/zh-hant/System.ComponentModel.TypeConverter.xml",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net46/System.ComponentModel.TypeConverter.dll",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "System.ComponentModel.TypeConverter.nuspec"
       ]
     },
     "System.Diagnostics.Contracts/4.0.0": {
@@ -17533,6 +18188,10 @@
       "Microsoft.NETCore >= 5.0.0",
       "Microsoft.NETCore.Portable.Compatibility >= 1.0.0",
       "Newtonsoft.Json >= 8.0.2",
+      "NuSpec.ReferenceGenerator >= 1.4.2",
+      "System.Collections.NonGeneric >= 4.0.0",
+      "System.ComponentModel >= 4.0.0",
+      "System.ComponentModel.TypeConverter >= 4.0.0",
       "System.Runtime.Serialization.Primitives >= 4.0.10"
     ],
     ".NETPlatform,Version=v5.0": []

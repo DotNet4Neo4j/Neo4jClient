@@ -8,6 +8,10 @@
     "Microsoft.NETCore": "5.0.0",
     "Microsoft.NETCore.Portable.Compatibility": "1.0.0",
     "Newtonsoft.Json": "8.0.2",
+    "NuSpec.ReferenceGenerator": "1.4.2",
+    "System.Collections.NonGeneric": "4.0.0",
+    "System.ComponentModel": "4.0.0",
+    "System.ComponentModel.TypeConverter": "4.0.0",
     "System.Runtime.Serialization.Primitives": "4.0.10"
   },
   "frameworks": {

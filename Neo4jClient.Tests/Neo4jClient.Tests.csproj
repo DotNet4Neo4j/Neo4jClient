@@ -204,9 +204,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Neo4jClient\Neo4jClient.csproj">
+    <ProjectReference Include="..\Neo4jClient.Full\Neo4jClient.Full.csproj">
       <Project>{343B9889-6DDF-4474-A1EC-05508A652E5A}</Project>
-      <Name>Neo4jClient</Name>
+      <Name>Neo4jClient.Full</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

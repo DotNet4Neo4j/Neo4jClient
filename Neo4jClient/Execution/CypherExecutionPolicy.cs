@@ -15,25 +15,6 @@ namespace Neo4jClient.Execution
 
         private INeo4jTransaction GetTransactionInScope()
         {
-            // first try to get the Non DTC transaction and if it doesn't succeed then try it with the DTC
-            var transactionalClient = Client as IInternalTransactionalGraphClient;
-            if (transactionalClient == null)
-            {
-                return null;
-            }
-
-            var proxiedTransaction = transactionalClient.Transaction as TransactionScopeProxy;
-            if (proxiedTransaction != null)
-            {
-                return proxiedTransaction.TransactionContext;;
-            }
-
-            var ambientTransaction = transactionalClient.TransactionManager.CurrentDtcTransaction;
-            if (ambientTransaction != null)
-            {
-                return (INeo4jTransaction) ambientTransaction;
-            }
-
             return null;
         }
 
@@ -41,20 +22,10 @@ namespace Neo4jClient.Execution
         {
             get
             {
-                if (!InTransaction)
-                {
+                if(InTransaction)
+                    throw new NotImplementedException("Not implemented in the PCL version at present.");
+
                     return Client.CypherEndpoint;
-                }
-
-                var proxiedTransaction = GetTransactionInScope();
-                var transactionalClient = (ITransactionalGraphClient) Client;
-                if (proxiedTransaction == null)
-                {
-                    return transactionalClient.TransactionEndpoint;
-                }
-
-                var startingReference = proxiedTransaction.Endpoint ?? transactionalClient.TransactionEndpoint;
-                return startingReference;
             }
         }
 

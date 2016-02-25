@@ -1,30 +1,47 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
+using Neo4jClient.ApiModels.Cypher;
+using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
+using Neo4jClient.Gremlin;
+using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
     public partial class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient, IDisposable
     {
+      
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.UseNagleAlgorithm = false;
+//            ServicePointManager.Expect100Continue = true;
+//            ServicePointManager.UseNagleAlgorithm = false;
         }
 
         public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
-            ServicePointManager.Expect100Continue = expect100Continue;
-            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
+//            ServicePointManager.Expect100Continue = expect100Continue;
+//            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
 
-
+      
         public virtual void Connect()
         {
             if (IsConnected)
@@ -70,7 +87,7 @@ namespace Neo4jClient
                 if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
                 {
                     RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
-                    transactionManager = new TransactionManager(this);
+//                    transactionManager = new TransactionManager(this);
                 }
 
                 if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
@@ -105,7 +122,7 @@ namespace Neo4jClient
                 if (RootApiResponse.Version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 operationCompletedArgs.Exception = e;
                 stopTimerAndNotifyCompleted();
@@ -114,5 +131,7 @@ namespace Neo4jClient
 
             stopTimerAndNotifyCompleted();
         }
+
+ 
     }
 }
