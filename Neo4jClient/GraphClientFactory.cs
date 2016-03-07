@@ -1,4 +1,6 @@
-﻿namespace Neo4jClient
+﻿using System;
+
+namespace Neo4jClient
 {
     public class GraphClientFactory : IGraphClientFactory
     {
@@ -6,6 +8,12 @@
 
         public GraphClientFactory(NeoServerConfiguration configuration)
         {
+            if (_configuration == null)
+             throw new ArgumentNullException("configuration", "Neo server configuration is null");
+
+            if (configuration.ApiConfig == null)
+                throw new ArgumentException("Root Api configuration is not defined", "ApiConfig");
+
             _configuration = configuration;
         }
 
