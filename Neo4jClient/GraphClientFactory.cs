@@ -1,4 +1,5 @@
 ﻿using System;
+using Neo4jClient.Execution;
 
 namespace Neo4jClient
 {
@@ -20,6 +21,15 @@ namespace Neo4jClient
                 _configuration.RootUri,
                 _configuration.Username,
                 _configuration.Password);
+
+            client.Connect(_configuration);
+
+            return client;
+        }
+
+        public IGraphClient Create(IHttpClient httpClient)
+        {
+            var client = new GraphClient(_configuration.RootUri, httpClient);
 
             client.Connect(_configuration);
 
