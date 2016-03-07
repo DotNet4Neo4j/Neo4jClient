@@ -7,12 +7,12 @@ namespace Neo4jClient
 {
     public class NeoServerConfiguration
     {
-        internal RootApiResponse ApiConfig { get; set; }
+        internal RootApiResponse ApiConfig { get; private set; }
 
-        internal Uri RootUri { get; set; }
+        internal Uri RootUri { get; private set; }
 
-        internal string Username { get; set; }
-        internal string Password { get; set; }
+        internal string Username { get; private set; }
+        internal string Password { get; private set; }
 
         private NeoServerConfiguration(RootApiResponse apiConfig)
         {
@@ -52,6 +52,11 @@ namespace Neo4jClient
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ParseAs<RootApiResponse>()
                 .Execute();
+
+            if (result == null)
+            {
+                throw new ApplicationException("Couldn't obtain server Root API configuration.");
+            }
 
             var rootUriWithoutUserInfo = rootUri;
             if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))

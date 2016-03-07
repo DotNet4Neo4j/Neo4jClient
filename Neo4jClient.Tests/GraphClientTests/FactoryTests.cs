@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using Neo4jClient.Execution;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -14,16 +16,26 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ApplicationException))]
         public void ShouldThrowExceptionIfRootApiIsNotDefined()
         {
-            using (var testHarness = new RestTestHarness())
+            using (var testHarness = new RestTestHarness
             {
-                var config = NeoServerConfiguration.GetConfiguration(new Uri(testHarness.BaseUri));
+                { MockRequest.Get("/"), new MockResponse { StatusCode = HttpStatusCode.OK } }
+            })
+            {
+                var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
 
-                config.ApiConfig = null;
+                var executeConfiguration = new ExecutionConfiguration
+                {
+                    HttpClient = httpClient,
+                    UserAgent =
+                        string.Format("Neo4jClient/{0}", typeof(NeoServerConfiguration).Assembly.GetName().Version),
+                    UseJsonStreaming = true,
+                    JsonConverters = GraphClient.DefaultJsonConverters
+                };
 
-                new GraphClientFactory(config);
+                NeoServerConfiguration.GetConfiguration(new Uri(testHarness.BaseUri), null, null, executeConfiguration);
             }
         }
     }
