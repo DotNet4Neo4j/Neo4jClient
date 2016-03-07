@@ -195,11 +195,11 @@ namespace Neo4jClient
             where TNode : class
         {
             if (typeof (TNode).IsGenericType &&
-                typeof (TNode).GetGenericTypeDefinition() == typeof(Node<>))
+                typeof (TNode).GetGenericTypeDefinition() == typeof (Node<>))
             {
                 throw new ArgumentException(string.Format(
                     "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
-                    typeof(TNode).GetGenericArguments()[0].Name),
+                    typeof (TNode).GetGenericArguments()[0].Name),
                     "node");
             }
 
@@ -219,7 +219,7 @@ namespace Neo4jClient
                 .Cast<Relationship>()
                 .Select(r => new
                 {
-                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof(TNode), r),
+                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof (TNode), r),
                     Relationship = r
                 })
                 .ToArray();
@@ -442,7 +442,7 @@ namespace Neo4jClient
         public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference)
             where TData : class, new()
         {
-            return Get<TData>((RelationshipReference)reference);
+            return Get<TData>((RelationshipReference) reference);
         }
 
         public virtual RelationshipInstance<TData> Get<TData>(RelationshipReference reference)
@@ -1283,7 +1283,7 @@ namespace Neo4jClient
             var updates = indexEntries
                 .SelectMany(
                     i => i.KeyValues,
-                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value })
+                    (i, kv) => new {IndexName = i.Name, kv.Key, kv.Value})
                 .Where(update => update.Value != null)
                 .ToList();
 
@@ -1362,8 +1362,8 @@ namespace Neo4jClient
         private string BuildRelativeIndexAddress(string indexName, IndexFor indexFor)
         {
             var baseUri = indexFor == IndexFor.Node
-                ? new UriBuilder() {Path = RootApiResponse.NodeIndex }
-                : new UriBuilder() {Path = RootApiResponse.RelationshipIndex };
+                ? new UriBuilder() {Path = RootApiResponse.NodeIndex}
+                : new UriBuilder() {Path = RootApiResponse.RelationshipIndex};
             return baseUri.Uri.AddPath(Uri.EscapeDataString(indexName)).LocalPath;
         }
 
