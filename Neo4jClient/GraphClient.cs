@@ -23,7 +23,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
-    public class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient, IDisposable
+    public class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient
     {
         internal const string GremlinPluginUnavailable =
             "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
@@ -108,7 +108,7 @@ namespace Neo4jClient
             get { return RootApiResponse != null; }
         }
 
-        public virtual void Connect()
+        public virtual void Connect(NeoServerConfiguration configuration = null)
         {
             if (IsConnected)
             {
@@ -131,41 +131,17 @@ namespace Neo4jClient
 
             try
             {
-                var result = Request.With(ExecutionConfiguration)
-                    .Get(BuildUri(""))
-                    .WithExpectedStatusCodes(HttpStatusCode.OK)
-                    .ParseAs<RootApiResponse>()
-                    .Execute();
+                configuration = configuration ?? NeoServerConfiguration.GetConfiguration(
+                    RootUri,
+                    ExecutionConfiguration.Username,
+                    ExecutionConfiguration.Password,
+                    ExecutionConfiguration);
 
-                var rootUriWithoutUserInfo = RootUri;
-                if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
-                    rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
-                var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+                RootApiResponse = configuration.ApiConfig;
 
-                RootApiResponse = result;
-                RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
-                RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
-                RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
-                RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
-                RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
-                RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
-
-                if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
+                if (!string.IsNullOrWhiteSpace(RootApiResponse.Transaction))
                 {
-                    RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
                     transactionManager = new TransactionManager(this);
-                }
-
-                if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
-                {
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                        RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-                }
-
-                if (RootApiResponse.Cypher != null)
-                {
-                    RootApiResponse.Cypher =
-                        RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
                 }
 
                 rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
@@ -1056,7 +1032,7 @@ namespace Neo4jClient
                 context.Complete(query, ex);
                 throw;
             }
-     
+
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(task.Result.ResponseObject), null);
 
             context.Complete(query);
