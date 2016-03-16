@@ -10,9 +10,10 @@ namespace Neo4jClient
     public class HttpClientWrapper : IHttpClient
     {
         internal AuthenticationHeaderValue AuthenticationHeaderValue { get; private set; }
-        private readonly HttpClient client;
+        internal readonly HttpClient Client;
 
-        public HttpClientWrapper(string username = null, string password = null) : this(new HttpClient())
+        public HttpClientWrapper(string username = null, string password = null, HttpClient client = null) 
+            : this(client ?? new HttpClient())
         {
             Username = username;
             Password = password;
@@ -25,7 +26,7 @@ namespace Neo4jClient
 
         public HttpClientWrapper(HttpClient client)
         {
-            this.client = client;
+            this.Client = client;
         }
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
@@ -33,7 +34,7 @@ namespace Neo4jClient
             if (AuthenticationHeaderValue != null)
                 request.Headers.Authorization = AuthenticationHeaderValue;
 
-            return client.SendAsync(request);
+            return Client.SendAsync(request);
         }
 
         public string Username { get; private set; }
