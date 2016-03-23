@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Execution;
@@ -35,7 +36,7 @@ namespace Neo4jClient
                 {
                     HttpClient = httpClient,
                     UserAgent =
-                        string.Format("Neo4jClient/{0}", typeof(NeoServerConfiguration).Assembly.GetName().Version),
+                        string.Format("Neo4jClient/{0}", typeof(NeoServerConfiguration).GetTypeInfo().Assembly.GetName().Version),
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters,
                     Username = username,
@@ -56,7 +57,7 @@ namespace Neo4jClient
 
             if (result == null)
             {
-                throw new ApplicationException("Couldn't obtain server Root API configuration.");
+                throw new InvalidOperationException("Couldn't obtain server Root API configuration.");
             }
 
             var rootUriWithoutUserInfo = rootUri;
@@ -117,7 +118,7 @@ namespace Neo4jClient
                 {
                     HttpClient = httpClient,
                     UserAgent =
-                        string.Format("Neo4jClient/{0}", typeof (NeoServerConfiguration).Assembly.GetName().Version),
+                        string.Format("Neo4jClient/{0}", typeof (NeoServerConfiguration).GetTypeInfo().Assembly.GetName().Version),
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters,
                     Username = username,
@@ -138,7 +139,7 @@ namespace Neo4jClient
 
             if (result == null)
             {
-                throw new ApplicationException("Couldn't obtain server Root API configuration.");
+                throw new InvalidOperationException("Couldn't obtain server Root API configuration.");
             }
 
             var rootUriWithoutUserInfo = rootUri;

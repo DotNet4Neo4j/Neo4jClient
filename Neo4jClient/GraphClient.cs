@@ -1,32 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Reflection;
 using System.Threading.Tasks;
-using Neo4jClient.ApiModels;
-using Neo4jClient.ApiModels.Cypher;
-using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Cypher;
-using Neo4jClient.Execution;
-using Neo4jClient.Gremlin;
-using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
     public partial class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient, IDisposable
     {
-      
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
@@ -41,8 +22,7 @@ namespace Neo4jClient
 //            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
 
-      
-        public virtual void Connect()
+        public virtual async Task ConnectAsync(NeoServerConfiguration configuration = null)
         {
             if (IsConnected)
             {
@@ -65,41 +45,17 @@ namespace Neo4jClient
 
             try
             {
-                var result = Request.With(ExecutionConfiguration)
-                    .Get(BuildUri(""))
-                    .WithExpectedStatusCodes(HttpStatusCode.OK)
-                    .ParseAs<RootApiResponse>()
-                    .Execute();
+                configuration = configuration ?? await NeoServerConfiguration.GetConfigurationAsync(
+                    RootUri,
+                    ExecutionConfiguration.Username,
+                    ExecutionConfiguration.Password,
+                    ExecutionConfiguration).ConfigureAwait(false);
 
-                var rootUriWithoutUserInfo = RootUri;
-                if (!string.IsNullOrEmpty(rootUriWithoutUserInfo.UserInfo))
-                    rootUriWithoutUserInfo = new UriBuilder(RootUri.AbsoluteUri) {UserName = "", Password = ""}.Uri;
-                var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length;
+                RootApiResponse = configuration.ApiConfig;
 
-                RootApiResponse = result;
-                RootApiResponse.Batch = RootApiResponse.Batch.Substring(baseUriLengthToTrim);
-                RootApiResponse.Node = RootApiResponse.Node.Substring(baseUriLengthToTrim);
-                RootApiResponse.NodeIndex = RootApiResponse.NodeIndex.Substring(baseUriLengthToTrim);
-                RootApiResponse.Relationship = "/relationship"; //Doesn't come in on the Service Root
-                RootApiResponse.RelationshipIndex = RootApiResponse.RelationshipIndex.Substring(baseUriLengthToTrim);
-                RootApiResponse.ExtensionsInfo = RootApiResponse.ExtensionsInfo.Substring(baseUriLengthToTrim);
-
-                if (!string.IsNullOrEmpty(RootApiResponse.Transaction))
+                if (!string.IsNullOrWhiteSpace(RootApiResponse.Transaction))
                 {
-                    RootApiResponse.Transaction = RootApiResponse.Transaction.Substring(baseUriLengthToTrim);
-//                    transactionManager = new TransactionManager(this);
-                }
-
-                if (RootApiResponse.Extensions != null && RootApiResponse.Extensions.GremlinPlugin != null)
-                {
-                    RootApiResponse.Extensions.GremlinPlugin.ExecuteScript =
-                        RootApiResponse.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-                }
-
-                if (RootApiResponse.Cypher != null)
-                {
-                    RootApiResponse.Cypher =
-                        RootApiResponse.Cypher.Substring(baseUriLengthToTrim);
+                    //  transactionManager = new TransactionManager(this);
                 }
 
                 rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
@@ -122,7 +78,20 @@ namespace Neo4jClient
                 if (RootApiResponse.Version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
             }
-            catch(Exception e)
+            catch (AggregateException ex)
+            {
+                Exception unwrappedException;
+                var wasUnwrapped = ex.TryUnwrap(out unwrappedException);
+                operationCompletedArgs.Exception = wasUnwrapped ? unwrappedException : ex;
+
+                stopTimerAndNotifyCompleted();
+
+                if (wasUnwrapped)
+                    throw unwrappedException;
+
+                throw;
+            }
+            catch (Exception e)
             {
                 operationCompletedArgs.Exception = e;
                 stopTimerAndNotifyCompleted();
@@ -131,7 +100,5 @@ namespace Neo4jClient
 
             stopTimerAndNotifyCompleted();
         }
-
- 
     }
 }

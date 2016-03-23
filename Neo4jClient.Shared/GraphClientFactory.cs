@@ -10,7 +10,7 @@ namespace Neo4jClient
         public GraphClientFactory(NeoServerConfiguration configuration)
         {
             if (configuration == null)
-             throw new ArgumentNullException("configuration", "Neo server configuration is null");
+                throw new ArgumentNullException("configuration", "Neo server configuration is null");
 
             _configuration = configuration;
         }

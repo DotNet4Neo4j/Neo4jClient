@@ -112,11 +112,13 @@ namespace Neo4jClient.Cypher
             var resultingType = expression.Constructor.DeclaringType;
             Debug.Assert(resultingType != null, "resultingType != null");
 
+            var typeInfo = resultingType.GetTypeInfo();
+
             var quacksLikeAnAnonymousType =
-                resultingType.IsSpecialName &&
-                resultingType.IsValueType &&
-                resultingType.IsNestedPrivate &&
-                !resultingType.IsGenericType;
+                typeInfo.IsSpecialName &&
+                typeInfo.IsValueType &&
+                typeInfo.IsNestedPrivate &&
+                !typeInfo.IsGenericType;
             if (expression.Members == null && !quacksLikeAnAnonymousType)
                 throw new ArgumentException(WithExpressionShouldBeOneOfExceptionMessage, "expression");
 
@@ -250,7 +252,7 @@ namespace Neo4jClient.Cypher
         static string BuildStatement(ParameterExpression expression, MemberInfo targetMember)
         {
             var statement = expression.Name;
-            if (!statement.Equals(targetMember.Name, StringComparison.InvariantCultureIgnoreCase))
+            if (!statement.Equals(targetMember.Name, StringComparison.OrdinalIgnoreCase))
                 statement += " AS " + targetMember.Name;
             return statement;
         }
@@ -322,12 +324,12 @@ namespace Neo4jClient.Cypher
         {
             if (!methodInfo.IsGenericMethod) throw new InvalidOperationException("Expected generic method, but it wasn't.");
             var methodType = methodInfo.GetGenericArguments().Single();
-            return methodType.IsGenericType && methodType.GetGenericTypeDefinition() == typeof(Node<>);
+            return methodType.GetTypeInfo().IsGenericType && methodType.GetGenericTypeDefinition() == typeof(Node<>);
         }
 
         static WrappedFunctionCall BuildWrappedFunction(MethodCallExpression methodCallExpression)
         {
-            var targetObject = ((MethodCallExpression) methodCallExpression.Object);
+            var targetObject = ((MethodCallExpression)methodCallExpression.Object);
             Debug.Assert(targetObject != null, "targetObject != null");
 
             string statementFormat;
@@ -422,7 +424,7 @@ namespace Neo4jClient.Cypher
         static bool IsTypeNullable(Type type)
         {
             if (type == null) return false;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
             if (type == typeof(string)) return true;
             return false;
         }
