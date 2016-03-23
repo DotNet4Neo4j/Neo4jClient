@@ -68,6 +68,13 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Set(string setText);
         ICypherFluentQuery Remove(string removeText);
         ICypherFluentQuery ForEach(string text);
+
+        /// <summary>Load a CSV into Neo4j.</summary>
+        /// <remarks>This creates the following: <c>LOAD CSV FROM 'fileUri' AS identifier</c></remarks>
+        /// <param name="fileUri">The file URI in the format: <c>c:\\example.csv.</c></param>
+        /// <param name="identifier">The identifier to use in the rest of the query.</param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
+        ICypherFluentQuery LoadCsv(Uri fileUri, string identifier);
         ICypherFluentQuery Unwind(string collection, string columnName);
         ICypherFluentQuery Unwind(IEnumerable collection, string identity);
         ICypherFluentQuery Union();
