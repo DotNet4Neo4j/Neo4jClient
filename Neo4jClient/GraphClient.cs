@@ -1026,6 +1026,7 @@ namespace Neo4jClient
                 if (ex.TryUnwrap(out unwrappedException))
                 {
                     context.Complete(query, unwrappedException);
+
                     throw unwrappedException;
                 }
 

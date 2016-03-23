@@ -93,6 +93,7 @@
     <Compile Include="Cypher\CypherFluentQueryMatchTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryRemoveTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryPlannerTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryLoadCsvTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryUnwindTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryUsingIndexTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
