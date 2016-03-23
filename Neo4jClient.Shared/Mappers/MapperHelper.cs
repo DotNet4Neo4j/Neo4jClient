@@ -20,8 +20,8 @@ namespace Neo4jClient.Mappers
             try
             {
                 var validType = prop.PropertyType;
-                if (prop.PropertyType.IsGenericType &&
-                    prop.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
+                if (prop.PropertyType.GetTypeInfo().IsGenericType &&
+                    prop.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
                     var nullableConverter = new NullableConverter(prop.PropertyType);
                     validType = nullableConverter.UnderlyingType;
@@ -34,11 +34,11 @@ namespace Neo4jClient.Mappers
                 }
 
                 object convertedData;
-                if (validType.IsEnum)
+                if (validType.GetTypeInfo().IsEnum)
                 {
                     convertedData = Enum.Parse(validType, value, false);
                 }
-                else if (validType == typeof (DateTimeOffset))
+                else if (validType == typeof(DateTimeOffset))
                 {
                     var rawValue = value.Replace("NeoDate", "Date");
                     convertedData = DateRegex.IsMatch(rawValue)

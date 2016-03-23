@@ -13,7 +13,7 @@ namespace Neo4jClient.Gremlin
             filters = filters
                 .Select(f =>
                 {
-                    if (f.Value != null && f.Value.GetType().IsEnum)
+                    if (f.Value != null && f.Value.GetType().GetTypeInfo().IsEnum)
                         f.Value = f.Value.ToString();
                     return f;
                 })
@@ -64,13 +64,13 @@ namespace Neo4jClient.Gremlin
             var parameters = new Dictionary<string, object>();
             var nextParameterIndex = queryThatTheFilterWillEventuallyBeAddedTo.QueryParameters.Count;
             Func<object, string> createParameter = value =>
-                {
-                    if (value == null) return "null";
-                    var paramName = string.Format("p{0}", nextParameterIndex);
-                    parameters.Add(paramName, value);
-                    nextParameterIndex++;
-                    return paramName;
-                };
+            {
+                if (value == null) return "null";
+                var paramName = string.Format("p{0}", nextParameterIndex);
+                parameters.Add(paramName, value);
+                nextParameterIndex++;
+                return paramName;
+            };
 
             var expandedFilters =
                 from f in filters
@@ -130,17 +130,17 @@ namespace Neo4jClient.Gremlin
                         (expression.Member is PropertyInfo))// && expression.Member.MemberType == MemberTypes.Property))
                     {
                         var newFilter = new Filter
-                            {
-                                ExpressionType = ExpressionType.Equal,
-                                PropertyName = expression.Member.Name,
-                                Value = true
-                            };
+                        {
+                            ExpressionType = ExpressionType.Equal,
+                            PropertyName = expression.Member.Name,
+                            Value = true
+                        };
 
-                        return new List<Filter> {newFilter};
+                        return new List<Filter> { newFilter };
                     }
                 }
 
-                if(filter.Body.NodeType == ExpressionType.Not)
+                if (filter.Body.NodeType == ExpressionType.Not)
                 {
                     var expression = filter.Body as UnaryExpression;
 
@@ -150,11 +150,11 @@ namespace Neo4jClient.Gremlin
                         if (operand != null)
                         {
                             var newFilter = new Filter
-                                {
-                                    ExpressionType = ExpressionType.Equal,
-                                    PropertyName = operand.Member.Name,
-                                    Value = false
-                                };
+                            {
+                                ExpressionType = ExpressionType.Equal,
+                                PropertyName = operand.Member.Name,
+                                Value = false
+                            };
 
                             return new List<Filter> { newFilter };
                         }
@@ -202,8 +202,8 @@ namespace Neo4jClient.Gremlin
             var underlyingPropertyType = key.PropertyType;
             underlyingPropertyType = Nullable.GetUnderlyingType(key.PropertyType) ?? underlyingPropertyType;
 
-            var convertedValue = underlyingPropertyType.IsEnum
-                ? Enum.Parse(underlyingPropertyType, underlyingPropertyType.GetEnumName(constantValue))
+            var convertedValue = underlyingPropertyType.GetTypeInfo().IsEnum
+                ? Enum.Parse(underlyingPropertyType, constantValue.ToString())
                 : constantValue;
 
             return new[]
@@ -226,8 +226,9 @@ namespace Neo4jClient.Gremlin
 
             var memberExpression = expression as MemberExpression;
             if (memberExpression != null &&
-                memberExpression.Member is PropertyInfo &&
-                memberExpression.Member.MemberType == MemberTypes.Property)
+                memberExpression.Member is PropertyInfo
+                //&& memberExpression.Member.MemberType == MemberTypes.Property)
+                )
                 return new ExpressionKey
                 {
                     Name = memberExpression.Member.Name,

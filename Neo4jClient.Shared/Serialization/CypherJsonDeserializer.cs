@@ -16,7 +16,7 @@ namespace Neo4jClient.Serialization
         readonly IGraphClient client;
         readonly CypherResultMode resultMode;
         private readonly CypherResultFormat resultFormat;
-        private readonly bool inTransaction; 
+        private readonly bool inTransaction;
 
         readonly CultureInfo culture = CultureInfo.InvariantCulture;
 
@@ -87,7 +87,7 @@ Include the full type definition of {0}.
 Include this raw JSON, with any sensitive values replaced with non-sensitive equivalents:
 
 {1}";
-                var message = string.Format(messageTemplate, typeof (TResult).FullName, content);
+                var message = string.Format(messageTemplate, typeof(TResult).FullName, content);
 
                 // If it's a specifc scenario that we're blowing up about, put this front and centre in the message
                 var deserializationException = ex as DeserializationException;
@@ -99,15 +99,15 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 throw new ArgumentException(message, "content", ex);
             }
         }
-		
-		IEnumerable<TResult> DeserializeInternal(string content)
+
+        IEnumerable<TResult> DeserializeInternal(string content)
         {
             var context = new DeserializationContext
-                {
-                    Culture = culture,
-                    JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
-                    JsonContractResolver = client.JsonContractResolver
-                };
+            {
+                Culture = culture,
+                JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
+                JsonContractResolver = client.JsonContractResolver
+            };
             content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
@@ -127,7 +127,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(Node<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -139,7 +139,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -158,7 +158,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     jsonTypeMappings.Add(new TypeMapping
                     {
                         ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                            nestingLevel == 0 && type.IsClass,
+                            nestingLevel == 0 && type.GetTypeInfo().IsClass,
                         DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                             typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
                         MutationCallback = n =>
@@ -183,7 +183,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(Node<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -195,7 +195,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 new TypeMapping
                 {
                     ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                        type.IsGenericType &&
+                        type.GetTypeInfo().IsGenericType &&
                         type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>),
                     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
                     {
@@ -217,9 +217,9 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                         jsonTypeMappings.Add(new TypeMapping
                         {
                             ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                                nestingLevel == 0 && type.IsClass,
+                                nestingLevel == 0 && type.GetTypeInfo().IsClass,
                             DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
-                                typeof (NodeOrRelationshipApiResponse<>).MakeGenericType(new[] {t}),
+                                typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
                             MutationCallback = n =>
                                 n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
                         });
@@ -235,7 +235,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             JToken propValue;
             if (obj.TryGetValue(propertyName, out propValue))
             {
-                return (string) (propValue as JValue);
+                return (string)(propValue as JValue);
             }
             return null;
         }
@@ -260,7 +260,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             return new NeoException(new ExceptionResponse
             {
                 // there is no stack trace in transaction error response
-                StackTrace = new string[] {},
+                StackTrace = new string[] { },
                 Exception = lastCodePart,
                 FullName = code,
                 Message = message
@@ -347,7 +347,7 @@ This means no query was emitted, so a method that doesn't care about getting res
         private IEnumerable<TResult> FullDeserializationFromTransactionResponse(JsonTextReader reader, DeserializationContext context)
         {
             var root = JToken.ReadFrom(reader).Root as JObject;
-            
+
             // discarding all the results but the first
             // (this won't affect the library because as of now there is no way of executing
             // multiple statements in the same batch within a transaction and returning the results)
@@ -372,15 +372,15 @@ This means no query was emitted, so a method that doesn't care about getting res
             return DeserializeResultSet(root, context);
         }
 
-// ReSharper disable UnusedParameter.Local
+        // ReSharper disable UnusedParameter.Local
         IEnumerable<TResult> ParseInSingleColumnMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
-// ReSharper restore UnusedParameter.Local
+        // ReSharper restore UnusedParameter.Local
         {
             if (columnNames.Count() != 1)
                 throw new InvalidOperationException("The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead. If using the fluent Cypher interface, use the overload of Return that takes a lambda or object instead of single string. (The overload with a single string is for an identity, not raw query text: we can't map the columns back out if you just supply raw query text.)");
 
             var resultType = typeof(TResult);
-            var isResultTypeANodeOrRelationshipInstance = resultType.IsGenericType &&
+            var isResultTypeANodeOrRelationshipInstance = resultType.GetTypeInfo().IsGenericType &&
                                        (resultType.GetGenericTypeDefinition() == typeof(Node<>) ||
                                         resultType.GetGenericTypeDefinition() == typeof(RelationshipInstance<>));
             var mapping = jsonTypeMappings.SingleOrDefault(m => m.ShouldTriggerForPropertyType(0, resultType));
@@ -399,7 +399,7 @@ This means no query was emitted, so a method that doesn't care about getting res
                     {
                         throw new InvalidOperationException("Expected the row to be a JSON object, but it wasn't.");
                     }
-                    
+
                     JToken rowProperty;
                     if (!rowObject.TryGetValue(dataPropertyNameInTransaction, out rowProperty))
                     {
@@ -421,12 +421,12 @@ This means no query was emitted, so a method that doesn't care about getting res
                 var elementToParse = row[0];
                 if (elementToParse is JObject)
                 {
-                    var propertyNames = ((JObject) elementToParse)
+                    var propertyNames = ((JObject)elementToParse)
                         .Properties()
                         .Select(p => p.Name)
                         .ToArray();
                     var dataElementLooksLikeANodeOrRelationshipInstance =
-                        new[] {"data", "self", "traverse", "properties"}.All(propertyNames.Contains);
+                        new[] { "data", "self", "traverse", "properties" }.All(propertyNames.Contains);
                     if (!isResultTypeANodeOrRelationshipInstance &&
                         dataElementLooksLikeANodeOrRelationshipInstance)
                     {
@@ -456,25 +456,25 @@ This means no query was emitted, so a method that doesn't care about getting res
                 // See if there is a constructor that is compatible with all property types,
                 // which is the case for anonymous types...
                 var ctor = typeof(TResult).GetConstructors().FirstOrDefault(info =>
-                    {
-                        var parameters = info.GetParameters();
-                        if (parameters.Length != columnNames.Length)
-                            return false;
+                {
+                    var parameters = info.GetParameters();
+                    if (parameters.Length != columnNames.Length)
+                        return false;
 
-                        for (var i = 0; i < parameters.Length; i++)
-                        {
-                            var property = propertiesDictionary[columnNames[i]];
-                            if (!parameters[i].ParameterType.IsAssignableFrom(property.PropertyType))
-                                return false;
-                        }
-                        return true;
-                    });
+                    for (var i = 0; i < parameters.Length; i++)
+                    {
+                        var property = propertiesDictionary[columnNames[i]];
+                        if (!parameters[i].ParameterType.IsAssignableFrom(property.PropertyType))
+                            return false;
+                    }
+                    return true;
+                });
 
                 if (ctor != null)
                 {
                     getRow = token => ReadProjectionRowUsingCtor(context, token, propertiesDictionary, columnNames, jsonTypeMappings, ctor);
                 }
-                
+
                 if (getRow == null)
                 {
                     // wasn't able to build TResult via constructor
@@ -534,7 +534,7 @@ This means no query was emitted, so a method that doesn't care about getting res
             var result = Activator.CreateInstance<TResult>();
 
             var cellIndex = 0;
-            foreach(var cell in row.Children())
+            foreach (var cell in row.Children())
             {
                 var columnName = columnNames[cellIndex];
                 cellIndex++;
@@ -559,8 +559,8 @@ This means no query was emitted, so a method that doesn't care about getting res
             var propertyType = property.PropertyType;
 
             var isEnumerable =
-                propertyType.IsGenericType &&
-                propertyType.GetGenericTypeDefinition() == typeof (IEnumerable<>);
+                propertyType.GetTypeInfo().IsGenericType &&
+                propertyType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
 
             var isArrayOrEnumerable =
                 isEnumerable ||

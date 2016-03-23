@@ -203,18 +203,18 @@ namespace Neo4jClient.Cypher
         void VisitStaticMember(MemberExpression node)
         {
             object value;
-            switch (node.Member.MemberType)
+
+            FieldInfo fInfo = node.Member as FieldInfo;
+            PropertyInfo pInfo = node.Member as PropertyInfo;
+
+            if (fInfo != null)
+                value = fInfo.GetValue(null);
+            else if (pInfo != null)
+                value = pInfo.GetValue(null, null);
+            else
             {
-                case MemberTypes.Field:
-                    value = ((FieldInfo)node.Member).GetValue(null);
-                    break;
-                case MemberTypes.Property:
-                    value = ((PropertyInfo)node.Member).GetValue(null, null);
-                    break;
-                default:
-                    throw new NotSupportedException(string.Format(
-                        "Unhandled member type {0} in static member expression: {1}",
-                        node.Member.MemberType,
+                throw new NotSupportedException(string.Format(
+                        "Unhandled member type in static member expression: {0}",
                         node));
             }
 
@@ -234,13 +234,13 @@ namespace Neo4jClient.Cypher
 
             var nullIdentifier = string.Empty;
 
-            var propertyParent = node.Member.ReflectedType;
+            var propertyParent = node.Member.DeclaringType;
             var propertyType = propertyParent.GetProperty(node.Member.Name).PropertyType;
 
             if (capabilities.SupportsPropertySuffixesForControllingNullComparisons)
             {
-                var isNullable = propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
-                if (isNullable || propertyType == typeof (string)) nullIdentifier = "?";
+                var isNullable = propertyType.GetTypeInfo().IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+                if (isNullable || propertyType == typeof(string)) nullIdentifier = "?";
             }
 
             var nodeMemberName = node.Member.GetNameUsingJsonProperty();

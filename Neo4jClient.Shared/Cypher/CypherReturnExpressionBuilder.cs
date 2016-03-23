@@ -184,12 +184,13 @@ namespace Neo4jClient.Cypher
             }
 
             var resultingType = constructor.DeclaringType;
+            var typeInfo = resultingType.GetTypeInfo();
             var quacksLikeAnAnonymousType =
                 resultingType != null &&
-                resultingType.IsSpecialName &&
-                resultingType.IsValueType &&
-                resultingType.IsNestedPrivate &&
-                !resultingType.IsGenericType;
+                typeInfo.IsSpecialName &&
+                typeInfo.IsValueType &&
+                typeInfo.IsNestedPrivate &&
+                !typeInfo.IsGenericType;
             var expressionMembers = expression.Members;
             if (expressionMembers == null && !quacksLikeAnAnonymousType)
             {
@@ -463,10 +464,10 @@ namespace Neo4jClient.Cypher
         static bool IsNodeOrRelationshipOfT(Type type)
         {
             if (type == null) throw new ArgumentNullException("type");
-            return type.IsGenericType && (
-                type.GetGenericTypeDefinition() == typeof (Node<>) ||
-                type.GetGenericTypeDefinition() == typeof (Relationship<>) ||
-                type.GetGenericTypeDefinition() == typeof (RelationshipInstance<>));
+            return type.GetTypeInfo().IsGenericType && (
+                type.GetGenericTypeDefinition() == typeof(Node<>) ||
+                type.GetGenericTypeDefinition() == typeof(Relationship<>) ||
+                type.GetGenericTypeDefinition() == typeof(RelationshipInstance<>));
         }
 
         static bool IsSupportedForAs(Type type, IEnumerable<JsonConverter> jsonConvertersThatTheDeserializerWillUse)
@@ -482,12 +483,12 @@ namespace Neo4jClient.Cypher
             if (type.IsArray)
                 return IsSupportedElementForAs(type.GetElementType(), jsonConvertersThatTheDeserializerWillUseAsArray);
 
-            if (type.IsGenericType)
+            if (type.GetTypeInfo().IsGenericType)
             {
                 var genericTypeDefinition = type.GetGenericTypeDefinition();
-                if (genericTypeDefinition == typeof (IEnumerable<>)
-                    || genericTypeDefinition == typeof (ICollection<>)
-                    || genericTypeDefinition == typeof (IList<>))
+                if (genericTypeDefinition == typeof(IEnumerable<>)
+                    || genericTypeDefinition == typeof(ICollection<>)
+                    || genericTypeDefinition == typeof(IList<>))
                 {
                     var genericArguments = type.GetGenericArguments();
                     if (genericArguments.Length == 1)
@@ -520,7 +521,7 @@ namespace Neo4jClient.Cypher
             if (type == typeof(RelationshipInstance))
                 return true;
 
-            if (type.IsGenericType)
+            if (type.GetTypeInfo().IsGenericType)
             {
                 var genericTypeDefinition = type.GetGenericTypeDefinition();
                 if ((genericTypeDefinition == typeof(RelationshipInstance<>)
@@ -628,7 +629,7 @@ namespace Neo4jClient.Cypher
         static bool IsTypeNullable(Type type)
         {
             if (type == null) return false;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) return true;
             if (type == typeof(string)) return true;
             return false;
         }

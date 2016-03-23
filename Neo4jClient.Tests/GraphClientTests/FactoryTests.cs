@@ -19,7 +19,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowExceptionIfRootApiIsNotDefined()
         {
             using (var testHarness = new RestTestHarness
