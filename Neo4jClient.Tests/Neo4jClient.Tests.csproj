@@ -82,6 +82,7 @@
     <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="ApiModels\RootApiResponseTests.cs" />
     <Compile Include="Cypher\AggregateTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryAdvancedTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryCustomHeaderTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryDetachDeleteTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryForEachTests.cs" />

@@ -21,14 +21,9 @@ namespace Neo4jClient.Cypher
         protected readonly QueryWriter QueryWriter;
         protected readonly bool CamelCaseProperties;
 
-        public CypherFluentQuery(IGraphClient client)
+        public CypherFluentQuery(IGraphClient client) 
+            : this(client, new QueryWriter())
         {
-            if (!(client is IRawGraphClient))
-                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
-
-            Client = (IRawGraphClient)client;
-            QueryWriter = new QueryWriter();
-            CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
         }
 
         protected CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
@@ -39,6 +34,7 @@ namespace Neo4jClient.Cypher
             Client = (IRawGraphClient)client;
             QueryWriter = queryWriter;
             CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
+            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter);
         }
 
         IOrderedCypherFluentQuery MutateOrdered(Action<QueryWriter> callback)
@@ -400,6 +396,8 @@ namespace Neo4jClient.Cypher
         {
             return Client.ExecuteCypherAsync(Query);
         }
+
+        public ICypherFluentQueryAdvanced Advanced { get; private set; }
 
         IGraphClient IAttachedReference.Client
         {
