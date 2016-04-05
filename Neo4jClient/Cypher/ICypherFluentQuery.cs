@@ -105,15 +105,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity);
-
-        /// <summary>
-        /// Used to control deserialization when building libraries on top of Neo4jClient
-        /// </summary>
-        /// <typeparam name="TResult">The type to be returned</typeparam>
-        /// <param name="expression">The return expression</param>
-        /// <returns></returns>
-        ICypherFluentQuery<TResult> ReturnDistinct<TResult>(ReturnExpression expression);
-        //        ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<TResult>> expression);
+//        ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<TResult>> expression);
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, TResult>> expression);
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(Expression<Func<ICypherResultItem, ICypherResultItem, ICypherResultItem, TResult>> expression);
