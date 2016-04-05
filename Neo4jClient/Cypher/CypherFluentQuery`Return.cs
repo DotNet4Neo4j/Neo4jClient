@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Microsoft.SqlServer.Server;
 
 namespace Neo4jClient.Cypher
 {
@@ -53,25 +52,13 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery<TResult> Return<TResult>(LambdaExpression expression)
         {
             var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, Client.CypherCapabilities, Client.JsonConverters, CamelCaseProperties);
-
-            return Mutate<TResult>(w =>
-            {
-                w.ResultMode = returnExpression.ResultMode;
-                w.ResultFormat = returnExpression.ResultFormat;
-                w.AppendClause("RETURN " + returnExpression.Text);
-            });
+            return Advanced.Return<TResult>(returnExpression);
         }
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(LambdaExpression expression)
         {
             var returnExpression = CypherReturnExpressionBuilder.BuildText(expression, Client.CypherCapabilities, Client.JsonConverters, CamelCaseProperties);
-
-            return Mutate<TResult>(w =>
-            {
-                w.ResultMode = returnExpression.ResultMode;
-                w.ResultFormat = returnExpression.ResultFormat;
-                w.AppendClause("RETURN distinct " + returnExpression.Text);
-            });
+            return Advanced.ReturnDistinct<TResult>(returnExpression);
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(Expression<Func<TResult>> expression)
