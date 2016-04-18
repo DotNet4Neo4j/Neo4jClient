@@ -117,7 +117,7 @@ namespace Neo4jClient.Execution
             }
 
             // use a custom task factory
-            return await taskFactory.StartNew(() => _executionConfiguration.HttpClient.SendAsync(_request).Result);
+            return await taskFactory.StartNew(() => _executionConfiguration.HttpClient.SendAsync(_request).Result).ConfigureAwait(false);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync()
