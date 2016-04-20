@@ -34,6 +34,7 @@ namespace Neo4jClient.Test.Cypher
             Assert.IsInstanceOf<IEnumerable<ReturnPropertyQueryResult>>(results);
         }
 
+      
         [Test]
         public void ReturnColumnAliasOfTypeEnum()
         {

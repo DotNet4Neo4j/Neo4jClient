@@ -419,19 +419,19 @@ namespace Neo4jClient
             return task.Result;
         }
 
-        public virtual async Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
+        public virtual Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
             CheckTransactionEnvironmentWithPolicy(policy);
 
-            return await Request.With(ExecutionConfiguration)
+            return Request.With(ExecutionConfiguration)
                 .Get(policy.BaseEndpoint.AddPath(reference, policy))
                 .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
                 .ParseAs<NodeApiResponse<TNode>>()
                 .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
                 .WithDefault()
-                .ExecuteAsync(nodeMessage => nodeMessage.Result != null ? nodeMessage.Result.ToNode(this) : null).ConfigureAwait(false);
+                .ExecuteAsync(nodeMessage => nodeMessage.Result != null ? nodeMessage.Result.ToNode(this) : null);
         }
 
         public virtual Node<TNode> Get<TNode>(NodeReference<TNode> reference)
@@ -461,13 +461,13 @@ namespace Neo4jClient
             return task.Result;
         }
 
-        public virtual async Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
+        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
         {
             CheckRoot();
             var policy = policyFactory.GetPolicy(PolicyType.Rest);
             CheckTransactionEnvironmentWithPolicy(policy);
 
-            return await Request.With(ExecutionConfiguration)
+            return Request.With(ExecutionConfiguration)
                 .Get(policy.BaseEndpoint.AddPath(reference, policy))
                 .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
                 .ParseAs<RelationshipApiResponse<TData>>()
@@ -1043,7 +1043,7 @@ namespace Neo4jClient
         {
             var context = ExecutionContext.Begin(this);
             
-            var response = await PrepareCypherRequest<object>(query, context.Policy);
+            var response = await PrepareCypherRequest<object>(query, context.Policy).ConfigureAwait(false);
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
             
             context.Complete(query);
