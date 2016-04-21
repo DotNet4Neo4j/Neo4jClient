@@ -108,7 +108,7 @@ namespace Neo4jClient
             get { return RootApiResponse != null; }
         }
 
-        public virtual void Connect(NeoServerConfiguration configuration = null)
+        public virtual async Task ConnectAsync(NeoServerConfiguration configuration = null)
         {
             if (IsConnected)
             {
@@ -131,11 +131,11 @@ namespace Neo4jClient
 
             try
             {
-                configuration = configuration ?? NeoServerConfiguration.GetConfiguration(
+                configuration = configuration ?? await NeoServerConfiguration.GetConfigurationAsync(
                     RootUri,
                     ExecutionConfiguration.Username,
                     ExecutionConfiguration.Password,
-                    ExecutionConfiguration);
+                    ExecutionConfiguration).ConfigureAwait(false);
 
                 RootApiResponse = configuration.ApiConfig;
 
@@ -164,7 +164,20 @@ namespace Neo4jClient
                 if (RootApiResponse.Version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
             }
-            catch(Exception e)
+            catch (AggregateException ex)
+            {
+                Exception unwrappedException;
+                var wasUnwrapped = ex.TryUnwrap(out unwrappedException);
+                operationCompletedArgs.Exception = wasUnwrapped ? unwrappedException : ex;
+
+                stopTimerAndNotifyCompleted();
+
+                if (wasUnwrapped)
+                    throw unwrappedException;
+
+                throw;
+            }
+            catch (Exception e)
             {
                 operationCompletedArgs.Exception = e;
                 stopTimerAndNotifyCompleted();
@@ -174,7 +187,36 @@ namespace Neo4jClient
             stopTimerAndNotifyCompleted();
         }
 
-        //public NameValueCollection CustomHeaders { get; set; }
+        public virtual void Connect(NeoServerConfiguration configuration = null)
+        {
+            var task = ConnectAsync(configuration);
+            try
+            {
+                Task.WaitAll(task);
+            }
+            catch (AggregateException ex)
+            {
+                var operationCompleteArgs = new OperationCompletedEventArgs();
+
+                Exception unwrappedException;
+                var wasUnwrapped = ex.TryUnwrap(out unwrappedException);
+                operationCompleteArgs.Exception = wasUnwrapped ? unwrappedException : ex;
+
+                if (OperationCompleted != null)
+                    OperationCompleted(this, operationCompleteArgs);
+
+                if (wasUnwrapped)
+                    throw unwrappedException;
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                if (OperationCompleted != null)
+                    OperationCompleted(this, new OperationCompletedEventArgs { Exception = ex });
+                throw;
+            }
+        }
 
         [Obsolete(
             "The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels."
