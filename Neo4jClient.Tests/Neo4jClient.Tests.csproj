@@ -114,6 +114,7 @@
     <Compile Include="Cypher\QueryWriterTests.cs" />
     <Compile Include="Cypher\StartBitFormatterTests.cs" />
     <Compile Include="Extensions\MemberInfoExtensionsTests.cs" />
+    <Compile Include="GraphClientTests\ConnectAsyncTests.cs" />
     <Compile Include="GraphClientTests\FactoryTests.cs" />
     <Compile Include="HttpClientWrapperTests.cs" />
     <Compile Include="MockResponseThrows.cs" />
