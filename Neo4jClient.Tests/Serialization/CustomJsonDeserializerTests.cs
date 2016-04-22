@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Transactions;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using NUnit.Framework;
@@ -72,7 +73,7 @@ namespace Neo4jClient.Test.Serialization
         [TestCase("2011/09/06 12:11:00 PM", "2011-09-06T12:11:00.0000000", DateTimeKind.Unspecified)]
         public void DeserializeShouldPreserveDateValuesUsingIso8601Format(string input, string expectedResult, DateTimeKind expectedKind)
         {
-            var culturesToTest = new[] { "en-AU", "en-US" };
+            var culturesToTest = new[] { "en-AU", "en-US", "nb-NO" };
 
             foreach (var cultureName in culturesToTest)
             {
