@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using Neo4jClient.Cypher;
 using NSubstitute;
 using NUnit.Framework;
@@ -35,6 +36,29 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual("WITH n\r\nLOAD CSV FROM 'file://localhost/c:/foo/bar.csv' AS row", query.QueryText);
         }
 
+        [Test]
+        public void TestLoadCsvWithHeaders()
+        {
+            const string expected = "LOAD CSV WITH HEADERS FROM 'file://localhost/c:/foo/bar.csv' AS row";
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .LoadCsv(new Uri("file://localhost/c:/foo/bar.csv"), "row", true)
+                .Query;
+
+            Assert.AreEqual(expected, query.QueryText);
+        }
+
+        [Test]
+        public void TestLoadCsvWithHeadersAndCustomFieldTerminator()
+        {
+            const string expected = "LOAD CSV WITH HEADERS FROM 'file://localhost/c:/foo/bar.csv' AS row FIELDTERMINATOR '|'";
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .LoadCsv(new Uri("file://localhost/c:/foo/bar.csv"), "row", true, "|")
+                .Query;
+
+            Assert.AreEqual(expected, query.QueryText);
+        }
 
         [Test]
         public void ThrowsExceptionWhenUriIsNull()
@@ -44,5 +68,7 @@ namespace Neo4jClient.Test.Cypher
 
             Assert.Throws<ArgumentException>(() => query.LoadCsv(null, "row"));
         }
+
+        
     }
 }

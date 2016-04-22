@@ -316,12 +316,25 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
-        public ICypherFluentQuery LoadCsv(Uri fileUri, string identifier)
+        public ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null)
         {
             if(fileUri == null)
                 throw new ArgumentException("File URI must be supplied.", "fileUri");
 
-            return Mutate(w => w.AppendClause(string.Format("LOAD CSV FROM '{0}' AS {1}", fileUri.AbsoluteUri, identifier)));
+            string withHeadersEnabledText = string.Empty;
+            string fieldSeperatorEnabledText = string.Empty;
+            if (withHeaders)
+            {
+                withHeadersEnabledText = " WITH HEADERS";
+            }
+
+            if (!string.IsNullOrEmpty(fieldTerminator))
+            {
+                fieldSeperatorEnabledText = string.Format(" FIELDTERMINATOR '{0}'", fieldTerminator);
+            }
+
+            return Mutate(w => w.AppendClause(string.Format("LOAD CSV{0} FROM '{1}' AS {2}{3}", withHeadersEnabledText, fileUri.AbsoluteUri, identifier, 
+                fieldSeperatorEnabledText)));
         }
 
         public ICypherFluentQuery Unwind(string collectionName, string columnName)
