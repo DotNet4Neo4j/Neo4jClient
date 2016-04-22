@@ -75,8 +75,10 @@ namespace Neo4jClient.Cypher
         /// <remarks>This creates the following: <c>LOAD CSV FROM 'fileUri' AS identifier</c></remarks>
         /// <param name="fileUri">The file URI in the format: <c>c:\\example.csv.</c></param>
         /// <param name="identifier">The identifier to use in the rest of the query.</param>
+        /// <param name="withHeaders">Use this custom headers are defined in the CSV file</param>
+        /// <param name="fieldTerminator">The terminator to use. If you do not define anything the Neo4j default will be used: ','</param>
         /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
-        ICypherFluentQuery LoadCsv(Uri fileUri, string identifier);
+        ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null);
         ICypherFluentQuery Unwind(string collection, string columnName);
         ICypherFluentQuery Unwind(IEnumerable collection, string identity);
         ICypherFluentQuery Union();
