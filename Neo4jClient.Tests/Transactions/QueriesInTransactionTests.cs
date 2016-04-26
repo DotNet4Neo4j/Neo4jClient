@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -281,6 +282,7 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
+        [Timeout(5000)]
         public void PromoteDurableInAmbientTransaction()
         {
             // when two durables are registered they get promoted
@@ -702,6 +704,55 @@ namespace Neo4jClient.Test.Transactions
                     Assert.AreEqual(1, results.Count());
                     Assert.AreEqual(1234, results.First().Total);
 
+                    msTransaction.Complete();
+                }
+
+                Assert.IsFalse(client.InTransaction);
+            }
+        }
+
+        private class DateHolder {  public DateTime Date { get; set; } }
+
+        [Test]
+        public void TestTransactionScopeWithComplexDeserialization_WithCulture()
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("nb-NO");
+
+            const string queryText = @"MATCH (dt:DummyTotal) RETURN dt";
+            const string resultColumn = @"{'columns':['dt'],'data':[{'row':[{'date':'2015-07-27T22:30:35Z'}]}]}";
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction", cypherApiQuery),
+                    MockResponse.Json(201, TransactionRestResponseHelper.GenerateInitTransactionResponse(1, resultColumn), "http://foo/db/data/transaction/1")
+                },
+                {
+                    commitRequest, MockResponse.Json(200, @"{'results':[], 'errors':[] }")
+                }
+            })
+            {
+                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+                using (var msTransaction = new TransactionScope())
+                {
+                    Assert.IsTrue(client.InTransaction);
+
+                    var query = client.Cypher.Match("(dt:DummyTotal)")
+                        .Return(dt => dt.As<DateHolder>());
+
+                    var eResults = query.Results;
+                    var results = eResults.ToList();
+
+                    Assert.AreEqual(1, results.Count);
+                    var date = results.First().Date;
+
+                    Assert.AreEqual(date.Kind, DateTimeKind.Utc);
+                    Assert.AreEqual(new DateTime(2015,7,27,22,30,35), results.First().Date);
+                    
                     msTransaction.Complete();
                 }
 
