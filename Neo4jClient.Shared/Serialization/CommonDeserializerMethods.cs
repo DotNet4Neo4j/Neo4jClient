@@ -70,7 +70,7 @@ namespace Neo4jClient.Serialization
                 if (!DateTime.TryParse(rawValue, out parsed))
                     return null;
 
-                return rawValue.EndsWith("Z", StringComparison.InvariantCultureIgnoreCase) ? parsed.ToUniversalTime() : parsed;
+                return rawValue.EndsWith("Z", StringComparison.OrdinalIgnoreCase) ? parsed.ToUniversalTime() : parsed;
             }
 
             var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
