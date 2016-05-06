@@ -12,3 +12,4 @@ packages
 *.Cache
 *.vs\
 *.ghostdoc.xml
+project.lock.json
