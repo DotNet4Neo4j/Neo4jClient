@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neo4jClient.Full", "Neo4jClient.Full\Neo4jClient.Full.csproj", "{343B9889-6DDF-4474-A1EC-05508A652E5A}"
 EndProject
@@ -35,23 +35,35 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Full - Debug|Any CPU = Full - Debug|Any CPU
+		Portable - Debug|Any CPU = Portable - Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Full - Debug|Any CPU.ActiveCfg = Full - Debug|Any CPU
+		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Full - Debug|Any CPU.Build.0 = Full - Debug|Any CPU
+		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Portable - Debug|Any CPU.ActiveCfg = Portable - Debug|Any CPU
 		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{343B9889-6DDF-4474-A1EC-05508A652E5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2724A871-4B4F-4C83-8E0F-2439F69CADA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2724A871-4B4F-4C83-8E0F-2439F69CADA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2724A871-4B4F-4C83-8E0F-2439F69CADA2}.Full - Debug|Any CPU.ActiveCfg = Full - Debug|Any CPU
+		{2724A871-4B4F-4C83-8E0F-2439F69CADA2}.Portable - Debug|Any CPU.ActiveCfg = Portable - Debug|Any CPU
 		{2724A871-4B4F-4C83-8E0F-2439F69CADA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2724A871-4B4F-4C83-8E0F-2439F69CADA2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Full - Debug|Any CPU.ActiveCfg = Full - Debug|Any CPU
+		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Portable - Debug|Any CPU.ActiveCfg = Portable - Debug|Any CPU
 		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Full - Debug|Any CPU.ActiveCfg = Full - Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Portable - Debug|Any CPU.ActiveCfg = Portable - Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Portable - Debug|Any CPU.Build.0 = Portable - Debug|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
