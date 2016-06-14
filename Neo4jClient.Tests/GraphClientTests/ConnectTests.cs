@@ -16,7 +16,7 @@ namespace Neo4jClient.Test.GraphClientTests
     public class ConnectTests
     {
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError")]
+        [ExpectedException(typeof(Exception), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
             using (var testHarness = new RestTestHarness
