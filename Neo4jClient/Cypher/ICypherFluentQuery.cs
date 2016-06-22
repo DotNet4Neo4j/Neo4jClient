@@ -27,11 +27,11 @@ namespace Neo4jClient.Cypher
 
         /// <summary>
         /// Custom headers to add to REST calls to Neo4j server.
-        /// Example usage: This can be used to provide extra information to a Neo4j Loadbalancer. 
+        /// Example usage: This can be used to provide extra information to a Neo4j Loadbalancer.
         /// </summary>
         /// <remarks>
         /// This settings is ignored when using <see cref="IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction"/>
-        /// Since it could create a race-condition. 
+        /// Since it could create a race-condition.
         /// </remarks>
         /// <param name="headers">Customheader added via: <see cref="NameValueCollection"/></param>
         /// <returns></returns>
@@ -57,6 +57,27 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Merge(string mergeText);
         ICypherFluentQuery OnCreate();
         ICypherFluentQuery OnMatch();
+
+        /// <summary>
+        /// [Neo4j 3.0+] Calls a Stored Procedure on the Database.
+        /// </summary>
+        /// <remarks>This only works on Neo4j 3.0+</remarks>
+        /// <param name="storedProcedureText">The Stored Procedure to execute.</param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="storedProcedureText"/> argument is empty or null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if an attempt is made to call this against a server version prior to 3.0.</exception>
+        ICypherFluentQuery Call(string storedProcedureText);
+
+        /// <summary>
+        /// [Neo4j 3.0+] Yields the values from the response of a <see cref="Call"/> method
+        /// </summary>
+        /// <remarks>This only works on Neo4j 3.0+</remarks>
+        /// <param name="yieldText">The values to yield.</param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="yieldText"/> argument is empty or null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if an attempt is made to call this against a server version prior to 3.0.</exception>
+        ICypherFluentQuery Yield(string yieldText);
+
         ICypherFluentQuery CreateUnique(string createUniqueText);
         ICypherFluentQuery CreateUniqueConstraint(string identity, string property);
         ICypherFluentQuery DropUniqueConstraint(string identity, string property);

@@ -49,7 +49,7 @@ namespace Neo4jClient
         private RootNode rootNode;
 
         private CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
-        
+
 
         public bool UseJsonStreamingIfAvailable { get; set; }
 
@@ -163,6 +163,9 @@ namespace Neo4jClient
 
                 if (RootApiResponse.Version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
+
+                if (RootApiResponse.Version >= new Version(3, 0))
+                    cypherCapabilities = CypherCapabilities.Cypher30;
             }
             catch (AggregateException ex)
             {
@@ -981,7 +984,7 @@ namespace Neo4jClient
                     ResponseObject = response.Result
                 });
         }
-        
+
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
         {
             var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
@@ -996,7 +999,7 @@ namespace Neo4jClient
                     throw unwrappedException;
                 throw;
             }
-            
+
             return task.Result;
         }
 
@@ -1049,7 +1052,7 @@ namespace Neo4jClient
 
             return results;
         }
-        
+
         void IRawGraphClient.ExecuteCypher(CypherQuery query)
         {
             var context = ExecutionContext.Begin(this);
@@ -1080,14 +1083,14 @@ namespace Neo4jClient
 
             context.Complete(query);
         }
-        
+
         async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
             var context = ExecutionContext.Begin(this);
-            
+
             var response = await PrepareCypherRequest<object>(query, context.Policy).ConfigureAwait(false);
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
-            
+
             context.Complete(query);
         }
 
