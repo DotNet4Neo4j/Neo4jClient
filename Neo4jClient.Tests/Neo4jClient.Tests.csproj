@@ -102,6 +102,7 @@
     <Compile Include="Cypher\AggregateTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryAdvancedTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryCustomHeaderTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryCallTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryDetachDeleteTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryForEachTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryDropTests.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Cypher\CypherFluentQueryUnwindTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryUsingIndexTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
+    <Compile Include="Cypher\CypherFluentQueryYieldTests.cs" />
     <Compile Include="Cypher\CypherQueryTests.cs" />
     <Compile Include="Cypher\DocumentationExamples.cs" />
     <Compile Include="Cypher\UnionTests.cs" />

@@ -21,7 +21,7 @@ namespace Neo4jClient.Cypher
         protected readonly QueryWriter QueryWriter;
         protected readonly bool CamelCaseProperties;
 
-        public CypherFluentQuery(IGraphClient client) 
+        public CypherFluentQuery(IGraphClient client)
             : this(client, new QueryWriter())
         {
         }
@@ -208,6 +208,30 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("ON MATCH"));
         }
 
+        public ICypherFluentQuery Call(string storedProcedureText)
+        {
+            if (!Client.CypherCapabilities.SupportsStoredProcedures)
+                throw new InvalidOperationException("CALL not supported in Neo4j versions older than 3.0");
+
+           if(string.IsNullOrWhiteSpace(storedProcedureText))
+                throw new ArgumentException("The stored procedure to call can't be null or whitespace.", "storedProcedureText");
+
+            return Mutate(w =>
+                w.AppendClause(string.Format("CALL {0}", storedProcedureText)));
+        }
+
+        public ICypherFluentQuery Yield(string yieldText)
+        {
+            if (!Client.CypherCapabilities.SupportsStoredProcedures)
+                throw new InvalidOperationException("YIELD not supported in Neo4j versions older than 3.0");
+
+            if (string.IsNullOrWhiteSpace(yieldText))
+                throw new ArgumentException("The value to yield can't be null or whitespace.", "yieldText");
+
+            return Mutate(w =>
+                w.AppendClause(string.Format("YIELD {0}", yieldText)));
+        }
+
         public ICypherFluentQuery CreateUnique(string createUniqueText)
         {
             return Mutate(w => w.AppendClause("CREATE UNIQUE " + createUniqueText));
@@ -246,7 +270,7 @@ namespace Neo4jClient.Cypher
         }
 
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)
-            where TNode : class 
+            where TNode : class
         {
             if (typeof(TNode).GetTypeInfo().IsGenericType &&
                 typeof(TNode).GetGenericTypeDefinition() == typeof(Node<>)) {
@@ -289,7 +313,7 @@ namespace Neo4jClient.Cypher
             if(identities.Contains("."))
                 throw new InvalidOperationException("Unable to DETACH DELETE properties, you can only delete nodes & relationships.");
 
-            return Mutate(w => 
+            return Mutate(w =>
                 w.AppendClause(string.Format("DETACH DELETE {0}", identities)));
         }
 
@@ -333,7 +357,7 @@ namespace Neo4jClient.Cypher
                 fieldSeperatorEnabledText = string.Format(" FIELDTERMINATOR '{0}'", fieldTerminator);
             }
 
-            return Mutate(w => w.AppendClause(string.Format("LOAD CSV{0} FROM '{1}' AS {2}{3}", withHeadersEnabledText, fileUri.AbsoluteUri, identifier, 
+            return Mutate(w => w.AppendClause(string.Format("LOAD CSV{0} FROM '{1}' AS {2}{3}", withHeadersEnabledText, fileUri.AbsoluteUri, identifier,
                 fieldSeperatorEnabledText)));
         }
 
@@ -426,7 +450,7 @@ namespace Neo4jClient.Cypher
         {
             if (version < minimumCypherParserVersion)
                 return ParserVersion("LEGACY");
-            
+
             return ParserVersion(string.Format("{0}.{1}", version.Major, version.Minor));
         }
 
@@ -473,9 +497,9 @@ namespace Neo4jClient.Cypher
 
         public static string ApplyCamelCase(bool isCamelCase, string propertyName)
         {
-            return isCamelCase ? 
-                string.Format("{0}{1}", propertyName.Substring(0, 1).ToLowerInvariant(), propertyName.Length > 1 
-                    ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty) 
+            return isCamelCase ?
+                string.Format("{0}{1}", propertyName.Substring(0, 1).ToLowerInvariant(), propertyName.Length > 1
+                    ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty)
                 : propertyName;
         }
     }
