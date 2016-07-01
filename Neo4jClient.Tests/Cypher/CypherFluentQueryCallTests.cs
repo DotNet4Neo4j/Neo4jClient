@@ -30,24 +30,19 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void ThrowArgumentException_WhenNoStoredProcedureIsGiven()
         {
             var client = GraphClient_30;
-            var query = new CypherFluentQuery(client)
-                .Call(null).Query;
+            Assert.That(() => new CypherFluentQuery(client).Call(null).Query, Throws.ArgumentException);
         }
 
         [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
         public void ThrowsInvalidOperationException_WhenClientVersionIsLessThan_30()
         {
             var client = GraphClient_30;
             client.CypherCapabilities.Returns(CypherCapabilities.Cypher23);
 
-            var query = new CypherFluentQuery(client)
-                .Call("apoc.sp")
-                .Query;
+            Assert.That(() => new CypherFluentQuery(client).Call("apoc.sp").Query, Throws.InvalidOperationException);
         }
     }
 }

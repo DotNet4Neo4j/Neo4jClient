@@ -265,47 +265,40 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "This expression is not a binary expression:",
-            MatchType = MessageMatch.StartsWith)]
         public void TranslateFilterShouldThrowExceptionIfOuterExpressionIsAndAlsoAndInnerLeftExpressionIsNotABinaryExpression()
         {
             var testVariable = bool.Parse(bool.TrueString);
-            FilterFormatters.TranslateFilter<Foo>(f => testVariable && f.Prop2 == null);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.TranslateFilter<Foo>(f => testVariable && f.Prop2 == null));
+
+
+            Assert.IsTrue(ex.Message.StartsWith("This expression is not a binary expression:"));
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "This expression is not a binary expression:",
-            MatchType = MessageMatch.StartsWith)]
         public void TranslateFilterShouldThrowExceptionIfOuterExpressionIsAndAlsoAndInnerRightExpressionIsNotABinaryExpression()
         {
             var testVariable = bool.Parse(bool.TrueString);
-            FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null && testVariable);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null && testVariable));
+
+            Assert.IsTrue(ex.Message.StartsWith("This expression is not a binary expression:"));
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "Oprerator Or is not yet supported.",
-            MatchType = MessageMatch.StartsWith)]
         public void TranslateFilterShouldThrowExceptionForOrExpression()
         {
             var testVariable = bool.Parse(bool.TrueString);
-            FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null | testVariable);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null | testVariable));
+
+            Assert.IsTrue(ex.Message.StartsWith("Oprerator Or is not yet supported."));
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "Oprerator OrElse is not yet supported.",
-            MatchType = MessageMatch.StartsWith)]
         public void TranslateFilterShouldThrowExceptionForOrElseExpression()
         {
             var testVariable = bool.Parse(bool.TrueString);
-            FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null || testVariable);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.TranslateFilter<Foo>(f => f.Prop2 == null || testVariable));
+
+            Assert.IsTrue(ex.Message.StartsWith("Oprerator OrElse is not yet supported."));
         }
 
         public class Foo

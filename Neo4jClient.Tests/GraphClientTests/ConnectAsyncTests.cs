@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Neo4jClient.Execution;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -18,7 +19,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
 
@@ -47,7 +48,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
             graphClient.ExecutionConfiguration.UseJsonStreaming = false;
@@ -75,7 +76,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
 
@@ -105,7 +106,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpClient);
             OperationCompletedEventArgs operationCompletedArgs = null;

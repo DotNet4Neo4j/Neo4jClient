@@ -10,11 +10,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
     public class ExecuteGetAllRelationshipsGremlinTests
     {
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteGetAllRelationshipsGremlin("", null);
+            Assert.Throws<InvalidOperationException>(() => client.ExecuteGetAllRelationshipsGremlin("", null));
         }
 
         [Test]
@@ -41,7 +40,7 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
                           'end' : 'http://127.0.0.1:5118/db/data/node/789'
                         } ]")
                     }
-                }) 
+                })
                 {
                     var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
 

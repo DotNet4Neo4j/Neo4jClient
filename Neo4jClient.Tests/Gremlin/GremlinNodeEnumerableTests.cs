@@ -10,12 +10,11 @@ namespace Neo4jClient.Test.Gremlin
     public class GremlinNodeEnumerableTests
     {
         [Test]
-        [ExpectedException(typeof(DetachedNodeException))]
         public void GetEnumeratorShouldThrowDetachedNodeExceptionWhenClientNotSet()
         {
             // ReSharper disable ReturnValueOfPureMethodIsNotUsed
             IEnumerable<Node<object>> enumerable = new GremlinNodeEnumerable<object>(new GremlinQuery(null, "abc", null, null));
-            enumerable.GetEnumerator();
+            Assert.That(() => enumerable.GetEnumerator(), Throws.TypeOf<DetachedNodeException>());
             // ReSharper restore ReturnValueOfPureMethodIsNotUsed
         }
 

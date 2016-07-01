@@ -10,11 +10,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
     public class ExecuteGetAllNodesGremlinTests
     {
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteGetAllNodesGremlin<object>("", null);
+            Assert.Throws<InvalidOperationException>(() => client.ExecuteGetAllNodesGremlin<object>("", null));
         }
 
         public class Foo

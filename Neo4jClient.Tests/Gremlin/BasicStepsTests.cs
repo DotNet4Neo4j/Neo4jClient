@@ -353,11 +353,10 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        [ExpectedException(typeof(DetachedNodeException))]
         public void GremlinCountShouldThrowDetachedNodeExceptionWhenBaseReferenceClientIsNull()
         {
             var node = new NodeReference(123);
-            node.GremlinCount();
+            Assert.Throws<DetachedNodeException>(() => node.GremlinCount());
         }
 
         public enum TestEnum { Bar }

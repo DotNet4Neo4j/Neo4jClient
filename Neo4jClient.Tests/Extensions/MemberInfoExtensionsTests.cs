@@ -25,10 +25,10 @@ namespace Neo4jClient.Test.Extensions
         [TestFixture]
         public class GetNameUsingJsonPropertyMethod
         {
-            [Test, ExpectedException(typeof(ArgumentNullException))]
+            [Test]
             public void ThrowsArgumentNullException_WhenMemberInfoIsNull()
             {
-                MemberInfoExtensions.GetNameUsingJsonProperty(null);
+                Assert.Throws<ArgumentNullException>(() => MemberInfoExtensions.GetNameUsingJsonProperty(null));
             }
 
             [Test]

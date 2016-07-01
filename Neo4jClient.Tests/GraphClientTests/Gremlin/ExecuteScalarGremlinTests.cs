@@ -8,11 +8,10 @@ namespace Neo4jClient.Test.GraphClientTests.Gremlin
     public class ExecuteScalarGremlinTests
     {
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.ExecuteScalarGremlin("", null);
+            Assert.Throws<InvalidOperationException>(() => client.ExecuteScalarGremlin("", null));
         }
 
         [Test]

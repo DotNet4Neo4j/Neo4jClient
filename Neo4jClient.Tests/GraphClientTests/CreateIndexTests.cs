@@ -71,7 +71,6 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
         [TestCase(
             IndexFor.Node,
             IndexProvider.lucene,
@@ -131,7 +130,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     Provider = indexProvider,
                     Type = indexType
                 };
-                graphClient.CreateIndex("foo", indexConfiguration, indexFor);
+                Assert.Throws<Exception>(() => graphClient.CreateIndex("foo", indexConfiguration, indexFor));
             }
         }
     }

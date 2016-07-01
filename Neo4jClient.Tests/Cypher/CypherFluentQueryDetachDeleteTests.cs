@@ -31,14 +31,13 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ThrowInvalidOperationException_WhenAttemptingToDeleteProperty()
         {
             var client = GraphClient_230;
-            var query = new CypherFluentQuery(client)
+            Assert.That(() => new CypherFluentQuery(client)
                 .DetachDelete("andres.age")
                 .Return<Node<object>>("andres")
-                .Query;
+                .Query, Throws.InvalidOperationException);
         }
 
         [Test]
@@ -87,16 +86,15 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
         public void ThrowsInvalidOperationException_WhenClientVersionIsLessThan_230()
         {
             var client = GraphClient_230;
             client.CypherCapabilities.Returns(CypherCapabilities.Cypher226);
-            
-            var query = new CypherFluentQuery(client)
+
+            Assert.That(() => new CypherFluentQuery(client)
                 .Match("(n)")
                 .DetachDelete("n")
-                .Query;
+                .Query, Throws.InvalidOperationException);
         }
     }
 }

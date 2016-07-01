@@ -51,13 +51,13 @@ namespace Neo4jClient.Test.Cypher
             Assert.AreEqual(startsWith, query.QueryParameters["p0"]);
         }
 
-        [Test, ExpectedException(typeof(NotSupportedException))]
+        [Test]
         public void ThrowsNotSupportedException_WhenNeo4jInstanceIsLowerThan23()
         {
             var client = Substitute.For<IRawGraphClient>();
             client.CypherCapabilities.Returns(CypherCapabilities.Cypher22);
             const string startsWith = "Bar";
-            new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.StartsWith(startsWith));
+            Assert.Throws<NotSupportedException>(() => new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.StartsWith(startsWith)));
         }
 
         [Test]
