@@ -73,7 +73,7 @@ namespace Neo4jClient.Execution
                 condition, _customHeaders);
         }
 
-        private async Task<HttpResponseMessage> PrepareAsync(TaskFactory taskFactory)
+        private async Task<HttpResponseMessage> PrepareAsync()
         {
             if (_executionConfiguration.UseJsonStreaming)
             {
@@ -110,39 +110,28 @@ namespace Neo4jClient.Execution
                 _request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
             }
 
-            if (taskFactory == null)
-            {
-                // use the standard factory
-                return await _executionConfiguration.HttpClient.SendAsync(_request).ConfigureAwait(false);
-            }
-
-            // use a custom task factory
-            return await taskFactory.StartNew(() => _executionConfiguration.HttpClient.SendAsync(_request).Result).ConfigureAwait(false);
+            return await _executionConfiguration.HttpClient.SendAsync(_request).ConfigureAwait(false);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync()
         {
-            return ExecuteAsync(null, null, null);
+            return ExecuteAsync(null, null);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync(string commandDescription)
         {
-            return ExecuteAsync(commandDescription, null, null);
+            return ExecuteAsync(commandDescription, null);
+        }
+
+
+        public Task<HttpResponseMessage> ExecuteAsync(Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
+        {
+            return ExecuteAsync(null, continuationFunction);
         }
 
         public Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
         {
-            return ExecuteAsync(commandDescription, continuationFunction, null);
-        }
-
-        public Task<HttpResponseMessage> ExecuteAsync(Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
-        {
-            return ExecuteAsync(null, continuationFunction, null);
-        }
-
-        public Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction, TaskFactory taskFactory)
-        {
-            var executionTask = PrepareAsync(taskFactory).ContinueWith(requestTask =>
+            var executionTask = PrepareAsync().ContinueWith(requestTask =>
             {
                 var response = requestTask.Result;
                 if (string.IsNullOrEmpty(commandDescription))
@@ -184,27 +173,18 @@ namespace Neo4jClient.Execution
 
         public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<HttpResponseMessage>, TExpected> continuationFunction)
         {
-            return ExecuteAsync(commandDescription, continuationFunction, null);
-        }
-
-        public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<HttpResponseMessage>, TExpected> continuationFunction, TaskFactory taskFactory)
-        {
-            return ExecuteAsync(commandDescription, null, taskFactory).ContinueWith(continuationFunction);
+            return ExecuteAsync(commandDescription, null).ContinueWith(continuationFunction);
         }
 
         public HttpResponseMessage Execute()
         {
-            return Execute(null, null);
+            return Execute(null);
         }
+
 
         public HttpResponseMessage Execute(string commandDescription)
         {
-            return Execute(commandDescription, null);
-        }
-
-        public HttpResponseMessage Execute(string commandDescription, TaskFactory taskFactory)
-        {
-            var task = ExecuteAsync(commandDescription, null, taskFactory);
+            var task = ExecuteAsync(commandDescription, null);
             try
             {
                 Task.WaitAll(task);

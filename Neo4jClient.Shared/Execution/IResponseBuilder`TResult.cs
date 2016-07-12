@@ -13,16 +13,11 @@ namespace Neo4jClient.Execution
         Task<TResult> ExecuteAsync(string commandDescription);
         Task<TResult> ExecuteAsync(Func<Task<TResult>, TResult> continuationFunction);
         Task<TResult> ExecuteAsync(string commandDescription, Func<Task<TResult>, TResult> continuationFunction);
-        Task<TResult> ExecuteAsync(string commandDescription,
-            Func<Task<TResult>, TResult> continuationFunction, TaskFactory taskFactory);
         Task<TResult> ExecuteAsync();
 
         Task<TExpected> ExecuteAsync<TExpected>(Func<Task<TResult>, TExpected> continuationFunction);
         Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<TResult>, TExpected> continuationFunction);
-        Task<TExpected> ExecuteAsync<TExpected>(string commandDescription,
-            Func<Task<TResult>, TExpected> continuationFunction, TaskFactory taskFactory);
 
-        TResult Execute(string commandDescription, TaskFactory taskFactory);
         TResult Execute(string commandDescription);
         TResult Execute();
     }
