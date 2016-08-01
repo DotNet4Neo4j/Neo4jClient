@@ -68,6 +68,10 @@
         <dependency id="System.Threading" version="4.0.11" />
         <dependency id="System.Threading.Tasks" version="4.0.11" />
       </group>
+      <group targetFramework="net45">
+        <dependency id="Newtonsoft.Json" version="9.0.1"/>
+        <dependency id="Microsoft.Net.Http" version="2.2.29"/>
+      </group>
     </dependencies>
   </metadata>
   <files>
