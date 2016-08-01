@@ -44,7 +44,7 @@ namespace Neo4jClient.Test.Transactions
                     }
                     Assert.Fail("Should not reach this code, as there is an expected exception.");
                 }
-                catch (ApplicationException ex)
+                catch (Exception ex)
                 {
                     Assert.That(ex.Message.Contains("404"));
                 }
@@ -53,7 +53,6 @@ namespace Neo4jClient.Test.Transactions
 
 
         [Test]
-        [ExpectedException(typeof(NeoException))]
         //https://github.com/Readify/Neo4jClient/issues/127
         public void ReturnsCorrectError_WhenTransactionIsAutomaticallyRolledBack_ViaNeo4j_2_2_6_Plus([Values(RestTestHarness.Neo4jVersion.Neo226/*, RestTestHarness.Neo4jVersion.Neo23*/)] RestTestHarness.Neo4jVersion version)
         {
@@ -76,7 +75,7 @@ namespace Neo4jClient.Test.Transactions
                 client.Connect();
                 using (var transaction = client.BeginTransaction())
                 {
-                    client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
+                    Assert.That(() => client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults(), Throws.TypeOf<NeoException>());
                 }
             }
         }
@@ -108,7 +107,7 @@ namespace Neo4jClient.Test.Transactions
                         client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
                     }
                 }
-                catch (ApplicationException ex)
+                catch (Exception ex)
                 {
                     Assert.That(ex.Message.Contains("404"));
                 }
@@ -144,7 +143,7 @@ namespace Neo4jClient.Test.Transactions
                 {
                     ScopedTransactions = null
                 };
-                
+
                 tm.EndTransaction();
             }
         }
@@ -183,23 +182,21 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
-        [ExpectedException(typeof (NotSupportedException))]
         public void BeginTransactionShouldFailWithLower20Versions()
         {
             using (var testHarness = new RestTestHarness())
             {
                 var client = testHarness.CreateGraphClient(RestTestHarness.Neo4jVersion.Neo19);
                 client.Connect();
-                client.BeginTransaction();
+                Assert.That(() => client.BeginTransaction(), Throws.TypeOf<NotSupportedException>());
             }
         }
 
         [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
         public void BeginTransactionShouldFailWithoutConnectingFirst()
         {
             var client = new GraphClient(new Uri("http://foo/db/data"), null);
-            client.BeginTransaction();
+            Assert.That(() => client.BeginTransaction(), Throws.InvalidOperationException);
         }
 
         [Test]
@@ -424,7 +421,6 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
-        [ExpectedException(typeof(ClosedTransactionException))]
         public void CannotJoinAfterClosedTransaction()
         {
             using (var testHarness = new RestTestHarness())
@@ -436,15 +432,13 @@ namespace Neo4jClient.Test.Transactions
 
                     Assert.IsFalse(tran.IsOpen);
                     // should fail here
-                    using (var tran2 = client.BeginTransaction())
-                    {
-                    }
+
+                    Assert.That(() => client.BeginTransaction(), Throws.TypeOf<ClosedTransactionException>());
                 }
             }
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void FailsForCommitInSuppressMode()
         {
             using (var testHarness = new RestTestHarness())
@@ -452,13 +446,12 @@ namespace Neo4jClient.Test.Transactions
                 var client = testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction(TransactionScopeOption.Suppress))
                 {
-                    tran.Commit();
+                    Assert.That(() => tran.Commit(), Throws.InvalidOperationException);
                 }
             }
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void FailsForRollbackInSuppressMode()
         {
             using (var testHarness = new RestTestHarness())
@@ -466,45 +459,41 @@ namespace Neo4jClient.Test.Transactions
                 var client = testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction(TransactionScopeOption.Suppress))
                 {
-                    tran.Rollback();
+                    Assert.That(() => tran.Rollback(), Throws.InvalidOperationException);
                 }
             }
         }
 
         [Test]
-        [ExpectedException(typeof (ClosedTransactionException))]
         public void ShouldNotBeAbleToCommitTwice()
         {
             var transaction = new Neo4jTransaction(new GraphClient(new Uri("http://foo/db/data")));
             transaction.Commit();
-            transaction.Commit();
+            Assert.That(() => transaction.Commit(), Throws.TypeOf<ClosedTransactionException>());
         }
 
         [Test]
-        [ExpectedException(typeof (ClosedTransactionException))]
         public void ShouldNotBeAbleToRollbackTwice()
         {
             var transaction = new Neo4jTransaction(new GraphClient(new Uri("http://foo/db/data")));
             transaction.Rollback();
-            transaction.Rollback();
+            Assert.That(() => transaction.Rollback(), Throws.TypeOf<ClosedTransactionException>());
         }
 
         [Test]
-        [ExpectedException(typeof (ClosedTransactionException))]
         public void ShouldNotBeAbleToCommitAfterRollback()
         {
             var transaction = new Neo4jTransaction(new GraphClient(new Uri("http://foo/db/data")));
             transaction.Rollback();
-            transaction.Commit();
+            Assert.That(() => transaction.Commit(), Throws.TypeOf<ClosedTransactionException>());
         }
 
         [Test]
-        [ExpectedException(typeof (ClosedTransactionException))]
         public void ShouldNotBeAbleToRollbackAfterCommit()
         {
             var transaction = new Neo4jTransaction(new GraphClient(new Uri("http://foo/db/data")));
             transaction.Commit();
-            transaction.Rollback();
+            Assert.That(() => transaction.Rollback(), Throws.TypeOf<ClosedTransactionException>());
         }
 
         [Test]

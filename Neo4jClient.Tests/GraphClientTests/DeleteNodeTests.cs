@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -8,11 +9,10 @@ namespace Neo4jClient.Test.GraphClientTests
     public class DeleteNodeTests
     {
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.Delete(123, DeleteMode.NodeOnly);
+            Assert.Throws<InvalidOperationException>(() => client.Delete(123, DeleteMode.NodeOnly));
         }
 
         [Test]
@@ -78,8 +78,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the node. The node may still have relationships. The response status was: 409 Conflict")]
-        public void ShouldThrowApplicationExceptionWhenDeleteFails()
+        public void ShouldThrowExceptionWhenDeleteFails()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -90,7 +89,9 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                graphClient.Delete(456, DeleteMode.NodeOnly);
+                var ex = Assert.Throws<Exception>(() => graphClient.Delete(456, DeleteMode.NodeOnly));
+                ex.Message.Should().Be("Unable to delete the node. The node may still have relationships. The response status was: 409 Conflict");
+
             }
         }
     }

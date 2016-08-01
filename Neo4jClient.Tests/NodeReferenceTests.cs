@@ -46,16 +46,16 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        [TestCase(1, 2, Result = false)]
-        [TestCase(3, 3, Result = true)]
+        [TestCase(1, 2, ExpectedResult = false)]
+        [TestCase(3, 3, ExpectedResult = true)]
         public bool Equals(int lhs, int rhs)
         {
             return new NodeReference(lhs) == new NodeReference(rhs);
         }
 
         [Test]
-        [TestCase(1, 2, Result = false)]
-        [TestCase(3, 3, Result = true)]
+        [TestCase(1, 2, ExpectedResult = false)]
+        [TestCase(3, 3, ExpectedResult = true)]
         public bool GetHashCode(int lhs, int rhs)
         {
             return new NodeReference(lhs).GetHashCode() == new NodeReference(rhs).GetHashCode();
@@ -136,13 +136,11 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "You're tring to initialize NodeReference<Node<System.TimeZone>> which is too many levels of nesting. You should just be using NodeReference<System.TimeZone> instead. (You use a Node, or a NodeReference, but not both together.)")]
         public void TypedNodeReferenceShouldThrowExceptionIfTNodeIsWrappedAgain()
         {
 // ReSharper disable ObjectCreationAsStatement
-            new NodeReference<Node<TimeZone>>(123);
+            var ex = Assert.Throws<NotSupportedException>(() => new NodeReference<Node<TimeZone>>(123));
+            Assert.AreEqual("You're trying to initialize NodeReference<Node<System.TimeZone>> which is too many levels of nesting. You should just be using NodeReference<System.TimeZone> instead. (You use a Node, or a NodeReference, but not both together.)", ex.Message);
 // ReSharper restore ObjectCreationAsStatement
         }
 

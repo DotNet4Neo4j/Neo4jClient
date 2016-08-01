@@ -167,9 +167,6 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo of type System.ThreadStaticAttribute, with expression Equal")]
         public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseSensitiveEqualFilterOfUnsupportedType()
         {
             var filters = new List<Filter>
@@ -177,7 +174,8 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute(), ExpressionType = ExpressionType.Equal  },
             };
             var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>(), new List<string>());
-            FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.FormatGremlinFilter(filters, StringComparison.Ordinal, baseQuery));
+            Assert.AreEqual("One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo of type System.ThreadStaticAttribute, with expression Equal", ex.Message);
         }
 
         [Test]
@@ -640,9 +638,6 @@ namespace Neo4jClient.Test.Gremlin
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo of type System.ThreadStaticAttribute, with expression Equal")]
         public void FormatGremlinFilterShouldThrowNotSupportedExceptionForCaseInsensitiveEqualFilterOfUnsupportedType()
         {
             var filters = new List<Filter>
@@ -650,13 +645,11 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = new ThreadStaticAttribute(), ExpressionType = ExpressionType.Equal  },
             };
             var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>(), new List<string>());
-            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery));
+            Assert.AreEqual("One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo of type System.ThreadStaticAttribute, with expression Equal", ex.Message);
         }
 
         [Test]
-        [ExpectedException(
-            typeof(NotSupportedException),
-            ExpectedMessage = "One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo with null value and expression Divide")]
         public void FormatGremlinFilterShouldThrowNotSupportedExceptionForExpressionsThatAreNotRegisteredInFilterTypesToCompareNulls()
         {
             var filters = new List<Filter>
@@ -664,7 +657,8 @@ namespace Neo4jClient.Test.Gremlin
                 new Filter { PropertyName= "Foo", Value = null, ExpressionType = ExpressionType.Divide },
             };
             var baseQuery = new GremlinQuery(null, null, new Dictionary<string, object>(), new List<string>());
-            FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery);
+            var ex = Assert.Throws<NotSupportedException>(() => FilterFormatters.FormatGremlinFilter(filters, StringComparison.OrdinalIgnoreCase, baseQuery));
+            Assert.AreEqual("One or more of the supplied filters is of an unsupported type or expression. Unsupported filters were: Foo with null value and expression Divide", ex.Message);
         }
 
         [Test]

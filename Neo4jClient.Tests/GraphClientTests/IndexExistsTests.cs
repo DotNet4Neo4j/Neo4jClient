@@ -7,10 +7,10 @@ namespace Neo4jClient.Test.GraphClientTests
     public class IndexExistsTests
     {
         [Test]
-        [TestCase(IndexFor.Node, "/index/node/MyIndex", HttpStatusCode.OK, Result = true)]
-        [TestCase(IndexFor.Node, "/index/node/MyIndex", HttpStatusCode.NotFound, Result = false)]
-        [TestCase(IndexFor.Relationship, "/index/relationship/MyIndex", HttpStatusCode.OK, Result = true)]
-        [TestCase(IndexFor.Relationship, "/index/relationship/MyIndex", HttpStatusCode.NotFound, Result = false)]
+        [TestCase(IndexFor.Node, "/index/node/MyIndex", HttpStatusCode.OK, ExpectedResult = true)]
+        [TestCase(IndexFor.Node, "/index/node/MyIndex", HttpStatusCode.NotFound, ExpectedResult = false)]
+        [TestCase(IndexFor.Relationship, "/index/relationship/MyIndex", HttpStatusCode.OK, ExpectedResult = true)]
+        [TestCase(IndexFor.Relationship, "/index/relationship/MyIndex", HttpStatusCode.NotFound, ExpectedResult = false)]
         public bool ShouldReturnIfIndexIsFound(
             IndexFor indexFor,
             string indexPath,

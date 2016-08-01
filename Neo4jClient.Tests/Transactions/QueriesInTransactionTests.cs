@@ -182,7 +182,7 @@ namespace Neo4jClient.Test.Transactions
             const string headerName = "MyTestHeader";
             const string headerValue = "myTestHeaderValue";
             var customHeaders = new NameValueCollection { {headerName, headerValue} };
-            
+
 
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
                 'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}, {'statement': 'MATCH t\r\nRETURN count(t)', 'resultDataContents':[], 'parameters': {}}]}");
@@ -752,7 +752,7 @@ namespace Neo4jClient.Test.Transactions
 
                     Assert.AreEqual(date.Kind, DateTimeKind.Utc);
                     Assert.AreEqual(new DateTime(2015,7,27,22,30,35), results.First().Date);
-                    
+
                     msTransaction.Complete();
                 }
 
@@ -970,7 +970,7 @@ namespace Neo4jClient.Test.Transactions
                     tran.Commit();
                 }
 
-            } 
+            }
         }
 
         private class RestHarnessWithCounter : RestTestHarness
@@ -1079,7 +1079,6 @@ namespace Neo4jClient.Test.Transactions
         /// Perhaps need to insert simulated delay into MockResponse?
         /// </summary>
         [Test]
-        [ExpectedException(typeof(InvalidOperationException), ExpectedMessage = "Cannot commit unless all tasks have been completed")]
         public void CommitFailsOnPendingAsyncRequests()
         {
             const string queryText = @"MATCH (n) RETURN count(n) as Total";
@@ -1101,7 +1100,8 @@ namespace Neo4jClient.Test.Transactions
                 using (var tran = client.BeginTransaction())
                 {
                     rawClient.ExecuteGetCypherResultsAsync<DummyTotal>(cypherQuery);
-                    tran.Commit();
+                    var ex = Assert.Throws<InvalidOperationException>(() => tran.Commit());
+                    Assert.AreEqual("Cannot commit unless all tasks have been completed", ex.Message);
                 }
 
             }

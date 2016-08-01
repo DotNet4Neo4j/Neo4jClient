@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
+using FluentAssertions;
 using NUnit.Framework;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Gremlin;
@@ -13,41 +14,37 @@ namespace Neo4jClient.Test.GraphClientTests
     public class CreateNodeTests
     {
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowArgumentNullExceptionForNullNode()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.Create<object>(null);
+            Assert.Throws<ArgumentNullException>(() => client.Create<object>(null));
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.Create(new object());
+            Assert.Throws<InvalidOperationException>(() => client.Create(new object()));
         }
 
         [Test]
-        [ExpectedException(typeof(ValidationException))]
         public void ShouldThrowValidationExceptionForInvalidNodes()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
 
             var testNode = new TestNode {Foo = "text is too long", Bar = null, Baz = "123"};
-            graphClient.Create(testNode);
+            Assert.Throws<ValidationException>(() => graphClient.Create(testNode));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException), ExpectedMessage = "You're trying to pass in a Node<TestNode> instance. Just pass the TestNode instance instead.\r\nParameter name: node")]
         public void ShouldThrowArgumentExceptionForPreemptivelyWrappedNode()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
-            graphClient.Create((Node<TestNode>)null);
+            var ex = Assert.Throws<ArgumentException>(() => graphClient.Create((Node<TestNode>)null));
+            ex.Message.Should().Be("You're trying to pass in a Node<TestNode> instance. Just pass the TestNode instance instead.\r\nParameter name: node");
         }
 
         [Test]
-        [ExpectedException(typeof(NeoException), ExpectedMessage = "PropertyValueException: Could not set property \"TestNode2\", unsupported type: {Foo=foo, Bar=bar}")]
         public void ShouldThrowNeoExceptionWhenBatchCreationStepJobFails()
         {
             var testHarness = new RestTestHarness
@@ -65,7 +62,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     ),
                     MockResponse.Json(HttpStatusCode.OK,
                        @"[ {
-                        'id':0,'location':null, 
+                        'id':0,'location':null,
                         'body': {
                             'message': 'Could not set property ""TestNode2"", unsupported type: {Foo=foo, Bar=bar}',
                             'exception': 'PropertyValueException',
@@ -73,20 +70,20 @@ namespace Neo4jClient.Test.GraphClientTests
                             'stacktrace': [
                                'org.neo4j.server.rest.domain.PropertySettingStrategy.setProperty(PropertySettingStrategy.java:141)',
                                'java.lang.Thread.run(Unknown Source)'
-                            ] 
-                        }, 
-                        'status': 400}]" 
+                            ]
+                        },
+                        'status': 400}]"
                     )
                 }
             };
 
             var graphClient = testHarness.CreateAndConnectGraphClient();
-            graphClient.Create(new NestedTestNode()
+            var ex = Assert.Throws<NeoException>(() => graphClient.Create(new NestedTestNode()
                                    {
                                        Foo = "foo",
                                        TestNode2 = new TestNode2() {Bar = "bar", Foo = "foo"}
-                                   });
-
+                                   }));
+            ex.Message.Should().Be("PropertyValueException: Could not set property \"TestNode2\", unsupported type: {Foo=foo, Bar=bar}");
         }
 
         [Test]

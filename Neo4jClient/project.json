@@ -1,0 +1,18 @@
+﻿{
+  "supports": {},
+  "dependencies": {
+    "Microsoft.VisualBasic": "10.0.1",
+    "NETStandard.Library": "1.6.0",
+    "Newtonsoft.Json": "9.0.1",
+    "NuSpec.ReferenceGenerator": "2.0.0-beta-bld14",
+    "System.Collections.NonGeneric": "4.0.1",
+    "System.ComponentModel": "4.0.1",
+    "System.ComponentModel.Annotations": "4.1.0",
+    "System.ComponentModel.TypeConverter": "4.1.0",
+    "System.Reflection.TypeExtensions": "4.1.0",
+    "System.Runtime.Serialization.Primitives": "4.1.1"
+  },
+  "frameworks": {
+    "netstandard1.4": {}
+  }
+}

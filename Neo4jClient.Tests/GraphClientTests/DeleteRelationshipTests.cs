@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -7,11 +8,10 @@ namespace Neo4jClient.Test.GraphClientTests
     public class DeleteRelationshipTests
     {
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.DeleteRelationship(123);
+            Assert.Throws<InvalidOperationException>(() => client.DeleteRelationship(123));
         }
 
         [Test]
@@ -31,8 +31,7 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Unable to delete the relationship. The response status was: 404 NotFound")]
-        public void ShouldThrowApplicationExceptionWhenDeleteFails()
+        public void ShouldThrowExceptionWhenDeleteFails()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -43,7 +42,8 @@ namespace Neo4jClient.Test.GraphClientTests
             })
             {
                 var graphClient = testHarness.CreateAndConnectGraphClient();
-                graphClient.DeleteRelationship(456);
+                var ex = Assert.Throws<Exception>(() => graphClient.DeleteRelationship(456));
+                ex.Message.Should().Be("Unable to delete the relationship. The response status was: 404 NotFound");
             }
         }
     }

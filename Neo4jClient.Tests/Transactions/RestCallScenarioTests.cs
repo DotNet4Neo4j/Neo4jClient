@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using Neo4jClient.Test.Relationships;
 using Neo4jClient.Transactions;
 using NUnit.Framework;
@@ -38,142 +37,106 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CreateShouldFailUnderTransaction()
+        public void CreateNodeIndexShouldFailUnderTransaction()
         {
-            ExecuteRestMethodUnderTransaction(client => client.Create(new object()));
+            Assert.That(() => ExecuteRestMethodUnderTransaction(
+                client => client.CreateIndex("node", new IndexConfiguration(), IndexFor.Node)), Throws.InvalidOperationException);
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void UpdateShouldFailUnderTransaction()
+        public void CreateRelationshipIndexShouldFailUnderTransaction()
         {
-            ExecuteRestMethodUnderTransaction(client =>
-            {
-                var pocoReference = new NodeReference<TestNode>(456);
-                var updatedNode = client.Update(
-                    pocoReference, nodeFromDb =>
-                    {
-                        nodeFromDb.Foo = "fooUpdated";
-                    });
-            });
+            Assert.That(() => ExecuteRestMethodUnderTransaction(
+                client => client.CreateIndex("rel", new IndexConfiguration(), IndexFor.Relationship)), Throws.InvalidOperationException);
         }
 
         [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
-        public void DeleteNodeShouldFailUnderTransaction()
-        {
-            var pocoReference = new NodeReference<TestNode>(456);
-            ExecuteRestMethodUnderTransaction(client => client.Delete(pocoReference, DeleteMode.NodeOnly));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void DeleteAndRelationshipsShouldFailUnderTransaction()
-        {
-            var pocoReference = new NodeReference<TestNode>(456);
-            ExecuteRestMethodUnderTransaction(client => client.Delete(pocoReference, DeleteMode.NodeAndRelationships));
-        }
-
-        [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
-        public void DeleteNodeIndexShouldFailUnderTransaction()
-        {
-            ExecuteRestMethodUnderTransaction(client => client.DeleteIndex("node", IndexFor.Node));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void DeleteRelationshipIndexShouldFailUnderTransaction()
-        {
-            ExecuteRestMethodUnderTransaction(client => client.DeleteIndex("rel", IndexFor.Relationship));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void DeleteIndexEntriesShouldFailUnderTransaction()
-        {
-            var pocoReference = new NodeReference<TestNode>(456);
-            ExecuteRestMethodUnderTransaction(client => client.DeleteIndexEntries("rel", pocoReference));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void DeleteRelationshipShouldFailUnderTransaction()
-        {
-            var relReference = new RelationshipReference(1);
-            ExecuteRestMethodUnderTransaction(client => client.DeleteRelationship(relReference));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetNodeShouldFailUnderTransaction()
-        {
-            var nodeReference = new NodeReference<TestNode>(1);
-            ExecuteRestMethodUnderTransaction(client => client.Get(nodeReference));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetRelationshipShouldFailUnderTransaction()
-        {
-            var relReference = new RelationshipReference<TestNode>(1);
-            ExecuteRestMethodUnderTransaction(client => client.Get(relReference));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetNodeIndexesShouldFailUnderTransaction()
-        {
-            ExecuteRestMethodUnderTransaction(client => client.GetIndexes(IndexFor.Node));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetRelationshipIndexesShouldUnderTransaction()
-        {
-            ExecuteRestMethodUnderTransaction(client => client.GetIndexes(IndexFor.Relationship));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void ReIndexShouldFailUnderTransaction()
-        {
-            var nodeReference = new NodeReference(1);
-            var indexEntries = new IndexEntry[] {new IndexEntry("node")};
-            ExecuteRestMethodUnderTransaction(client => client.ReIndex(nodeReference, indexEntries));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void CreateRelationshipShouldFailUnderTransaction()
         {
             var nodeReference = new NodeReference<RootNode>(1);
             var rel = new OwnedBy(new NodeReference<TestNode>(3));
-            ExecuteRestMethodUnderTransaction(client => client.CreateRelationship(nodeReference, rel));
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.CreateRelationship(nodeReference, rel)), Throws.InvalidOperationException);
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CreateNodeIndexShouldFailUnderTransaction()
+        public void CreateShouldFailUnderTransaction()
         {
-            ExecuteRestMethodUnderTransaction(
-                client => client.CreateIndex("node", new IndexConfiguration(), IndexFor.Node));
+            Assert.That(() =>
+                ExecuteRestMethodUnderTransaction(client => client.Create(new object())), Throws.InvalidOperationException);
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CreateRelationshipIndexShouldFailUnderTransaction()
+        public void DeleteAndRelationshipsShouldFailUnderTransaction()
         {
-            ExecuteRestMethodUnderTransaction(
-                client => client.CreateIndex("rel", new IndexConfiguration(), IndexFor.Relationship));
+            var pocoReference = new NodeReference<TestNode>(456);
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.Delete(pocoReference, DeleteMode.NodeAndRelationships)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void DeleteIndexEntriesShouldFailUnderTransaction()
+        {
+            var pocoReference = new NodeReference<TestNode>(456);
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.DeleteIndexEntries("rel", pocoReference)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void DeleteNodeIndexShouldFailUnderTransaction()
+        {
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.DeleteIndex("node", IndexFor.Node)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void DeleteNodeShouldFailUnderTransaction()
+        {
+            var pocoReference = new NodeReference<TestNode>(456);
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.Delete(pocoReference, DeleteMode.NodeOnly)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void DeleteRelationshipIndexShouldFailUnderTransaction()
+        {
+            Assert.That(() =>
+                ExecuteRestMethodUnderTransaction(client => client.DeleteIndex("rel", IndexFor.Relationship)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void DeleteRelationshipShouldFailUnderTransaction()
+        {
+            var relReference = new RelationshipReference(1);
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.DeleteRelationship(relReference)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void GetNodeIndexesShouldFailUnderTransaction()
+        {
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.GetIndexes(IndexFor.Node)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void GetNodeShouldFailUnderTransaction()
+        {
+            var nodeReference = new NodeReference<TestNode>(1);
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.Get(nodeReference)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void GetRelationshipIndexesShouldUnderTransaction()
+        {
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.GetIndexes(IndexFor.Relationship)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void GetRelationshipShouldFailUnderTransaction()
+        {
+            var relReference = new RelationshipReference<TestNode>(1);
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.Get(relReference)), Throws.InvalidOperationException);
         }
 
         [Test]
         public void GetShouldSucceedInSuppressedMode()
         {
             var nodeReference = new NodeReference<TestNode>(1);
-            var requests = new List<KeyValuePair<MockRequest, MockResponse>>()
+            var requests = new List<KeyValuePair<MockRequest, MockResponse>>
             {
                 new KeyValuePair<MockRequest, MockResponse>(
                     MockRequest.Get("/node/1"),
@@ -195,10 +158,29 @@ namespace Neo4jClient.Test.Transactions
                     )
             };
             ExecuteRestMethodUnderTransaction(
-                client => client.Get(nodeReference), 
+                client => client.Get(nodeReference),
                 TransactionScopeOption.Suppress,
                 requests);
         }
 
+        [Test]
+        public void ReIndexShouldFailUnderTransaction()
+        {
+            var nodeReference = new NodeReference(1);
+            var indexEntries = new[] {new IndexEntry("node")};
+            Assert.That(() => ExecuteRestMethodUnderTransaction(client => client.ReIndex(nodeReference, indexEntries)), Throws.InvalidOperationException);
+        }
+
+        [Test]
+        public void UpdateShouldFailUnderTransaction()
+        {
+            Assert.That(() =>
+                ExecuteRestMethodUnderTransaction(client =>
+                {
+                    var pocoReference = new NodeReference<TestNode>(456);
+                    var updatedNode = client.Update(
+                        pocoReference, nodeFromDb => { nodeFromDb.Foo = "fooUpdated"; });
+                }), Throws.InvalidOperationException);
+        }
     }
 }

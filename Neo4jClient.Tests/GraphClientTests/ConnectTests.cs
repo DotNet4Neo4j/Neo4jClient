@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.GraphClientTests
@@ -16,7 +17,6 @@ namespace Neo4jClient.Test.GraphClientTests
     public class ConnectTests
     {
         [Test]
-        [ExpectedException(typeof(ApplicationException), ExpectedMessage = "Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError")]
         public void ShouldThrowConnectionExceptionFor500Response()
         {
             using (var testHarness = new RestTestHarness
@@ -27,7 +27,8 @@ namespace Neo4jClient.Test.GraphClientTests
                 }
             })
             {
-                testHarness.CreateAndConnectGraphClient();
+                var ex = Assert.Throws<Exception>(() => testHarness.CreateAndConnectGraphClient());
+                Assert.AreEqual("Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError", ex.Message);
             }
         }
 
@@ -46,13 +47,13 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(ExpectedMessage = "The graph client is not connected to the server. Call the Connect method first.")]
+        
         public void RootNode_ShouldThrowInvalidOperationException_WhenNotConnectedYet()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
-// ReSharper disable ReturnValueOfPureMethodIsNotUsed
-            graphClient.RootNode.ToString();
-// ReSharper restore ReturnValueOfPureMethodIsNotUsed
+
+            var ex = Assert.Throws<InvalidOperationException>(() => graphClient.RootNode.ToString());
+            Assert.AreEqual("The graph client is not connected to the server. Call the Connect method first.", ex.Message);
         }
 
         [Test]
@@ -153,7 +154,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
 
@@ -182,10 +183,10 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
-            
+
             try
             {
                 graphClient.Connect();
@@ -211,7 +212,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
             graphClient.ExecutionConfiguration.UseJsonStreaming = false;
@@ -309,7 +310,7 @@ namespace Neo4jClient.Test.GraphClientTests
 
             var graphClient = new GraphClient(new Uri("http://localhost"), username, password);
             var httpClient = (HttpClientWrapper) graphClient.ExecutionConfiguration.HttpClient;
-            
+
             Assert.AreEqual(expectedHeader, httpClient.AuthenticationHeaderValue.Parameter);
         }
 
@@ -319,7 +320,7 @@ namespace Neo4jClient.Test.GraphClientTests
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
                 .SendAsync(Arg.Any<HttpRequestMessage>())
-                .Returns(callInfo => { throw new NotImplementedException(); });
+                .Throws(new NotImplementedException());
 
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), httpClient);
             OperationCompletedEventArgs operationCompletedArgs = null;

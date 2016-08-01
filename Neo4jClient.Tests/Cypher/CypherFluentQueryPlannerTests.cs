@@ -26,7 +26,7 @@ namespace Neo4jClient.Test.Cypher
 
         [Test, Sequential]
         public void TestPlannerWithCypherPlannerVariant(
-            [Values(CypherPlanner.CostGreedy,CypherPlanner.CostIdp, CypherPlanner.Rule)] CypherPlanner input, 
+            [Values(CypherPlanner.CostGreedy,CypherPlanner.CostIdp, CypherPlanner.Rule)] CypherPlanner input,
             [Values("COST", "IDP", "RULE")] string expected)
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -40,15 +40,17 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
-        [ExpectedException(typeof (InvalidOperationException))]
         public void ThrowsInvalidOperationException_WhenNeo4jVersionIsLessThan22()
         {
             var client = Substitute.For<IRawGraphClient>();
             client.CypherCapabilities.Returns(CypherCapabilities.Cypher19);
 
-            var _ = new CypherFluentQuery(client)
-                .Planner("FreePlanner")
-                .Query;
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                var _ = new CypherFluentQuery(client)
+                    .Planner("FreePlanner")
+                    .Query;
+            });
         }
     }
 }

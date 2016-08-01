@@ -12,14 +12,12 @@ namespace Neo4jClient.Test.GraphClientTests
     public class FactoryTests
     {
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowExceptionIfConfigurationIsNotDefined()
         {
-            new GraphClientFactory(null);
+            Assert.Throws<ArgumentNullException>(() => new GraphClientFactory(null));
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException))]
         public void ShouldThrowExceptionIfRootApiIsNotDefined()
         {
             using (var testHarness = new RestTestHarness
@@ -38,7 +36,7 @@ namespace Neo4jClient.Test.GraphClientTests
                     JsonConverters = GraphClient.DefaultJsonConverters
                 };
 
-                NeoServerConfiguration.GetConfiguration(new Uri(testHarness.BaseUri), null, null, executeConfiguration);
+                Assert.Throws<InvalidOperationException>(() => NeoServerConfiguration.GetConfiguration(new Uri(testHarness.BaseUri), null, null, executeConfiguration));
             }
         }
 

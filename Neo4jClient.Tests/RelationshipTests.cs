@@ -85,30 +85,27 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        [ExpectedException(typeof(AmbiguousRelationshipDirectionException))]
         public void DetermineRelationshipDirectionShouldThrowExceptionWhenBothNodesAreValidAsSourceAndTargetNodes()
         {
             var baseNodeType = typeof(Bar);
             var relationship = new TestRelationship(new NodeReference<Bar>(123));
-            Relationship.DetermineRelationshipDirection(baseNodeType, relationship);
+            Assert.That(() => Relationship.DetermineRelationshipDirection(baseNodeType, relationship), Throws.TypeOf<AmbiguousRelationshipDirectionException>());
         }
 
         [Test]
-        [ExpectedException(typeof(AmbiguousRelationshipDirectionException))]
         public void DetermineRelationshipDirectionShouldReturnIncomingWhenBaseNodeOnlyValidAsTargetAndSourceNodeNotDefinedAsEither()
         {
             var baseNodeType = typeof(Baz);
             var relationship = new TestRelationship(new NodeReference<Qak>(123));
-            Assert.AreEqual(RelationshipDirection.Incoming, Relationship.DetermineRelationshipDirection(baseNodeType, relationship));
+            Assert.That(() => Assert.AreEqual(RelationshipDirection.Incoming, Relationship.DetermineRelationshipDirection(baseNodeType, relationship)), Throws.TypeOf<AmbiguousRelationshipDirectionException>());
         }
 
         [Test]
-        [ExpectedException(typeof(AmbiguousRelationshipDirectionException))]
         public void DetermineRelationshipDirectionShouldThrowExceptionWhenNeitherNodeIsValidAtEitherEnd()
         {
             var baseNodeType = typeof(Zip);
             var relationship = new TestRelationship(new NodeReference<Qak>(123));
-            Relationship.DetermineRelationshipDirection(baseNodeType, relationship);
+            Assert.That(() => Relationship.DetermineRelationshipDirection(baseNodeType, relationship), Throws.TypeOf<AmbiguousRelationshipDirectionException>());
         }
 
         [Test]

@@ -82,29 +82,26 @@ namespace Neo4jClient.Test.GraphClientTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void ShouldThrowArgumentNullExceptionForNullNodeReference()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.CreateRelationship((NodeReference<TestNode>)null, new TestRelationship(10));
+            Assert.Throws<ArgumentNullException>(() => client.CreateRelationship((NodeReference<TestNode>)null, new TestRelationship(10)));
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            client.CreateRelationship(new NodeReference<TestNode>(5), new TestRelationship(10));
+            Assert.Throws<InvalidOperationException>(() => client.CreateRelationship(new NodeReference<TestNode>(5), new TestRelationship(10)));
         }
 
         [Test]
-        [ExpectedException(typeof(NotSupportedException))]
         public void ShouldThrowNotSupportedExceptionForIncomingRelationship()
         {
             using (var testHarness = new RestTestHarness())
             {
                 var client = testHarness.CreateAndConnectGraphClient();
-                client.CreateRelationship(new NodeReference<TestNode>(5), new TestRelationship(10) { Direction = RelationshipDirection.Incoming });
+                Assert.Throws<NotSupportedException>(() => client.CreateRelationship(new NodeReference<TestNode>(5), new TestRelationship(10) { Direction = RelationshipDirection.Incoming }));
             }
         }
 

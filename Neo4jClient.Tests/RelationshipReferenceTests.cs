@@ -22,16 +22,16 @@ namespace Neo4jClient.Test
         }
 
         [Test]
-        [TestCase(1, 2, Result = false)]
-        [TestCase(3, 3, Result = true)]
+        [TestCase(1, 2, ExpectedResult = false)]
+        [TestCase(3, 3, ExpectedResult = true)]
         public bool Equals(int lhs, int rhs)
         {
             return new RelationshipReference(lhs) == new RelationshipReference(rhs);
         }
 
         [Test]
-        [TestCase(1, 2, Result = false)]
-        [TestCase(3, 3, Result = true)]
+        [TestCase(1, 2, ExpectedResult = false)]
+        [TestCase(3, 3, ExpectedResult = true)]
         public bool GetHashCode(int lhs, int rhs)
         {
             return new RelationshipReference(lhs).GetHashCode() == new RelationshipReference(rhs).GetHashCode();
