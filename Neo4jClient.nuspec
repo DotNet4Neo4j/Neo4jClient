@@ -69,17 +69,17 @@
         <dependency id="System.Threading.Tasks" version="4.0.11" />
       </group>
       <group targetFramework="net45">
-        <dependency id="Newtonsoft.Json" version="9.0.1"/>
-        <dependency id="Microsoft.Net.Http" version="2.2.29"/>
+        <dependency id="Newtonsoft.Json" version="9.0.1" />
+        <dependency id="Microsoft.Net.Http" version="2.2.29" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Neo4jClient.Full\bin\Release\Neo4jClient.dll" target="lib\net45" />
-    <file src="Neo4jClient.Full\bin\Release\Neo4jClient.pdb" target="lib\net45" />
-    <file src="Neo4jClient.Full\bin\Release\Neo4jClient.xml" target="lib\net45" />
-    <file src="Neo4jClient\bin\Release\Neo4jClient.dll" target="lib\dotnet" />
-    <file src="Neo4jClient\bin\Release\Neo4jClient.pdb" target="lib\dotnet" />
-    <file src="Neo4jClient\bin\Release\Neo4jClient.xml" target="lib\dotnet" />
+    <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.dll" target="lib\net45" />
+    <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.pdb" target="lib\net45" />
+    <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.xml" target="lib\net45" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.dll" target="lib\dotnet" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.pdb" target="lib\dotnet" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.xml" target="lib\dotnet" />
   </files>
 </package>

@@ -13,3 +13,5 @@ packages
 *.vs\
 *.ghostdoc.xml
 project.lock.json
+msbuild.log
+TestResult.xml
