@@ -14,7 +14,6 @@ The official neo4jclient build and nuget package is automated via MyGet [build s
 #### Dependency Changes in 2.0
 
 * JSON.NET updated to 9.0.1 
-* Microsoft.Net.Http updated to 2.2.29
 
 #### Breaking Changes in 2.0
 
