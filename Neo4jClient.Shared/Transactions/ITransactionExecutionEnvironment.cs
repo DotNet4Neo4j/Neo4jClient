@@ -13,5 +13,6 @@ namespace Neo4jClient.Transactions
         IEnumerable<JsonConverter> JsonConverters { get; set; }
         string Username { get; set; }
         string Password { get; set; }
+        Guid ResourceManagerId { get; set; }
     }
 }
