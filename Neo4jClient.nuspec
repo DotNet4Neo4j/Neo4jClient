@@ -80,5 +80,8 @@
     <file src="Neo4jClient\bin\$configuration$\Neo4jClient.dll" target="lib\dotnet" />
     <file src="Neo4jClient\bin\$configuration$\Neo4jClient.pdb" target="lib\dotnet" />
     <file src="Neo4jClient\bin\$configuration$\Neo4jClient.xml" target="lib\dotnet" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.dll" target="lib\netstandard1.0" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.pdb" target="lib\netstandard1.0" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.xml" target="lib\netstandard1.0" />
   </files>
 </package>
