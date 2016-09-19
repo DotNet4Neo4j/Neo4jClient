@@ -174,6 +174,21 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void For30VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher30);
+
+            Assert.AreEqual("(not(exists(foo.NullableBar)))", result);
+        }
+
+        [Test]
         public void For20VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNullProperty()
         {
             var parameters = new Dictionary<string, object>();
@@ -201,6 +216,21 @@ namespace Neo4jClient.Test.Cypher
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
             Assert.AreEqual("(foo.NullableBar? is not null)", result);
+        }
+
+        [Test]
+        public void For30VersionsEvaluateTrueWhenComparingNotMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher30);
+
+            Assert.AreEqual("(exists(foo.NullableBar))", result);
         }
 
         [Test]
@@ -404,24 +434,48 @@ namespace Neo4jClient.Test.Cypher
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
-        public void DontSuffixPropertyWhenComparingMissingNullablePropertyToNull()
+        public void For30DontSuffixPropertyWhenComparingMissingNullablePropertyToNull()
         {
             var parameters = new Dictionary<string, object>();
             Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == null;
 
-            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher30);
+
+            Assert.AreEqual("(not(exists(foo.NullableBar)))", result);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void For20DontSuffixPropertyWhenComparingMissingNullablePropertyToNull()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == null;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher20);
 
             Assert.AreEqual("(not(has(foo.NullableBar)))", result);
         }
 
         [Test]
         [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
-        public void DontSuffixPropertyWhenComparingMissingNullablePropertyToNotNull()
+        public void For30DontSuffixPropertyWhenComparingMissingNullablePropertyToNotNull()
         {
             var parameters = new Dictionary<string, object>();
             Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != null;
 
-            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher30);
+
+            Assert.AreEqual("(exists(foo.NullableBar))", result);
+        }
+
+        [Test]
+        [Description("https://bitbucket.org/Readify/neo4jclient/issue/163/neo4j-v2m6-client-syntax-error")]
+        public void For20DontSuffixPropertyWhenComparingMissingNullablePropertyToNotNull()
+        {
+            var parameters = new Dictionary<string, object>();
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != null;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher20);
 
             Assert.AreEqual("(has(foo.NullableBar))", result);
         }
