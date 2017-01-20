@@ -98,8 +98,9 @@ namespace Neo4jClient.Cypher
         /// <param name="identifier">The identifier to use in the rest of the query.</param>
         /// <param name="withHeaders">Use this custom headers are defined in the CSV file</param>
         /// <param name="fieldTerminator">The terminator to use. If you do not define anything the Neo4j default will be used: ','</param>
+        /// <param name="periodicCommit">If this is <c>null</c> no periodic commit will be used, otherwise PERIODIC COMMIT will be added with the value set.</param>
         /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
-        ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null);
+        ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null, int? periodicCommit = null);
         ICypherFluentQuery Unwind(string collection, string columnName);
         ICypherFluentQuery Unwind(IEnumerable collection, string identity);
         ICypherFluentQuery Union();

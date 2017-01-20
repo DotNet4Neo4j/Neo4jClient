@@ -340,10 +340,18 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("FOREACH " + text));
         }
 
-        public ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null)
+        public ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null, int? periodicCommit = null)
         {
             if(fileUri == null)
                 throw new ArgumentException("File URI must be supplied.", "fileUri");
+
+            string periodicCommitText = string.Empty;
+            if (periodicCommit != null)
+            {
+                periodicCommitText = "USING PERIODIC COMMIT";
+                if (periodicCommit > 0)
+                    periodicCommitText += $" {periodicCommit.Value}";
+            }
 
             string withHeadersEnabledText = string.Empty;
             string fieldSeperatorEnabledText = string.Empty;
@@ -357,8 +365,8 @@ namespace Neo4jClient.Cypher
                 fieldSeperatorEnabledText = string.Format(" FIELDTERMINATOR '{0}'", fieldTerminator);
             }
 
-            return Mutate(w => w.AppendClause(string.Format("LOAD CSV{0} FROM '{1}' AS {2}{3}", withHeadersEnabledText, fileUri.AbsoluteUri, identifier,
-                fieldSeperatorEnabledText)));
+            return Mutate(w => w.AppendClause(string.Format("{0} LOAD CSV{1} FROM '{2}' AS {3}{4}", periodicCommitText, withHeadersEnabledText, fileUri.AbsoluteUri, identifier,
+                fieldSeperatorEnabledText).Trim()));
         }
 
         public ICypherFluentQuery Unwind(string collectionName, string columnName)
