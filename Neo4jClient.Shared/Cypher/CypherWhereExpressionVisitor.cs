@@ -117,10 +117,15 @@ namespace Neo4jClient.Cypher
                 {
                     TextOutput.Append(" is not null");
                 }
-                else
+                else if (capabilities.SupportsHasFunction)
                 {
                     TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
                     TextOutput.Append(string.Format("has({0})", lastWrittenMemberName));
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("exists({0})", lastWrittenMemberName));
                 }
                 return node;
             }
@@ -132,10 +137,15 @@ namespace Neo4jClient.Cypher
                 {
                     TextOutput.Append(" is null");
                 }
-                else
+                else if (capabilities.SupportsHasFunction)
                 {
                     TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
                     TextOutput.Append(string.Format("not(has({0}))", lastWrittenMemberName));
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("not(exists({0}))", lastWrittenMemberName));
                 }
                 return node;
             }
@@ -264,10 +274,15 @@ namespace Neo4jClient.Cypher
                 {
                     TextOutput.Append(" is not null");
                 }
-                else
+                else if (capabilities.SupportsHasFunction)
                 {
                     TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
                     TextOutput.Append(string.Format("has({0})", lastWrittenMemberName));
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("exists({0})", lastWrittenMemberName));
                 }
 
                 // no further processing is required
@@ -281,10 +296,15 @@ namespace Neo4jClient.Cypher
                 {
                     TextOutput.Append(" is null");
                 }
-                else
+                else if(capabilities.SupportsHasFunction)
                 {
                     TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
                     TextOutput.Append(string.Format("not(has({0}))", lastWrittenMemberName));
+                }
+                else
+                {
+                    TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
+                    TextOutput.Append(string.Format("not(exists({0}))", lastWrittenMemberName));
                 }
 
                 // no further processing is required

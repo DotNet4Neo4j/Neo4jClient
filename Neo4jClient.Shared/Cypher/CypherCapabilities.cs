@@ -23,12 +23,17 @@ namespace Neo4jClient.Cypher
         {
             SupportsPropertySuffixesForControllingNullComparisons = false,
             SupportsNullComparisonsWithIsOperator = false,
+            SupportsHasFunction = true
         };
 
         public static readonly CypherCapabilities Cypher22 = new CypherCapabilities(Cypher20){SupportsPlanner = true};
         public static readonly CypherCapabilities Cypher226 = new CypherCapabilities(Cypher22) { AutoRollsBackOnError = true };
         public static readonly CypherCapabilities Cypher23 = new CypherCapabilities(Cypher226) {SupportsStartsWith = true};
-        public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23) {SupportsStoredProcedures = true};
+        public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23)
+        {
+            SupportsStoredProcedures = true,
+            SupportsHasFunction = false
+        };
         public static readonly CypherCapabilities Default = Cypher20;
 
         public bool SupportsPlanner { get; set; }
@@ -42,5 +47,10 @@ namespace Neo4jClient.Cypher
         public bool SupportsStoredProcedures { get; set; }
 
         public bool AutoRollsBackOnError { get; set; }
+
+        /// <summary>
+        /// Cypher 3.0 no longer has the HAS() function, as it has been now superseded by EXISTS()
+        /// </summary>
+        public bool SupportsHasFunction { get; set; }
     }
 }
