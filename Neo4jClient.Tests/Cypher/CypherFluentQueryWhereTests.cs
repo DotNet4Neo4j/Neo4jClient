@@ -58,6 +58,32 @@ namespace Neo4jClient.Test.Cypher
         }
 
         [Test]
+        public void CreatesEndsWithQuery()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher23);
+            const string startsWith = "Bar";
+            var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.EndsWith(startsWith)).Query;
+
+            Assert.AreEqual("WHERE (foo.bar ENDS WITH {p0})", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters.Count);
+            Assert.AreEqual(startsWith, query.QueryParameters["p0"]);
+        }
+
+        [Test]
+        public void CreatesContainsQuery()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher23);
+            const string startsWith = "Bar";
+            var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.Contains(startsWith)).Query;
+
+            Assert.AreEqual("WHERE (foo.bar CONTAINS {p0})", query.QueryText);
+            Assert.AreEqual(1, query.QueryParameters.Count);
+            Assert.AreEqual(startsWith, query.QueryParameters["p0"]);
+        }
+
+        [Test]
         public void ThrowsNotSupportedException_WhenNeo4jInstanceIsLowerThan23()
         {
             var client = Substitute.For<IRawGraphClient>();

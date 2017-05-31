@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -18,6 +19,8 @@ namespace Neo4jClient.Cypher
         private const string LessThan = " < ";
         private const string LessThanOrEqual = " <= ";
 
+        private readonly Dictionary<string, Func<MethodCallExpression, Expression>> supportedMethodCalls;
+
         private string lastWrittenMemberName;
 
         private readonly Func<object, string> createParameterCallback;
@@ -32,12 +35,22 @@ namespace Neo4jClient.Cypher
             this.capabilities = capabilities;
             this.camelCaseProperties = camelCaseProperties;
             TextOutput = new StringBuilder();
+
+            supportedMethodCalls = new Dictionary<string, Func<MethodCallExpression, Expression>>()
+            {
+                { "StartsWith",  VisitStartsWithMethod },
+                { "Contains",  VisitContainsMethod },
+                { "EndsWith",  VisitEndsWithMethod },
+            };
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            if (node.Method.Name == "StartsWith")
-                return VisitStartsWithMethod(node);
+            Func<MethodCallExpression, Expression> visitMethod;
+            if (supportedMethodCalls.TryGetValue(node.Method.Name, out visitMethod))
+            {
+                return visitMethod(node);
+            }
 
             return base.VisitMethodCall(node);
         }
@@ -55,6 +68,44 @@ namespace Neo4jClient.Cypher
             else
             {
                 throw new NotSupportedException("Neo4j doesn't support STARTS WITH in versions lower than 2.3.0. Instead you have to use a Lucene query like: WHERE n.Property =~ 'Tob.*'.");
+            }
+
+
+            return node;
+        }
+
+        private Expression VisitContainsMethod(MethodCallExpression node)
+        {
+            if (capabilities.SupportsStartsWith)
+            {
+                TextOutput.Append("(");
+                Visit(node.Object);
+                TextOutput.Append(" CONTAINS ");
+                Visit(node.Arguments[0]);
+                TextOutput.Append(")");
+            }
+            else
+            {
+                throw new NotSupportedException("Neo4j doesn't support CONTAINS in versions lower than 2.3.0. Instead you have to use a Lucene query like: WHERE n.Property =~ 'Tob.*'.");
+            }
+
+
+            return node;
+        }
+
+        private Expression VisitEndsWithMethod(MethodCallExpression node)
+        {
+            if (capabilities.SupportsStartsWith)
+            {
+                TextOutput.Append("(");
+                Visit(node.Object);
+                TextOutput.Append(" ENDS WITH ");
+                Visit(node.Arguments[0]);
+                TextOutput.Append(")");
+            }
+            else
+            {
+                throw new NotSupportedException("Neo4j doesn't support ENDS WITH in versions lower than 2.3.0. Instead you have to use a Lucene query like: WHERE n.Property =~ 'Tob.*'.");
             }
 
 
