@@ -15,7 +15,7 @@ namespace Neo4jClient.Extensions
         internal static string GetNameUsingJsonProperty(this MemberInfo info)
         {
             var jsonPropertyAttribute = info.GetCustomAttributes(typeof (JsonPropertyAttribute)).FirstOrDefault() as JsonPropertyAttribute;
-            var jsonObjectAttribute = info.DeclaringType.GetCustomAttributes(typeof(JsonObjectAttribute)).FirstOrDefault() as JsonObjectAttribute;
+            var jsonObjectAttribute = info.DeclaringType.GetTypeInfo().GetCustomAttributes(typeof(JsonObjectAttribute)).FirstOrDefault() as JsonObjectAttribute;
 
             var hasSpecifiedName = jsonPropertyAttribute != null && !string.IsNullOrWhiteSpace(jsonPropertyAttribute.PropertyName);
             var hasNamingStrategy = jsonObjectAttribute != null && jsonObjectAttribute.NamingStrategyType != null;
