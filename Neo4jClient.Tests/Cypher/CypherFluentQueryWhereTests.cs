@@ -30,6 +30,12 @@ namespace Neo4jClient.Test.Cypher
             public string Bar { get; set; }
         }
 
+        [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+        class FooWithCamelCaseNamingStrategy
+        {
+            public string Bar { get; set; }
+        }
+
         class MockWithNullField
         {
             public string NullField { get; set; }
@@ -65,6 +71,15 @@ namespace Neo4jClient.Test.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar == "Bar").Query;
+
+            Assert.AreEqual("WHERE (foo.bar = {p0})", query.QueryText);
+        }
+
+        [Test]
+        public void UsesCamelCaseNamingStrategyOverPropertyName()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client).Where((FooWithCamelCaseNamingStrategy foo) => foo.Bar == "Bar").Query;
 
             Assert.AreEqual("WHERE (foo.bar = {p0})", query.QueryText);
         }
