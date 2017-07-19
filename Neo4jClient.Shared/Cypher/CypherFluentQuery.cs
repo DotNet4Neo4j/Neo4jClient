@@ -17,7 +17,7 @@ namespace Neo4jClient.Cypher
         IAttachedReference
     {
         private readonly Version minimumCypherParserVersion = new Version(1, 9);
-        protected readonly IRawGraphClient Client;
+        internal readonly IRawGraphClient Client;
         protected readonly QueryWriter QueryWriter;
         protected readonly bool CamelCaseProperties;
 
@@ -26,7 +26,7 @@ namespace Neo4jClient.Cypher
         {
         }
 
-        protected CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
+        internal CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
         {
             if (!(client is IRawGraphClient))
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");

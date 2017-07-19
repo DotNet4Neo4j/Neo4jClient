@@ -1,43 +1,48 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Neo4jClient.Cypher;
+﻿using Neo4jClient.Cypher;
 using NSubstitute;
 using NUnit.Framework;
 
 namespace Neo4jClient.Test.Cypher
 {
     [TestFixture]
-    public class CypherFluentQueryAdvancedTests
+    public class CypherFluentQuerySetClientTests
     {
         [Test]
-        public void ReturnColumnAlias()
+        public void SetClient()
         {
-            // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
-            // START a=node(1)
-            // RETURN a.Age AS SomethingTotallyDifferent
+            var client1 = Substitute.For<IRawGraphClient>();
+            var client2 = Substitute.For<IRawGraphClient>();
 
-            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client1).Match("(n)");
+            Assert.AreSame(((CypherFluentQuery) query).Client, client1);
 
-            client
-                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
-                .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
-
-            var cypher = new CypherFluentQuery(client);
-            var results = cypher
-                .Start("a", (NodeReference) 1)
-                .Advanced.Return<ReturnPropertyQueryResult>(new ReturnExpression
-                {
-                    ResultFormat = CypherResultFormat.DependsOnEnvironment,
-                    ResultMode = CypherResultMode.Projection,
-                    Text = "a.Age AS SomethingTotallyDifferent"
-                });
-            Assert.AreEqual("START a=node(1)\r\nRETURN a.Age AS SomethingTotallyDifferent", results.Query.DebugQueryText);
-            Assert.IsInstanceOf<IEnumerable<ReturnPropertyQueryResult>>(results.Results);
+            query = query.Advanced.SetClient(client2);
+            Assert.AreSame(((CypherFluentQuery) query).Client, client2);
         }
 
-        public class ReturnPropertyQueryResult
+        [Test]
+        public void SetClient_TResult()
         {
-            public int SomethingTotallyDifferent { get; set; }
+            var client1 = Substitute.For<IRawGraphClient>();
+            var client2 = Substitute.For<IRawGraphClient>();
+
+            var query = new CypherFluentQuery(client1).Match("(n)").Return(n => n.Count());
+            Assert.AreSame(((CypherFluentQuery) query).Client, client1);
+
+            query = query.Advanced.SetClient<long>(client2);
+            Assert.AreSame(((CypherFluentQuery) query).Client, client2);
+        }
+
+        [Test]
+        public void JoinQueries()
+        {
+            var client1 = Substitute.For<IRawGraphClient>();
+            var client2 = Substitute.For<IRawGraphClient>();
+
+            var query = new CypherFluentQuery(client1).Match("(bar)");
+            Assert.AreSame(((CypherFluentQuery)query).Client, client1);
+            query = query.Advanced.SetClient(client2).Return(bar => new {Foo = bar.As<object>()});
+            Assert.AreSame(((CypherFluentQuery)query).Client, client2);
         }
     }
 }
