@@ -7,7 +7,7 @@ namespace Neo4jClient.Cypher
         private readonly IGraphClient client;
         private readonly QueryWriter queryWriter;
 
-        public CypherFluentQueryAdvanced(IGraphClient client, QueryWriter queryWriter)
+        public CypherFluentQueryAdvanced(IGraphClient client, QueryWriter queryWriter) 
         {
             this.client = client;
             this.queryWriter = queryWriter;
@@ -32,7 +32,23 @@ namespace Neo4jClient.Cypher
                 w.AppendClause("RETURN distinct " + returnExpression.Text);
             });
         }
-        
+
+        public ICypherFluentQuery<TResult> SetClient<TResult>(IGraphClient graphClient)
+        {
+            if (!(client is IRawGraphClient))
+                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(graphClient));
+
+            return new CypherFluentQuery<TResult>(graphClient, queryWriter);
+        }
+
+        public ICypherFluentQuery SetClient(IGraphClient graphClient)
+        {
+            if (!(client is IRawGraphClient))
+                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(graphClient));
+            
+            return new CypherFluentQuery(graphClient, queryWriter);
+        }
+
         protected ICypherFluentQuery<TResult> Mutate<TResult>(Action<QueryWriter> callback)
         {
             var newWriter = queryWriter.Clone();

@@ -8,5 +8,8 @@
         ICypherFluentQuery<TResult> Return<TResult>(ReturnExpression returnExpression);
 
         ICypherFluentQuery<TResult> ReturnDistinct<TResult>(ReturnExpression returnExpression);
+
+        ICypherFluentQuery<TResult> SetClient<TResult>(IGraphClient graphClient);
+        ICypherFluentQuery SetClient(IGraphClient graphClient);
     }
 }
