@@ -13,6 +13,28 @@ namespace Neo4jClient
 {
     public interface IGraphClient : ICypherGraphClient
     {
+        event OperationCompletedEventHandler OperationCompleted;
+
+        CypherCapabilities CypherCapabilities { get; }
+
+        Version ServerVersion { get; }
+
+        Uri RootEndpoint { get; }
+
+        Uri BatchEndpoint { get; }
+
+        Uri CypherEndpoint { get; }
+
+        //Uri BoltEndpoint { get; }
+
+        ISerializer Serializer { get; }
+
+        ExecutionConfiguration ExecutionConfiguration { get; }
+
+        bool IsConnected { get; }
+
+        Task ConnectAsync(NeoServerConfiguration configuration = null);
+
         [Obsolete("The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels.")]
         RootNode RootNode { get; }
 
@@ -106,7 +128,7 @@ namespace Neo4jClient
         void DeleteIndexEntries(string indexName, RelationshipReference relationshipReference);
 
         [Obsolete("There are encoding issues with this method. You should use the newer Cypher aproach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher.")]
-        IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query );
+        IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query);
 
         IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id);
         IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id);
@@ -114,32 +136,14 @@ namespace Neo4jClient
         [Obsolete("This method depends on Gremlin, which is being dropped in Neo4j 2.0. Find an alternate strategy for server lifetime management.")]
         void ShutdownServer();
 
-        event OperationCompletedEventHandler OperationCompleted;
-
-        CypherCapabilities CypherCapabilities { get; }
-
         [Obsolete("Gremlin support gets dropped with Neo4j 2.0. Please move to equivalent (but much more powerful and readable!) Cypher.")]
         IGremlinClient Gremlin { get; }
-
-        Version ServerVersion { get; }
-
-        Uri RootEndpoint { get; }
-
-        Uri BatchEndpoint { get; }
-
-        Uri CypherEndpoint { get; }
 
         Uri GremlinEndpoint { get; }
 
         Uri NodeIndexEndpoint { get; }
 
         Uri RelationshipIndexEndpoint { get; }
-
-        ISerializer Serializer { get; }
-
-        ExecutionConfiguration ExecutionConfiguration { get; }
-
-        bool IsConnected { get; }
 
         void Connect(NeoServerConfiguration configuration = null);
 

@@ -15,18 +15,19 @@ namespace Neo4jClient
 
         internal string Username { get; private set; }
         internal string Password { get; private set; }
+        internal string Realm { get; private set; }
 
         private NeoServerConfiguration(RootApiResponse apiConfig)
         {
             ApiConfig = apiConfig;
         }
 
-        public static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username = null, string password = null)
+        public static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username = null, string password = null, string realm = null)
         {
-            return await GetConfigurationAsync(rootUri, username, password, null).ConfigureAwait(false);
+            return await GetConfigurationAsync(rootUri, username, password, realm, null).ConfigureAwait(false);
         }
 
-        internal static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username, string password, ExecutionConfiguration executionConfiguration)
+        internal static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username, string password, string realm, ExecutionConfiguration executionConfiguration)
         {
             if (executionConfiguration == null)
             {
@@ -40,7 +41,8 @@ namespace Neo4jClient
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters,
                     Username = username,
-                    Password = password
+                    Password = password,
+                    Realm = realm
                 };
             }
 
@@ -99,16 +101,17 @@ namespace Neo4jClient
             {
                 RootUri = rootUri,
                 Username = username,
-                Password = password
+                Password = password,
+                Realm = realm
             };
         }
 
-        public static NeoServerConfiguration GetConfiguration(Uri rootUri, string username = null, string password = null)
+        public static NeoServerConfiguration GetConfiguration(Uri rootUri, string username = null, string password = null, string realm = null)
         {
-            return GetConfiguration(rootUri, username, password, null);
+            return GetConfiguration(rootUri, username, password, realm, null);
         }
 
-        internal static NeoServerConfiguration GetConfiguration(Uri rootUri, string username, string password, ExecutionConfiguration executionConfiguration)
+        internal static NeoServerConfiguration GetConfiguration(Uri rootUri, string username, string password, string realm, ExecutionConfiguration executionConfiguration)
         {
             if (executionConfiguration == null)
             {
@@ -122,7 +125,8 @@ namespace Neo4jClient
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters,
                     Username = username,
-                    Password = password
+                    Password = password,
+                    Realm = realm
                 };
             }
 

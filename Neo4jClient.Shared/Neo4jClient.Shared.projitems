@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Cypher\CypherStatementList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Cypher\CypherTransactionStatement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Cypher\PathsResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ApiModels\Cypher\PathsResultBolt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ExceptionResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\ExtensionsApiResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\FieldChange.cs" />
@@ -30,6 +31,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RelationshipApiResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RelationshipTemplate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RootApiResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CypherPartialResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\All.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherCapabilities.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Execution\ResponseFailBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Execution\ResponseFailBuilder`TParse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Execution\RestExecutionPolicy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\EnumerableExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MemberInfoExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClientExtensions.cs" />
@@ -144,6 +147,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)HttpClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpContentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IAttachedReference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IBoltGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ICypherGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IGraphClientFactory.cs" />
@@ -161,6 +165,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ITypedNodeReference.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JTokenExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mappers\MapperHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Neo4jDriverExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NeoException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NeoServerConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NodeReference.cs" />
@@ -184,12 +189,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DeserializationContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DeserializationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\EnumValueConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ICypherJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\NullableEnumValueConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\PartialDeserializationContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TimeZoneInfoConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeConverterBasedJsonConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StatementResultHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Transactions\BoltResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\IInternalTransactionalGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\INeo4jTransaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransaction.cs" />

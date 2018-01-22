@@ -1,18 +1,21 @@
 ﻿{
   "supports": {},
   "dependencies": {
-    "Microsoft.VisualBasic": "10.0.1",
-    "NETStandard.Library": "1.6.0",
-    "Newtonsoft.Json": "9.0.1",
-    "NuSpec.ReferenceGenerator": "2.0.0-beta-bld14",
-    "System.Collections.NonGeneric": "4.0.1",
-    "System.ComponentModel": "4.0.1",
-    "System.ComponentModel.Annotations": "4.1.0",
-    "System.ComponentModel.TypeConverter": "4.1.0",
-    "System.Reflection.TypeExtensions": "4.1.0",
-    "System.Runtime.Serialization.Primitives": "4.1.1"
+    "Microsoft.DependencyValidation.Analyzers": "0.9.0",
+    "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
+    "Microsoft.VisualBasic": "10.2.0",
+    "Neo4j.Driver": "1.5.2",
+    "NETStandard.Library": "2.0.0",
+    "Newtonsoft.Json": "10.0.3",
+    "System.Collections": "4.3.0",
+    "System.Collections.NonGeneric": "4.3.0",
+    "System.ComponentModel": "4.3.0",
+    "System.ComponentModel.Annotations": "4.4.0",
+    "System.ComponentModel.TypeConverter": "4.3.0",
+    "System.Reflection.TypeExtensions": "4.4.0",
+    "System.Runtime.Serialization.Primitives": "4.3.0"
   },
   "frameworks": {
-    "netstandard1.4": {}
+    "netstandard1.3": {}
   }
 }

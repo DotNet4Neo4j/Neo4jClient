@@ -1,39 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Neo4jClient.Transactions
+﻿namespace Neo4jClient.Transactions
 {
     /// <summary>
-    /// Implements the TransactionScopeProxy interfaces for INeo4jTransaction
+    ///     Implements the TransactionScopeProxy interfaces for INeo4jTransaction
     /// </summary>
     internal class Neo4jTransactionProxy : TransactionScopeProxy
     {
-        private readonly bool _doCommitInScope;
+        private readonly bool doCommitInScope;
 
         public Neo4jTransactionProxy(ITransactionalGraphClient client, TransactionContext transactionContext, bool newScope)
             : base(client, transactionContext)
         {
-            _doCommitInScope = newScope;
+            doCommitInScope = newScope;
         }
+
+        public override bool Committable => true;
+
+        public override bool IsOpen => (TransactionContext != null) && TransactionContext.IsOpen;
 
         protected override void DoCommit()
         {
-            if (_doCommitInScope)
-            {
+            if (doCommitInScope)
                 TransactionContext.Commit();
-            }
         }
 
         protected override bool ShouldDisposeTransaction()
         {
-            return _doCommitInScope;
-        }
-
-        public override bool Committable
-        {
-            get { return true; }
+            return doCommitInScope;
         }
 
         public override void Rollback()
@@ -44,14 +36,6 @@ namespace Neo4jClient.Transactions
         public override void KeepAlive()
         {
             TransactionContext.KeepAlive();
-        }
-
-        public override bool IsOpen
-        {
-            get
-            {
-                return TransactionContext != null && TransactionContext.IsOpen;
-            }
         }
     }
 }

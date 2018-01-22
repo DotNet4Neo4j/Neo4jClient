@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
@@ -16,7 +17,7 @@ namespace Neo4jClient.Execution
         private INeo4jTransaction GetTransactionInScope()
         {
             // first try to get the Non DTC transaction and if it doesn't succeed then try it with the DTC
-            var transactionalClient = Client as IInternalTransactionalGraphClient;
+            var transactionalClient = Client as IInternalTransactionalGraphClient<HttpResponseMessage>;
             if (transactionalClient == null)
             {
                 return null;

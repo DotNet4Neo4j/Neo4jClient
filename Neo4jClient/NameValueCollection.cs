@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Neo4jClient
 {
@@ -6,12 +7,17 @@ namespace Neo4jClient
     {
         private readonly IDictionary<string, string> contents = new Dictionary<string, string>();
 
-        public string[] AllKeys { get; set; }
-        public long Count { get; set; }
+        public string[] AllKeys => contents.Keys.ToArray();
+        public long Count => contents.Count;
 
         public string Get(string customHeaderKey)
         {
-            throw new System.NotImplementedException();
+            return contents[customHeaderKey];
+        }
+
+        public void Add(string headerName, string headerValue)
+        {
+            contents.Add(headerName, headerValue);
         }
     }
 }

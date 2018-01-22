@@ -1,11 +1,10 @@
 ﻿Imports FluentAssertions
 Imports Moq
 Imports Neo4jClient.Cypher
-Imports NUnit.Framework
+Imports Xunit
 
-<TestFixture>
 Public Class WhereTests
-    <Test>
+    <Fact>
     Public Sub CreatesCorrectCypherWhenStringComparisonPassedIn()
         Dim mock As New Mock(Of IRawGraphClient)()
 
@@ -14,7 +13,7 @@ Public Class WhereTests
     End Sub
 
 
-        <Test>
+    <Fact>
     Public Sub CreatesCorrectCypherWhenUsingClassInstance()
         Dim mock As New Mock(Of IRawGraphClient)()
         Dim fooInstance As New Foo()

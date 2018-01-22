@@ -7,9 +7,20 @@ Grab the latest drop straight from the `Neo4jClient` package on [NuGet](http://n
 Read [our wiki doco](https://github.com/Readify/Neo4jClient/wiki).
 
 ## Current Builds
-The official neo4jclient build and nuget package is automated via MyGet [build services](http://docs.myget.org/docs/reference/build-services). Contributors can test private builds using MyGet build services under their own account.
+The official neo4jclient build and nuget package is automated via [AppVeyor](http://www.appveyor.com). 
 
-### Stable [![neo4jclient-tx MyGet Build Status](https://www.myget.org/BuildSource/Badge/neo4jclient-tx?identifier=57c22856-7609-4211-a432-a1ecdf6f1497)](https://www.myget.org/)
+### Stable (3.x)
+
+[![Build status](https://ci.appveyor.com/api/projects/status/q96upd53uq0hyepe?svg=true)](https://ci.appveyor.com/project/ChrisSkardon/neo4jclient)
+
+#### Changes in 3.x
+
+* Bolt!
+* Transactions now use `AsyncLocal<>` instead of `ThreadStatic`
+  * Transactions still don't work in the .NET Core version for the same reason as listed below (in `Breaking Changes in 2.0`)
+  * `TransactionScope` _does_ exist in `NetStandard 2.0` - but some of the other bits surrounding the Transaction management doesn't. 
+* JSON.NET updated to 10.0.3
+* `PathResults` doesn't work with Bolt, you need to use `PathResultsBolt` instead.
 
 #### Dependency Changes in 2.0
 

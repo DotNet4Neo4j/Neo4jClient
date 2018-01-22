@@ -24,7 +24,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
-    public partial class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient, IDisposable
+    public partial class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient<HttpResponseMessage>, IDisposable
     {
         internal const string GremlinPluginUnavailable =
             "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
@@ -40,7 +40,7 @@ namespace Neo4jClient
 
         public static readonly DefaultContractResolver DefaultJsonContractResolver = new DefaultContractResolver();
 
-        private ITransactionManager transactionManager;
+        private ITransactionManager<HttpResponseMessage> transactionManager;
         private readonly IExecutionPolicyFactory policyFactory;
 
         public ExecutionConfiguration ExecutionConfiguration { get; private set; }
@@ -77,11 +77,11 @@ namespace Neo4jClient
             ExecutionConfiguration = new ExecutionConfiguration
             {
                 HttpClient = httpClient,
-                UserAgent = string.Format("Neo4jClient/{0}", GetType().GetTypeInfo().Assembly.GetName().Version),
+                UserAgent = $"Neo4jClient/{GetType().GetTypeInfo().Assembly.GetName().Version}",
                 UseJsonStreaming = true,
                 JsonConverters = JsonConverters,
-                Username = httpClient == null ? null : httpClient.Username,
-                Password = httpClient == null ? null : httpClient.Password
+                Username = httpClient?.Username,
+                Password = httpClient?.Password
             };
             UseJsonStreamingIfAvailable = true;
             policyFactory = new ExecutionPolicyFactory(this);
@@ -104,10 +104,7 @@ namespace Neo4jClient
             return Serializer.Serialize(contents);
         }
 
-        public virtual bool IsConnected
-        {
-            get { return RootApiResponse != null; }
-        }
+        public virtual bool IsConnected => RootApiResponse != null;
 
         public virtual void Connect(NeoServerConfiguration configuration = null)
         {
@@ -124,8 +121,7 @@ namespace Neo4jClient
                 var wasUnwrapped = ex.TryUnwrap(out unwrappedException);
                 operationCompleteArgs.Exception = wasUnwrapped ? unwrappedException : ex;
 
-                if (OperationCompleted != null)
-                    OperationCompleted(this, operationCompleteArgs);
+                OperationCompleted?.Invoke(this, operationCompleteArgs);
 
                 if (wasUnwrapped)
                     throw unwrappedException;
@@ -134,8 +130,7 @@ namespace Neo4jClient
             }
             catch (Exception ex)
             {
-                if (OperationCompleted != null)
-                    OperationCompleted(this, new OperationCompletedEventArgs { Exception = ex });
+                OperationCompleted?.Invoke(this, new OperationCompletedEventArgs { Exception = ex });
                 throw;
             }
         }
@@ -725,7 +720,7 @@ namespace Neo4jClient
             }
         }
 
-        public List<JsonConverter> JsonConverters { get; private set; }
+        public List<JsonConverter> JsonConverters { get; }
 
         private void CheckTransactionEnvironmentWithPolicy(IExecutionPolicy policy)
         {
@@ -763,15 +758,9 @@ namespace Neo4jClient
             return transactionManager.BeginTransaction(scopeOption);
         }
 
-        public ITransaction Transaction
-        {
-            get { return transactionManager == null ? null : transactionManager.CurrentNonDtcTransaction; }
-        }
+        public ITransaction Transaction => transactionManager?.CurrentNonDtcTransaction;
 
-        public bool InTransaction
-        {
-            get { return transactionManager != null && transactionManager.InTransaction; }
-        }
+        public bool InTransaction => transactionManager != null && transactionManager.InTransaction;
 
         public void EndTransaction()
         {
@@ -850,10 +839,7 @@ namespace Neo4jClient
             return results;
         }
 
-        public CypherCapabilities CypherCapabilities
-        {
-            get { return cypherCapabilities; }
-        }
+        public CypherCapabilities CypherCapabilities => cypherCapabilities;
 
         [Obsolete(
             "This method is for use by the framework internally. Use IGraphClient.Cypher instead, and read the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher. If you really really want to call this method directly, and you accept the fact that YOU WILL LIKELY INTRODUCE A RUNTIME SECURITY RISK if you do so, then it shouldn't take you too long to find the correct explicit interface implementation that you have to call. This hurdle is for your own protection. You really really should not do it. This signature may be removed or renamed at any time.",
@@ -1453,7 +1439,7 @@ namespace Neo4jClient
 
         public DefaultContractResolver JsonContractResolver { get; set; }
 
-        public ITransactionManager TransactionManager
+        public ITransactionManager<HttpResponseMessage> TransactionManager
         {
             get { return transactionManager; }
         }

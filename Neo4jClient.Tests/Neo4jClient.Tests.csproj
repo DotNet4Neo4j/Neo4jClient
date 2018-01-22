@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Neo4jClient.Test</RootNamespace>
     <AssemblyName>Neo4jClient.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -28,6 +28,7 @@
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>true</UseVSHostingProcess>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>7</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -57,187 +58,146 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentAssertions, Version=4.9.1.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentAssertions.4.9.1\lib\net45\FluentAssertions.dll</HintPath>
+    <Reference Include="Castle.Core, Version=4.1.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Core.4.1.1\lib\net45\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentAssertions, Version=4.19.4.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.19.4\lib\net45\FluentAssertions.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentAssertions.Core, Version=4.19.4.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentAssertions.4.19.4\lib\net45\FluentAssertions.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="FluentAssertions.Core, Version=4.9.1.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentAssertions.4.9.1\lib\net45\FluentAssertions.Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Moq, Version=4.7.99.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.4.7.99\lib\net45\Moq.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Neo4j.Driver, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Neo4j.Driver.1.5.0\lib\net452\Neo4j.Driver.dll</HintPath>
     </Reference>
-    <Reference Include="NSubstitute, Version=1.10.0.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
-      <HintPath>..\packages\NSubstitute.1.10.0.0\lib\net45\NSubstitute.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.core, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\nunit.core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="nunit.core.interfaces, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\nunit.core.interfaces.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.6.2.12296, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="nunit.util, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\nunit.util.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="NUnit.VisualStudio.TestAdapter, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4cb40d35494691ac, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\NUnit.VisualStudio.TestAdapter.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="NSubstitute, Version=2.0.3.0, Culture=neutral, PublicKeyToken=92dd2e9066daa5ca, processorArchitecture=MSIL">
+      <HintPath>..\packages\NSubstitute.2.0.3\lib\net45\NSubstitute.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.AppContext, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.AppContext.4.3.0\lib\net46\System.AppContext.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Console.4.3.0\lib\net46\System.Console.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.2.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.4.1\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Globalization.Calendars, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Globalization.Calendars.4.3.0\lib\net46\System.Globalization.Calendars.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Compression, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.4.3.0\lib\net46\System.IO.Compression.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.FileSystem, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.4.3.0\lib\net46\System.IO.FileSystem.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Http.4.3.2\lib\net46\System.Net.Http.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Net.NameResolution, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.NameResolution.4.3.0\lib\net46\System.Net.NameResolution.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Security, Version=4.0.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Security.4.3.1\lib\net46\System.Net.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Sockets, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Net.Sockets.4.3.0\lib\net46\System.Net.Sockets.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.0.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Primitives, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Serialization.Primitives.4.3.0\lib\net46\System.Runtime.Serialization.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Algorithms, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net461\System.Security.Cryptography.Algorithms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.0\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.ReaderWriter, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Xml.ReaderWriter.4.3.0\lib\net46\System.Xml.ReaderWriter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.abstractions.2.0.1\lib\net35\xunit.abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.assert, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.assert.2.2.0\lib\netstandard1.1\xunit.assert.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.core, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.extensibility.core.2.2.0\lib\netstandard1.1\xunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.execution.desktop, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.extensibility.execution.2.2.0\lib\net452\xunit.execution.desktop.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiModels\GremlinTableCapResponseTests.cs" />
-    <Compile Include="ApiModels\RootApiResponseTests.cs" />
-    <Compile Include="Cypher\AggregateTests.cs" />
-    <Compile Include="Cypher\CypherFluentQuerySetClientTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryAdvancedTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryCustomHeaderTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryCallTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryDetachDeleteTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryForEachTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryDropTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryConstraintTest.cs" />
-    <Compile Include="Cypher\CypherFluentQueryMaxExecutionTimeTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryParserVersionTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryMergeTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryMatchTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryRemoveTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryPlannerTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryLoadCsvTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryUnwindTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryUsingIndexTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryWithParamTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryYieldTests.cs" />
-    <Compile Include="Cypher\CypherQueryTests.cs" />
-    <Compile Include="Cypher\DocumentationExamples.cs" />
-    <Compile Include="Cypher\UnionTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryWhereTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryWithTests.cs" />
-    <Compile Include="Cypher\CypherFluentQuerySkipTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryLimitTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryDeleteTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryReturnTests.cs" />
-    <Compile Include="Cypher\CypherFluentQuerySetTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryStartTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryCreateUniqueTests.cs" />
-    <Compile Include="Cypher\CypherWhereExpressionBuilderTests.cs" />
-    <Compile Include="Cypher\QueryWriterTests.cs" />
-    <Compile Include="Cypher\StartBitFormatterTests.cs" />
-    <Compile Include="Extensions\MemberInfoExtensionsTests.cs" />
-    <Compile Include="GraphClientTests\ConnectAsyncTests.cs" />
-    <Compile Include="GraphClientTests\FactoryTests.cs" />
-    <Compile Include="HttpClientWrapperTests.cs" />
-    <Compile Include="MockResponseThrows.cs" />
-    <Compile Include="MockResponseThrowsException.cs" />
-    <Compile Include="Serialization\CypherJsonDeserializerTests.cs" />
-    <Compile Include="Serialization\CustomJsonDeserializerTests.cs" />
-    <Compile Include="Domain\Product.cs" />
-    <Compile Include="Cypher\CypherFluentQueryResultsTests.cs" />
-    <Compile Include="Cypher\CypherReturnExpressionBuilderTests.cs" />
-    <Compile Include="GraphClientTests\ReIndexRelationshipsTests.cs" />
-    <Compile Include="GraphClientTests\Cypher\ExecuteCypherTests.cs" />
-    <Compile Include="GraphClientTests\LookupIndexTests.cs" />
-    <Compile Include="GraphClientTests\ServerVersionTests.cs" />
-    <Compile Include="GraphClientTests\CreateRelationshipTests.cs" />
-    <Compile Include="IndexEntryTests.cs" />
-    <Compile Include="MockRequest.cs" />
-    <Compile Include="MockResponse.cs" />
-    <Compile Include="GraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
-    <Compile Include="Cypher\CypherFluentQueryTests.cs" />
-    <Compile Include="RestTestHarness.cs" />
-    <Compile Include="GraphClientTests\UpdateRelationshipTests.cs" />
-    <Compile Include="GraphClientTests\DeleteIndexTests.cs" />
-    <Compile Include="GraphClientTests\IndexExistsTests.cs" />
-    <Compile Include="GraphClientTests\GetIndexesTests.cs" />
-    <Compile Include="GraphClientTests\CreateIndexTests.cs" />
-    <Compile Include="GraphClientTests\Gremlin\ExecuteGetAllRelationshipsGremlinTests.cs" />
-    <Compile Include="GraphClientTests\DeleteRelationshipTests.cs" />
-    <Compile Include="GraphClientTests\QueryNodeIndexTests.cs" />
-    <Compile Include="GraphClientTests\ReIndexNodesTests.cs" />
-    <Compile Include="GraphClientTests\RootNodeTests.cs" />
-    <Compile Include="GraphClientTests\UpdateNodeTests.cs" />
-    <Compile Include="GraphClientTests\Gremlin\ExecuteGetAllNodesGremlinTests.cs" />
-    <Compile Include="GraphClientTests\DeleteNodeTests.cs" />
-    <Compile Include="Gremlin\AggregateStepTests.cs" />
-    <Compile Include="Gremlin\BackTests.cs" />
-    <Compile Include="Gremlin\BasicStepsTests.cs" />
-    <Compile Include="Gremlin\AsStepTests.cs" />
-    <Compile Include="Gremlin\EmitPropertyStepTests.cs" />
-    <Compile Include="Gremlin\GremlinClientTests.cs" />
-    <Compile Include="Gremlin\IfThenElseTests.cs" />
-    <Compile Include="Gremlin\GremlinHasNextStepTests.cs" />
-    <Compile Include="Gremlin\PrintLineStatementTests.cs" />
-    <Compile Include="Gremlin\StoreStepTests.cs" />
-    <Compile Include="Gremlin\GremlinDistinctStepTests.cs" />
-    <Compile Include="Gremlin\ExhaustMergeStepTests.cs" />
-    <Compile Include="Gremlin\FairMergeStepTests.cs" />
-    <Compile Include="Gremlin\CopySplitStepTests.cs" />
-    <Compile Include="Gremlin\ExceptStepTests.cs" />
-    <Compile Include="Gremlin\RetainStepTests.cs" />
-    <Compile Include="Gremlin\TableTests.cs" />
-    <Compile Include="Gremlin\LoopStepTests.cs" />
-    <Compile Include="Gremlin\GremlinPagedEnumeratorTests.cs" />
-    <Compile Include="Gremlin\IteratorTests.cs" />
-    <Compile Include="Gremlin\FormatGremlinFilterTests.cs" />
-    <Compile Include="Gremlin\GremlinNodeEnumerableTests.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Gremlin\TranslateFilterTests.cs" />
-    <Compile Include="NodeTests.cs" />
-    <Compile Include="RelationshipTests.cs" />
-    <Compile Include="GraphClientTests\Gremlin\ExecuteScalarGremlinTests.cs" />
-    <Compile Include="Relationships\OwnedBy.cs" />
-    <Compile Include="Relationships\Requires.cs" />
-    <Compile Include="Relationships\StoredIn.cs" />
-    <Compile Include="Domain\StorageLocation.cs" />
-    <Compile Include="ApiUsageIdeas.cs" />
-    <Compile Include="RelationshipReferenceTests.cs" />
-    <Compile Include="GraphClientTests\ConnectTests.cs" />
-    <Compile Include="GraphClientTests\CreateNodeTests.cs" />
-    <Compile Include="GraphClientTests\GetNodeTests.cs" />
-    <Compile Include="NodeReferenceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Domain\User.cs" />
-    <Compile Include="Serialization\CustomJsonSerializerTests.cs" />
-    <Compile Include="CultureInfoSetupFixture.cs" />
-    <Compile Include="Serialization\UserSuppliedSerializationTests.cs" />
+    <Compile Include="Transactions\BoltQueriesInTransactionTests.cs" />
     <Compile Include="Transactions\Neo4jTransactionResourceManagerTests.cs" />
     <Compile Include="Transactions\QueriesInTransactionTests.cs" />
     <Compile Include="Transactions\TransactionExecutionEnvironmentTests.cs" />
     <Compile Include="Transactions\TransactionRestResponseHelper.cs" />
     <Compile Include="Transactions\RestCallScenarioTests.cs" />
     <Compile Include="Transactions\TransactionManagementTests.cs" />
-    <Compile Include="UtilitiesTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -251,7 +211,20 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.DependencyValidation.Analyzers.0.9.0\analyzers\dotnet\cs\Microsoft.DependencyValidation.Analyzers.resources.dll" />
+    <Analyzer Include="..\packages\Microsoft.DependencyValidation.Analyzers.0.9.0\analyzers\dotnet\Microsoft.DependencyValidation.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="..\Neo4jClient.Tests.Shared\Neo4jClient.Tests.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -6,25 +6,16 @@ namespace Neo4jClient.ApiModels.Cypher
 {
     class CypherApiQuery
     {
-        readonly string queryText;
-        readonly IDictionary<string, object> queryParameters;
-
         public CypherApiQuery(CypherQuery query)
         {
-            queryText = query.QueryText;
-            queryParameters = query.QueryParameters ?? new Dictionary<string, object>();
+            Query = query.QueryText;
+            Parameters = query.QueryParameters ?? new Dictionary<string, object>();
         }
 
         [JsonProperty("query")]
-        public string Query
-        {
-            get { return queryText; }
-        }
+        public string Query { get; }
 
         [JsonProperty("params")]
-        public IDictionary<string, object> Parameters
-        {
-            get { return queryParameters; }
-        }
+        public IDictionary<string, object> Parameters { get; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
@@ -9,7 +10,7 @@ using Neo4jClient.Transactions;
 
 namespace Neo4jClient
 {
-    public partial class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient, IDisposable
+    public partial class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient<HttpResponseMessage>, IDisposable
     {
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
@@ -53,6 +54,7 @@ namespace Neo4jClient
                     RootUri,
                     ExecutionConfiguration.Username,
                     ExecutionConfiguration.Password,
+                    ExecutionConfiguration.Realm,
                     ExecutionConfiguration).ConfigureAwait(false);
 
                 RootApiResponse = configuration.ApiConfig;

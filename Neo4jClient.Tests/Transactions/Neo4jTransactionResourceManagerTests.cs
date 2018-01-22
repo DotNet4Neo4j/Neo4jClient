@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Neo4jClient.Execution;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
-using NUnit.Framework;
+using Xunit;
 
 namespace Neo4jClient.Test.Transactions
 {
-    [TestFixture]
+    
     public class Neo4jTransactionResourceManagerTests
     {
 

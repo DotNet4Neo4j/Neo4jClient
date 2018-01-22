@@ -1,28 +1,29 @@
 ﻿using System;
 using Neo4jClient.Execution;
+using Neo4jClient.Test.Fixtures;
 using Neo4jClient.Transactions;
-using NUnit.Framework;
+using Xunit;
 
 namespace Neo4jClient.Test.Transactions
 {
-    [TestFixture]
-    public class TransactionExecutionEnvironmentTests
+    
+    public class TransactionExecutionEnvironmentTests : IClassFixture<CultureInfoSetupFixture>
     {
-        [Test]
+        [Fact]
         public void ResourceManagerIdDefaultValueIsSet()
         {
             var configuration = new ExecutionConfiguration();
             var executionEnvironment = new TransactionExecutionEnvironment(configuration);
-            Assert.AreEqual(configuration.ResourceManagerId, executionEnvironment.ResourceManagerId);
+            Assert.Equal(configuration.ResourceManagerId, executionEnvironment.ResourceManagerId);
         }
 
-        [Test]
+        [Fact]
         public void UserCanSetResourceManagerId()
         {
             var resourceManagerId = Guid.NewGuid();
             var configuration = new ExecutionConfiguration {ResourceManagerId = resourceManagerId};
             var executionEnvironment = new TransactionExecutionEnvironment(configuration);
-            Assert.AreEqual(resourceManagerId, executionEnvironment.ResourceManagerId);
+            Assert.Equal(resourceManagerId, executionEnvironment.ResourceManagerId);
         }
     }
 }

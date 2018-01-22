@@ -10,59 +10,56 @@ namespace Neo4jClient.Transactions
     /// </summary>
     internal abstract class TransactionScopeProxy : INeo4jTransaction
     {
-        private readonly ITransactionalGraphClient _client;
-        private bool _markCommitted = false;
-        private bool _disposing = false;
-        private TransactionContext _transactionContext;
+        private readonly ITransactionalGraphClient client;
+        private bool markCommitted = false;
+        private bool disposing = false;
+        private TransactionContext transactionContext;
 
 
-        public TransactionContext TransactionContext
-        {
-            get { return _transactionContext; }
-        }
+        public TransactionContext TransactionContext => transactionContext;
 
         protected TransactionScopeProxy(ITransactionalGraphClient client, TransactionContext transactionContext)
         {
-            _client = client;
-            _disposing = false;
-            _transactionContext = transactionContext;
+            this.client = client;
+            disposing = false;
+            this.transactionContext = transactionContext;
         }
 
         public Uri Endpoint
         {
-            get { return _transactionContext.Endpoint; }
-            set { _transactionContext.Endpoint = value; }
+            get { return transactionContext.Endpoint; }
+            set { transactionContext.Endpoint = value; }
         }
 
         public NameValueCollection CustomHeaders { get; set; }
 
         public virtual void Dispose()
         {
-            if (_disposing)
+            if (disposing)
             {
                 return;
             }
 
-            _disposing = true;
-            _client.EndTransaction();
-            if (!_markCommitted && Committable && TransactionContext.IsOpen)
+            disposing = true;
+            client.EndTransaction();
+            if (!markCommitted && Committable && TransactionContext.IsOpen)
             {
                 Rollback();
             }
 
-            if (_transactionContext != null && ShouldDisposeTransaction())
+            if (transactionContext != null && ShouldDisposeTransaction())
             {
-                _transactionContext.Dispose();
-                _transactionContext = null;
+                transactionContext.Dispose();
+                transactionContext = null;
             }
         }
 
         public void Commit()
         {
-            _markCommitted = true;
+            markCommitted = true;
             if (CustomHeaders != null)
             {
-                _transactionContext.CustomHeaders = CustomHeaders;
+                transactionContext.CustomHeaders = CustomHeaders;
             }
             DoCommit();
         }
