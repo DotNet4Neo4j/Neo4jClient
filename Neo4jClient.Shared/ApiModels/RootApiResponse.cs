@@ -36,7 +36,8 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("extensions")]
         public ExtensionsApiResponse Extensions { get; set; }
 
-        public string neo4j_version { get; set; }
+        [JsonProperty("neo4j_version")]
+        public string Neo4jVersion { get; set; }
 
         /// <summary>
         /// Returns a structured representation of the Neo4j server version, but only with partial data.
@@ -44,28 +45,27 @@ namespace Neo4jClient.ApiModels
         /// so both 1.9.M01, 1.9.RC1 and 1.9.1 will all return 1.9.0.1.
         /// </summary>
         [JsonIgnore]
-        public Version Version
+        public Version Version => GetVersion(Neo4jVersion);
+
+        internal static Version GetVersion(string version)
         {
-            get
-            {
-                if (string.IsNullOrEmpty(neo4j_version))
-                    return new Version(0,0);
+            if (string.IsNullOrEmpty(version))
+                return new Version(0, 0);
 
-                var numericalVersionString = Regex.Replace(
-                    neo4j_version,
-                    @"(?<major>\d*)[.](?<minor>\d*)[.]?(M(?<build>\d*)|RC(?<build>\d*)?).*",
-                    "${major}.${minor}.0.${build}");
+            var numericalVersionString = Regex.Replace(
+                version,
+                @"(?<major>\d*)[.](?<minor>\d*)[.]?(M(?<build>\d*)|RC(?<build>\d*)?).*",
+                "${major}.${minor}.0.${build}");
 
-                numericalVersionString = Regex.Replace(
-                    numericalVersionString,
-                    @"(?<major>\d*)[.](?<minor>\d*)-.*",
-                    "${major}.${minor}");
+            numericalVersionString = Regex.Replace(
+                numericalVersionString,
+                @"(?<major>\d*)[.](?<minor>\d*)-.*",
+                "${major}.${minor}");
 
-                Version result;
-                var parsed = Version.TryParse(numericalVersionString, out result);
+            Version result;
+            var parsed = Version.TryParse(numericalVersionString, out result);
 
-                return parsed ? result : new Version(0, 0);
-            }
+            return parsed ? result : new Version(0, 0);
         }
     }
 }

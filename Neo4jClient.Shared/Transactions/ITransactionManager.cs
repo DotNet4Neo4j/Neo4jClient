@@ -9,7 +9,7 @@ namespace Neo4jClient.Transactions
     /// Interface that handles all the queries related to transactions that could be needed in a ITransactionalGraphClient
     /// <see cref="Neo4jClient.Transactions.TransactionManager" /> for implementation.
     /// </summary>
-    public interface ITransactionManager : IDisposable
+    public interface ITransactionManager<T> : IDisposable
     {
         bool InTransaction { get; }
         ITransaction CurrentNonDtcTransaction { get; }
@@ -17,6 +17,6 @@ namespace Neo4jClient.Transactions
         ITransaction BeginTransaction(TransactionScopeOption option);
         void EndTransaction();
         void RegisterToTransactionIfNeeded();
-        Task<HttpResponseMessage> EnqueueCypherRequest(string commandDescription, IGraphClient graphClient, CypherQuery query);
+        Task<T> EnqueueCypherRequest(string commandDescription, IGraphClient graphClient, CypherQuery query);
     }
 }

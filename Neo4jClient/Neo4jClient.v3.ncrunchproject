@@ -1,0 +1,10 @@
+﻿<ProjectConfiguration>
+  <Settings>
+    <CopyReferencedAssembliesToWorkspace>True</CopyReferencedAssembliesToWorkspace>
+    <IgnoredTests>
+      <AllTestsSelector />
+    </IgnoredTests>
+    <IgnoreThisComponentCompletely>True</IgnoreThisComponentCompletely>
+    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
+  </Settings>
+</ProjectConfiguration>

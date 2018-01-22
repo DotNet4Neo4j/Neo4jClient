@@ -1,14 +1,15 @@
 ﻿using System.Collections.Specialized;
 using Neo4jClient.Cypher;
+using Neo4jClient.Test.Fixtures;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 
 namespace Neo4jClient.Test.Cypher
 {
-    [TestFixture]
-    public class CypherFluentQueryCustomHeaderTests
+    
+    public class CypherFluentQueryCustomHeaderTests : IClassFixture<CultureInfoSetupFixture>
     {
-        [Test]
+        [Fact]
         public void SetsMaxExecutionTimeAndCustomHeader_WhenUsingAReturnTypeQuery()
         {
             const string headerName = "HeaderName";
@@ -23,11 +24,11 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual(100, query.MaxExecutionTime);
-            Assert.AreEqual(customHeaders, query.CustomHeaders);
+            Assert.Equal(100, query.MaxExecutionTime);
+            Assert.Equal(customHeaders, query.CustomHeaders);
         }
 
-        [Test]
+        [Fact]
         public void SetsCustomHeader_WhenUsingAReturnTypeQuery()
         {
             const string headerName = "HeaderName";
@@ -41,10 +42,10 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.AreEqual(customHeaders, query.CustomHeaders);
+            Assert.Equal(customHeaders, query.CustomHeaders);
         }
 
-        [Test]
+        [Fact]
         public void SetsCustomHeader_WhenUsingANonReturnTypeQuery()
         {
             const string headerName = "HeaderName";
@@ -58,7 +59,7 @@ namespace Neo4jClient.Test.Cypher
                 .Set("n.Value = 'value'")
                 .Query;
 
-            Assert.AreEqual(customHeaders, query.CustomHeaders);
+            Assert.Equal(customHeaders, query.CustomHeaders);
         }
     }
 }

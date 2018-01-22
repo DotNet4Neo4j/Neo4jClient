@@ -19,5 +19,6 @@ namespace Neo4jClient.Execution
         public string Password { get; set; }
         public bool HasErrors { get; set; }
         public Guid ResourceManagerId { get; set; }
+        public string Realm { get; set; }
     }
 }

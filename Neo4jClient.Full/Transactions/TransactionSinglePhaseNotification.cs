@@ -9,21 +9,20 @@ namespace Neo4jClient.Transactions
     /// </summary>
     internal class TransactionPromotableSinglePhaseNotification : IPromotableSinglePhaseNotification
     {
-        private Neo4jTransaction _transaction;
-        private readonly ITransactionalGraphClient _client;
-        private static ITransactionResourceManager _resourceManager;
-        private ISet<Transaction> _enlistedInTransactions = new HashSet<Transaction>();
-        private int _transactionId;
+        private Neo4jRestTransaction transaction;
+        private readonly ITransactionalGraphClient client;
+        private static ITransactionResourceManager resourceManager;
+        private readonly ISet<Transaction> enlistedInTransactions = new HashSet<Transaction>();
+        private int transactionId;
 
         public TransactionPromotableSinglePhaseNotification(ITransactionalGraphClient client)
         {
-            _client = client;
-            //_resourceManager = new Neo4jTransactionResourceManager();
+            this.client = client;
         }
 
         public void EnlistIfNecessary()
         {
-            if (!_enlistedInTransactions.Contains(Transaction.Current))
+            if (!enlistedInTransactions.Contains(Transaction.Current))
             {
                 Enlist(Transaction.Current);
             }
@@ -44,47 +43,47 @@ namespace Neo4jClient.Transactions
 
                 // we create a transaction directly instead of using BeginTransaction that GraphClient
                 // doesn't store it in its stack of scopes.
-                 var localTransaction = new Neo4jTransaction(_client);
+                 var localTransaction = new Neo4jRestTransaction(client);
                 localTransaction.ForceKeepAlive();
-                _transactionId = localTransaction.Id;
+                transactionId = localTransaction.Id;
                 var resourceManager = GetResourceManager();
                 var propagationToken = TransactionInterop.GetTransmitterPropagationToken(transaction);
-                var transactionExecutionEnvironment = new TransactionExecutionEnvironment(_client.ExecutionConfiguration)
+                var transactionExecutionEnvironment = new TransactionExecutionEnvironment(client.ExecutionConfiguration)
                 {
                     TransactionId =  localTransaction.Id,
-                    TransactionBaseEndpoint = _client.TransactionEndpoint
+                    TransactionBaseEndpoint = client.TransactionEndpoint
                 };
                 resourceManager.Enlist(transactionExecutionEnvironment, propagationToken);
                 localTransaction.Cancel();
             }
 
-            _enlistedInTransactions.Add(transaction);
+            enlistedInTransactions.Add(transaction);
         }
 
         public byte[] Promote()
         {
             // we have been promoted to MSTDC, so we have to clean the local resources
-            if (_transaction == null)
+            if (transaction == null)
             {
-                _transaction = new Neo4jTransaction(_client);
+                transaction = new Neo4jRestTransaction(client);
             }
 
             // do a keep alive in case the promotion takes too long or in case we don't have an ID
-            _transaction.ForceKeepAlive();
-            _transactionId = _transaction.Id;
-            _transaction.Cancel();
-            _transaction = null;
+            transaction.ForceKeepAlive();
+            transactionId = transaction.Id;
+            transaction.Cancel();
+            transaction = null;
 
-            if (_transactionId == 0)
+            if (transactionId == 0)
             {
                 throw new InvalidOperationException("For some reason we don't have a TransactionContext ID");
             }
 
             var resourceManager = GetResourceManager();
-            return resourceManager.Promote(new TransactionExecutionEnvironment(_client.ExecutionConfiguration)
+            return resourceManager.Promote(new TransactionExecutionEnvironment(client.ExecutionConfiguration)
             {
-                TransactionId = _transactionId,
-                TransactionBaseEndpoint = _client.TransactionEndpoint
+                TransactionId = transactionId,
+                TransactionBaseEndpoint = client.TransactionEndpoint
             });
         }
 
@@ -94,22 +93,22 @@ namespace Neo4jClient.Transactions
             // For now we can use local transactions
             // we create it directly instead of using BeginTransaction that GraphClient
             // doesn't store it in its stack of scopes.
-            _transaction = new Neo4jTransaction(_client);
+            transaction = new Neo4jRestTransaction(client);
         }
 
-        public Neo4jTransaction AmbientTransaction
+        public Neo4jRestTransaction AmbientTransaction
         {
             get
             {
                 // If _transaction is null, then our PSPE enlistment failed or we got promoted.
                 // If we got promoted then we can reconstruct it because we have the id and the client,
                 // but only if we have an ID, if we don't have an ID that means we haven't executed a single query
-                if (_transaction == null && _transactionId > 0)
+                if (transaction == null && transactionId > 0)
                 {
-                    return Neo4jTransaction.FromIdAndClient(_transactionId, _client);
+                    return Neo4jRestTransaction.FromIdAndClient(transactionId, client);
                 }
 
-                return _transaction;
+                return transaction;
             }
         }
 
@@ -117,53 +116,53 @@ namespace Neo4jClient.Transactions
         {
             // we receive a commit message
             // if we own a local transaction, then commit that transaction
-            if (_transaction != null)
+            if (transaction != null)
             {
-                _transaction.Commit();
-                _transaction = null;
+                transaction.Commit();
+                transaction = null;
                 singlePhaseEnlistment.Committed();
             }
-            else if (_transactionId > 0)
+            else if (transactionId > 0)
             {
-                GetResourceManager().CommitTransaction(_transactionId);
+                GetResourceManager().CommitTransaction(transactionId);
                 singlePhaseEnlistment.Committed();
             }
 
-            _enlistedInTransactions.Remove(Transaction.Current);
+            enlistedInTransactions.Remove(Transaction.Current);
         }
 
         public void Rollback(SinglePhaseEnlistment singlePhaseEnlistment)
         {
             // we receive a commit message
             // if we own a local transaction, then commit that transaction
-            if (_transaction != null)
+            if (transaction != null)
             {
-                _transaction.Rollback();
-                _transaction = null;
+                transaction.Rollback();
+                transaction = null;
             }
-            else if (_transactionId > 0)
+            else if (transactionId > 0)
             {
-                GetResourceManager().RollbackTransaction(_transactionId);
+                GetResourceManager().RollbackTransaction(transactionId);
             }
             singlePhaseEnlistment.Aborted();
 
-            _enlistedInTransactions.Remove(Transaction.Current);
+            enlistedInTransactions.Remove(Transaction.Current);
         }
 
         // the following was adapted from Npgsql sources:
-        private static System.Runtime.Remoting.Lifetime.ClientSponsor _sponser;
+        private static System.Runtime.Remoting.Lifetime.ClientSponsor sponsor;
         private static ITransactionResourceManager GetResourceManager()
         {
-            if (_resourceManager == null)
+            if (resourceManager == null)
             {
-                _sponser = new System.Runtime.Remoting.Lifetime.ClientSponsor();
+                sponsor = new System.Runtime.Remoting.Lifetime.ClientSponsor();
                 AppDomain rmDomain = AppDomain.CreateDomain("Neo4jTransactionResourceManager", AppDomain.CurrentDomain.Evidence, AppDomain.CurrentDomain.SetupInformation);
-                _resourceManager = (ITransactionResourceManager) rmDomain.CreateInstanceAndUnwrap(
+                resourceManager = (ITransactionResourceManager) rmDomain.CreateInstanceAndUnwrap(
                     typeof(Neo4jTransactionResourceManager).Assembly.FullName,
                     typeof(Neo4jTransactionResourceManager).FullName);
-                _sponser.Register((MarshalByRefObject)_resourceManager);
+                sponsor.Register((MarshalByRefObject)resourceManager);
             }
-            return _resourceManager;
+            return resourceManager;
         }
     }
 }

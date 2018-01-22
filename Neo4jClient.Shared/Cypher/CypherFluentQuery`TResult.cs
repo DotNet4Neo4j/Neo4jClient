@@ -9,13 +9,13 @@ namespace Neo4jClient.Cypher
         CypherFluentQuery,
         IOrderedCypherFluentQuery<TResult>
     {
-        public CypherFluentQuery(IGraphClient client, QueryWriter writer)
-            : base(client, writer)
+        public CypherFluentQuery(IGraphClient client, QueryWriter writer, bool isWrite = true)
+            : base(client, writer, isWrite)
         {}
 
         public new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName)
         {
-            return Mutate<TResult>(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+            return Mutate<TResult>(w => w.AppendClause($"UNWIND {collectionName} AS {columnName}"));
         }
 
         public new ICypherFluentQuery<TResult> Limit(int? limit)
@@ -35,41 +35,29 @@ namespace Neo4jClient.Cypher
         public new IOrderedCypherFluentQuery<TResult> OrderBy(params string[] properties)
         {
             return MutateOrdered<TResult>(w =>
-                w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
+                w.AppendClause($"ORDER BY {string.Join(", ", properties)}"));
         }
 
         public new IOrderedCypherFluentQuery<TResult> OrderByDescending(params string[] properties)
         {
             return MutateOrdered<TResult>(w =>
-                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(" DESC, ", properties))));
+                w.AppendClause($"ORDER BY {string.Join(" DESC, ", properties)} DESC"));
         }
 
         public new IOrderedCypherFluentQuery<TResult> ThenBy(params string[] properties)
         {
             return MutateOrdered<TResult>(w =>
-                w.AppendToClause(string.Format(", {0}", string.Join(", ", properties))));
+                w.AppendToClause($", {string.Join(", ", properties)}"));
         }
 
         public new IOrderedCypherFluentQuery<TResult> ThenByDescending(params string[] properties)
         {
             return MutateOrdered<TResult>(w =>
-                w.AppendToClause(string.Format(", {0} DESC", string.Join(" DESC, ", properties))));
+                w.AppendToClause($", {string.Join(" DESC, ", properties)} DESC"));
         }
 
-        public IEnumerable<TResult> Results
-        {
-            get
-            {
-                return Client.ExecuteGetCypherResults<TResult>(Query);
-            }
-        }
+        public IEnumerable<TResult> Results => Client.ExecuteGetCypherResults<TResult>(Query);
 
-        public Task<IEnumerable<TResult>> ResultsAsync
-        {
-            get
-            {
-                return Client.ExecuteGetCypherResultsAsync<TResult>(Query);
-            }
-        }
+        public Task<IEnumerable<TResult>> ResultsAsync => Client.ExecuteGetCypherResultsAsync<TResult>(Query);
     }
 }

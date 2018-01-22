@@ -23,7 +23,8 @@ namespace Neo4jClient.Cypher
         readonly CypherResultFormat resultFormat;
         readonly IContractResolver jsonContractResolver;
         readonly int? maxExecutionTime;
-        readonly NameValueCollection customHeaders;
+        private readonly NameValueCollection customHeaders;
+        public bool IsWrite { get; }
 
         public CypherQuery(
             string queryText,
@@ -41,7 +42,8 @@ namespace Neo4jClient.Cypher
             CypherResultFormat resultFormat,
             IContractResolver contractResolver = null, 
             int? maxExecutionTime = null, 
-            NameValueCollection customHeaders = null
+            NameValueCollection customHeaders = null,
+            bool isWrite = true
             )
         {
             this.queryText = queryText;
@@ -51,6 +53,7 @@ namespace Neo4jClient.Cypher
             jsonContractResolver = contractResolver ?? GraphClient.DefaultJsonContractResolver;
             this.maxExecutionTime = maxExecutionTime;
             this.customHeaders = customHeaders;
+            IsWrite = isWrite;
         }
 
         public IDictionary<string, object> QueryParameters

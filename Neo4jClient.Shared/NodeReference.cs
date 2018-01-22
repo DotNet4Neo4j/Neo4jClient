@@ -84,7 +84,7 @@ namespace Neo4jClient
 
         public ICypherFluentQuery StartCypher(string identity)
         {
-            var query = new CypherFluentQuery(client)
+            var query = new CypherFluentQuery(client, true)
                 .Start(identity, this);
             return query;
         }

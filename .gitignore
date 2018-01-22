@@ -15,3 +15,6 @@ packages
 project.lock.json
 msbuild.log
 TestResult.xml
+[Nn][Dd]epend[Ou]ut\*
+\.vs/
+\.idea/

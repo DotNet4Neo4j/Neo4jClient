@@ -27,25 +27,25 @@ namespace Neo4jClient.Transactions
         /// <summary>
         /// The consumer of all the tasks (a single thread)
         /// </summary>
-        private Action _consumer = null;
+        private Action consumer;
         
         /// <summary>
         /// This is where the producer generates all the tasks
         /// </summary>
-        private BlockingCollection<Task> _taskQueue;
+        private readonly BlockingCollection<Task> taskQueue;
 
         public NameValueCollection CustomHeaders { get; set; }
 
         /// <summary>
         /// Where the cancellation token generates
         /// </summary>
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly CancellationTokenSource cancellationTokenSource;
         
         public TransactionContext(INeo4jTransaction transaction)
         {
             Transaction = transaction;
-            _cancellationTokenSource = new CancellationTokenSource();
-            _taskQueue = new BlockingCollection<Task>();
+            cancellationTokenSource = new CancellationTokenSource();
+            taskQueue = new BlockingCollection<Task>();
         }
 
         public Task<HttpResponseMessage> EnqueueTask(string commandDescription, IGraphClient client, IExecutionPolicy policy, CypherQuery query)
@@ -74,21 +74,21 @@ namespace Neo4jClient.Transactions
                         })
                     .Result
             );
-            _taskQueue.Add(task, _cancellationTokenSource.Token);
+            taskQueue.Add(task, cancellationTokenSource.Token);
 
-            if (_consumer == null)
+            if (consumer == null)
             {
-                _consumer = () =>
+                consumer = () =>
                 {
                     while (true)
                     {
                         try
                         {
                             Task queuedTask;
-                            if (!_taskQueue.TryTake(out queuedTask, 0, _cancellationTokenSource.Token))
+                            if (!taskQueue.TryTake(out queuedTask, 0, cancellationTokenSource.Token))
                             {
                                 // no items to consume
-                                _consumer = null;
+                                consumer = null;
                                 break;
                             }
                             queuedTask.RunSynchronously();
@@ -106,7 +106,7 @@ namespace Neo4jClient.Transactions
                     }
                 };
 
-                _consumer.BeginInvoke(null, null);
+                consumer.BeginInvoke(null, null);
             }
 
             return task;
@@ -119,10 +119,10 @@ namespace Neo4jClient.Transactions
 
         public void Commit()
         {
-            _taskQueue.CompleteAdding();
-            if (_taskQueue.Count > 0)
+            taskQueue.CompleteAdding();
+            if (taskQueue.Count > 0)
             {
-                _cancellationTokenSource.Cancel();
+                cancellationTokenSource.Cancel();
                 throw new InvalidOperationException("Cannot commit unless all tasks have been completed");
             }
             if (CustomHeaders != null)
@@ -134,8 +134,8 @@ namespace Neo4jClient.Transactions
 
         public void Rollback()
         {
-            _taskQueue.CompleteAdding();
-            _cancellationTokenSource.Cancel();
+            taskQueue.CompleteAdding();
+            cancellationTokenSource.Cancel();
             Transaction.Rollback();
         }
 
@@ -144,10 +144,7 @@ namespace Neo4jClient.Transactions
             Transaction.KeepAlive();
         }
 
-        public bool IsOpen
-        {
-            get { return Transaction.IsOpen; }
-        }
+        public bool IsOpen => Transaction.IsOpen;
 
         public Uri Endpoint
         {

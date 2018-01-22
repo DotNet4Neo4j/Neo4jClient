@@ -20,55 +20,76 @@ namespace Neo4jClient.Cypher
         internal readonly IRawGraphClient Client;
         protected readonly QueryWriter QueryWriter;
         protected readonly bool CamelCaseProperties;
+        internal bool IsWrite { get; private set; }
 
-        public CypherFluentQuery(IGraphClient client)
-            : this(client, new QueryWriter())
+        public ICypherFluentQuery Read
         {
+            get
+            {
+                IsWrite = false;
+                return this;
+            }
         }
 
-        internal CypherFluentQuery(IGraphClient client, QueryWriter queryWriter)
+        public ICypherFluentQuery Write
+        {
+            get
+            {
+                IsWrite = true;
+                return this;
+            }
+        }
+
+        public CypherFluentQuery(IGraphClient client, bool isWrite = true)
+            : this(client, new QueryWriter(), isWrite)
+        {
+            IsWrite = isWrite;
+        }
+
+        internal CypherFluentQuery(IGraphClient client, QueryWriter queryWriter, bool isWrite = true)
         {
             if (!(client is IRawGraphClient))
-                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", "client");
+                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(client));
 
             Client = (IRawGraphClient)client;
             QueryWriter = queryWriter;
             CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
-            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter);
+            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter, isWrite);
+            IsWrite = isWrite;
         }
 
         IOrderedCypherFluentQuery MutateOrdered(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery(Client, newWriter);
+            return new CypherFluentQuery(Client, newWriter, IsWrite);
         }
 
         protected IOrderedCypherFluentQuery<TResult> MutateOrdered<TResult>(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(Client, newWriter);
+            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite);
         }
 
         ICypherFluentQuery Mutate(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery(Client, newWriter);
+            return new CypherFluentQuery(Client, newWriter, IsWrite);
         }
 
         protected ICypherFluentQuery<TResult> Mutate<TResult>(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(Client, newWriter);
+            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite);
         }
 
         public ICypherFluentQuery WithParam(string key, object value)
         {
             if (QueryWriter.ContainsParameterWithKey(key))
-                throw new ArgumentException("A parameter with the given key is already defined in the query.", "key");
+                throw new ArgumentException("A parameter with the given key is already defined in the query.", nameof(key));
             return Mutate(w => w.CreateParameter(key, value));
         }
 
@@ -77,7 +98,7 @@ namespace Neo4jClient.Cypher
             if (parameters == null || parameters.Count == 0) return this;
 
             if (parameters.Keys.Any(key => QueryWriter.ContainsParameterWithKey(key)))
-                throw new ArgumentException("A parameter with the given key is already defined in the query.", "parameters");
+                throw new ArgumentException("A parameter with the given key is already defined in the query.", nameof(parameters));
 
             return Mutate(w => w.CreateParameters(parameters));
         }
@@ -99,7 +120,7 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery Start(string identity, string startText)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("START {0}={1}", identity, startText)));
+                w.AppendClause($"START {identity}={startText}"));
         }
 
         public ICypherFluentQuery Start(object startBits)
@@ -214,10 +235,10 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException("CALL not supported in Neo4j versions older than 3.0");
 
            if(string.IsNullOrWhiteSpace(storedProcedureText))
-                throw new ArgumentException("The stored procedure to call can't be null or whitespace.", "storedProcedureText");
+                throw new ArgumentException("The stored procedure to call can't be null or whitespace.", nameof(storedProcedureText));
 
             return Mutate(w =>
-                w.AppendClause(string.Format("CALL {0}", storedProcedureText)));
+                w.AppendClause($"CALL {storedProcedureText}"));
         }
 
         public ICypherFluentQuery Yield(string yieldText)
@@ -226,10 +247,10 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException("YIELD not supported in Neo4j versions older than 3.0");
 
             if (string.IsNullOrWhiteSpace(yieldText))
-                throw new ArgumentException("The value to yield can't be null or whitespace.", "yieldText");
+                throw new ArgumentException("The value to yield can't be null or whitespace.", nameof(yieldText));
 
             return Mutate(w =>
-                w.AppendClause(string.Format("YIELD {0}", yieldText)));
+                w.AppendClause($"YIELD {yieldText}"));
         }
 
         public ICypherFluentQuery CreateUnique(string createUniqueText)
@@ -250,7 +271,7 @@ namespace Neo4jClient.Cypher
                 .ForEach(o =>
                 {
                     if (o == null)
-                        throw new ArgumentException("Array includes a null entry", "objects");
+                        throw new ArgumentException("Array includes a null entry", nameof(objects));
 
                     var objectType = o.GetType();
                     if (objectType.GetTypeInfo().IsGenericType &&
@@ -259,7 +280,7 @@ namespace Neo4jClient.Cypher
                         throw new ArgumentException(string.Format(
                             "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
                             objectType.GetGenericArguments()[0].Name),
-                            "objects");
+                            nameof(objects));
                     }
 
                     var validationContext = new ValidationContext(o, null, null);
@@ -277,32 +298,32 @@ namespace Neo4jClient.Cypher
                 throw new ArgumentException(string.Format(
                    "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
                    typeof(TNode).GetGenericArguments()[0].Name),
-                   "node");
+                   nameof(node));
             }
 
             if (node == null)
-                throw new ArgumentNullException("node");
+                throw new ArgumentNullException(nameof(node));
 
             var validationContext = new ValidationContext(node, null, null);
             Validator.ValidateObject(node, validationContext);
 
-            return Mutate(w => w.AppendClause(string.Format("CREATE ({0} {{0}})", identity), node));
+            return Mutate(w => w.AppendClause($"CREATE ({identity} {{0}})", node));
         }
 
         public ICypherFluentQuery CreateUniqueConstraint(string identity, string property)
         {
-            return Mutate(w => w.AppendClause(string.Format("CREATE CONSTRAINT ON ({0}) ASSERT {1} IS UNIQUE", identity, property)));
+            return Mutate(w => w.AppendClause($"CREATE CONSTRAINT ON ({identity}) ASSERT {property} IS UNIQUE"));
         }
 
         public ICypherFluentQuery DropUniqueConstraint(string identity, string property)
         {
-            return Mutate(w => w.AppendClause(string.Format("DROP CONSTRAINT ON ({0}) ASSERT {1} IS UNIQUE", identity, property)));
+            return Mutate(w => w.AppendClause($"DROP CONSTRAINT ON ({identity}) ASSERT {property} IS UNIQUE"));
         }
 
         public ICypherFluentQuery Delete(string identities)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("DELETE {0}", identities)));
+                w.AppendClause($"DELETE {identities}"));
         }
 
         public ICypherFluentQuery DetachDelete(string identities)
@@ -314,25 +335,25 @@ namespace Neo4jClient.Cypher
                 throw new InvalidOperationException("Unable to DETACH DELETE properties, you can only delete nodes & relationships.");
 
             return Mutate(w =>
-                w.AppendClause(string.Format("DETACH DELETE {0}", identities)));
+                w.AppendClause($"DETACH DELETE {identities}"));
         }
 
         public ICypherFluentQuery Drop(string dropText)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("DROP {0}", dropText)));
+                w.AppendClause($"DROP {dropText}"));
         }
 
         public ICypherFluentQuery Set(string setText)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("SET {0}", setText)));
+                w.AppendClause($"SET {setText}"));
         }
 
         public ICypherFluentQuery Remove(string removeText)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("REMOVE {0}", removeText)));
+                w.AppendClause($"REMOVE {removeText}"));
         }
 
         public ICypherFluentQuery ForEach(string text)
@@ -343,7 +364,7 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery LoadCsv(Uri fileUri, string identifier, bool withHeaders = false, string fieldTerminator = null, int? periodicCommit = null)
         {
             if(fileUri == null)
-                throw new ArgumentException("File URI must be supplied.", "fileUri");
+                throw new ArgumentException("File URI must be supplied.", nameof(fileUri));
 
             string periodicCommitText = string.Empty;
             if (periodicCommit != null)
@@ -362,16 +383,15 @@ namespace Neo4jClient.Cypher
 
             if (!string.IsNullOrEmpty(fieldTerminator))
             {
-                fieldSeperatorEnabledText = string.Format(" FIELDTERMINATOR '{0}'", fieldTerminator);
+                fieldSeperatorEnabledText = $" FIELDTERMINATOR '{fieldTerminator}'";
             }
 
-            return Mutate(w => w.AppendClause(string.Format("{0} LOAD CSV{1} FROM '{2}' AS {3}{4}", periodicCommitText, withHeadersEnabledText, fileUri.AbsoluteUri, identifier,
-                fieldSeperatorEnabledText).Trim()));
+            return Mutate(w => w.AppendClause($"{periodicCommitText} LOAD CSV{withHeadersEnabledText} FROM '{fileUri.AbsoluteUri}' AS {identifier}{fieldSeperatorEnabledText}".Trim()));
         }
 
         public ICypherFluentQuery Unwind(string collectionName, string columnName)
         {
-            return Mutate(w => w.AppendClause(string.Format("UNWIND {0} AS {1}", collectionName, columnName)));
+            return Mutate(w => w.AppendClause($"UNWIND {collectionName} AS {columnName}"));
         }
 
         public ICypherFluentQuery Unwind(IEnumerable collection, string identity)
@@ -406,31 +426,28 @@ namespace Neo4jClient.Cypher
         public IOrderedCypherFluentQuery OrderBy(params string[] properties)
         {
             return MutateOrdered(w =>
-                w.AppendClause(string.Format("ORDER BY {0}", string.Join(", ", properties))));
+                w.AppendClause($"ORDER BY {string.Join(", ", properties)}"));
         }
 
         public IOrderedCypherFluentQuery OrderByDescending(params string[] properties)
         {
             return MutateOrdered(w =>
-                w.AppendClause(string.Format("ORDER BY {0} DESC", string.Join(" DESC, ", properties))));
+                w.AppendClause($"ORDER BY {string.Join(" DESC, ", properties)} DESC"));
         }
 
         public IOrderedCypherFluentQuery ThenBy(params string[] properties)
         {
             return MutateOrdered(w =>
-                w.AppendToClause(string.Format(", {0}", string.Join(", ", properties))));
+                w.AppendToClause($", {string.Join(", ", properties)}"));
         }
 
         public IOrderedCypherFluentQuery ThenByDescending(params string[] properties)
         {
             return MutateOrdered(w =>
-                w.AppendToClause(string.Format(", {0} DESC", string.Join(" DESC, ", properties))));
+                w.AppendToClause($", {string.Join(" DESC, ", properties)} DESC"));
         }
 
-        public CypherQuery Query
-        {
-            get { return QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver); }
-        }
+        public CypherQuery Query => QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver, IsWrite);
 
         public void ExecuteWithoutResults()
         {
@@ -442,7 +459,7 @@ namespace Neo4jClient.Cypher
             return Client.ExecuteCypherAsync(Query);
         }
 
-        public ICypherFluentQueryAdvanced Advanced { get; private set; }
+        public ICypherFluentQueryAdvanced Advanced { get; }
 
         IGraphClient IAttachedReference.Client
         {
@@ -451,15 +468,14 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery ParserVersion(string version)
         {
-            return Mutate(w => w.AppendClause(string.Format("CYPHER {0}", version)));
+            return Mutate(w => w.AppendClause($"CYPHER {version}"));
         }
 
         public ICypherFluentQuery ParserVersion(Version version)
         {
-            if (version < minimumCypherParserVersion)
-                return ParserVersion("LEGACY");
-
-            return ParserVersion(string.Format("{0}.{1}", version.Major, version.Minor));
+            return ParserVersion(version < minimumCypherParserVersion 
+                ? "LEGACY" 
+                : $"{version.Major}.{version.Minor}");
         }
 
         public ICypherFluentQuery ParserVersion(int major, int minor)
@@ -472,7 +488,7 @@ namespace Neo4jClient.Cypher
             if(!Client.CypherCapabilities.SupportsPlanner)
                 throw new InvalidOperationException("PLANNER not supported in Neo4j versions older than 2.2");
 
-            return Mutate(w => w.AppendClause(string.Format("PLANNER {0}", planner)));
+            return Mutate(w => w.AppendClause($"PLANNER {planner}"));
         }
 
         public ICypherFluentQuery Planner(CypherPlanner planner)
@@ -486,7 +502,7 @@ namespace Neo4jClient.Cypher
                 case CypherPlanner.CostGreedy:
                     return Planner("COST");
                 default:
-                    throw new ArgumentOutOfRangeException("planner", planner, null);
+                    throw new ArgumentOutOfRangeException(nameof(planner), planner, null);
             }
         }
 
@@ -505,9 +521,8 @@ namespace Neo4jClient.Cypher
 
         public static string ApplyCamelCase(bool isCamelCase, string propertyName)
         {
-            return isCamelCase ?
-                string.Format("{0}{1}", propertyName.Substring(0, 1).ToLowerInvariant(), propertyName.Length > 1
-                    ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty)
+            return isCamelCase 
+                ? $"{propertyName.Substring(0, 1).ToLowerInvariant()}{(propertyName.Length > 1 ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty)}"
                 : propertyName;
         }
     }

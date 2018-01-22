@@ -9,35 +9,35 @@ namespace Neo4jClient.Execution
 {
     internal class RequestTypeBuilder : IRequestTypeBuilder
     {
-        private readonly ExecutionConfiguration _executionConfiguration;
-        private readonly NameValueCollection _customHeaders;
-        private readonly int? _maxExecutionTime;
+        private readonly ExecutionConfiguration executionConfiguration;
+        private readonly NameValueCollection customHeaders;
+        private readonly int? maxExecutionTime;
 
         public RequestTypeBuilder(ExecutionConfiguration executionConfiguration, NameValueCollection customHeaders, int? maxExecutionTime)
         {
-            _executionConfiguration = executionConfiguration;
-            _customHeaders = customHeaders;
-            _maxExecutionTime = maxExecutionTime;
+            this.executionConfiguration = executionConfiguration;
+            this.customHeaders = customHeaders;
+            this.maxExecutionTime = maxExecutionTime;
         }
 
         public IResponseBuilder Delete(Uri endpoint)
         {
-            return new ResponseBuilder(new HttpRequestMessage(HttpMethod.Delete, endpoint), _executionConfiguration, _customHeaders);
+            return new ResponseBuilder(new HttpRequestMessage(HttpMethod.Delete, endpoint), executionConfiguration, customHeaders);
         }
 
         public IResponseBuilder Get(Uri endpoint)
         {
-            return new ResponseBuilder(new HttpRequestMessage(HttpMethod.Get, endpoint), _executionConfiguration, _customHeaders);
+            return new ResponseBuilder(new HttpRequestMessage(HttpMethod.Get, endpoint), executionConfiguration, customHeaders);
         }
 
         public IRequestWithPendingContentBuilder Post(Uri endpoint)
         {
-            return new RequestWithPendingContentBuilder(HttpMethod.Post, endpoint, _executionConfiguration, _customHeaders, _maxExecutionTime);
+            return new RequestWithPendingContentBuilder(HttpMethod.Post, endpoint, executionConfiguration, customHeaders, maxExecutionTime);
         }
 
         public IRequestWithPendingContentBuilder Put(Uri endpoint)
         {
-            return new RequestWithPendingContentBuilder(HttpMethod.Put, endpoint, _executionConfiguration, _customHeaders, _maxExecutionTime);
+            return new RequestWithPendingContentBuilder(HttpMethod.Put, endpoint, executionConfiguration, customHeaders, maxExecutionTime);
         }
     }
 
