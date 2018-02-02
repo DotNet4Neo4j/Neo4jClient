@@ -18,3 +18,4 @@ TestResult.xml
 [Nn][Dd]epend[Ou]ut\*
 \.vs/
 \.idea/
+*\.vs\*
