@@ -10,6 +10,11 @@
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
     <tags>neo4j nosql cypher</tags>
     <dependencies>
+      <group targetFramework="net452">
+        <dependency id="Newtonsoft.Json" version="10.0.3" />
+        <dependency id="System.Net.Http" version="4.3.2" />
+        <dependency id="Neo4j.Driver" version="1.5.2" />        
+      </group>
       <group targetFramework="netstandard1.3">
         <dependency id="Neo4j.Driver" version="1.5.2" />
         <dependency id="Newtonsoft.Json" version="10.0.3" />
@@ -23,11 +28,14 @@
       <group targetFramework="net46">
         <dependency id="Newtonsoft.Json" version="10.0.3" />
         <dependency id="System.Net.Http" version="4.3.2" />
-        <dependency id="Neo4j.Driver" version="1.4.1" />
+        <dependency id="Neo4j.Driver" version="1.5.2" />
       </group>
     </dependencies>
   </metadata>
   <files>
+    <file src="Neo4jClient.Full452\bin\$configuration$\Neo4jClient.dll" target="lib\net452"/>
+    <file src="Neo4jClient.Full452\bin\$configuration$\Neo4jClient.pdb" target="lib\net452"/>
+    <file src="Neo4jClient.Full452\bin\$configuration$\Neo4jClient.xml" target="lib\net452"/>
     <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.dll" target="lib\net46" />
     <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.pdb" target="lib\net46" />
     <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.xml" target="lib\net46" />

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -10,73 +8,67 @@ using Neo4jClient.Execution;
 
 namespace Neo4jClient.Transactions
 {
+
     /// <summary>
     /// Handles all the queries related to transactions that could be needed in a ITransactionalGraphClient
     /// </summary>
-    internal class TransactionManager : ITransactionManager<HttpResponseMessage>
+    internal class BoltTransactionManager : ITransactionManager<BoltResponse>
     {
+
         // holds the transaction objects per thread
-        private static AsyncLocal<Stack<TransactionScopeProxy>> scopedTransactions;
+#if NET45
+        [ThreadStatic] private static IScopedTransactions<BoltTransactionScopeProxy> scopedTransactions;
+#else
+        private static IScopedTransactions<BoltTransactionScopeProxy> scopedTransactions;
+#endif
+
+        internal static IScopedTransactions<BoltTransactionScopeProxy> ScopedTransactions
+        {
+            get => scopedTransactions ?? (scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions());
+            set => scopedTransactions = value;
+        }
+
+
         // holds the transaction contexts for transactions from the System.Transactions framework
-        private readonly IDictionary<string, TransactionContext> dtcContexts; 
-        private readonly TransactionPromotableSinglePhaseNotification promotable;
+        private readonly IDictionary<string, BoltTransactionContext> dtcContexts; 
+        private readonly BoltTransactionPromotableSinglePhasesNotification promotable;
         private readonly ITransactionalGraphClient client;
 
-        internal AsyncLocal<Stack<TransactionScopeProxy>>  ScopedTransactions
-        {
-            get
-            {
-                if (scopedTransactions?.Value == null)
-                    scopedTransactions = CreateScopedTransactions();
-                return scopedTransactions;
-            }
-            set { scopedTransactions = value; }
-        }
-
-        private static AsyncLocal<Stack<TransactionScopeProxy>> CreateScopedTransactions()
-        {
-            return new AsyncLocal<Stack<TransactionScopeProxy>> { Value = new Stack<TransactionScopeProxy>() };
-        }
-
-        public TransactionManager(ITransactionalGraphClient client)
+        public BoltTransactionManager(ITransactionalGraphClient client)
         {
             this.client = client;
             // specifies that we are about to use variables that depend on OS threads
             Thread.BeginThreadAffinity();
-            scopedTransactions = CreateScopedTransactions();
+            scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
 
             // this object enables the interacion with System.Transactions and MSDTC, at first by
             // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
             // then it notifies the library how to do it.
-            promotable = new TransactionPromotableSinglePhaseNotification(client);
-            dtcContexts = new Dictionary<string, TransactionContext>();
+            promotable = new BoltTransactionPromotableSinglePhasesNotification(client);
+            dtcContexts = new Dictionary<string, BoltTransactionContext>();
         }
 
-        private TransactionContext GetOrCreateDtcTransactionContext(NameValueCollection customHeaders = null)
+        private BoltTransactionContext GetOrCreateDtcTransactionContext()
         {
             // we need to lock as we could get other async requests to the same transaction
             var txId = Transaction.Current.TransactionInformation.LocalIdentifier;
             lock (dtcContexts)
             {
-                TransactionContext txContext;
+                BoltTransactionContext txContext;
                 if (dtcContexts.TryGetValue(txId, out txContext))
                 {
                     return txContext;
                 }
 
                 // associate it with the ambient transaction
-                txContext = new TransactionContext(promotable.AmbientTransaction)
-                {
-                    Transaction = {CustomHeaders = customHeaders},
-                    CustomHeaders = customHeaders
-                };
+                txContext = new BoltTransactionContext(promotable.AmbientTransaction);
                 dtcContexts[txId] = txContext;
                 
                 return txContext;
             }
         }
 
-        private TransactionContext GetContext(NameValueCollection customHeaders = null)
+        private BoltTransactionContext GetContext()
         {
             var nonDtcTransaction = CurrentInternalTransaction;
             if (nonDtcTransaction != null && nonDtcTransaction.Committable)
@@ -85,7 +77,7 @@ namespace Neo4jClient.Transactions
             }
 
             // if we are not in a native transaction get the context of our ambient transaction
-            return GetOrCreateDtcTransactionContext(customHeaders);
+            return GetOrCreateDtcTransactionContext();
         }
 
         public bool InTransaction
@@ -103,13 +95,13 @@ namespace Neo4jClient.Transactions
             }
         }
 
-        public TransactionScopeProxy CurrentInternalTransaction
+        public BoltTransactionScopeProxy CurrentInternalTransaction
         {
             get
             {
-                if (scopedTransactions?.Value == null || scopedTransactions.Value.Count == 0)
+                if (ScopedTransactions == null || ScopedTransactions.Count == 0)
                     return null;
-                return scopedTransactions.Value.Peek();
+                return scopedTransactions.Peek();
             }
         }
 
@@ -129,14 +121,16 @@ namespace Neo4jClient.Transactions
             if (scopeOption == TransactionScopeOption.Suppress)
             {
                 // TransactionScopeOption.Suppress doesn't fail with older versions of Neo4j
+                //TODO: Check this
                 return BeginSupressTransaction();
             }
 
-            if (client.ServerVersion < new Version(2, 0))
+            if (client.ServerVersion < new Version(3, 0))
             {
-                throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
+                throw new NotSupportedException("Bolt Transactions are only supported on Neo4j 3.0 and newer.");
             }
 
+            //TODO: Check this
             if (scopeOption == TransactionScopeOption.Join)
             {
                 var joinedTransaction = BeginJoinTransaction();
@@ -150,28 +144,30 @@ namespace Neo4jClient.Transactions
             return BeginNewTransaction();
         }
 
-        private TransactionContext GenerateTransaction()
+        private BoltTransactionContext GenerateTransaction()
         {
-            return new TransactionContext(new Neo4jRestTransaction(client));
+            var session = ((BoltGraphClient) client).Driver.Session();
+            var transaction = session.BeginTransaction();
+            return new BoltTransactionContext(new BoltNeo4jTransaction(session, transaction));
         }
 
-        private TransactionContext GenerateTransaction(TransactionContext reference)
+        private BoltTransactionContext GenerateTransaction(BoltTransactionContext reference)
         {
-            return new TransactionContext(reference.Transaction);
+            return new BoltTransactionContext(reference.Transaction);
         }
 
-        private static void PushScopeTransaction(TransactionScopeProxy transaction)
+        private void PushScopeTransaction(BoltTransactionScopeProxy transaction)
         {
-            if (scopedTransactions?.Value == null)
+            if (ScopedTransactions == null)
             {
-                scopedTransactions = CreateScopedTransactions();
+                ScopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
             }
-            scopedTransactions.Value.Push(transaction);
+            ScopedTransactions.Push(transaction);
         }
 
         private ITransaction BeginNewTransaction()
         {
-            var transaction = new Neo4jTransactionProxy(client, GenerateTransaction(), true);
+            var transaction = new BoltNeo4jTransactionProxy(client, GenerateTransaction(), true);
             PushScopeTransaction(transaction);
             return transaction;
         }
@@ -194,26 +190,25 @@ namespace Neo4jClient.Transactions
                 throw new ClosedTransactionException(null);
             }
 
-            var joinedTransaction = new Neo4jTransactionProxy(client, GenerateTransaction(parentScope.TransactionContext), false);
+            var joinedTransaction = new BoltNeo4jTransactionProxy(client, GenerateTransaction(parentScope.TransactionContext), false);
             PushScopeTransaction(joinedTransaction);
             return joinedTransaction;
         }
 
         private ITransaction BeginSupressTransaction()
         {
-            var suppressTransaction = new SuppressTransactionProxy(client);
+            var suppressTransaction = new BoltSuppressTransactionProxy(client);
             PushScopeTransaction(suppressTransaction);
             return suppressTransaction;
         }
 
         public void EndTransaction()
         {
-            if (scopedTransactions?.Value == null || scopedTransactions.Value.Count <= 0)
+            if (ScopedTransactions.Count <= 0)
                 return;
 
-            var currentTransaction = scopedTransactions.Value.Pop();
-            if (currentTransaction != null)
-                currentTransaction.Dispose();
+            var currentTransaction = ScopedTransactions.Pop();
+            currentTransaction?.Dispose();
         }
 
         /// <summary>
@@ -221,20 +216,8 @@ namespace Neo4jClient.Transactions
         /// </summary>
         public void RegisterToTransactionIfNeeded()
         {
+            //If promotable is null - we don't support tx.
             promotable?.EnlistIfNecessary();
-        }
-
-        public Task<HttpResponseMessage> EnqueueCypherRequest(string commandDescription, IGraphClient graphClient, CypherQuery query)
-        {
-            var policy = new CypherTransactionExecutionPolicy(graphClient);
-            // we try to get the current dtc transaction. If we are in a System.Transactions transaction and it has
-            // been "promoted" to be handled by DTC then transactionObject will be null, but it doesn't matter as
-            // we don't care about updating the object.
-            var txContext = GetContext(query.CustomHeaders);
-            txContext.CustomHeaders = query.CustomHeaders;
-            // the main difference with a normal Request.With() call is that the request is associated with the
-            // TX context.
-            return txContext.EnqueueTask(commandDescription, graphClient, policy, query);
         }
 
         public void Dispose()
@@ -242,5 +225,21 @@ namespace Neo4jClient.Transactions
             scopedTransactions = null;
             Thread.EndThreadAffinity();
         }
+
+        #region Implementation of ITransactionManager
+
+        public Task<BoltResponse> EnqueueCypherRequest(string commandDescription, IGraphClient graphClient, CypherQuery query)
+        {
+            var policy = new CypherTransactionExecutionPolicy(graphClient);
+            // we try to get the current dtc transaction. If we are in a System.Transactions transaction and it has
+            // been "promoted" to be handled by DTC then transactionObject will be null, but it doesn't matter as
+            // we don't care about updating the object.
+            var txContext = GetContext();
+            // the main difference with a normal Request.With() call is that the request is associated with the
+            // TX context.
+            return txContext.EnqueueTask(commandDescription, client as BoltGraphClient, policy, query);
+        }
+
+        #endregion
     }
 }
