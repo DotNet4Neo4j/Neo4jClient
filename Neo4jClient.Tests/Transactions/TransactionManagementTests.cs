@@ -9,6 +9,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Test.Fixtures;
 using Neo4jClient.Transactions;
 using Xunit;
+using TransactionManager = Neo4jClient.Transactions.TransactionManager;
 using TransactionScopeOption = Neo4jClient.Transactions.TransactionScopeOption;
 
 namespace Neo4jClient.Test.Transactions
@@ -129,11 +130,10 @@ namespace Neo4jClient.Test.Transactions
                 var client = testHarness.CreateAndConnectTransactionalGraphClient();
                 client.Connect();
 
-                var tm = new Neo4jClient.Transactions.TransactionManager(client)
-                {
-                    ScopedTransactions = new AsyncLocal<Stack<TransactionScopeProxy>> { Value = new Stack<TransactionScopeProxy>()}
-                };
-                Assert.Equal(0, tm.ScopedTransactions.Value.Count);
+                var tm = new TransactionManager(client);
+                TransactionManager.ScopedTransactions = new ThreadContextWrapper<TransactionScopeProxy>();
+                
+                Assert.Equal(0, TransactionManager.ScopedTransactions.Count);
                 tm.EndTransaction();
             }
         }
@@ -146,10 +146,8 @@ namespace Neo4jClient.Test.Transactions
                 var client = testHarness.CreateAndConnectTransactionalGraphClient();
                 client.Connect();
 
-                var tm = new Neo4jClient.Transactions.TransactionManager(client)
-                {
-                    ScopedTransactions = null
-                };
+                var tm = new TransactionManager(client);
+                TransactionManager.ScopedTransactions = null;
 
                 tm.EndTransaction();
             }
@@ -163,11 +161,10 @@ namespace Neo4jClient.Test.Transactions
                 var client = testHarness.CreateAndConnectTransactionalGraphClient();
                 client.Connect();
 
-                var tm = new Neo4jClient.Transactions.TransactionManager(client)
-                {
-                    ScopedTransactions = new AsyncLocal<Stack<TransactionScopeProxy>> { Value = new Stack<TransactionScopeProxy>()}
-                };
-                Assert.Equal(0, tm.ScopedTransactions.Value.Count);
+                var tm = new TransactionManager(client);
+                TransactionManager.ScopedTransactions = new ThreadContextWrapper<TransactionScopeProxy>();
+
+                Assert.Equal(0, TransactionManager.ScopedTransactions.Count);
                 Assert.Null(tm.CurrentInternalTransaction);
             }
         }
@@ -180,10 +177,9 @@ namespace Neo4jClient.Test.Transactions
                 var client = testHarness.CreateAndConnectTransactionalGraphClient();
                 client.Connect();
 
-                var tm = new Neo4jClient.Transactions.TransactionManager(client)
-                {
-                    ScopedTransactions = null
-                };
+                var tm = new TransactionManager(client);
+                TransactionManager.ScopedTransactions = null;
+
                 Assert.Null(tm.CurrentInternalTransaction);
             }
         }

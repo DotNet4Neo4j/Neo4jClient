@@ -531,7 +531,11 @@ namespace Neo4jClient
             }
 
             IsConnected = true;
+#if NET45
+            return Task.FromResult(0);
+#else
             return Task.CompletedTask;
+#endif
         }
 
         /// <inheritdoc />
@@ -540,9 +544,9 @@ namespace Neo4jClient
         /// <inheritdoc />
         public DefaultContractResolver JsonContractResolver { get; set; }
 
-        #endregion
+#endregion
 
-        #region Implementation of IRawGraphClient
+#region Implementation of IRawGraphClient
 
         /// <inheritdoc />
         IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
@@ -688,7 +692,11 @@ namespace Neo4jClient
             }
 
             tx.Complete(query);
+#if NET45
+            return Task.FromResult(0);
+#else
             return Task.CompletedTask;
+#endif
         }
 
         #endregion
@@ -731,9 +739,9 @@ namespace Neo4jClient
             get { throw new InvalidOperationException(NotValidForBolt); }
         }
 
-        #endregion
+#endregion
 
-        #region Implementation of IBoltGraphClient
+#region Implementation of IBoltGraphClient
 
         /// <inheritdoc />
         public event OperationCompletedEventHandler OperationCompleted;
@@ -783,6 +791,6 @@ namespace Neo4jClient
             OperationCompleted?.Invoke(this, args);
         }
 
-        #endregion
+#endregion
     }
 }
