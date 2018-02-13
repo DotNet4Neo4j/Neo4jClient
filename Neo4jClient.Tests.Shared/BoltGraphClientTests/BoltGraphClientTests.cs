@@ -7,6 +7,7 @@ using Moq;
 using Neo4j.Driver.V1;
 using Neo4jClient.Test.BoltGraphClientTests;
 using Neo4jClient.Test.Fixtures;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Neo4jClient.Test.Extensions
@@ -81,6 +82,60 @@ namespace Neo4jClient.Test.Extensions
             public IReadOnlyList<string> Keys { get; }
             public IResultSummary Summary { get; }
 
+        }
+
+        [Fact]
+        public void SerializesDateTimesProperly()
+        {
+            var mockSession = new Mock<ISession>();
+            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+
+            var mockDriver = new Mock<IDriver>();
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
+
+            var bgc = new BoltGraphClient(mockDriver.Object);
+            bgc.Connect();
+
+            var cwd = new ClassWithDateTime{Dt = new DateTime(2000, 1, 1)};;
+
+            bgc.Cypher.Create("(c)").WithParam("testParam", cwd).ExecuteWithoutResults();
+
+            var expectedParameters = new Dictionary<string, object>
+            {
+                {
+                    "testParam", new Dictionary<string, object> {{"Dt", JsonConvert.SerializeObject(cwd.Dt).Trim('\"')}}
+                }
+            };
+
+            mockSession.Verify(x => x.Run("CREATE (c)", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
+        }
+
+        [Fact]
+        public void SerializesDateTimeOffsetsProperly()
+        {
+            var mockSession = new Mock<ISession>();
+            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+
+            var mockDriver = new Mock<IDriver>();
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
+
+            var bgc = new BoltGraphClient(mockDriver.Object);
+            bgc.Connect();
+
+            var cwd = new ClassWithDateTimeOffset { Dt = new DateTimeOffset(new DateTime(2000, 1, 1), TimeSpan.FromHours(1)) }; ;
+
+            bgc.Cypher.Create("(c)").WithParam("testParam", cwd).ExecuteWithoutResults();
+
+            var expectedParameters = new Dictionary<string, object>
+            {
+                {
+                    "testParam", new Dictionary<string, object> {{"Dt", JsonConvert.SerializeObject(cwd.Dt).Trim('\"')}}
+                }
+            };
+
+            mockSession.Verify(x => x.Run("CREATE (c)", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
         }
 
         [Fact]
