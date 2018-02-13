@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
@@ -34,7 +35,7 @@ namespace Neo4jClient
                 if (typeInfo.IsClass && type != typeof(string))
                 {
                     object itemToAdd;
-                    if (typeInfo.ImplementedInterfaces.Contains(typeof(IEnumerable)) )
+                    if (typeInfo.ImplementedInterfaces.Contains(typeof(IEnumerable)))
                     {
                         if (typeInfo.IsArray)
                         {
@@ -49,11 +50,14 @@ namespace Neo4jClient
                             else
                                 itemToAdd = ConvertListToListOfDictionaries((IEnumerable) item.Value, gc);
                         }
-      
-                        else itemToAdd = ConvertListToListOfDictionaries((IEnumerable)item.Value, gc);
+
+                        else itemToAdd = ConvertListToListOfDictionaries((IEnumerable) item.Value, gc);
                     }
                     else
-                        itemToAdd = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(item.Value, Formatting.None, gc.JsonConverters.ToArray()));
+                    {
+                        var serialized = JsonConvert.SerializeObject(item.Value, Formatting.None, gc.JsonConverters.ToArray());
+                        itemToAdd = JsonConvert.DeserializeObject<Dictionary<string, object>>(serialized, new JsonSerializerSettings{DateParseHandling = DateParseHandling.None} );
+                    }
 
                     output.Add(item.Key, itemToAdd);
                 }

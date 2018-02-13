@@ -20,6 +20,15 @@ namespace Neo4jClient.Test.Extensions
             Id = Guid.NewGuid();
         }
     }
+
+    internal class ClassWithDateTime
+    {
+        public DateTime Dt { get; set; }
+    }
+    internal class ClassWithDateTimeOffset
+    {
+        public DateTimeOffset Dt { get; set; }
+    }
     public class Neo4jDriverExtensionsTests 
     {
 

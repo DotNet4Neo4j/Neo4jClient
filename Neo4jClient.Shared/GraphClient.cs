@@ -331,10 +331,7 @@ namespace Neo4jClient
             return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
         }
 
-        public ISerializer Serializer
-        {
-            get { return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver }; }
-        }
+        public ISerializer Serializer => new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
 
         public void DeleteRelationship(RelationshipReference reference)
         {
