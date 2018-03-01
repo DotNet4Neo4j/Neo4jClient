@@ -95,6 +95,7 @@ namespace Neo4jClient.Test.Extensions
                 parameters.Count.Should().Be(1);
                 var item = parameters.First();
                 ((IDictionary<string, object>) item.Value)[nameof(ClassWithGuid.Id)].Should().BeOfType<string>();
+                ((IDictionary<string, object>)item.Value)[nameof(ClassWithGuid.Id)].Should().Be(cwg.Id.ToString());
             }
 
             [Fact]

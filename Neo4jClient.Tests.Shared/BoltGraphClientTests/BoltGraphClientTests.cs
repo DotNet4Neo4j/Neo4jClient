@@ -180,7 +180,7 @@ namespace Neo4jClient.Test.Extensions
 
             bgc.Cypher.Create("(c)").Where((ClassWithGuid c) => c.Id == cwg.Id).ExecuteWithoutResults();
 
-            var expectedParameters = new Dictionary<string, object> {{"p0", $"\"{cwg.Id}\""}};
+            var expectedParameters = new Dictionary<string, object> {{"p0", $"{cwg.Id}"}};
 
             mockSession.Verify(x => x.Run("CREATE (c)\r\nWHERE (c.Id = {p0})", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
         }

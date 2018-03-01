@@ -63,6 +63,8 @@ namespace Neo4jClient
                 }
                 else if (type == typeof(string) || typeInfo.IsPrimitive)
                     output.Add(item.Key, item.Value);
+                else if(type == typeof(Guid))
+                    output.Add(item.Key, $"{item.Value}");
                 else
                     output.Add(item.Key, JsonConvert.SerializeObject(item.Value));
             }
