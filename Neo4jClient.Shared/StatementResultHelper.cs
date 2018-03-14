@@ -375,7 +375,6 @@ namespace Neo4jClient
                 }
                 else if (obj is IEnumerable && !(obj is string))
                 {
-                    var count = 0;
                     var listObj = ((IEnumerable) obj).Cast<object>().ToList();
 
                     var first = listObj.FirstOrDefault();
@@ -390,15 +389,17 @@ namespace Neo4jClient
                     }
                     else
                     {
+                        var parsedItems = new List<dynamic>();
                         foreach (var o in listObj)
                         {
                             var newRecord = new Neo4jClientRecord(o, identifier);
-                            var p2 = ParseAnonymousAsDynamic(newRecord, graphClient, true);
-                            inner.Add(p2);
-                            count++;
+                            // item o gets parsed and returned always as a list when onlyReturnData = true
+                            var p2 = (List<dynamic>)ParseAnonymousAsDynamic(newRecord, graphClient, true);
+                            // but we only need the first item
+                            parsedItems.Add(p2.First());
                         }
-                        if (count == 0)
-                            inner.Add(new object[0]);
+
+                        inner.Add(parsedItems);
                     }
                 }
                 else

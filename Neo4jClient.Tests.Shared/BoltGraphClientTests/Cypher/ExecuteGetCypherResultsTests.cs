@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
@@ -132,6 +133,55 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             public string RelationshipType { get; set; }
             public string Name { get; set; }
             public long? UniqueId { get; set; }
+        }
+
+        private class ObjectWithIds
+        {
+            public List<int> Ids { get; set; }
+        }
+
+        [Fact]
+        public void ShouldDeserializeCollectionsWithAnonymousReturn()
+        {
+            // Arrange
+            const string queryText = @"MATCH (start:Node) RETURN [start.Id, start.Id] AS Ids";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["Ids"])
+                    .Returns(new[] {1, 2, 3});
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "Ids" });
+
+                var testStatementResult = new TestStatementResult(new[] { "Ids" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                //Session mock???
+                var dummy = new
+                {
+                    Ids = new List<int>()
+                };
+                var anonType = dummy.GetType();
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
+                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] {cypherQuery});
+
+                var results = genericResults.Cast<object>().ToArray();
+
+                //Assert
+                Assert.Equal(1, results.Length);
+                var ids = (List<int>)anonType.GetProperty(nameof(dummy.Ids)).GetValue(results.First(), null);
+                ids.Count.Should().Be(3);
+                ids[0].Should().Be(1);
+                ids[1].Should().Be(2);
+                ids[2].Should().Be(3);
+            }
         }
 
         [Fact]
