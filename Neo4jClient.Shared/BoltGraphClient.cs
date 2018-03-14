@@ -581,7 +581,7 @@ namespace Neo4jClient
                 if (InTransaction)
                 {
                     var result = await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
-                    results = ParseResults<TResult>(result.StatementResult, query, true);
+                    results = ParseResults<TResult>(result.StatementResult, query);
                 }
                 else
                 {
@@ -590,7 +590,7 @@ namespace Neo4jClient
                     {
                         
                         var result = session.Run(query, this);
-                        results = ParseResults<TResult>(result, query, false);
+                        results = ParseResults<TResult>(result, query);
                     }
                 }
             }
@@ -610,9 +610,9 @@ namespace Neo4jClient
             return results;
         }
 
-        private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query, bool inTransaction)
+        private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
         {
-            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, inTransaction);
+            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, false);
             var results = new List<TResult>();
             if (typeof(TResult).IsAnonymous())
             {
