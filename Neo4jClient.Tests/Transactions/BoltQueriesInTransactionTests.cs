@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Transactions;
+using FluentAssertions;
 using Neo4j.Driver.V1;
 using Neo4jClient.Test.Fixtures;
 using Neo4jClient.Transactions;
@@ -30,7 +32,21 @@ namespace Neo4jClient.Test.Transactions
 
         private static void GetDriverAndSession(out IDriver driver, out ISession session, out Neo4j.Driver.V1.ITransaction transaction)
         {
+            var mockNode = Substitute.For<INode>();
+            mockNode["Name"].Returns("Value");
+            mockNode.Labels.Returns(new List<string>() {"Node"});
+            mockNode.Properties.Returns(new Dictionary<string, object>() {{"Name", "Value"}});
+
+            var mockRecord = Substitute.For<IRecord>();
+            mockRecord.Keys.Returns(new List<string>(){"Node"});
+            mockRecord["Node"].Returns(mockNode);
+            mockRecord.Values["Node"].Returns(mockNode);
+
+            var mockStatementResult = Substitute.For<IStatementResult>();
+            mockStatementResult.GetEnumerator().Returns(new List<IRecord>(new[]{mockRecord}).GetEnumerator());
+
             var mockTransaction = Substitute.For<Neo4j.Driver.V1.ITransaction>();
+            mockTransaction.Run(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(mockStatementResult);
 
             var mockSession = Substitute.For<ISession>();
             var dbmsReturn = GetDbmsComponentsResponse();
@@ -76,6 +92,36 @@ namespace Neo4jClient.Test.Transactions
                 using (var tx = txGc.BeginTransaction())
                 {
                     txGc.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
+                    tx.Commit();
+                }
+
+                driver.Received(1).Session();
+                session.Received(1).BeginTransaction();
+                transaction.Received(1).Success();
+            }
+
+            private class MockNode
+            {
+                public string Name { get; set; }
+            }
+
+            [Fact]
+            public void SimpleTransaction_RetrieveAndSerializeAnonymousResult()
+            {
+                ISession session;
+                IDriver driver;
+                Neo4j.Driver.V1.ITransaction transaction;
+                IGraphClient graphClient;
+
+                GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
+
+                ITransactionalGraphClient txGc = (ITransactionalGraphClient)graphClient;
+                using (var tx = txGc.BeginTransaction())
+                {
+                    var node = txGc.Cypher.Match("(n:Node)").Return(n => new {Node = n.As<MockNode>()}).Results.SingleOrDefault();
+
+                    node.Node.Name.Should().Be("Value");
+
                     tx.Commit();
                 }
 
@@ -199,7 +245,6 @@ namespace Neo4jClient.Test.Transactions
                 transaction.Received(2).Dispose();
                 session.Received(2).Dispose();
             }
-
 
             [Fact]
             public void SimpleTransaction_Subsequent_WithResults_2Queries()

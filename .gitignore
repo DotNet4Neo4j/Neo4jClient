@@ -19,3 +19,4 @@ TestResult.xml
 \.vs/
 \.idea/
 *\.vs\*
+*.nuget.targets
