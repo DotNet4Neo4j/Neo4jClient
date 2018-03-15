@@ -141,6 +141,49 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
         }
 
         [Fact]
+        public void CollectionShouldDeserializeCorrectly()
+        {
+            // simulate a collect()
+            const string queryText = "MATCH (start:Node) RETURN collect(start) AS data";
+
+            var queryParams = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var nodeMock = new Mock<INode>();
+                nodeMock
+                    .Setup(n => n.Id)
+                    .Returns(1);
+                nodeMock
+                    .Setup(n => n.Properties)
+                    .Returns(new Dictionary<string, object>() {{"Ids", new List<int> {1, 2, 3}}});
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["data"])
+                    .Returns(new List<INode>() {nodeMock.Object});
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "data" });
+
+                var testStatementResult = new TestStatementResult(new[] { "data" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery).ToArray();
+
+                //Assert
+                var deserializedObject = results.First().First();
+                deserializedObject.Ids.Count.Should().Be(3);
+                deserializedObject.Ids[0].Should().Be(1);
+                deserializedObject.Ids[1].Should().Be(2);
+                deserializedObject.Ids[2].Should().Be(3);
+            }
+        }
+
+        [Fact]
         public void CreateWithArrayParametersShouldSerializeAndDeserializeOnReturn()
         {
             // Arrange

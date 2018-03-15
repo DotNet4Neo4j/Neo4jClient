@@ -24,7 +24,7 @@ namespace Neo4jClient
 
             if (isNestedInList)
             {
-                inSet = true;
+                inSet = false;
                 isNested = false;
             }
 
