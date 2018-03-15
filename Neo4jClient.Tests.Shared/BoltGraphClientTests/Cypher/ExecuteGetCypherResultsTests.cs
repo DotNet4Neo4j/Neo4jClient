@@ -141,6 +141,46 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
         }
 
         [Fact]
+        public void CreateWithArrayParametersShouldSerializeAndDeserializeOnReturn()
+        {
+            // Arrange
+            const string queryText = "CREATE (start:Node {obj}) RETURN start";
+
+            var testNode = new ObjectWithIds()
+            {
+                Ids = new List<int>() {1, 2, 3}
+            };
+
+            var queryParams = new Dictionary<string, object>() {{"obj", testNode}};
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["start"])
+                    .Returns(testNode);
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "start" });
+
+                var testStatementResult = new TestStatementResult(new[] { "start" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<ObjectWithIds>(cypherQuery).ToArray();
+
+                //Assert
+                Assert.IsAssignableFrom<IEnumerable<ObjectWithIds>>(results);
+                results.First().Ids.Count.Should().Be(3);
+                results.First().Ids[0].Should().Be(1);
+                results.First().Ids[1].Should().Be(2);
+                results.First().Ids[2].Should().Be(3);
+            }
+        }
+
+        [Fact]
         public void ShouldDeserializeCollectionsWithAnonymousReturn()
         {
             // Arrange
