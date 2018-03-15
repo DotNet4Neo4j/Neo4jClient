@@ -79,6 +79,26 @@ namespace Neo4jClient.Test.Transactions
         public class TransactionGraphClientTests : IClassFixture<CultureInfoSetupFixture>
         {
             [Fact]
+            public void SimulateMultipleQueries_AsSingleTransaction()
+            {
+                ISession session;
+                IDriver driver;
+                Neo4j.Driver.V1.ITransaction transaction;
+                IGraphClient graphClient;
+
+                GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
+
+                var query = graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").Query;
+
+                var rawGraphClient = (IRawGraphClient) graphClient;
+                rawGraphClient.ExecuteMultipleCypherQueriesInTransaction(new[]{query});
+
+                driver.Received(1).Session();
+                session.Received(1).BeginTransaction();
+                transaction.Received(1).Success();
+            }
+
+            [Fact]
             public void SimpleTransaction_AsTransactionalGc_1Query()
             {
                 ISession session;
