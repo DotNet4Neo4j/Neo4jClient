@@ -639,36 +639,19 @@ namespace Neo4jClient
         }
 
         /// <inheritdoc />
-        
+        [Obsolete]
         void IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries, NameValueCollection customHeaders = null)
         {
-//            var context = ExecutionContext.Begin(this);
-//
-//            var queryList = queries.ToList();
-//            string queriesInText = string.Join(", ", queryList.Select(query => query.QueryText));
-//
-//            var stopwatch = new Stopwatch();
-//            stopwatch.Start();
-//
-//            var response = Request.With(ExecutionConfiguration, customHeaders)
-//                .Post(context.Policy.BaseEndpoint)
-//                .WithJsonContent(SerializeAsJson(new CypherStatementList(queryList)))
-//                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
-//                .Execute("Executing multiple queries: " + queriesInText);
-//
-//            var transactionObject = transactionManager.CurrentNonDtcTransaction ??
-//                                    transactionManager.CurrentDtcTransaction;
-//
-//            if (customHeaders != null && customHeaders.Count > 0)
-//            {
-//                transactionObject.CustomHeaders = customHeaders;
-//            }
-//
-//            context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
-//            context.Complete(OperationCompleted != null ? string.Join(", ", queryList.Select(query => query.DebugQueryText)) : string.Empty);
-//            context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response), transactionObject);
+            using (var tx = BeginTransaction())
+            {
+                // the HTTP endpoint executed the transactions in a serial fashion
+                foreach (var query in queries)
+                {
+                    ((IRawGraphClient) this).ExecuteCypher(query);
+                }
 
-            throw new InvalidOperationException(NotValidForBolt);
+                tx.Commit();
+            }
         }
 
         /// <inheritdoc />
