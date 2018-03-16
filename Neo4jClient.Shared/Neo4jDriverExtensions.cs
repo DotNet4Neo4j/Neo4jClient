@@ -3,15 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Globalization;
 using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
-using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
 {
     public static class Neo4jDriverExtensions
     {
+        private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
+
         public static IStatementResult Run(this ISession session, CypherQuery query, IGraphClient gc)
         {
             return session.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
@@ -29,56 +31,110 @@ namespace Neo4jClient
 
             foreach (var item in query.QueryParameters)
             {
-                var type = item.Value.GetType();
-                var typeInfo = type.GetTypeInfo();
+                var value = item.Value;
 
-                if (typeInfo.IsClass && type != typeof(string))
-                {
-                    object itemToAdd;
-                    if (typeInfo.ImplementedInterfaces.Contains(typeof(IEnumerable)))
-                    {
-                        if (typeInfo.IsArray)
-                        {
-                            itemToAdd = item.Value;
-                        }
-                        else if (typeInfo.IsGenericType && type.GenericTypeArguments.Length == 1)
-                        {
-                            var genericType = type.GenericTypeArguments[0];
-                            var genericTypeInfo = genericType.GetTypeInfo();
-                            if (genericTypeInfo.IsValueType || genericType == typeof(string))
-                                itemToAdd = item.Value;
-                            else
-                                itemToAdd = ConvertListToListOfDictionaries((IEnumerable) item.Value, gc);
-                        }
-
-                        else itemToAdd = ConvertListToListOfDictionaries((IEnumerable) item.Value, gc);
-                    }
-                    else
-                    {
-                        var serialized = JsonConvert.SerializeObject(item.Value, Formatting.None, gc.JsonConverters.ToArray());
-                        itemToAdd = JsonConvert.DeserializeObject<Dictionary<string, object>>(serialized, new JsonSerializerSettings{DateParseHandling = DateParseHandling.None} );
-                    }
-
-                    output.Add(item.Key, itemToAdd);
-                }
-                else if (type == typeof(string) || typeInfo.IsPrimitive)
-                    output.Add(item.Key, item.Value);
-                else if(type == typeof(Guid))
-                    output.Add(item.Key, $"{item.Value}");
-                else
-                    output.Add(item.Key, JsonConvert.SerializeObject(item.Value));
+                output.Add(item.Key, Serialize(item.Value));
             }
 
             return output;
         }
 
-        private static IEnumerable<IDictionary<string, object>> ConvertListToListOfDictionaries(IEnumerable list, IGraphClient gc)
+        private static object Serialize(object value)
         {
-            var output = new List<IDictionary<string, object>>();
-            foreach (var item in list)
-                output.Add(JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(item, Formatting.None, gc.JsonConverters.ToArray())));
+            if (value == null)
+            {
+                return null;
+            }
 
-            return output;
+            var type = value.GetType();
+            var typeInfo = type.GetTypeInfo();
+
+            if (typeInfo.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+            {
+                return SerializeDictionary(type, value);
+            }
+
+            if (typeInfo.IsClass && type != typeof(string))
+            {
+                if (typeInfo.IsArray || typeInfo.ImplementedInterfaces.Contains(typeof(IEnumerable)))
+                {
+                    return SerializeCollection((IEnumerable)value);
+                }
+
+                return SerializeObject(type, value);
+            }
+
+            return SerializePrimitive(type, typeInfo, value);
+        }
+        
+        private static object SerializeObject(Type type, object value)
+        {
+            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute))))
+                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value)));
+        }
+
+        private static object SerializeCollection(IEnumerable value)
+        {
+            return value.Cast<object>().Select(o => Serialize(o)).ToArray();
+        }
+
+        private static object SerializePrimitive(Type type, TypeInfo typeInfo, object instance)
+        {
+            if (type == typeof(DateTime))
+            {
+                return SerializeDateTime((DateTime) instance);
+            }
+
+            if (type == typeof(DateTimeOffset))
+            {
+                return SerializeDateTimeOffset((DateTimeOffset) instance);
+            }
+
+            if (type == typeof(string) || typeInfo.IsPrimitive)
+            {
+                return instance;
+            }
+
+            if (type == typeof(Guid))
+            {
+                return $"{instance}";
+            }
+
+            // last case scenario serialize it as JSON
+            return JsonConvert.SerializeObject(instance);
+        }
+
+        private static string SerializeDateTime(DateTime dateTime)
+        {
+             return dateTime.ToString(DefaultDateTimeFormat, CultureInfo.CurrentCulture);
+        }
+
+        private static string SerializeDateTimeOffset(DateTimeOffset dateTime)
+        {
+            return dateTime.ToString(DefaultDateTimeFormat, CultureInfo.CurrentCulture);
+        }
+
+
+        private static object SerializeDictionary(Type type, object value)
+        {
+            var keyType = type.GetGenericArguments()[0];
+            if (keyType != typeof(string))
+            {
+                throw new NotSupportedException(
+                    $"Dictionary had keys with type '{keyType.Name}'. Only dictionaries with type '{nameof(String)}' are supported.");
+            }
+
+            var serialized = new Dictionary<string, object>();
+            foreach (var item in (dynamic) value)
+            {
+                string key = item.Key;
+                object entry = item.Value;
+
+                serialized[key] = Serialize(entry);
+            }
+
+            return serialized;
         }
     }
 }

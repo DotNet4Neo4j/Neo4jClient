@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,6 +47,28 @@ namespace Neo4jClient.Test.Extensions
             }
 
             [Fact]
+            public void SerializeObjectWithArrays()
+            {
+                var list = new[] { "foo", "bar" };
+
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node {p})")
+                    .WithParam("p", new {Collection = list});
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("p");
+                actual["p"].Should().BeOfType<Dictionary<string, object>>();
+                var serializedObj = (Dictionary<string, object>) actual["p"];
+                serializedObj.Keys.Should().Contain("Collection");
+                (serializedObj["Collection"] as IEnumerable).Should().NotBeNull();
+                var expectedCollection = ((IEnumerable) serializedObj["Collection"]).Cast<string>().ToArray();
+                expectedCollection.Length.Should().Be(2);
+                expectedCollection[0].Should().Be("foo");
+                expectedCollection[1].Should().Be("bar");
+            }
+
+            [Fact]
             public void SerializesArraysOfSimpleTypesCorrectly()
             {
                 var list = new [] { "foo", "bar" };
@@ -58,7 +81,9 @@ namespace Neo4jClient.Test.Extensions
 
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("listParam");
-                actual["listParam"].Should().BeOfType<string[]>();
+                actual["listParam"].Should().BeOfType<object[]>();
+                ((object[])actual["listParam"])[0].Should().Be("foo");
+                ((object[])actual["listParam"])[1].Should().Be("bar");
             }
 
             [Fact]
@@ -74,7 +99,10 @@ namespace Neo4jClient.Test.Extensions
 
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("listParam");
-                actual["listParam"].Should().BeOfType<List<string>>();
+                actual["listParam"].Should().BeOfType<object[]>();
+                var serialized = (object[]) actual["listParam"];
+                serialized[0].Should().Be(list[0]);
+                serialized[1].Should().Be(list[1]);
             }
 
 
@@ -145,7 +173,13 @@ namespace Neo4jClient.Test.Extensions
 
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("p0");
-                actual["p0"].Should().BeOfType<List<IDictionary<string, object>>>();
+                actual["p0"].Should().BeOfType<object[]>();
+                var serializedFoo = ((object[]) actual["p0"])[0];
+                serializedFoo.Should().BeOfType<Dictionary<string, object>>();
+                var serializedFooDict = (Dictionary<string, object>) serializedFoo;
+                serializedFooDict.Keys.Should().Contain("Bar");
+                serializedFooDict["Bar"].Should().Be(list[0].Bar);
+
             }
 
             private class Foo

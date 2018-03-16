@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
@@ -132,6 +133,138 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             public string RelationshipType { get; set; }
             public string Name { get; set; }
             public long? UniqueId { get; set; }
+        }
+
+        private class ObjectWithIds
+        {
+            public List<int> Ids { get; set; }
+        }
+
+        [Fact]
+        public void CollectionShouldDeserializeCorrectly()
+        {
+            // simulate a collect()
+            const string queryText = "MATCH (start:Node) RETURN collect(start) AS data";
+
+            var queryParams = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var nodeMock = new Mock<INode>();
+                nodeMock
+                    .Setup(n => n.Id)
+                    .Returns(1);
+                nodeMock
+                    .Setup(n => n.Properties)
+                    .Returns(new Dictionary<string, object>() {{"Ids", new List<int> {1, 2, 3}}});
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["data"])
+                    .Returns(new List<INode>() {nodeMock.Object});
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "data" });
+
+                var testStatementResult = new TestStatementResult(new[] { "data" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery).ToArray();
+
+                //Assert
+                var deserializedObject = results.First().First();
+                deserializedObject.Ids.Count.Should().Be(3);
+                deserializedObject.Ids[0].Should().Be(1);
+                deserializedObject.Ids[1].Should().Be(2);
+                deserializedObject.Ids[2].Should().Be(3);
+            }
+        }
+
+        [Fact]
+        public void CreateWithArrayParametersShouldSerializeAndDeserializeOnReturn()
+        {
+            // Arrange
+            const string queryText = "CREATE (start:Node {obj}) RETURN start";
+
+            var testNode = new ObjectWithIds()
+            {
+                Ids = new List<int>() {1, 2, 3}
+            };
+
+            var queryParams = new Dictionary<string, object>() {{"obj", testNode}};
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["start"])
+                    .Returns(testNode);
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "start" });
+
+                var testStatementResult = new TestStatementResult(new[] { "start" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<ObjectWithIds>(cypherQuery).ToArray();
+
+                //Assert
+                Assert.IsAssignableFrom<IEnumerable<ObjectWithIds>>(results);
+                results.First().Ids.Count.Should().Be(3);
+                results.First().Ids[0].Should().Be(1);
+                results.First().Ids[1].Should().Be(2);
+                results.First().Ids[2].Should().Be(3);
+            }
+        }
+
+        [Fact]
+        public void ShouldDeserializeCollectionsWithAnonymousReturn()
+        {
+            // Arrange
+            const string queryText = @"MATCH (start:Node) RETURN [start.Id, start.Id] AS Ids";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["Ids"])
+                    .Returns(new[] {1, 2, 3});
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "Ids" });
+
+                var testStatementResult = new TestStatementResult(new[] { "Ids" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                //Session mock???
+                var dummy = new
+                {
+                    Ids = new List<int>()
+                };
+                var anonType = dummy.GetType();
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
+                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] {cypherQuery});
+
+                var results = genericResults.Cast<object>().ToArray();
+
+                //Assert
+                Assert.Equal(1, results.Length);
+                var ids = (List<int>)anonType.GetProperty(nameof(dummy.Ids)).GetValue(results.First(), null);
+                ids.Count.Should().Be(3);
+                ids[0].Should().Be(1);
+                ids[1].Should().Be(2);
+                ids[2].Should().Be(3);
+            }
         }
 
         [Fact]
