@@ -140,6 +140,128 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             public List<int> Ids { get; set; }
         }
 
+        private class RelationType
+        {
+            public int Id { get; set; }
+        }
+
+        private class RelationGrouper
+        {
+            public RelationType Rel { get; set; }
+        }
+
+        [Fact]
+        public void RelationshipShouldDeserializeInDefinedType()
+        {
+            // Arrange
+            const string queryText = "MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var relationshipMock = new Mock<IRelationship>();
+                relationshipMock
+                    .Setup(r => r.StartNodeId)
+                    .Returns(1);
+                relationshipMock
+                    .Setup(r => r.EndNodeId)
+                    .Returns(2);
+                relationshipMock
+                    .Setup(r => r.Type)
+                    .Returns("Xx");
+                relationshipMock
+                    .Setup(r => r.Id)
+                    .Returns(3);
+                relationshipMock
+                    .Setup(r => r.Properties)
+                    .Returns(new Dictionary<string, object>()
+                    {
+                        {"Id", 42}
+                    });
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["Rel"])
+                    .Returns(relationshipMock.Object);
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "Rel" });
+
+                var testStatementResult = new TestStatementResult(new[] { "Rel" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<RelationGrouper>(cypherQuery).ToArray();
+
+                //Assert
+                Assert.Equal(1, results.Length);
+                var relation = results.First().Rel;
+                relation.Id.Should().Be(42);
+            }
+        }
+
+        [Fact]
+        public void RelationshipShouldDeserializeInAnonymousType()
+        {
+            // Arrange
+            const string queryText = @"MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var relationshipMock = new Mock<IRelationship>();
+                relationshipMock
+                    .Setup(r => r.StartNodeId)
+                    .Returns(1);
+                relationshipMock
+                    .Setup(r => r.EndNodeId)
+                    .Returns(2);
+                relationshipMock
+                    .Setup(r => r.Type)
+                    .Returns("Xx");
+                relationshipMock
+                    .Setup(r => r.Id)
+                    .Returns(3);
+                relationshipMock
+                    .Setup(r => r.Properties)
+                    .Returns(new Dictionary<string, object>()
+                    {
+                        {"Id", 42}
+                    });
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["Rel"])
+                    .Returns(relationshipMock.Object);
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "Rel" });
+
+                var testStatementResult = new TestStatementResult(new[] { "Rel" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                //Session mock???   
+                var dummy = new
+                {
+                    Rel = new RelationType()
+                };
+                var anonType = dummy.GetType();
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
+                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+
+                var results = genericResults.Cast<object>().ToArray();
+
+                //Assert
+                Assert.Equal(1, results.Length);
+                var relation = (RelationType)anonType.GetProperty(nameof(dummy.Rel)).GetValue(results.First(), null);
+                relation.Id.Should().Be(42);
+            }
+        }
+
         [Fact]
         public void CollectionShouldDeserializeCorrectly()
         {

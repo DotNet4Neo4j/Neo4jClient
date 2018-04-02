@@ -370,7 +370,19 @@ namespace Neo4jClient
                 else if (obj is INode node)
                 {
                     foreach (var property in node.Properties)
-                        t[property.Key] = property.Value;
+                    {
+                        t[property.Key] = ParseElementInCollectionForAnonymous(graphClient, property.Value, identifier);
+                    }
+
+                    inner.Add(new Dictionary<string, dynamic> {{"data", expando}});
+                }
+                else if (obj is IRelationship relationship)
+                {
+                    foreach (var property in relationship.Properties)
+                    {
+                        t[property.Key] = ParseElementInCollectionForAnonymous(graphClient, property.Value, identifier);
+                    }
+
                     inner.Add(new Dictionary<string, dynamic> {{"data", expando}});
                 }
                 else if (obj is IEnumerable && !(obj is string))
