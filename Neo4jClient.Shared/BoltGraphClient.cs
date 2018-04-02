@@ -612,7 +612,7 @@ namespace Neo4jClient
 
         private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
         {
-            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, false);
+            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, false, true);
             var results = new List<TResult>();
             if (typeof(TResult).IsAnonymous())
             {

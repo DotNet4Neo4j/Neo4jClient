@@ -230,6 +230,75 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
         }
 
         [Fact]
+        public void ShouldDeserializeMapWithAnonymousReturnAsDictionary()
+        {
+            // simulates the following query
+            const string queryText = "MATCH (start:Node) WITH {Node: 3, Count: 1} AS Node, start RETURN Node, start";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection,
+                CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                INode start = new TestNode
+                {
+                    Id = 1337,
+                    Properties = new Dictionary<string, object>()
+                    {
+                        {"Ids", new List<int>() {1, 2, 3}}
+                    }
+                };
+                IDictionary<string, object> resultMap = new Dictionary<string, object>()
+                {
+                    {"Node", 3},
+                    {"Count", 1}
+                };
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["Node"])
+                    .Returns(resultMap);
+                recordMock
+                    .Setup(r => r["Start"])
+                    .Returns(start);
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "Node", "Start" });
+
+                var testStatementResult = new TestStatementResult(new[] { "Node", "Start" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                // the anon type
+                var dummy = new
+                {
+                    Node = new Dictionary<string, int>(),
+                    Start = new ObjectWithIds()
+                };
+                var anonType = dummy.GetType();
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
+                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+
+                var results = genericResults.Cast<object>().ToArray();
+
+                //Assert
+                Assert.Equal(1, results.Length);
+
+                var startNode = (ObjectWithIds)anonType.GetProperty(nameof(dummy.Start)).GetValue(results.First(), null);
+                startNode.Ids.Count.Should().Be(3);
+                startNode.Ids[0].Should().Be(1);
+                startNode.Ids[1].Should().Be(2);
+                startNode.Ids[2].Should().Be(3);
+
+                var nodeWrapper = (Dictionary<string, int>)anonType.GetProperty(nameof(dummy.Node)).GetValue(results.First(), null);
+                nodeWrapper.Keys.Count.Should().Be(2);
+                nodeWrapper["Node"].Should().Be(3);
+                nodeWrapper["Count"].Should().Be(1);
+            }
+        }
+
+        [Fact]
         public void ShouldDeserializeMapWithAnonymousReturn()
         {
             // simulates the following query
