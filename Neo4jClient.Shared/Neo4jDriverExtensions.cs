@@ -27,16 +27,7 @@ namespace Neo4jClient
         // ReSharper disable once InconsistentNaming
         public static Dictionary<string, object> ToNeo4jDriverParameters(this CypherQuery query, IGraphClient gc)
         {
-            var output = new Dictionary<string, object>();
-
-            foreach (var item in query.QueryParameters)
-            {
-                var value = item.Value;
-
-                output.Add(item.Key, Serialize(item.Value));
-            }
-
-            return output;
+            return query.QueryParameters.ToDictionary(item => item.Key, item => Serialize(item.Value));
         }
 
         private static object Serialize(object value)
@@ -76,7 +67,7 @@ namespace Neo4jClient
 
         private static object SerializeCollection(IEnumerable value)
         {
-            return value.Cast<object>().Select(o => Serialize(o)).ToArray();
+            return value.Cast<object>().Select(Serialize).ToArray();
         }
 
         private static object SerializePrimitive(Type type, TypeInfo typeInfo, object instance)
@@ -91,11 +82,11 @@ namespace Neo4jClient
                 return SerializeDateTimeOffset((DateTimeOffset) instance);
             }
 
-            if (type == typeof(string) || typeInfo.IsPrimitive)
+            if (type == typeof(string) || typeInfo.IsPrimitive || type == typeof(decimal))
             {
                 return instance;
             }
-
+            
             if (type == typeof(Guid))
             {
                 return $"{instance}";

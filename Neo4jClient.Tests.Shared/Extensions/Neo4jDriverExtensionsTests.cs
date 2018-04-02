@@ -182,6 +182,18 @@ namespace Neo4jClient.Test.Extensions
 
             }
 
+            [Fact]
+            public void SerializesDecimalsProperly()
+            {
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .WithParam("One", 12.3m);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("One");
+                actual["One"].Should().Be(12.3m);
+            }
+
             private class Foo
             {
                 public string Bar { get; set; }
