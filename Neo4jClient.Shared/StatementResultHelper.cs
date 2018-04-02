@@ -384,7 +384,12 @@ namespace Neo4jClient
                         dynamic expando2 = new ExpandoObject();
                         var t2 = (IDictionary<string, object>) expando2;
                         foreach (var property in newNode.Properties)
-                            t2[property.Key] = property.Value;
+                        {
+                            var parsedValue = 
+                                ParseElementInCollectionForAnonymous(graphClient, property.Value, identifier);
+                            t2[property.Key] = parsedValue;
+                        }
+
                         inner.Add(expando2);
                     }
                     else
@@ -392,11 +397,7 @@ namespace Neo4jClient
                         var parsedItems = new List<dynamic>();
                         foreach (var o in listObj)
                         {
-                            var newRecord = new Neo4jClientRecord(o, identifier);
-                            // item o gets parsed and returned always as a list when onlyReturnData = true
-                            var p2 = (List<dynamic>)ParseAnonymousAsDynamic(newRecord, graphClient, true);
-                            // but we only need the first item
-                            parsedItems.Add(p2.First());
+                            parsedItems.Add(ParseElementInCollectionForAnonymous(graphClient, o, identifier));
                         }
 
                         inner.Add(parsedItems);
@@ -427,6 +428,15 @@ namespace Neo4jClient
             };
 
             return output;
+        }
+
+        private static dynamic ParseElementInCollectionForAnonymous(IGraphClient graphClient, dynamic item, string identifier)
+        {
+            var newRecord = new Neo4jClientRecord(item, identifier);
+            // item o gets parsed and returned always as a list when onlyReturnData = true
+            var p2 = (List<dynamic>)ParseAnonymousAsDynamic(newRecord, graphClient, true);
+            // but we only need the first item
+            return p2.First();
         }
 
         public static bool IsAnonymous(this Type type)

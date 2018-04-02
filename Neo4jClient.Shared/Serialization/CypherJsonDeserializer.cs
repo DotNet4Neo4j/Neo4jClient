@@ -17,6 +17,7 @@ namespace Neo4jClient.Serialization
         readonly CypherResultMode resultMode;
         private readonly CypherResultFormat resultFormat;
         private readonly bool inTransaction;
+        private readonly bool inBolt;
 
         readonly CultureInfo culture = CultureInfo.InvariantCulture;
 
@@ -24,15 +25,21 @@ namespace Neo4jClient.Serialization
         public CypherJsonDeserializer() { }
 
         public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, CypherResultFormat resultFormat)
-            : this(client, resultMode, resultFormat, false)
+            : this(client, resultMode, resultFormat, false, false)
         {
         }
 
         public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, CypherResultFormat resultFormat, bool inTransaction)
+            : this(client, resultMode, resultFormat, inTransaction, false)
+        {
+        }
+
+        public CypherJsonDeserializer(IGraphClient client, CypherResultMode resultMode, CypherResultFormat resultFormat, bool inTransaction, bool inBolt)
         {
             this.client = client;
             this.resultMode = resultMode;
             this.inTransaction = inTransaction;
+            this.inBolt = inBolt;
             // here is where we decide if we should deserialize as transactional or REST endpoint data format.
             if (resultFormat == CypherResultFormat.DependsOnEnvironment)
             {
@@ -214,7 +221,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     return ParseInSingleColumnMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
                 case CypherResultMode.Projection:
                     // if we are in transaction and we have an object we dont need a mutation
-                    if (!inTransaction)
+                    if (!inTransaction && !inBolt)
                     {
                         jsonTypeMappings.Add(new TypeMapping
                         {
