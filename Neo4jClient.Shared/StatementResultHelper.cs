@@ -99,7 +99,7 @@ namespace Neo4jClient
                 {
                     var output = new List<string>();
                     foreach (var e in (IEnumerable) o)
-                        if (IsPrimitive(e.GetType()))
+                        if (IsPrimitive(e.GetType()) || e is INode)
                             output.Add($"{e.ToJsonString(true, true, true) ?? "null"}");
                         else
                             output.Add($"{{{e.ToJsonString(true, true, true) ?? "null"}}}");

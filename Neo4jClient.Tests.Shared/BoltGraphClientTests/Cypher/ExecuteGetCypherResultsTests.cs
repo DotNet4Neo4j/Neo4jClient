@@ -135,6 +135,11 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             public long? UniqueId { get; set; }
         }
 
+        private class ObjectWithId
+        {
+            public long Id { get; set; }
+        }
+
         private class ObjectWithIds
         {
             public List<int> Ids { get; set; }
@@ -303,6 +308,70 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 deserializedObject.Ids[1].Should().Be(2);
                 deserializedObject.Ids[2].Should().Be(3);
             }
+        }
+
+        //https://github.com/readify/neo4jclient/issues/266
+        [Fact]
+        public void CollectionOfComplexTypesShouldDeserializeCorrectlyWhenInConjunctionWithAnotherComplexTypeInAContainer()
+        {
+            const string queryText = "MATCH (start:Node)-->(next:Node) RETURN start AS Start, collect(next) AS Next";
+
+            var queryParams = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var startNodeMock = new Mock<INode>();
+                startNodeMock
+                    .Setup(n => n.Id)
+                    .Returns(1);
+                startNodeMock
+                    .Setup(n => n.Properties)
+                    .Returns(new Dictionary<string, object> { { "Id", 1 } });
+
+                var nextNodeMock = new Mock<INode>();
+                nextNodeMock
+                    .Setup(n => n.Id)
+                    .Returns(2);
+                nextNodeMock
+                    .Setup(n => n.Properties)
+                    .Returns(new Dictionary<string, object> { { "Id", 2 } });
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["Next"])
+                    .Returns(new List<INode> { nextNodeMock.Object });
+
+                recordMock
+                    .Setup(r => r["Start"])
+                    .Returns(startNodeMock.Object);
+
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "Start", "Next" });
+
+                var testStatementResult = new TestStatementResult(new[] { "Start", "Next" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<Container>(cypherQuery).ToArray();
+
+                //Assert
+                var deserializedObject = results.First();
+                deserializedObject.Start.Should().NotBeNull();
+                deserializedObject.Start.Id.Should().Be(1);
+
+                var deserializedNext = deserializedObject.Next.ToList();
+                deserializedNext.Should().HaveCount(1);
+                deserializedNext.First().Id.Should().Be(2);
+            }
+        }
+
+        private class Container
+        {
+            public ObjectWithId Start { get; set; }
+            public IEnumerable<ObjectWithId> Next { get; set; }
         }
 
         [Fact]
