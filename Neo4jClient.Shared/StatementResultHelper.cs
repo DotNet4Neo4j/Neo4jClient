@@ -546,7 +546,9 @@ namespace Neo4jClient
 
             public Neo4jClientRecord(IRecord record, string identifier)
             {
-                Values = new Dictionary<string, object> {{identifier, record[identifier]}};
+                Values = record == null 
+                    ? new Dictionary<string, object> { { identifier, null } } 
+                    : new Dictionary<string, object> {{identifier, record[identifier]}};
             }
 
             [Obsolete("This should not be called internally.")]
