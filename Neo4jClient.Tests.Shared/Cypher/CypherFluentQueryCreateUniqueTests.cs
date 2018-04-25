@@ -6,7 +6,7 @@ using Neo4jClient.Test.Fixtures;
 
 namespace Neo4jClient.Test.Cypher
 {
-    class CypherFluentQueryCreateUniqueTests : IClassFixture<CultureInfoSetupFixture>
+    public class CypherFluentQueryCreateUniqueTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
         public void CreateNodeWithValuesViaCreateUnique()
@@ -25,7 +25,7 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             Assert.Equal("START root=node({p0})\r\nCREATE UNIQUE root-[:X]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
-            Assert.Equal(2, query.QueryParameters["p0"]);
+            Assert.Equal(2l, query.QueryParameters["p0"]);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             Assert.Equal("START root=node({p0})\r\nMATCH root-[:X]-foo\r\nCREATE UNIQUE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
-            Assert.Equal(2, query.QueryParameters["p0"]);
+            Assert.Equal(2l, query.QueryParameters["p0"]);
         }
     }
 }

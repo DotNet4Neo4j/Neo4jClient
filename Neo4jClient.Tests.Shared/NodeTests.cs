@@ -76,7 +76,7 @@ namespace Neo4jClient.Test
         }
 
         [Fact]
-        public void GetHashCodeShouldReturnNodeId()
+        public void GetHashCodeTestShouldReturnNodeId()
         {
             var node = new Node<object>(new object(), new NodeReference<object>(123));
             Assert.Equal(123, node.Reference.Id);

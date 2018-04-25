@@ -19,14 +19,14 @@ namespace Neo4jClient.Test
         public void ShouldExplicitlyCastFromInt()
         {
             var relationshipReference = (RelationshipReference)3;
-            Assert.IsAssignableFrom(typeof(RelationshipReference), relationshipReference);
+            Assert.IsAssignableFrom<RelationshipReference>(relationshipReference);
             Assert.Equal(3, relationshipReference.Id);
         }
 
         [Theory]
         [InlineData(1, 2, false)]
         [InlineData(3, 3, true)]
-        public void Equals(int lhs, int rhs, bool expected)
+        public void EqualsTest(int lhs, int rhs, bool expected)
         {
             (new RelationshipReference(lhs) == new RelationshipReference(rhs)).Should().Be(expected);
         }
@@ -34,7 +34,7 @@ namespace Neo4jClient.Test
         [Theory]
         [InlineData(1, 2, false)]
         [InlineData(3, 3, true)]
-        public void GetHashCode(int lhs, int rhs, bool expected)
+        public void GetHashCodeTest(int lhs, int rhs, bool expected)
         {
             (new RelationshipReference(lhs).GetHashCode() == new RelationshipReference(rhs).GetHashCode()).Should().Be(expected);
         }
