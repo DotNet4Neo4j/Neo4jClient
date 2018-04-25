@@ -50,7 +50,7 @@ namespace Neo4jClient.Test
         [Theory]
         [InlineData(1, 2, false)]
         [InlineData(3, 3, true)]
-        public void Equals(int lhs, int rhs, bool expected)
+        public void EqualsTest(int lhs, int rhs, bool expected)
         {
             (new NodeReference(lhs) == new NodeReference(rhs)).Should().Be(expected);
         }
@@ -58,7 +58,7 @@ namespace Neo4jClient.Test
         [Theory]
         [InlineData(1, 2, false)]
         [InlineData(3, 3, true)]
-        public void GetHashCode(int lhs, int rhs, bool expected)
+        public void GetHashCodeTest(int lhs, int rhs, bool expected)
         {
             (new NodeReference(lhs).GetHashCode() == new NodeReference(rhs).GetHashCode()).Should().Be(expected);
         }

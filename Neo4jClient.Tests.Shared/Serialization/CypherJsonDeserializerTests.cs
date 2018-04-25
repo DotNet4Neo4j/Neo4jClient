@@ -28,7 +28,7 @@ namespace Neo4jClient.Test.Serialization
 
         private class DateTimeTestCasesFactory
         {
-            public static IEnumerable<object> TestCases
+            public static IEnumerable<object[]> TestCases
             {
                 get
                 {
@@ -42,7 +42,7 @@ namespace Neo4jClient.Test.Serialization
 
         private class DateTimeOffsetCasesFactory
         {
-            public static IEnumerable TestCases
+            public static IEnumerable<object[]> TestCases
             {
                 get
                 {
@@ -75,7 +75,7 @@ namespace Neo4jClient.Test.Serialization
         }          
                     
         [Theory]
-        [MemberData("TestCases", MemberType = typeof(DateTimeOffsetCasesFactory))]
+        [MemberData(nameof(DateTimeOffsetCasesFactory.TestCases), MemberType = typeof(DateTimeOffsetCasesFactory))]
         public void DeserializeShouldPreserveOffsetValues(CypherResultMode resultMode, CypherResultFormat format, string contentFormat, string input, string expectedResult)
         {  
             // Arrange
@@ -98,7 +98,7 @@ namespace Neo4jClient.Test.Serialization
         }
 
         [Theory]
-        [MemberData("TestCases", MemberType = typeof(DateTimeTestCasesFactory))]
+        [MemberData(nameof(DateTimeTestCasesFactory.TestCases), MemberType = typeof(DateTimeTestCasesFactory))]
         public void DeserializeDateShouldPreserveKind(string dateTime, DateTimeKind kind)
         { 
             //Arrange
@@ -114,7 +114,7 @@ namespace Neo4jClient.Test.Serialization
         }
 
         [Theory]
-        [MemberData("TestCases", MemberType = typeof(DateTimeTestCasesFactory))]
+        [MemberData(nameof(DateTimeTestCasesFactory.TestCases), MemberType = typeof(DateTimeTestCasesFactory))]
         public void DeserializeDateShouldPreservePointInTime(string dateTime, DateTimeKind kind)
         { 
             //Arrange
@@ -903,7 +903,7 @@ namespace Neo4jClient.Test.Serialization
         }
 
         [Fact]
-        public void DeserializeShouldMapProjectionIntoAnonymousType()
+        public void DeserializeShouldMapProjectionIntoAnonymousTypeTest()
         {
             DeserializeShouldMapProjectionIntoAnonymousType(new { Name = "", Population = 0 });
         }
@@ -945,7 +945,7 @@ namespace Neo4jClient.Test.Serialization
 
         [Fact]
         //[Description("https://bitbucket.org/Readify/neo4jclient/issue/67/cypher-deserialization-error-when-using")]
-        public void DeserializeShouldMapProjectionIntoAnonymousTypeWithNullCollectResult()
+        public void DeserializeShouldMapProjectionIntoAnonymousTypeWithNullCollectResultTest()
         {
             DeserializeShouldMapProjectionIntoAnonymousTypeWithNullCollectResult(new { Name = "", Friends = new object[0] });
         }
