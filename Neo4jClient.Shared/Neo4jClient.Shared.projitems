@@ -182,6 +182,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)RelationshipReference`TData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Relationship`TData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RootNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\DriverDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\IDriverDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\CommonDeserializerMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\CustomJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\CustomJsonSerializer.cs" />
@@ -214,5 +216,8 @@
     <None Include="$(MSBuildThisFileDirectory)Diagrams\Responses.cd" />
     <None Include="$(MSBuildThisFileDirectory)Indexing.cd" />
     <None Include="$(MSBuildThisFileDirectory)packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Serialization\Json\" />
   </ItemGroup>
 </Project>

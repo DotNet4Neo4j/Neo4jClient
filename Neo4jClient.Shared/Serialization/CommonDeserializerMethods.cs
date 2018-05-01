@@ -55,10 +55,8 @@ namespace Neo4jClient.Serialization
             return reader.ReadAsDateTimeOffset();
         }
 
-        public static DateTime? ParseDateTime(JToken value)
+        public static DateTime? ParseDateTime(string rawValue)
         {
-            var rawValue = value.AsString();
-
             if (string.IsNullOrWhiteSpace(rawValue))
                 return null;
 
@@ -66,18 +64,23 @@ namespace Neo4jClient.Serialization
 
             if (!DateRegex.IsMatch(rawValue))
             {
-                DateTime parsed;
-                if (!DateTime.TryParse(rawValue, out parsed))
+                if (!DateTime.TryParse(rawValue, out DateTime parsed))
                     return null;
 
                 return rawValue.EndsWith("Z", StringComparison.OrdinalIgnoreCase) ? parsed.ToUniversalTime() : parsed;
             }
 
-            var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
+            var text = $"{{\"a\":\"{rawValue}\"}}";
             var reader = new JsonTextReader(new StringReader(text));
             reader.Read(); // JsonToken.StartObject
             reader.Read(); // JsonToken.PropertyName
             return reader.ReadAsDateTime();
+        }
+
+        public static DateTime? ParseDateTime(JToken value)
+        {
+            var rawValue = value.AsString();
+            return ParseDateTime(rawValue);
         }
 
         public static object CoerceValue(DeserializationContext context, PropertyInfo propertyInfo, JToken value, IEnumerable<TypeMapping> typeMappings, int nestingLevel)

@@ -10,6 +10,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.BoltDriver;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -612,20 +613,12 @@ namespace Neo4jClient
 
         private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
         {
-            var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, false, true);
+            var deserializer = new DriverDeserializer<TResult>(query.ResultMode);
             var results = new List<TResult>();
-            if (typeof(TResult).IsAnonymous())
+
+            foreach (var record in result)
             {
-                foreach (var record in result)
-                    results.AddRange(deserializer.Deserialize(record.ParseAnonymous(this)));
-            }
-            else
-            {
-                var converted = result.Select(record => record.Deserialize(deserializer, query.ResultMode));
-                foreach (var enumerable in converted)
-                {
-                    results.AddRange(enumerable);
-                }
+                results.Add(deserializer.Deserialize(record));
             }
 
             return results;

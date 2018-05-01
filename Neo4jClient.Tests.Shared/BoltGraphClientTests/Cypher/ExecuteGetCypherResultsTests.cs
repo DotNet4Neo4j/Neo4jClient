@@ -98,6 +98,17 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
     }
 
     public class TestNode : INode {
+
+        public TestNode(string label, params string[] labels) :
+            this(new[] {label}.Concat(labels))
+        {
+        }
+
+        public TestNode(IEnumerable<string> labels)
+        {
+            Labels = labels.ToList();
+        }
+
         #region Implementation of IEntity
 
         public object this[string key]
@@ -192,6 +203,9 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] { "Rel" });
+                recordMock
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>() { { "Rel", relationshipMock.Object } });
 
                 var testStatementResult = new TestStatementResult(new[] { "Rel" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -212,7 +226,8 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             // Arrange
             const string queryText = @"MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection,
+                CypherResultFormat.Transactional);
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -243,6 +258,9 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] { "Rel" });
+                recordMock
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>() { { "Rel", relationshipMock.Object }});
 
                 var testStatementResult = new TestStatementResult(new[] { "Rel" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -299,6 +317,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
                 var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+
                 var results = graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery).ToArray();
 
                 //Assert
@@ -380,9 +399,18 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             // Arrange
             const string queryText = "CREATE (start:Node {obj}) RETURN start";
 
+            INode startNode = new TestNode("Node")
+            {
+                Id = 1337,
+                Properties = new Dictionary<string, object>()
+                {
+                    {"Ids", new List<int>() {1, 2, 3}}
+                }
+            };
+
             var testNode = new ObjectWithIds()
             {
-                Ids = new List<int>() {1, 2, 3}
+                Ids = new List<int> {1, 2, 3}
             };
 
             var queryParams = new Dictionary<string, object>() {{"obj", testNode}};
@@ -394,7 +422,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 var recordMock = new Mock<IRecord>();
                 recordMock
                     .Setup(r => r["start"])
-                    .Returns(testNode);
+                    .Returns(startNode);
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] { "start" });
@@ -403,6 +431,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
                 var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+
                 var results = graphClient.ExecuteGetCypherResults<ObjectWithIds>(cypherQuery).ToArray();
 
                 //Assert
@@ -431,7 +460,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
 
             using (var testHarness = new BoltTestHarness())
             {
-                INode start = new TestNode
+                INode start = new TestNode("Node")
                 {
                     Id = 1337,
                     Properties = new Dictionary<string, object>()
@@ -455,6 +484,9 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] { "Node", "Start" });
+                recordMock
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>() { { "Node", resultMap }, { "Start", start } });
 
                 var testStatementResult = new TestStatementResult(new[] { "Node", "Start" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -500,7 +532,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
 
             using (var testHarness = new BoltTestHarness())
             {
-                INode start = new TestNode
+                INode start = new TestNode("Node")
                 {
                     Id = 1337,
                     Properties = new Dictionary<string, object>()
@@ -524,6 +556,9 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] { "Node", "Start" });
+                recordMock
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>() {{"Node", resultMap}, {"Start", start}});
 
                 var testStatementResult = new TestStatementResult(new[] { "Node", "Start" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -573,13 +608,17 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
 
             using (var testHarness = new BoltTestHarness())
             {
+                var listData = new[] {1, 2, 3};
                 var recordMock = new Mock<IRecord>();
                 recordMock
                     .Setup(r => r["Ids"])
-                    .Returns(new[] {1, 2, 3});
+                    .Returns(listData);
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] { "Ids" });
+                recordMock
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>(){{"Ids", listData}});
 
                 var testStatementResult = new TestStatementResult(new[] { "Ids" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -623,13 +662,45 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             
             using (var testHarness = new BoltTestHarness())
             {
+                var startNode = new TestNode("Node")
+                {
+                    Id = 1,
+                    Properties = new Dictionary<string, object>()
+                };
+                var endNode = new TestNode("Node")
+                {
+                    Id = 2,
+                    Properties = new Dictionary<string, object>()
+                };
+
+                var path = new TestPath
+                {
+                    End = endNode,
+                    Start = startNode,
+                    Relationships = new List<IRelationship>
+                    {
+                        new TestRelationship()
+                        {
+                            Id = 3,
+                            StartNodeId = 1,
+                            EndNodeId = 2,
+                            Type = "Rel",
+                            Properties = new Dictionary<string, object>()
+                        }
+                    },
+                    Nodes = new List<INode> {startNode, endNode}
+                };
+
                 var recordMock = new Mock<IRecord>();
                 recordMock
                     .Setup(r => r["p"])
-                    .Returns(new TestPath {End = new TestNode{Id = 1}, Start = new TestNode{Id=2}, Relationships = new List<IRelationship> {new TestRelationship()}, Nodes = new List<INode> {new TestNode(), new TestNode() } });
+                    .Returns(path);
                 recordMock
                     .Setup(r => r.Keys)
                     .Returns(new[] {"p"});
+                recordMock
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>() {{"p", path}});
                 
                 var testStatementResult = new TestStatementResult(new[] {"p"}, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -643,8 +714,8 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 Assert.Equal(1, results.First().Length);
                 results.First().Nodes.Count().Should().Be(2);
                 results.First().Relationships.Count().Should().Be(1);
-                results.First().End.Id.Should().Be(1);
-                results.First().Start.Id.Should().Be(2);
+                results.First().End.Id.Should().Be(2);
+                results.First().Start.Id.Should().Be(1);
             }
         }
 
