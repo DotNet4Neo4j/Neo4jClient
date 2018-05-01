@@ -575,7 +575,7 @@ namespace Neo4jClient
                 throw new InvalidOperationException("Can't execute cypher unless you have connected to the server.");
 
             var context = ExecutionContext.Begin(this);
-            List<TResult> results;
+            IEnumerable<TResult> results;
             try
             {
 //                var inTransaction = ;
@@ -607,21 +607,15 @@ namespace Neo4jClient
                 throw;
             }
 
-            context.Complete(query, results.Count); //Doesn't this parse all the entries?
+            context.Complete(query);
             return results;
         }
 
-        private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
+        private IEnumerable<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
         {
             var deserializer = new DriverDeserializer<TResult>(query.ResultMode);
-            var results = new List<TResult>();
 
-            foreach (var record in result)
-            {
-                results.Add(deserializer.Deserialize(record));
-            }
-
-            return results;
+            return deserializer.Deserialize(result);
         }
 
         /// <inheritdoc />

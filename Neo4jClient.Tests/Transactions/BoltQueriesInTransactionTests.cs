@@ -43,6 +43,7 @@ namespace Neo4jClient.Test.Transactions
             mockRecord.Values.Returns(new Dictionary<string, object>() {{"Node", mockNode}});
 
             var mockStatementResult = Substitute.For<IStatementResult>();
+            mockStatementResult.Keys.Returns(new List<string>() {"Node"});
             mockStatementResult.GetEnumerator().Returns(new List<IRecord>(new[]{mockRecord}).GetEnumerator());
 
             var mockTransaction = Substitute.For<Neo4j.Driver.V1.ITransaction>();

@@ -7,6 +7,7 @@ using System.Text;
 using Neo4j.Driver.V1;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json;
 
 namespace Neo4jClient.Serialization.BoltDriver
 {
@@ -23,11 +24,11 @@ namespace Neo4jClient.Serialization.BoltDriver
             this.resultMode = resultMode;
         }
 
-        public TResult Deserialize(IRecord record)
+        public IEnumerable<TResult> Deserialize(IStatementResult results)
         {
             try
             {
-                return InternalDeserialize(record);
+                return InternalDeserialize(results);
             }
             catch (Exception ex)
             {
@@ -46,34 +47,44 @@ Include this full record instance, with any sensitive values replaced with non-s
 
 Keys: {1}
 
-Corresponding value types: {2}
+Results Object Graph (in JSON): {2}";
 
-Corresponding values (serialized through ToString()): {3}";
 
-                var message = string.Format(messageTemplate, typeof(TResult).FullName, string.Join(", ", record.Keys),
-                    string.Join(", ", record.Keys.Select(k => record[k]?.GetType().FullName ?? "(NULL)")),
-                        record.Keys.Select(k => record[k]?.ToString() ?? "(NULL)"));
+                var message = string.Format(messageTemplate, typeof(TResult).FullName,
+                    string.Join(", ", results.Keys),
+                    GenerateObjectGraph(results));
 
                 // If it's a specifc scenario that we're blowing up about, put this front and centre in the message
                 if (ex is DeserializationException deserializationException)
                 {
-                    message = $"{deserializationException.Message}{Environment.NewLine}{Environment.NewLine}----{Environment.NewLine}{Environment.NewLine}{message}";
+                    message =
+                        $"{deserializationException.Message}{Environment.NewLine}{Environment.NewLine}----{Environment.NewLine}{Environment.NewLine}{message}";
                 }
 
-                throw new ArgumentException(message, nameof(record), ex);
+                throw new ArgumentException(message, nameof(results), ex);
             }
         }
 
-        private TResult InternalDeserialize(IRecord record)
+        private string GenerateObjectGraph(IStatementResult results)
         {
-            return resultMode == CypherResultMode.Set
-                ? DeserializeSetMode(record)
-                : DeserializeProjectionMode(record);
+            var typeRecordSettings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All
+            };
+            return JsonConvert.SerializeObject(results.Select(record => record), Formatting.Indented,
+                typeRecordSettings);
         }
 
-        private TResult DeserializeSetMode(IRecord record)
+        private IEnumerable<TResult> InternalDeserialize(IStatementResult result)
         {
-            if (record.Keys.Count != 1)
+            return resultMode == CypherResultMode.Set
+                ? DeserializeSetMode(result)
+                : DeserializeProjectionMode(result);
+        }
+
+        private IEnumerable<TResult> DeserializeSetMode(IStatementResult result)
+        {
+            if (result.Keys.Count != 1)
             {
                 throw new InvalidOperationException(
                     "The deserializer is running in single column mode, but the response included multiple columns which indicates a projection instead. If using the fluent Cypher interface, use the overload of Return that takes a lambda or object instead of single string. (The overload with a single string is for an identity, not raw query text: we can't map the columns back out if you just supply raw query text.)");
@@ -81,32 +92,15 @@ Corresponding values (serialized through ToString()): {3}";
 
             var resultType = typeof(TResult);
 
-            var value = record[record.Keys[0]];
+            return result.Select(record =>
+            {
+                var value = record[record.Keys[0]];
 
-//            var rowAsArray = (JArray)row;
-//            if (rowAsArray.Count != 1)
-//                throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
-
-//            var elementToParse = row[0];
-//            if (elementToParse is JObject)
-//            {
-//                var propertyNames = ((JObject)elementToParse)
-//                    .Properties()
-//                    .Select(p => p.Name)
-//                    .ToArray();
-//                var dataElementLooksLikeANodeOrRelationshipInstance =
-//                    new[] { "data", "self", "traverse", "properties" }.All(propertyNames.Contains);
-//                if (!isResultTypeANodeOrRelationshipInstance &&
-//                    dataElementLooksLikeANodeOrRelationshipInstance)
-//                {
-//                    elementToParse = elementToParse["data"];
-//                }
-//            }
-
-            return (TResult) CoerceValue(resultType, value);
+                return (TResult) CoerceValue(resultType, value);
+            });
         }
 
-        private TResult DeserializeProjectionMode(IRecord record)
+        private IEnumerable<TResult> DeserializeProjectionMode(IStatementResult result)
         {
             var properties = typeof(TResult).GetProperties();
             var propertiesDictionary = properties
@@ -114,7 +108,7 @@ Corresponding values (serialized through ToString()): {3}";
 
             Func<IRecord, TResult> mutateRecord = null;
 
-            var columnNames = record.Keys.ToArray();
+            var columnNames = result.Keys.ToArray();
 
             var columnsWhichDontHaveSettableProperties = columnNames
                 .Where(c => !propertiesDictionary.ContainsKey(c) || !propertiesDictionary[c].CanWrite)
@@ -126,12 +120,12 @@ Corresponding values (serialized through ToString()): {3}";
                 var ctor = typeof(TResult).GetConstructors().FirstOrDefault(info =>
                 {
                     var parameters = info.GetParameters();
-                    if (parameters.Length != record.Keys.Count)
+                    if (parameters.Length != result.Keys.Count)
                         return false;
 
                     for (var i = 0; i < parameters.Length; i++)
                     {
-                        var property = propertiesDictionary[record.Keys[i]];
+                        var property = propertiesDictionary[result.Keys[i]];
                         if (!parameters[i].ParameterType.IsAssignableFrom(property.PropertyType))
                             return false;
                     }
@@ -152,7 +146,7 @@ Corresponding values (serialized through ToString()): {3}";
                         "The query response contains columns {0} however {1} does not contain publically settable properties to receive this data.",
                         columnsWhichDontHaveSettablePropertiesCommaSeparated,
                         typeof(TResult).FullName),
-                        nameof(record));
+                        nameof(result));
                 }
             }
             else
@@ -160,7 +154,7 @@ Corresponding values (serialized through ToString()): {3}";
                 mutateRecord = rec => ReadProjectionRowUsingProperties(rec, propertiesDictionary);
             }
 
-            return mutateRecord(record);
+            return result.Select(mutateRecord);
         }
 
         TResult ReadProjectionRowUsingCtor(

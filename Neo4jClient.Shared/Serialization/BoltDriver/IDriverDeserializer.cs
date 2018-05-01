@@ -10,6 +10,6 @@ namespace Neo4jClient.Serialization.BoltDriver
     /// </summary>
     public interface IDriverDeserializer<out TResult>
     {
-        TResult Deserialize(IRecord record);
+        IEnumerable<TResult> Deserialize(IStatementResult result);
     }
 }
