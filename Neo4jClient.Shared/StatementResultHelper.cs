@@ -10,6 +10,7 @@ using Neo4j.Driver.V1;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Newtonsoft.Json;
 
 namespace Neo4jClient

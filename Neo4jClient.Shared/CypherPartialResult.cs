@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 
 namespace Neo4jClient
 {

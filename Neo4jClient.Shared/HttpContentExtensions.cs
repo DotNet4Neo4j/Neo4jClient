@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 

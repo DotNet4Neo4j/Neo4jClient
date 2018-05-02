@@ -1,6 +1,6 @@
 using Newtonsoft.Json.Linq;
 
-namespace Neo4jClient.Serialization
+namespace Neo4jClient.Serialization.Json
 {
     public class PartialDeserializationContext
     {

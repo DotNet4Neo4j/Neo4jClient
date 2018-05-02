@@ -4,7 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Neo4jClient.Serialization
+namespace Neo4jClient.Serialization.Json
 {
     public class CustomJsonSerializer : ISerializer
     {

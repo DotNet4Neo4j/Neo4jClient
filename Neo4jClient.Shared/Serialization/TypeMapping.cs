@@ -2,7 +2,7 @@ using System;
 
 namespace Neo4jClient.Serialization
 {
-    internal class TypeMapping
+    public class TypeMapping
     {
         public Func<int, Type, bool> ShouldTriggerForPropertyType { get; set; }
         public Func<Type, Type> DetermineTypeToParseJsonIntoBasedOnPropertyType { get; set; }

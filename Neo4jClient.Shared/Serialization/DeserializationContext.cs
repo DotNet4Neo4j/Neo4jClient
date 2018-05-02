@@ -9,5 +9,6 @@ namespace Neo4jClient.Serialization
         public CultureInfo Culture { get; set; }
         public JsonConverter[] JsonConverters { get; set; }
         public IContractResolver JsonContractResolver { get; set; }
+        public TypeMapping[] TypeMappings { get; set; }
     }
 }

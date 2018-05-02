@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 using System.Globalization;
 using Newtonsoft.Json.Serialization;
 
-namespace Neo4jClient.Serialization
+namespace Neo4jClient.Serialization.Json
 {
     public class CustomJsonDeserializer
     {

@@ -10,6 +10,7 @@ using NSubstitute;
 using Xunit;
 using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Neo4jClient.Test.Fixtures;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;

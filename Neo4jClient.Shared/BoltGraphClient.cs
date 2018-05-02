@@ -11,6 +11,7 @@ using Neo4jClient.Execution;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
 using Neo4jClient.Serialization.BoltDriver;
+using Neo4jClient.Serialization.Json;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -613,7 +614,7 @@ namespace Neo4jClient
 
         private IEnumerable<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
         {
-            var deserializer = new DriverDeserializer<TResult>(query.ResultMode);
+            var deserializer = new DriverDeserializer<TResult>(this, query.ResultMode);
 
             return deserializer.Deserialize(result);
         }

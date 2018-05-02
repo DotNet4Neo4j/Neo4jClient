@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Neo4jClient.Extensions;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Cypher

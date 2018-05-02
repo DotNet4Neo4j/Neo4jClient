@@ -4,6 +4,7 @@ using System.Net;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Execution;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 
 namespace Neo4jClient.Transactions
 {
