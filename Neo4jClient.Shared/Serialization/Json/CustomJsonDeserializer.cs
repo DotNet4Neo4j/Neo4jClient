@@ -107,43 +107,5 @@ namespace Neo4jClient.Serialization.Json
         {
             return record;
         }
-
-//        public T Deserialize<TResult>(string content) where T : new()
-//        {
-//            var context = new DeserializationContext
-//                {
-//                    Culture = culture,
-//                    JsonConverters = (jsonConverters ?? new List<JsonConverter>(0)).Reverse().ToArray(),
-//                    JsonContractResolver = jsonResolver
-//                };
-//
-//            content = DateDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
-//
-//            var reader = new JsonTextReader(new StringReader(content))
-//            {
-//                DateParseHandling = DateParseHandling.None
-//            };
-//
-//            var target = new T();
-//
-//            if (target is IList)
-//            {
-//                var objType = target.GetType();
-//                var json = JToken.ReadFrom(reader);
-//                target = (T)DateDeserializerMethods.BuildList(context, objType, json.Root.Children(), new TypeMapping[0], 0);
-//            }
-//            else if (target is IDictionary)
-//            {
-//                var root = JToken.ReadFrom(reader).Root;
-//                target = (T)DateDeserializerMethods.BuildDictionary(context, target.GetType(), root.Children(), new TypeMapping[0], 0);
-//            }
-//            else
-//            {
-//                var root = JToken.ReadFrom(reader).Root;
-//                DateDeserializerMethods.Map(context, target, root, new TypeMapping[0], 0);
-//            }
-//
-//            return target;
-//        }
     }
 }
