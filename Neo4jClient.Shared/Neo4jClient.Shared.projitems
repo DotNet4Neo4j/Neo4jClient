@@ -199,7 +199,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\TimeZoneInfoConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\TypeConverterBasedJsonConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StatementResultHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\BoltResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\IInternalTransactionalGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\INeo4jTransaction.cs" />
