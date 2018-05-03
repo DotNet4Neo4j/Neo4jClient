@@ -359,12 +359,12 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
 
                 var recordMock = new Mock<IRecord>();
                 recordMock
-                    .Setup(r => r["Next"])
-                    .Returns(new List<INode> { nextNodeMock.Object });
-
-                recordMock
-                    .Setup(r => r["Start"])
-                    .Returns(startNodeMock.Object);
+                    .Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object>()
+                    {
+                        {"Next", new List<INode> {nextNodeMock.Object}},
+                        {"Start", startNodeMock.Object}
+                    });
 
                 recordMock
                     .Setup(r => r.Keys)
