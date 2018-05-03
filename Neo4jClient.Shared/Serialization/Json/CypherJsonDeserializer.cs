@@ -46,7 +46,7 @@ namespace Neo4jClient.Serialization.Json
 
         protected override JToken DeserializeIntoRecordCollections(string content)
         {
-            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+            content = DateDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
             {
@@ -165,13 +165,13 @@ namespace Neo4jClient.Serialization.Json
 
         protected override bool TryCastIntoDateTime(JToken value, out DateTime? dt)
         {
-            dt = CommonDeserializerMethods.ParseDateTime(value);
+            dt = DateDeserializerMethods.ParseDateTime(value);
             return true;
         }
 
         protected override bool TryCastIntoDateTimeOffset(JToken value, out DateTimeOffset? dt)
         {
-            dt = CommonDeserializerMethods.ParseDateTimeOffset(value);
+            dt = DateDeserializerMethods.ParseDateTimeOffset(value);
             return true;
         }
 
@@ -273,6 +273,24 @@ namespace Neo4jClient.Serialization.Json
             return context;
         }
 
+        protected override bool TryDeserializeCustomType(DeserializationContext context, Type propertyType, JToken field,
+            out object deserialized)
+        {
+            deserialized = null;
+            var converter = context.JsonConverters?.FirstOrDefault(c => c.CanConvert(propertyType));
+            if (converter == null)
+            {
+                return false;
+            }
+
+            using (var reader = field.CreateReader())
+            {
+                reader.Read();
+                deserialized = converter.ReadJson(reader, propertyType, null, null);
+                return true;
+            }
+        }
+
         private string GetStringPropertyFromObject(JObject obj, string propertyName)
         {
             JToken propValue;
@@ -317,7 +335,7 @@ namespace Neo4jClient.Serialization.Json
                 throw new InvalidOperationException("Deserialization of this type must be done inside of a transaction scope.");
             }
 
-            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+            content = DateDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
             {

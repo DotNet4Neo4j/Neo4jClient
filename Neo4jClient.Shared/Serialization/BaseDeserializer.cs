@@ -116,7 +116,8 @@ Include the full type definition of {0}.
             return field.ToString();
         }
 
-        protected virtual bool TryDeserializeCustomType(Type propertyType, TField field, out object deserialized)
+        protected virtual bool TryDeserializeCustomType(DeserializationContext context, Type propertyType, TField field, 
+            out object deserialized)
         {
             deserialized = null;
             return false;
@@ -134,6 +135,11 @@ Include the full type definition of {0}.
                 default:
                     throw new NotSupportedException($"Unrecognised result mode of {ResultMode}.");
             }
+        }
+
+        public TResult DeserializeObject(DeserializationContext context, TField instance)
+        {
+            return (TResult)CoerceValue(context, typeof(TResult), instance, 0);
         }
 
         protected IEnumerable<TResult> DeserializeInSingleColumnMode(DeserializationContext context, TRecordCollection results)
@@ -303,6 +309,11 @@ Include the full type definition of {0}.
                 return null;
             }
 
+            if (TryDeserializeCustomType(context, valueType, field, out object customDeserialized))
+            {
+                return customDeserialized;
+            }
+
             var typeInfo = valueType.GetTypeInfo();
 
             Type genericTypeDef = null;
@@ -314,6 +325,7 @@ Include the full type definition of {0}.
                 if (genericTypeDef == typeof(Nullable<>))
                 {
                     valueType = valueType.GetGenericArguments()[0];
+                    typeInfo = valueType.GetTypeInfo();
                     genericTypeDef = null;
                 }
             }
@@ -397,13 +409,6 @@ Include the full type definition of {0}.
                 return list.ToArray(elementType);
             }
 
-            if (genericTypeDef == typeof(List<>) || genericTypeDef == typeof(IEnumerable<>))
-            {
-                var value = CastIntoEnumerable(field);
-                var list = BuildList(context, valueType, GetListItemType(valueType), typeInfo, value, nestingLevel + 1);
-                return list;
-            }
-
             if (genericTypeDef == typeof(Dictionary<,>))
             {
                 var keyType = valueType.GetGenericArguments()[0];
@@ -418,9 +423,11 @@ Include the full type definition of {0}.
                 return dict;
             }
 
-            if (TryDeserializeCustomType(valueType, field, out object customDeserialized))
+            if (IsEnumerable(valueType, genericTypeDef))
             {
-                return customDeserialized;
+                var value = CastIntoEnumerable(field);
+                var list = BuildList(context, valueType, GetListItemType(valueType, typeInfo), typeInfo, value, nestingLevel + 1);
+                return list;
             }
 
             var mapping = GetTypeMapping(context, valueType, nestingLevel);
@@ -438,9 +445,19 @@ Include the full type definition of {0}.
             return item;
         }
 
-        private Type GetListItemType(Type collectionType)
+        private bool IsEnumerable(Type collectionType, Type genericType)
         {
-            if (collectionType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            return genericType == typeof(IEnumerable<>) || genericType == typeof(IList<>) ||
+                   collectionType
+                       .GetInterfaces()
+                       .Where(i => i.GetTypeInfo().IsGenericType)
+                       .Any(i => i.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
+                                 i.GetGenericTypeDefinition() == typeof(IList<>));
+        }
+
+        private Type GetListItemType(Type collectionType, TypeInfo ti)
+        {
+            if (ti.IsGenericType && collectionType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
                 return collectionType.GetGenericArguments().Single();
             }

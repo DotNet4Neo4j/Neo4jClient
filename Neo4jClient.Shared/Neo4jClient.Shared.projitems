@@ -185,7 +185,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\BaseDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\DriverDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\IDriverDeserializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\CommonDeserializerMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DateDeserializerMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CustomJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CustomJsonSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CypherJsonDeserializer.cs" />

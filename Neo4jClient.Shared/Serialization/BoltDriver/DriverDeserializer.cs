@@ -120,7 +120,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             dt = null;
             if (value is string s)
             {
-                dt = CommonDeserializerMethods.ParseDateTime(s);
+                dt = DateDeserializerMethods.ParseDateTime(s);
                 return true;
             }
 
@@ -132,7 +132,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             dt = null;
             if (value is string s)
             {
-                dt = CommonDeserializerMethods.ParseDateTimeOffset(s);
+                dt = DateDeserializerMethods.ParseDateTimeOffset(s);
                 return true;
             }
 
@@ -182,7 +182,8 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             return null;
         }
 
-        protected override bool TryDeserializeCustomType(Type propertyType, object field, out object deserialized)
+        protected override bool TryDeserializeCustomType(DeserializationContext context, Type propertyType, object field,
+            out object deserialized)
         {
             deserialized = null;
             if (propertyType == typeof(PathsResultBolt))
