@@ -145,9 +145,7 @@ namespace Neo4jClient.Serialization
             if (propertyType == typeof(DateTimeOffset))
             {
                 var dateTimeOffset = ParseDateTimeOffset(value);
-                if (dateTimeOffset.HasValue)
-                    return dateTimeOffset.Value;
-                return null;
+                return dateTimeOffset;
             }
 
             if (propertyType == typeof(Decimal))

@@ -12,25 +12,34 @@ namespace Neo4jClient.Serialization
     /// <summary>
     /// Base class for deserializers
     /// </summary>
-    public abstract class BaseDeserializer<TResult, TSerialized, TRecord, TField>
+    public abstract class BaseDeserializer<TResult, TSerialized, TRecordCollection, TRecord, TField>
     {
         private readonly IGraphClient client;
-        private readonly CypherResultMode resultMode;
 
         protected BaseDeserializer(IGraphClient client, CypherResultMode resultMode)
         {
             this.client = client;
-            this.resultMode = resultMode;
+            ResultMode = resultMode;
         }
+
+        protected CypherResultMode ResultMode { get; }
 
         public IEnumerable<TResult> Deserialize(TSerialized results)
         {
             try
             {
-                return InternalDeserialize(results);
+                var records = DeserializeIntoRecordCollections(results);
+                var context = GenerateContext(records, ResultMode);
+                return Deserialize(records, context);
             }
             catch (Exception ex)
             {
+                // we want the NeoException to be thrown
+                if (ex is NeoException)
+                {
+                    throw;
+                }
+
                 const string messageTemplate =
                     @"Neo4j returned a valid response, however Neo4jClient was unable to deserialize into the object structure you supplied.
 
@@ -58,22 +67,26 @@ Include the full type definition of {0}.
         }
 
         #region Abstract Methods
+
+        protected abstract TRecordCollection DeserializeIntoRecordCollections(TSerialized results);
         protected abstract string GenerateExceptionDetails(Exception exception, TSerialized results);
-        protected abstract string[] GetColumnNames(TSerialized results);
-        protected abstract IEnumerable<TRecord> GetRecordsFromResults(TSerialized results);
+        protected abstract string[] GetColumnNames(TRecordCollection results);
+        protected abstract IEnumerable<TRecord> GetRecordsFromResults(TRecordCollection results);
         protected abstract TField GetElementForDeserializationInSingleColumn(TRecord record);
         protected abstract void RegisterRecordBeingDeserialized(TRecord record);
-        protected abstract IEnumerable<FieldEntry> GetFieldEntries(TRecord record);
-        protected abstract IEnumerable<FieldEntry> CastIntoDictionaryEntries(TField field);
+        protected abstract IEnumerable<FieldEntry> GetFieldEntries(string[] columnNames, TRecord record);
+        protected abstract IEnumerable<FieldEntry> CastIntoDictionaryEntries(Dictionary<string, PropertyInfo> props, TField field);
         protected abstract IEnumerable<TField> CastIntoEnumerable(TField field);
         protected abstract object CastIntoPrimitiveType(Type primitiveType, TField field);
         protected abstract bool TryCastIntoDateTime(TField field, out DateTime? dt);
         protected abstract bool TryCastIntoDateTimeOffset(TField field, out DateTimeOffset? dt);
+        protected abstract Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context,
+            Type targetType);
         #endregion
 
         #region Overridable Methods
 
-        protected virtual DeserializationContext GenerateContext(TSerialized results, CypherResultMode resultMode)
+        protected virtual DeserializationContext GenerateContext(TRecordCollection results, CypherResultMode resultMode)
         {
             return new DeserializationContext
             {
@@ -88,7 +101,7 @@ Include the full type definition of {0}.
             return context.TypeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, type));
         }
 
-        protected virtual bool IsNull(TField field)
+        protected virtual bool IsNull(PropertyInfo propInfo, TField field)
         {
             return field == null;
         }
@@ -110,20 +123,20 @@ Include the full type definition of {0}.
         }
         #endregion
 
-        private IEnumerable<TResult> InternalDeserialize(TSerialized results)
+        protected IEnumerable<TResult> Deserialize(TRecordCollection results, DeserializationContext context)
         {
-            switch (resultMode)
+            switch (ResultMode)
             {
                 case CypherResultMode.Set:
-                    return DeserializeInSingleColumnMode(GenerateContext(results, resultMode), results);
+                    return DeserializeInSingleColumnMode(context, results);
                 case CypherResultMode.Projection:
-                    return DeserializeInProjectionMode(GenerateContext(results, resultMode), results);
+                    return DeserializeInProjectionMode(context, results);
                 default:
-                    throw new NotSupportedException($"Unrecognised result mode of {resultMode}.");
+                    throw new NotSupportedException($"Unrecognised result mode of {ResultMode}.");
             }
         }
 
-        protected IEnumerable<TResult> DeserializeInSingleColumnMode(DeserializationContext context, TSerialized results)
+        protected IEnumerable<TResult> DeserializeInSingleColumnMode(DeserializationContext context, TRecordCollection results)
         {
             var columns = GetColumnNames(results);
             if (columns.Length != 1)
@@ -137,17 +150,19 @@ Include the full type definition of {0}.
             var records = GetRecordsFromResults(results);
             var mutationMapping = mapping?.MutationCallback;
 
-            return records.Select(record =>
+            var result = records.Select(record =>
             {
                 RegisterRecordBeingDeserialized(record);
 
                 var elementForDeserialization = GetElementForDeserializationInSingleColumn(record);
-                var coercedValue = CreateAndMap(context, resultType, elementForDeserialization, 0);
+                var coercedValue = CoerceValue(context, resultType, elementForDeserialization, 0, false);
                 return (TResult) (mutationMapping == null ? coercedValue : mutationMapping(coercedValue));
             });
+
+            return result;
         }
 
-        protected IEnumerable<TResult> DeserializeInProjectionMode(DeserializationContext context, TSerialized results)
+        protected IEnumerable<TResult> DeserializeInProjectionMode(DeserializationContext context, TRecordCollection results)
         {
             var properties = typeof(TResult).GetProperties();
             var propertiesDictionary = properties
@@ -182,7 +197,7 @@ Include the full type definition of {0}.
                 if (ctor != null)
                 {
                     mutateRecord = rec =>
-                        ReadProjectionRowUsingCtor(context, rec, propertiesDictionary, ctor);
+                        ReadProjectionRowUsingCtor(context, rec, columnNames, propertiesDictionary, ctor);
                 }
 
                 if (mutateRecord == null)
@@ -198,7 +213,7 @@ Include the full type definition of {0}.
             }
             else
             {
-                mutateRecord = rec => ReadProjectionRowUsingProperties(context, rec, propertiesDictionary);
+                mutateRecord = rec => ReadProjectionRowUsingProperties(context, rec, columnNames, propertiesDictionary);
             }
 
             var records = GetRecordsFromResults(results);
@@ -213,14 +228,15 @@ Include the full type definition of {0}.
         TResult ReadProjectionRowUsingCtor(
             DeserializationContext context,
             TRecord record,
+            string[] columnNames,
             IDictionary<string, PropertyInfo> propertiesDictionary,
             ConstructorInfo ctor)
         {
-            var coercedValues = GetFieldEntries(record)
+            var coercedValues = GetFieldEntries(columnNames, record)
                 .Select(entry =>
                 {
                     var property = propertiesDictionary[entry.Key];
-                    if (IsNull(entry.Value))
+                    if (IsNull(property, entry.Value))
                     {
                         return null;
                     }
@@ -238,13 +254,18 @@ Include the full type definition of {0}.
         TResult ReadProjectionRowUsingProperties(
             DeserializationContext context,
             TRecord record,
+            string[] columnNames,
             IDictionary<string, PropertyInfo> propertiesDictionary)
         {
             var result = Activator.CreateInstance<TResult>();
 
-            foreach (var entry in GetFieldEntries(record))
+            foreach (var entry in GetFieldEntries(columnNames, record))
             {
                 var property = propertiesDictionary[entry.Key];
+                if (IsNull(property, entry.Value))
+                {
+                    continue;
+                }
 
                 SetPropertyValue(context, property, entry.Value, result, 0);
             }
@@ -254,7 +275,7 @@ Include the full type definition of {0}.
 
         private void SetPropertyValue(DeserializationContext context, PropertyInfo property, TField value, object instance, int nestingLevel)
         {
-            if (value == null)
+            if (IsNull(null, value))
             {
                 return;
             }
@@ -275,9 +296,9 @@ Include the full type definition of {0}.
             }
         }
 
-        private object CreateAndMap(DeserializationContext context, Type valueType, TField field, int nestingLevel)
+        private object CoerceValue(DeserializationContext context, Type valueType, TField field, int nestingLevel, bool useTypeMappings = true)
         {
-            if (IsNull(field))
+            if (IsNull(null, field))
             {
                 return null;
             }
@@ -371,14 +392,15 @@ Include the full type definition of {0}.
             if (typeInfo.BaseType == typeof(Array))
             {
                 var value = CastIntoEnumerable(field);
-                var list = (ArrayList)BuildList(context, typeof(ArrayList), valueType.GetElementType(), value, nestingLevel + 1);
-                return list.ToArray();
+                var elementType = valueType.GetElementType();
+                var list = (ArrayList)BuildList(context, typeof(ArrayList), elementType, typeInfo, value, nestingLevel + 1);
+                return list.ToArray(elementType);
             }
 
             if (genericTypeDef == typeof(List<>) || genericTypeDef == typeof(IEnumerable<>))
             {
                 var value = CastIntoEnumerable(field);
-                var list = BuildList(context, valueType, GetListItemType(valueType), value, nestingLevel + 1);
+                var list = BuildList(context, valueType, GetListItemType(valueType), typeInfo, value, nestingLevel + 1);
                 return list;
             }
 
@@ -401,23 +423,17 @@ Include the full type definition of {0}.
                 return customDeserialized;
             }
 
-            return CreateObject(context, valueType, field, nestingLevel + 1);
-        }
-
-        private object CoerceValue(DeserializationContext context, Type valueType, TField field, int nestingLevel)
-        {
             var mapping = GetTypeMapping(context, valueType, nestingLevel);
-            var item = mapping != null
+            return useTypeMappings && mapping != null
                 ? MutateObject(context, mapping, valueType, field, nestingLevel)
-                : CreateAndMap(context, valueType, field, nestingLevel);
-            return item;
+                : CreateObject(context, valueType, field, nestingLevel + 1);
         }
 
         private object MutateObject(DeserializationContext context, TypeMapping mapping, Type propertyType,
             TField field, int nestingLevel)
         {
             var newType = mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(propertyType);
-            var rawItem = CreateAndMap(context, newType, field, nestingLevel + 1);
+            var rawItem = CoerceValue(context, newType, field, nestingLevel + 1);
             var item = mapping.MutationCallback(rawItem);
             return item;
         }
@@ -438,14 +454,16 @@ Include the full type definition of {0}.
             return itemType;
         }
 
-        private IList BuildList(DeserializationContext context, Type collectionType, Type itemType, IEnumerable<TField> items, int nestingLevel)
+        private IList BuildList(DeserializationContext context, Type collectionType, Type itemType, TypeInfo collectionTypeInfo,
+            IEnumerable<TField> items, int nestingLevel)
         {
             if (items == null)
             {
                 return null;
             }
 
-            if (collectionType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            if (collectionTypeInfo.IsGenericType && 
+                collectionType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
                 collectionType = typeof(List<>).MakeGenericType(itemType);
             }
@@ -465,7 +483,7 @@ Include the full type definition of {0}.
             var dict = (IDictionary)Activator.CreateInstance(type);
             var valueType = type.GetGenericArguments()[1];
 
-            foreach (var entry in CastIntoDictionaryEntries(field))
+            foreach (var entry in CastIntoDictionaryEntries(null, field))
             {
                 dict.Add(entry.Key, CoerceValue(context, valueType, entry.Value, nestingLevel));
             }
@@ -492,35 +510,22 @@ Include the full type definition of {0}.
 
         private object Map(DeserializationContext context, Type targetType, object instance, TField field, int nestingLevel)
         {
-            var entries = CastIntoDictionaryEntries(field)
+            var props = GetPropertiesForType(context, targetType);
+            var entries = CastIntoDictionaryEntries(props, field)
                 .ToDictionary(e => e.Key, e => e.Value);
-            var props = GetPropertiesForType(targetType);
 
             foreach (var property in props)
             {
                 var propertyName = property.Key;
                 var propertyInfo = property.Value;
 
-                if (!entries.ContainsKey(propertyName))
+                if (entries.ContainsKey(propertyName))
                 {
-                    throw new InvalidOperationException(
-                        $"While trying to map some IRecord entry into an object of type {targetType.FullName}, " +
-                        $"we failed to find an expected property ({propertyName}).");
+                    SetPropertyValue(context, propertyInfo, entries[propertyName], instance, nestingLevel);
                 }
-
-                SetPropertyValue(context, propertyInfo, entries[propertyName], instance, nestingLevel);
             }
 
             return instance;
         }
-
-        private Dictionary<string, PropertyInfo> GetPropertiesForType(Type targetType)
-        {
-            return targetType
-                .GetProperties()
-                .Where(p => p.CanWrite)
-                .ToDictionary(p => p.Name);
-        }
-
     }
 }

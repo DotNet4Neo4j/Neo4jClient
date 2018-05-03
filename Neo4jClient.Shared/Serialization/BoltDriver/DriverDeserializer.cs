@@ -16,7 +16,7 @@ namespace Neo4jClient.Serialization.BoltDriver
     /// Deserializes based on Neo4j Binary Drivers (PackStream)
     /// </summary>
     /// <typeparam name="TResult">The type of the result object</typeparam>
-    public class DriverDeserializer<TResult> : BaseDeserializer<TResult, IStatementResult, IRecord, object>,
+    public class DriverDeserializer<TResult> : BaseDeserializer<TResult, IStatementResult, IStatementResult, IRecord, object>,
         IDriverDeserializer<TResult>
     {
         private IRecord currentRecord;
@@ -56,6 +56,11 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             return GenerateObjectGraph(results.Select(record => record).Take(100));
         }
 
+        protected override IStatementResult DeserializeIntoRecordCollections(IStatementResult results)
+        {
+            return results;
+        }
+
         protected override DeserializationContext GenerateContext(IStatementResult results, CypherResultMode resultMode)
         {
             var context = base.GenerateContext(results, resultMode);
@@ -83,7 +88,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             currentRecord = record;
         }
 
-        protected override IEnumerable<FieldEntry> GetFieldEntries(IRecord record)
+        protected override IEnumerable<FieldEntry> GetFieldEntries(string[] columnNames, IRecord record)
         {
             return record.Values.Select(pair => new FieldEntry(pair.Key, pair.Value));
         }
@@ -142,7 +147,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             }
         }
 
-        protected override IEnumerable<FieldEntry> CastIntoDictionaryEntries(object value)
+        protected override IEnumerable<FieldEntry> CastIntoDictionaryEntries(Dictionary<string, PropertyInfo> props, object value)
         {
             if (value is IDictionary dictionary)
             {
@@ -164,6 +169,14 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
                 $"Only maps, nodes, and relationships can be deserialized into dictionary entries.");
         }
 
+        protected override Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context, Type targetType)
+        {
+            return targetType
+                .GetProperties()
+                .Where(p => p.CanWrite)
+                .ToDictionary(p => p.Name);
+        }
+
         protected override TypeMapping GetTypeMapping(DeserializationContext context, Type type, int nestingLevel)
         {
             return null;
@@ -174,7 +187,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             deserialized = null;
             if (propertyType == typeof(PathsResultBolt))
             {
-                if (GetValueFromField(field) is IPath path)
+                if (field is IPath path)
                 {
                     deserialized = new PathsResultBolt(path);
                     return true;
@@ -186,7 +199,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
 
             if (propertyType == typeof(IPath))
             {
-                if (GetValueFromField(field) is IPath path)
+                if (field is IPath path)
                 {
                     deserialized = path;
                     return true;
@@ -198,7 +211,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
 
             if (propertyType == typeof(INode))
             {
-                if (GetValueFromField(field) is INode node)
+                if (field is INode node)
                 {
                     deserialized = node;
                     return true;
@@ -210,7 +223,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
 
             if (propertyType == typeof(IRelationship))
             {
-                if (GetValueFromField(field) is IRelationship relationship)
+                if (field is IRelationship relationship)
                 {
                     deserialized = relationship;
                     return true;

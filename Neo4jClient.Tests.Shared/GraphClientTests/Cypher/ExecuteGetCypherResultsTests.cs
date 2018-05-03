@@ -163,7 +163,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
     'outgoing_relationships' : 'http://localhost:8000/db/data/node/358/relationships/out',
     'data' : {
       'Bar' : 'BHP',
-      'Baz' : '1'
+      'Baz' : '1',
     },
     'all_typed_relationships' : 'http://localhost:8000/db/data/node/358/relationships/all/{-list|&|types}',
     'traverse' : 'http://localhost:8000/db/data/node/358/traverse/{returnType}',
