@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Neo4j.Driver.V1;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
@@ -59,6 +57,40 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
         protected override IStatementResult DeserializeIntoRecordCollections(IStatementResult results)
         {
             return results;
+        }
+
+        protected override bool IsNullArray(PropertyInfo propInfo, object field)
+        {
+            // Empty arrays in Cypher tables come back as things like [null] or [null,null]
+            // instead of just [] or null. We detect these scenarios and convert them to just
+            // null.
+
+            var propertyType = propInfo.PropertyType;
+
+            var isEnumerable =
+                propertyType.GetTypeInfo().IsGenericType &&
+                propertyType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+
+            var isArrayOrEnumerable =
+                isEnumerable ||
+                propertyType.IsArray;
+
+            if (!isArrayOrEnumerable)
+            {
+                return false;
+            }
+
+            if (!(field is IEnumerable))
+            {
+                return false;
+            }
+
+            var items = ((IEnumerable) field).Cast<object>().ToArray();
+            var hasOneOrMoreChildrenAndAllAreNull =
+                items.Any() &&
+                items.All(item => item == null);
+
+            return hasOneOrMoreChildrenAndAllAreNull;
         }
 
         protected override DeserializationContext GenerateContext(IStatementResult results, CypherResultMode resultMode)
@@ -186,6 +218,54 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             out object deserialized)
         {
             deserialized = null;
+            var typeInfo = propertyType.GetTypeInfo();
+            var genericTypeDefinition = typeInfo.IsGenericType ? typeInfo.GetGenericTypeDefinition() : null;
+            if (genericTypeDefinition == typeof(Node<>))
+            {
+                if (field is INode node)
+                {
+                    var nodeType = propertyType.GetGenericArguments()[0];
+                    var obj = DeserializeObject(context, nodeType, field);
+                    var nodeId = node.Id;
+
+                    var nodeConcreteClass = typeof(Node<>).MakeGenericType(nodeType);
+                    var nodeClassConstructor = nodeConcreteClass.GetConstructor(new[] {
+                        nodeType, typeof(long), typeof(IGraphClient)});
+                    deserialized = nodeClassConstructor?.Invoke(new[] {obj, nodeId, null});
+                    
+                    return deserialized != null;
+                }
+
+                throw new DeserializationException(
+                    $"A node must be returned by the IRecord entry in order to be deserialized into {propertyType.Name}");
+            }
+            if (genericTypeDefinition == typeof(RelationshipInstance<>))
+            {
+                if (field is IRelationship relationship)
+                {
+                    var dataType = propertyType.GetGenericArguments()[0];
+                    var obj = DeserializeObject(context, dataType, field);
+                    var relationshipId = relationship.Id;
+
+                    var nodeConcreteClass = typeof(RelationshipInstance<>).MakeGenericType(dataType);
+                    var nodeClassConstructor = nodeConcreteClass.GetConstructor(new[] {
+                        typeof(long), typeof(long), typeof(long), typeof(string), dataType});
+                    deserialized = nodeClassConstructor?.Invoke(new[]
+                    {
+                        relationshipId,
+                        relationship.StartNodeId,
+                        relationship.EndNodeId,
+                        relationship.Type,
+                        obj
+                    });
+
+                    return deserialized != null;
+                }
+
+                throw new DeserializationException(
+                    $"A relationship must be returned by the IRecord entry in order to be deserialized into {propertyType.Name}");
+            }
+
             if (propertyType == typeof(PathsResultBolt))
             {
                 if (field is IPath path)

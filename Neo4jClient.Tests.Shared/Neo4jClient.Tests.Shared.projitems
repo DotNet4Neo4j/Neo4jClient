@@ -126,6 +126,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\CustomJsonDeserializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\CustomJsonSerializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\CypherJsonDeserializerTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DriverDeserializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\UserSuppliedSerializationTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestsImplementFixture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilitiesTests.cs" />

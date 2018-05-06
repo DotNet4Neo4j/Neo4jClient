@@ -82,6 +82,7 @@ Include the full type definition of {0}.
         protected abstract bool TryCastIntoDateTimeOffset(TField field, out DateTimeOffset? dt);
         protected abstract Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context,
             Type targetType);
+        protected abstract bool IsNullArray(PropertyInfo propInfo, TField field);
         #endregion
 
         #region Overridable Methods
@@ -101,7 +102,7 @@ Include the full type definition of {0}.
             return context.TypeMappings.FirstOrDefault(m => m.ShouldTriggerForPropertyType(nestingLevel, type));
         }
 
-        protected virtual bool IsNull(PropertyInfo propInfo, TField field)
+        protected virtual bool IsNull(TField field)
         {
             return field == null;
         }
@@ -139,7 +140,12 @@ Include the full type definition of {0}.
 
         public TResult DeserializeObject(DeserializationContext context, TField instance)
         {
-            return (TResult)CoerceValue(context, typeof(TResult), instance, 0);
+            return (TResult)DeserializeObject(context, typeof(TResult), instance);
+        }
+
+        public object DeserializeObject(DeserializationContext context, Type resultType, TField instance)
+        {
+            return CoerceValue(context, resultType, instance, 0);
         }
 
         protected IEnumerable<TResult> DeserializeInSingleColumnMode(DeserializationContext context, TRecordCollection results)
@@ -242,7 +248,7 @@ Include the full type definition of {0}.
                 .Select(entry =>
                 {
                     var property = propertiesDictionary[entry.Key];
-                    if (IsNull(property, entry.Value))
+                    if (IsNull(entry.Value) || IsNullArray(property, entry.Value))
                     {
                         return null;
                     }
@@ -268,7 +274,7 @@ Include the full type definition of {0}.
             foreach (var entry in GetFieldEntries(columnNames, record))
             {
                 var property = propertiesDictionary[entry.Key];
-                if (IsNull(property, entry.Value))
+                if (IsNull(entry.Value) || IsNullArray(property, entry.Value))
                 {
                     continue;
                 }
@@ -281,7 +287,7 @@ Include the full type definition of {0}.
 
         private void SetPropertyValue(DeserializationContext context, PropertyInfo property, TField value, object instance, int nestingLevel)
         {
-            if (IsNull(null, value))
+            if (IsNull(value))
             {
                 return;
             }
@@ -304,7 +310,7 @@ Include the full type definition of {0}.
 
         private object CoerceValue(DeserializationContext context, Type valueType, TField field, int nestingLevel, bool useTypeMappings = true)
         {
-            if (IsNull(null, field))
+            if (IsNull(field))
             {
                 return null;
             }

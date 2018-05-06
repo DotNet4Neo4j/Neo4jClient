@@ -199,19 +199,14 @@ namespace Neo4jClient.Serialization.Json
             return properties.ToDictionary(p => p.Name, p => p.Property);
         }
 
-        protected override bool IsNull(PropertyInfo propertyInfo, JToken value)
+        protected override bool IsNull(JToken value)
         {
             if (value == null)
             {
                 return true;
             }
 
-            if (value.Type == JTokenType.Null)
-            {
-                return true;
-            }
-
-            return propertyInfo != null && IsNullArray(propertyInfo, value);
+            return value.Type == JTokenType.Null;
         }
 
         protected override object GetValueFromField(JToken field)
@@ -433,7 +428,7 @@ This means no query was emitted, so a method that doesn't care about getting res
             return root;
         }
 
-        private bool IsNullArray(PropertyInfo property, JToken cell)
+        protected override bool IsNullArray(PropertyInfo property, JToken cell)
         {
             // Empty arrays in Cypher tables come back as things like [null] or [null,null]
             // instead of just [] or null. We detect these scenarios and convert them to just
