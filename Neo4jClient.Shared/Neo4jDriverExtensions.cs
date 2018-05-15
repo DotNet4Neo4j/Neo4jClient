@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Globalization;
+using System.Runtime.Serialization;
 using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
@@ -79,7 +81,9 @@ namespace Neo4jClient
         private static object SerializeObject(Type type, object value, IList<JsonConverter> converters, IGraphClient gc)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute))))
+                .Where(pi =>
+                    !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute)) ||
+                      pi.IsDefined(typeof(IgnoreDataMemberAttribute))))
                 .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc));
         }
 
