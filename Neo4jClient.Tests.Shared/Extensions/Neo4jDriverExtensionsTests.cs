@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4jClient.Cypher;
@@ -29,6 +32,19 @@ namespace Neo4jClient.Test.Extensions
     internal class ClassWithDateTimeOffset
     {
         public DateTimeOffset Dt { get; set; }
+    }
+
+    internal class ClassWithJsonAttribute
+    {
+        [JsonProperty(PropertyName = "AnotherName")]
+        public string Prop { get; set; }
+    }
+
+    [DataContract]
+    internal class ClassWithDataMemberAttribute
+    {
+        [DataMember(Name = "AnotherName")]
+        public string Prop { get; set; }
     }
 
     public class Neo4jDriverExtensionsTests
@@ -73,6 +89,32 @@ namespace Neo4jClient.Test.Extensions
             private class Foo
             {
                 public string Bar { get; set; }
+            }
+
+            public static IEnumerable<object[]> GenerateObjectToSerialize()
+            {
+                return new[]
+                {
+                    new object[] {new ClassWithJsonAttribute() {Prop = "Stuff"}},
+                    new object[] {new ClassWithDataMemberAttribute() {Prop = "Stuff"}}
+                };
+            }
+
+            [Theory]
+            [MemberData(nameof(GenerateObjectToSerialize))]
+            public void SerializeObjectWithDifferentPropertyName(object toSerialize)
+            {
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node {p})")
+                    .WithParam("p", toSerialize);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("p");
+                var serializedObj = (Dictionary<string, object>)actual["p"];
+                serializedObj.Keys.Should().Contain("AnotherName");
+                serializedObj.Keys.Should().NotContain("Prop");
+                serializedObj["AnotherName"].Should().Be("Stuff");
             }
 
             [Fact]

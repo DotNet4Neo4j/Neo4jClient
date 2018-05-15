@@ -84,7 +84,22 @@ namespace Neo4jClient
                 .Where(pi =>
                     !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute)) ||
                       pi.IsDefined(typeof(IgnoreDataMemberAttribute))))
-                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc));
+                .ToDictionary(GetPropertyName, pi => Serialize(pi.GetValue(value), converters, gc));
+        }
+
+        private static string GetPropertyName(PropertyInfo pi)
+        {
+            var propertyNameFromAttribute = ((DataMemberAttribute) pi
+                    .GetCustomAttributes(typeof(DataMemberAttribute), true)
+                    .SingleOrDefault())
+                ?.Name;
+
+            var propertyNameFromJsonAttribute = ((JsonPropertyAttribute) pi
+                    .GetCustomAttributes(typeof(JsonPropertyAttribute), true)
+                    .SingleOrDefault())
+                ?.PropertyName;
+
+            return propertyNameFromAttribute ?? propertyNameFromJsonAttribute ?? pi.Name;
         }
 
         private static object SerializeCollection(IEnumerable value, IList<JsonConverter> converters, IGraphClient gc)
