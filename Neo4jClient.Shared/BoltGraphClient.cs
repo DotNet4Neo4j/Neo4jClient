@@ -120,6 +120,13 @@ namespace Neo4jClient
             new EnumValueConverter()
         };
 
+        internal static readonly ITypeSerializer[] DefaultSerializers =
+        {
+            new NullableEnumValueSerializer(),
+            new TimeZoneInfoSerializer(),
+            new EnumValueSerializer()
+        };
+
         private static readonly DefaultContractResolver DefaultJsonContractResolver = new DefaultContractResolver();
 
         private readonly string password;
@@ -504,6 +511,8 @@ namespace Neo4jClient
             connectTask.Wait();
         }
 
+        public List<ITypeSerializer> TypeSerializers { get; }
+
         /// <inheritdoc />
         public Task ConnectAsync(NeoServerConfiguration configuration = null)
         {
@@ -541,6 +550,7 @@ namespace Neo4jClient
         }
 
         /// <inheritdoc />
+        [Obsolete(NotValidForBolt)]
         public List<JsonConverter> JsonConverters { get; }
 
         /// <inheritdoc />

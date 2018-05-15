@@ -12,7 +12,8 @@ using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Serialization.Json
 {
-    public class CypherJsonDeserializer<TResult> : BaseDeserializer<TResult, string, JToken, JToken, JToken>, ICypherJsonDeserializer<TResult>
+    public class CypherJsonDeserializer<TResult> : BaseDeserializer<TResult, string, JToken, JToken, JToken, JsonConverter>,
+        ICypherJsonDeserializer<TResult>
     {
         readonly IGraphClient client;
         private readonly CypherResultFormat resultFormat;
@@ -175,7 +176,7 @@ namespace Neo4jClient.Serialization.Json
             return true;
         }
 
-        protected override Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context, Type targetType)
+        protected override Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext<JsonConverter> context, Type targetType)
         {
             var camelCase = (context.JsonContractResolver is CamelCasePropertyNamesContractResolver);
             var camel = new Func<string, string>(name => string.Format("{0}{1}",
@@ -219,9 +220,14 @@ namespace Neo4jClient.Serialization.Json
             return field.AsString();
         }
 
-        protected override DeserializationContext GenerateContext(JToken results, CypherResultMode resultMode)
+        protected override DeserializationContext<JsonConverter> GenerateContext(JToken results, CypherResultMode resultMode)
         {
-            var context = base.GenerateContext(results, resultMode);
+            var context = new DeserializationContext<JsonConverter>
+            {
+                Culture = CultureInfo.InvariantCulture,
+                Converters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>()).ToArray(),
+                JsonContractResolver = client.JsonContractResolver,
+            };
             var jsonTypeMappings = new List<TypeMapping>
             {
                 new TypeMapping
@@ -268,11 +274,11 @@ namespace Neo4jClient.Serialization.Json
             return context;
         }
 
-        protected override bool TryDeserializeCustomType(DeserializationContext context, Type propertyType, JToken field,
+        protected override bool TryDeserializeCustomType(DeserializationContext<JsonConverter> context, Type propertyType, JToken field,
             out object deserialized)
         {
             deserialized = null;
-            var converter = context.JsonConverters?.FirstOrDefault(c => c.CanConvert(propertyType));
+            var converter = context.Converters?.FirstOrDefault(c => c.CanConvert(propertyType));
             if (converter == null)
             {
                 return false;

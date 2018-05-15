@@ -28,6 +28,8 @@ namespace Neo4jClient
 
             JsonConverters = new List<JsonConverter>();
             JsonConverters.AddRange(DefaultJsonConverters);
+            TypeSerializers = new List<ITypeSerializer>();
+            TypeSerializers.AddRange(DefaultSerializers);
             JsonContractResolver = DefaultJsonContractResolver;
 
             ExecutionConfiguration = new ExecutionConfiguration

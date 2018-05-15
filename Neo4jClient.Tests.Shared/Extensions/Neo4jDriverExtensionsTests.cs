@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4jClient.Cypher;
+using Neo4jClient.Serialization;
 using Neo4jClient.Test.Fixtures;
 using Newtonsoft.Json;
 using Xunit;
@@ -47,7 +48,38 @@ namespace Neo4jClient.Test.Extensions
         public string Prop { get; set; }
     }
 
-    public class Neo4jDriverExtensionsTests
+    internal class ClassHandledByTypeConverter
+    {
+        public int Data { get; set; }
+    }
+
+    internal class ClassToSerializeWithHandler
+    {
+        public ClassHandledByTypeConverter Prop { get; set; }
+    }
+
+    internal class TestSerializer : ITypeSerializer
+    {
+        public bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(ClassHandledByTypeConverter);
+        }
+
+        public object Deserialize(Type objectType, object value)
+        {
+            return new ClassHandledByTypeConverter
+            {
+                Data = (int) Convert.ChangeType(value, typeof(int))
+            };
+        }
+
+        public object Serialize(object value)
+        {
+            return ((ClassHandledByTypeConverter) value).Data;
+        }
+    }
+
+    public class Neo4jDriverExtensionsTests 
     {
         public class ToNeo4jDriverParametersMethod : IClassFixture<CultureInfoSetupFixture>
         {
@@ -56,7 +88,8 @@ namespace Neo4jClient.Test.Extensions
                 get
                 {
                     var mockGc = new Mock<IRawGraphClient>();
-                    mockGc.Setup(x => x.JsonConverters).Returns(new List<JsonConverter>());
+                    var boltGc = mockGc.As<IBoltGraphClient>();
+                    boltGc.Setup(x => x.TypeSerializers).Returns(new List<ITypeSerializer>() {new TestSerializer()});
                     return mockGc;
                 }
             }
@@ -98,6 +131,29 @@ namespace Neo4jClient.Test.Extensions
                     new object[] {new ClassWithJsonAttribute() {Prop = "Stuff"}},
                     new object[] {new ClassWithDataMemberAttribute() {Prop = "Stuff"}}
                 };
+            }
+
+            [Fact]
+            public void SerializeWithConverter()
+            {
+                var toSerialize = new ClassToSerializeWithHandler
+                {
+                    Prop = new ClassHandledByTypeConverter()
+                    {
+                        Data = 5
+                    }
+                };
+
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node {p})")
+                    .WithParam("p", toSerialize);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("p");
+                var serializedObj = (Dictionary<string, object>)actual["p"];
+                serializedObj.Keys.Should().Contain("Prop");
+                serializedObj["Prop"].Should().Be(5);
             }
 
             [Theory]

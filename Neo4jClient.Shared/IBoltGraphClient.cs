@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
@@ -19,6 +20,8 @@ namespace Neo4jClient
         ExecutionConfiguration ExecutionConfiguration { get; }
 
         bool IsConnected { get; }
+
+        List<ITypeSerializer> TypeSerializers { get; }
 
         Task ConnectAsync(NeoServerConfiguration configuration = null);
     }

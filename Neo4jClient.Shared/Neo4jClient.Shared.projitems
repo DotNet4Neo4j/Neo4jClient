@@ -184,7 +184,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)RootNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\BaseDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\DriverDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\EnumValueSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\IDriverDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\NullableEnumValueSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\TimeZoneInfoSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DateDeserializerMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CustomJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CustomJsonSerializer.cs" />
@@ -198,6 +201,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\PartialDeserializationContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\TimeZoneInfoConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\TypeConverterBasedJsonConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ITypeSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\BoltResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\IInternalTransactionalGraphClient.cs" />

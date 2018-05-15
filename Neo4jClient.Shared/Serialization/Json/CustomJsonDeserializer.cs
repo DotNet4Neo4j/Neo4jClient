@@ -30,11 +30,11 @@ namespace Neo4jClient.Serialization.Json
 
         public T Deserialize<T>(string contents) where T : new()
         {
-            var context = new DeserializationContext
+            var context = new DeserializationContext<JsonConverter>
             {
                 Culture = culture,
                 JsonContractResolver = jsonResolver,
-                JsonConverters = jsonConverters.ToArray(),
+                Converters = jsonConverters.ToArray(),
                 TypeMappings = new TypeMapping[0]
             };
 
@@ -74,13 +74,13 @@ namespace Neo4jClient.Serialization.Json
             jsonResolver = resolver ?? GraphClient.DefaultJsonContractResolver;
         }
 
-        protected override DeserializationContext GenerateContext(JToken results, CypherResultMode resultMode)
+        protected override DeserializationContext<JsonConverter> GenerateContext(JToken results, CypherResultMode resultMode)
         {
-            var context = new DeserializationContext
+            var context = new DeserializationContext<JsonConverter>
             {
                 Culture = culture,
                 JsonContractResolver = jsonResolver,
-                JsonConverters = jsonConverters.ToArray(),
+                Converters = jsonConverters.ToArray(),
                 TypeMappings = new TypeMapping[0]
 
             };

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -15,13 +16,15 @@ namespace Neo4jClient.Serialization.BoltDriver
     /// Deserializes based on Neo4j Binary Drivers (PackStream)
     /// </summary>
     /// <typeparam name="TResult">The type of the result object</typeparam>
-    public class DriverDeserializer<TResult> : BaseDeserializer<TResult, IStatementResult, IStatementResult, IRecord, object>,
+    public class DriverDeserializer<TResult> : BaseDeserializer<TResult, IStatementResult, IStatementResult, IRecord, object, ITypeSerializer>,
         IDriverDeserializer<TResult>
     {
         private IRecord currentRecord;
+        private readonly IGraphClient client;
 
         public DriverDeserializer(IGraphClient client, CypherResultMode resultMode) : base(client, resultMode)
         {
+            this.client = client;
         }
 
         protected override string GenerateExceptionDetails(Exception exception, IStatementResult results)
@@ -94,11 +97,15 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             return hasOneOrMoreChildrenAndAllAreNull;
         }
 
-        protected override DeserializationContext GenerateContext(IStatementResult results, CypherResultMode resultMode)
+        protected override DeserializationContext<ITypeSerializer> GenerateContext(IStatementResult results, CypherResultMode resultMode)
         {
-            var context = base.GenerateContext(results, resultMode);
-            context.TypeMappings = new TypeMapping[] { };
-            return context;
+            return new DeserializationContext<ITypeSerializer>
+            {
+                Culture = CultureInfo.InvariantCulture,
+                Converters = Enumerable.Reverse((client as IBoltGraphClient)?.TypeSerializers ?? new List<ITypeSerializer>()).ToArray(),
+                JsonContractResolver = client.JsonContractResolver,
+                TypeMappings = new TypeMapping[] { }
+            };
         }
 
         protected override string[] GetColumnNames(IStatementResult results)
@@ -202,7 +209,7 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
                 $"Only maps, nodes, and relationships can be deserialized into dictionary entries.");
         }
 
-        protected override Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext context, Type targetType)
+        protected override Dictionary<string, PropertyInfo> GetPropertiesForType(DeserializationContext<ITypeSerializer> context, Type targetType)
         {
             return targetType
                 .GetProperties()
@@ -222,15 +229,23 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
                 .ToDictionary(p => p.Name, p => p.Property);
         }
 
-        protected override TypeMapping GetTypeMapping(DeserializationContext context, Type type, int nestingLevel)
+        protected override TypeMapping GetTypeMapping(DeserializationContext<ITypeSerializer> context, Type type, int nestingLevel)
         {
             return null;
         }
 
-        protected override bool TryDeserializeCustomType(DeserializationContext context, Type propertyType, object field,
+        protected override bool TryDeserializeCustomType(DeserializationContext<ITypeSerializer> context, Type propertyType, object field,
             out object deserialized)
         {
             deserialized = null;
+
+            var converter = context.Converters?.FirstOrDefault(c => c.CanConvert(propertyType));
+            if (converter != null)
+            {
+                deserialized = converter.Deserialize(propertyType, field);
+                return true;
+            }
+
             var typeInfo = propertyType.GetTypeInfo();
             var genericTypeDefinition = typeInfo.IsGenericType ? typeInfo.GetGenericTypeDefinition() : null;
             if (genericTypeDefinition == typeof(Node<>))
