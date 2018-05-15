@@ -3,6 +3,7 @@ using System.Linq;
 using NSubstitute;
 using Xunit;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Moq;
 using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
@@ -637,7 +638,7 @@ namespace Neo4jClient.Tests.Shared.Serialization
         {
             // Arrange
             var client = Substitute.For<IGraphClient>();
-            var deserializer = new DriverDeserializer<UserWithJsonPropertyAttribute>(client, CypherResultMode.Set);
+            var deserializer = new DriverDeserializer<UserWithDataMemberPropertyAttribute>(client, CypherResultMode.Set);
             var content = new TestStatementResult(
                 new[] {"Foo"},
                 GenerateMockRecord(new Dictionary<string, object>()
@@ -922,9 +923,10 @@ namespace Neo4jClient.Tests.Shared.Serialization
             public IEnumerable<Node<object>> Fans { get; set; }
         }
 
-        public class UserWithJsonPropertyAttribute
+        [DataContract]
+        public class UserWithDataMemberPropertyAttribute
         {
-            [JsonProperty("givenName")]
+            [DataMember(Name = "givenName")]
             public string Name { get; set; }
         }
 

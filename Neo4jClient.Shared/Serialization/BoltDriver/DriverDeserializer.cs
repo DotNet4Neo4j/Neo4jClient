@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Neo4j.Driver.V1;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
@@ -206,7 +207,19 @@ Unconsumed Results Object Graph (in JSON, max 100 records): {2}";
             return targetType
                 .GetProperties()
                 .Where(p => p.CanWrite)
-                .ToDictionary(p => p.Name);
+                .Select(p =>
+                {
+                    var propertyNameFromAttribute = ((DataMemberAttribute)p.GetCustomAttributes(typeof(DataMemberAttribute), true)
+                        .SingleOrDefault())
+                        ?.Name;
+
+                    return new
+                    {
+                        Name = propertyNameFromAttribute ?? p.Name,
+                        Property = p
+                    };
+                })
+                .ToDictionary(p => p.Name, p => p.Property);
         }
 
         protected override TypeMapping GetTypeMapping(DeserializationContext context, Type type, int nestingLevel)
