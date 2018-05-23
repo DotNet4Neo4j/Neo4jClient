@@ -69,6 +69,20 @@ namespace Neo4jClient.Test.Extensions
             }
 
             [Fact]
+            public void SerializesTimeSpanCorrectly()
+            {
+                var ts = new TimeSpan(1, 2, 3, 4, 5);
+                
+                var query = new CypherFluentQuery(MockGc.Object)
+                    .WithParam("tsParam", ts);
+
+                var actual = query.Query.ToNeo4jDriverParameters(MockGc.Object);
+                actual.Keys.Should().Contain("tsParam");
+                var tsParam = actual["tsParam"].ToString();
+                tsParam.Should().Be("1.02:03:04.0050000");
+            }
+
+            [Fact]
             public void SerializesArraysOfSimpleTypesCorrectly()
             {
                 var list = new [] { "foo", "bar" };
