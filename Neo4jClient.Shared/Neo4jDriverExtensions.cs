@@ -13,6 +13,7 @@ namespace Neo4jClient
     public static class Neo4jDriverExtensions
     {
         private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
+        private const string DefaultTimeSpanFormat = @"d\.hh\:mm\:ss\.fffffff";
 
         public static IStatementResult Run(this ISession session, CypherQuery query, IGraphClient gc)
         {
@@ -82,6 +83,11 @@ namespace Neo4jClient
                 return SerializeDateTimeOffset((DateTimeOffset) instance);
             }
 
+            if (type == typeof(TimeSpan))
+            {
+                return SerializeTimeSpan((TimeSpan) instance);
+            }
+
             if (type == typeof(string) || typeInfo.IsPrimitive || type == typeof(decimal))
             {
                 return instance;
@@ -106,6 +112,10 @@ namespace Neo4jClient
             return dateTime.ToString(DefaultDateTimeFormat, CultureInfo.CurrentCulture);
         }
 
+        private static string SerializeTimeSpan(TimeSpan timeSpan)
+        {
+            return timeSpan.ToString(DefaultTimeSpanFormat, CultureInfo.CurrentCulture);
+        }
 
         private static object SerializeDictionary(Type type, object value)
         {

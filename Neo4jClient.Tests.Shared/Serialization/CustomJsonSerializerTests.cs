@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using FluentAssertions;
 using Xunit;
 using Neo4jClient.Serialization;
 using Neo4jClient.Test.Fixtures;
@@ -41,10 +42,11 @@ namespace Neo4jClient.Test.Serialization
                 };
 
             // Act
-            var result = serializer.Serialize(model.Foo);
+            var result = serializer.Serialize(model);
 
-            // Assert
-            Assert.Equal("400.13:03:02.0100000", result.Replace("\"", ""));
+            const string expected = "{\r\n  \"Foo\": \"400.13:03:02.0100000\"\r\n}";
+
+            result.Should().Be(expected);
         }
 
         [Fact]
