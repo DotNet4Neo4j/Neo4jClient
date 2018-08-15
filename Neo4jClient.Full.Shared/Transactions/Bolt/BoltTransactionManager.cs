@@ -19,18 +19,53 @@ namespace Neo4jClient.Transactions
 #if NET45
         [ThreadStatic] private static IScopedTransactions<BoltTransactionScopeProxy> scopedTransactions;
 #else
-        private static IScopedTransactions<BoltTransactionScopeProxy> scopedTransactions;
+        private static AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>> scopedTransactions;
 #endif
 
+#if NET45
         internal static IScopedTransactions<BoltTransactionScopeProxy> ScopedTransactions
         {
             get => scopedTransactions ?? (scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions());
             set => scopedTransactions = value;
         }
+#else
+        internal static IScopedTransactions<BoltTransactionScopeProxy> ScopedTransactions
+        {
+            // [See Issue #284]
+            get
+            {
+                if (scopedTransactions != null && scopedTransactions.Value != null)
+                {
+                    return scopedTransactions.Value;
+                }
+
+                scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
+                {
+                    Value = ThreadContextHelper.CreateBoltScopedTransactions()
+                };
+
+                return scopedTransactions.Value;
+            }
+            set
+            {
+                if (scopedTransactions == null)
+                {
+                    scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
+                    {
+                        Value = ThreadContextHelper.CreateBoltScopedTransactions()
+                    };
+                }
+                else
+                {
+                    scopedTransactions.Value = value;
+                }
+            }
+        }
+#endif
 
 
         // holds the transaction contexts for transactions from the System.Transactions framework
-        private readonly IDictionary<string, BoltTransactionContext> dtcContexts; 
+        private readonly IDictionary<string, BoltTransactionContext> dtcContexts;
         private readonly BoltTransactionPromotableSinglePhasesNotification promotable;
         private readonly ITransactionalGraphClient client;
 
@@ -39,8 +74,15 @@ namespace Neo4jClient.Transactions
             this.client = client;
             // specifies that we are about to use variables that depend on OS threads
             Thread.BeginThreadAffinity();
-            scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
 
+#if NET45
+            scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
+#else
+            scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
+            {
+                Value = ThreadContextHelper.CreateBoltScopedTransactions()
+            };
+#endif
             // this object enables the interacion with System.Transactions and MSDTC, at first by
             // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
             // then it notifies the library how to do it.
@@ -63,7 +105,7 @@ namespace Neo4jClient.Transactions
                 // associate it with the ambient transaction
                 txContext = new BoltTransactionContext(promotable.AmbientTransaction);
                 dtcContexts[txId] = txContext;
-                
+
                 return txContext;
             }
         }
@@ -101,7 +143,8 @@ namespace Neo4jClient.Transactions
             {
                 if (ScopedTransactions == null || ScopedTransactions.Count == 0)
                     return null;
-                return scopedTransactions.Peek();
+
+                return ScopedTransactions.Peek();
             }
         }
 
@@ -146,7 +189,7 @@ namespace Neo4jClient.Transactions
 
         private BoltTransactionContext GenerateTransaction()
         {
-            var session = ((BoltGraphClient) client).Driver.Session();
+            var session = ((BoltGraphClient)client).Driver.Session();
             var transaction = session.BeginTransaction();
             return new BoltTransactionContext(new BoltNeo4jTransaction(session, transaction));
         }
