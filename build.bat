@@ -6,9 +6,9 @@ if "%config%" == "" (
    set config=Release
 )
 
-set version=-Version 1.0.0
+set nuget_version=-Version 2.0.0.0
 if not "%PackageVersion%" == "" (
-   set version=-Version %PackageVersion%
+   set nuget_version=-Version %PackageVersion%
 )
 
 REM Restore packages
@@ -16,8 +16,25 @@ tools\nuget.exe restore Neo4jClient.sln
 if not "%errorlevel%"=="0" goto failure
 @echo Packages restored - on to build...
 
+pushd tools
+REM Find location of the latest MSBuild using vswhere: https://github.com/Microsoft/vswhere
+for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath`) do (
+  set InstallDir=%%i
+)
+
+set msbuild=""
+
+if exist "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" (
+  set msbuild="%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe"
+)
+
+if %msbuild%=="" goto failure
+
+echo MSBuild located at "%msbuild%"
+popd
+
 REM Build
-"%programfiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe" Neo4jClient.sln /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false
+%msbuild% /p:Configuration="%config%" /m /v:M /fl /flp:LogFile=msbuild.log;Verbosity=Normal /nr:false
 if not "%errorlevel%"=="0" goto failure
 @echo Built and onto tests....
 
@@ -37,12 +54,12 @@ if not "%errorlevel%"=="0" goto failure
 
 REM Package
 mkdir Artifacts
-tools\nuget.exe pack "Neo4jClient.nuspec" -o Artifacts -p Configuration=%config% %version%
+tools\nuget.exe pack "Neo4jClient.nuspec" -o Artifacts -p Configuration=%config% %nuget_version%
 if not "%errorlevel%"=="0" goto failure
 @echo Packed and ready to roll!
 
 :success
-exit 0
+exit /b 0
 
 :failure
-exit -1
+exit /b -1

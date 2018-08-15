@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
 
 namespace Neo4jClient.Transactions
 {
@@ -16,7 +15,7 @@ namespace Neo4jClient.Transactions
         }
     }
 
-    internal interface IScopedTransactions<T> where T:class
+    internal interface IScopedTransactions<T> where T : class
     {
         int Count { get; }
         bool HasValue { get; }
@@ -25,66 +24,34 @@ namespace Neo4jClient.Transactions
         T Peek();
     }
 
-#if NET45
-        internal class ThreadContextWrapper<T> 
-            : IScopedTransactions<T> 
-            where T:class
-        {
-            private readonly Stack<T> _stack;
-
-            public ThreadContextWrapper()
-            {
-                _stack = new Stack<T>();
-            }
-
-            public int Count => _stack?.Count ?? 0;
-            public bool HasValue => _stack != null;
-
-
-            public T Peek()
-            {
-                return _stack.Peek();
-            }
-
-            public T Pop()
-            {
-                return _stack.Pop();
-            }
-
-            public void Push(T item)
-            {
-                _stack.Push(item);
-            }
-        }
-#else
-    internal class ThreadContextWrapper<T> 
-        : IScopedTransactions<T> 
-        where T:class
+    internal class ThreadContextWrapper<T>
+        : IScopedTransactions<T>
+        where T : class
     {
-        private static AsyncLocal<Stack<T>> asyncLocal;
+        private readonly Stack<T> _stack;
 
         public ThreadContextWrapper()
         {
-            asyncLocal = new AsyncLocal<Stack<T>> {Value = new Stack<T>()};
+            _stack = new Stack<T>();
         }
 
-        public int Count => asyncLocal.Value?.Count ?? 0;
-        public bool HasValue => asyncLocal.Value != null;
+        public int Count => _stack?.Count ?? 0;
+        public bool HasValue => _stack != null;
+
 
         public T Peek()
         {
-            return asyncLocal.Value?.Peek();
+            return _stack.Peek();
         }
 
         public T Pop()
         {
-            return asyncLocal.Value?.Pop();
+            return _stack.Pop();
         }
 
         public void Push(T item)
         {
-            asyncLocal.Value.Push(item);
+            _stack.Push(item);
         }
     }
-#endif
 }
