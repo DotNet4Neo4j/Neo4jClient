@@ -102,5 +102,26 @@ namespace Neo4jClient.Test.Cypher
             const string expected = "MATCH null";
             Assert.Equal(expected, query.DebugQueryText);
         }
+
+        [Fact]        
+        public void DebugQueryTextShouldSubstituteBothParameterSyntaxStyles()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("$paramDollar")
+                .WithParams(new
+                {
+                    paramDollar = 123
+                })
+                .Match("{paramBraces}")
+                .WithParams(new
+                {
+                    paramBraces = 456
+                })
+                .Query;
+
+            const string expected = "MATCH 123\r\nMATCH 456";
+            Assert.Equal(expected, query.DebugQueryText);
+        }
     }
 }
