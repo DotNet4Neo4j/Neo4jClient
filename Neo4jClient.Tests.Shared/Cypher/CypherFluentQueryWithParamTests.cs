@@ -92,8 +92,10 @@ namespace Neo4jClient.Test.Cypher
             public string CamelCaseProperty { get; set; }
         }
 
-        [Fact]
-        public void ComplexObjectInWithParam()
+        [Theory]
+        [InlineData("{obj}")]
+        [InlineData("$obj")]
+        public void ComplexObjectInWithParam(string param)
         {
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
@@ -101,7 +103,7 @@ namespace Neo4jClient.Test.Cypher
             // Act
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference) 3)
-                .CreateUnique("n-[:X]-(leaf {obj})")
+                .CreateUnique($"n-[:X]-(leaf {param})")
                 .WithParam("obj", CreateComplexObjForWithParamTest())
                 .Query;
 
@@ -127,8 +129,10 @@ namespace Neo4jClient.Test.Cypher
             };
         }
 
-        [Fact]
-        public void ComplexObjectInWithParamCamelCase()
+        [Theory]
+        [InlineData("{obj}")]
+        [InlineData("$obj")]
+        public void ComplexObjectInWithParamCamelCase(string param)
         {
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
@@ -137,7 +141,7 @@ namespace Neo4jClient.Test.Cypher
             // Act
             var query = new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
-                .CreateUnique("n-[:X]-(leaf {obj})")
+                .CreateUnique($"n-[:X]-(leaf {param})")
                 .WithParam("obj", CreateComplexObjForWithParamTest())
                 .Query;
 

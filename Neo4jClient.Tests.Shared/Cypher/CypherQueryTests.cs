@@ -30,12 +30,14 @@ namespace Neo4jClient.Test.Cypher
             Assert.Equal(expected, query.DebugQueryText);
         }
 
-        [Fact]
-        public void DebugQueryTextShouldSubstituteNumericParameters()
+        [Theory]
+        [InlineData("{param}")]
+        [InlineData("$param")]
+        public void DebugQueryTextShouldSubstituteNumericParameters(string match)
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Match("{param}")
+                .Match(match)
                 .WithParams(new
                 {
                     param = 123
@@ -46,12 +48,14 @@ namespace Neo4jClient.Test.Cypher
             Assert.Equal(expected, query.DebugQueryText);
         }
 
-        [Fact]
-        public void DebugQueryTextShouldSubstituteStringParametersWithEncoding()
+        [Theory]
+        [InlineData("{param}")]
+        [InlineData("$param")]
+        public void DebugQueryTextShouldSubstituteStringParametersWithEncoding(string match)
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Match("{param}")
+                .Match(match)
                 .WithParams(new
                 {
                     param = "hello"
@@ -62,12 +66,14 @@ namespace Neo4jClient.Test.Cypher
             Assert.Equal(expected, query.DebugQueryText);
         }
 
-        [Fact]
-        public void DebugQueryTextShouldSubstituteStringParametersWithEncodingOfSpecialCharacters()
+        [Theory]
+        [InlineData("{param}")]
+        [InlineData("$param")]
+        public void DebugQueryTextShouldSubstituteStringParametersWithEncodingOfSpecialCharacters(string match)
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Match("{param}")
+                .Match(match)
                 .WithParams(new
                 {
                     param = "hel\"lo"
@@ -78,13 +84,15 @@ namespace Neo4jClient.Test.Cypher
             Assert.Equal(expected, query.DebugQueryText);
         }
 
-        [Fact]
+        [Theory]
+        [InlineData("{param}")]
+        [InlineData("$param")]
         //[Description("https://github.com/Readify/Neo4jClient/issues/50")]
-        public void DebugQueryTextShouldSubstituteNullParameters()
+        public void DebugQueryTextShouldSubstituteNullParameters(string match)
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Match("{param}")
+                .Match(match)
                 .WithParams(new
                 {
                     param = (string)null
@@ -92,6 +100,27 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             const string expected = "MATCH null";
+            Assert.Equal(expected, query.DebugQueryText);
+        }
+
+        [Fact]        
+        public void DebugQueryTextShouldSubstituteBothParameterSyntaxStyles()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Match("$paramDollar")
+                .WithParams(new
+                {
+                    paramDollar = 123
+                })
+                .Match("{paramBraces}")
+                .WithParams(new
+                {
+                    paramBraces = 456
+                })
+                .Query;
+
+            const string expected = "MATCH 123\r\nMATCH 456";
             Assert.Equal(expected, query.DebugQueryText);
         }
     }
