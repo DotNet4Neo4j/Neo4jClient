@@ -33,6 +33,26 @@ namespace Neo4jClient.Test.Serialization
                 public NestedClass NestedClass { get; set; }
             }
 
+            private class NeoDateTimeSerializer : JsonConverter
+            {
+                public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+                {
+                    var dt = (DateTime)value;
+                    writer.WriteValue(dt.ToUniversalTime().Ticks);
+                }
+
+                public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+                {
+                    var val = new DateTime((long)reader.Value, DateTimeKind.Utc);
+                    return val;
+                }
+
+                public override bool CanConvert(Type objectType)
+                {
+                    return objectType == typeof(DateTime);
+                }
+            }
+
             private class ClassWithClassPropertyJsonSerializer : JsonConverter
             {
                 public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -76,6 +96,25 @@ namespace Neo4jClient.Test.Serialization
                 }
             }
 
+            private class DtModel
+            {
+                public DateTime Dt { get; set; }
+            }
+
+            [Fact]
+            public void DeserializesCorrectlyDateTimes()
+            {
+                // Arrange
+                var deserializer = new CustomJsonDeserializer(new List<JsonConverter>{new NeoDateTimeSerializer()}, new CultureInfo("en-US"));
+                var content = $"{{'Dt':{630822816000000000}}}";
+
+                // Act
+                var result = deserializer.Deserialize<DtModel>(content);
+
+                // Assert
+                Assert.NotNull(result.Dt);
+                Assert.Equal(630822816000000000, result.Dt.Ticks);
+            }
 
         }
 

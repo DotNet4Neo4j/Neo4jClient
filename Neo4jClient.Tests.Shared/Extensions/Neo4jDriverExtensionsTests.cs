@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4jClient.Cypher;
@@ -15,25 +13,26 @@ namespace Neo4jClient.Test.Extensions
 {
     internal class ClassWithGuid
     {
-        public Guid Id { get; set; }
         public ClassWithGuid()
         {
             Id = Guid.NewGuid();
         }
+
+        public Guid Id { get; set; }
     }
 
     internal class ClassWithDateTime
     {
         public DateTime Dt { get; set; }
     }
+
     internal class ClassWithDateTimeOffset
     {
         public DateTimeOffset Dt { get; set; }
     }
-    public class Neo4jDriverExtensionsTests 
+
+    public class Neo4jDriverExtensionsTests
     {
-
-
         public class ToNeo4jDriverParametersMethod : IClassFixture<CultureInfoSetupFixture>
         {
             private Mock<IRawGraphClient> MockGc
@@ -46,10 +45,40 @@ namespace Neo4jClient.Test.Extensions
                 }
             }
 
+            private class NeoDateTimeSerializer : JsonConverter
+            {
+                public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+                {
+                    var dt = (DateTime) value;
+                    var ticks = dt.ToUniversalTime().Ticks;
+                    writer.WriteValue(ticks);
+                }
+
+                public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override bool CanConvert(Type objectType)
+                {
+                    return objectType == typeof(DateTime);
+                }
+            }
+
+            private class DateTimeContainer
+            {
+                public DateTime Dt { get; set; }
+            }
+
+            private class Foo
+            {
+                public string Bar { get; set; }
+            }
+
             [Fact]
             public void SerializeObjectWithArrays()
             {
-                var list = new[] { "foo", "bar" };
+                var list = new[] {"foo", "bar"};
 
                 var mockGc = MockGc;
                 var query = new CypherFluentQuery(mockGc.Object)
@@ -69,23 +98,9 @@ namespace Neo4jClient.Test.Extensions
             }
 
             [Fact]
-            public void SerializesTimeSpanCorrectly()
-            {
-                var ts = new TimeSpan(1, 2, 3, 4, 5);
-                
-                var query = new CypherFluentQuery(MockGc.Object)
-                    .WithParam("tsParam", ts);
-
-                var actual = query.Query.ToNeo4jDriverParameters(MockGc.Object);
-                actual.Keys.Should().Contain("tsParam");
-                var tsParam = actual["tsParam"].ToString();
-                tsParam.Should().Be("1.02:03:04.0050000");
-            }
-
-            [Fact]
             public void SerializesArraysOfSimpleTypesCorrectly()
             {
-                var list = new [] { "foo", "bar" };
+                var list = new[] {"foo", "bar"};
 
                 var mockGc = MockGc;
                 var query = new CypherFluentQuery(mockGc.Object)
@@ -96,27 +111,32 @@ namespace Neo4jClient.Test.Extensions
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("listParam");
                 actual["listParam"].Should().BeOfType<object[]>();
-                ((object[])actual["listParam"])[0].Should().Be("foo");
-                ((object[])actual["listParam"])[1].Should().Be("bar");
+                ((object[]) actual["listParam"])[0].Should().Be("foo");
+                ((object[]) actual["listParam"])[1].Should().Be("bar");
             }
 
             [Fact]
-            public void SerializesListsOfSimpleTypesCorrectly()
+            public void SerializesBoolsProperly()
             {
-                var list = new List<string> { "foo", "bar" };
-
                 var mockGc = MockGc;
                 var query = new CypherFluentQuery(mockGc.Object)
-                    .Match("(n)")
-                    .Where("n.Id IN $listParam")
-                    .WithParam("listParam", list);
+                    .WithParam("One", true);
 
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
-                actual.Keys.Should().Contain("listParam");
-                actual["listParam"].Should().BeOfType<object[]>();
-                var serialized = (object[]) actual["listParam"];
-                serialized[0].Should().Be(list[0]);
-                serialized[1].Should().Be(list[1]);
+                actual.Keys.Should().Contain("One");
+                actual["One"].Should().Be(true);
+            }
+
+            [Fact]
+            public void SerializesDecimalsProperly()
+            {
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .WithParam("One", 12.3m);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("One");
+                actual["One"].Should().Be(12.3m);
             }
 
 
@@ -137,7 +157,7 @@ namespace Neo4jClient.Test.Extensions
                 parameters.Count.Should().Be(1);
                 var item = parameters.First();
                 ((IDictionary<string, object>) item.Value)[nameof(ClassWithGuid.Id)].Should().BeOfType<string>();
-                ((IDictionary<string, object>)item.Value)[nameof(ClassWithGuid.Id)].Should().Be(cwg.Id.ToString());
+                ((IDictionary<string, object>) item.Value)[nameof(ClassWithGuid.Id)].Should().Be(cwg.Id.ToString());
             }
 
             [Fact]
@@ -150,30 +170,6 @@ namespace Neo4jClient.Test.Extensions
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("One");
                 actual["One"].Should().Be(1);
-            }
-
-            [Fact]
-            public void SerializesStringsProperly()
-            {
-                var mockGc = MockGc;
-                var query = new CypherFluentQuery(mockGc.Object)
-                    .WithParam("One", "one");
-
-                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
-                actual.Keys.Should().Contain("One");
-                actual["One"].Should().Be("one");
-            }
-
-            [Fact]
-            public void SerializesBoolsProperly()
-            {
-                var mockGc = MockGc;
-                var query = new CypherFluentQuery(mockGc.Object)
-                    .WithParam("One", true);
-
-                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
-                actual.Keys.Should().Contain("One");
-                actual["One"].Should().Be(true);
             }
 
             [Fact]
@@ -193,27 +189,93 @@ namespace Neo4jClient.Test.Extensions
                 var serializedFooDict = (Dictionary<string, object>) serializedFoo;
                 serializedFooDict.Keys.Should().Contain("Bar");
                 serializedFooDict["Bar"].Should().Be(list[0].Bar);
-
             }
 
             [Fact]
-            public void SerializesDecimalsProperly()
+            public void SerializesListsOfSimpleTypesCorrectly()
+            {
+                var list = new List<string> {"foo", "bar"};
+
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Match("(n)")
+                    .Where("n.Id IN $listParam")
+                    .WithParam("listParam", list);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("listParam");
+                actual["listParam"].Should().BeOfType<object[]>();
+                var serialized = (object[]) actual["listParam"];
+                serialized[0].Should().Be(list[0]);
+                serialized[1].Should().Be(list[1]);
+            }
+
+            [Fact]
+            public void SerializesStringsProperly()
             {
                 var mockGc = MockGc;
                 var query = new CypherFluentQuery(mockGc.Object)
-                    .WithParam("One", 12.3m);
+                    .WithParam("One", "one");
 
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("One");
-                actual["One"].Should().Be(12.3m);
+                actual["One"].Should().Be("one");
             }
 
-            private class Foo
+            [Fact]
+            public void SerializesTimeSpanCorrectly()
             {
-                public string Bar { get; set; }
+                var ts = new TimeSpan(1, 2, 3, 4, 5);
+
+                var query = new CypherFluentQuery(MockGc.Object)
+                    .WithParam("tsParam", ts);
+
+                var actual = query.Query.ToNeo4jDriverParameters(MockGc.Object);
+                actual.Keys.Should().Contain("tsParam");
+                var tsParam = actual["tsParam"].ToString();
+                tsParam.Should().Be("1.02:03:04.0050000");
+            }
+
+            [Fact]
+            //Issue 292 - https://github.com/Readify/Neo4jClient/issues/292
+            public void SerializesWhenJsonConverterContainsNothingThatMatches()
+            {
+                var ts = new TimeSpan(1, 2, 3, 4, 5);
+                var mockGc = MockGc;
+                mockGc
+                    .Setup(x => x.JsonConverters)
+                    .Returns(new List<JsonConverter> {new NeoDateTimeSerializer()});
+
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .WithParam("tsParam", ts);
+
+                var actual = query.Query.ToNeo4jDriverParameters(MockGc.Object);
+                actual.Keys.Should().Contain("tsParam");
+                var tsParam = actual["tsParam"].ToString();
+                tsParam.Should().Be("1.02:03:04.0050000");
+            }
+
+            [Fact]
+            //Issue 292 - https://github.com/Readify/Neo4jClient/issues/292
+            public void UsesCustomJsonSerializersWhereItCan()
+            {
+                var dateTime = new DateTime(2000, 1, 1);
+                var mockGc = MockGc;
+                mockGc
+                    .Setup(x => x.JsonConverters)
+                    .Returns(new List<JsonConverter> {new NeoDateTimeSerializer()});
+
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node {p})")
+                    .WithParam("p", new DateTimeContainer {Dt = dateTime});
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("p");
+                actual["p"].Should().BeOfType<Dictionary<string, object>>();
+                var serializedObj = (Dictionary<string, object>) actual["p"];
+
+                serializedObj["Dt"].Should().Be(630822816000000000);
             }
         }
-
-
     }
 }
