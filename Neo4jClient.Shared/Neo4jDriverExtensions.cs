@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Globalization;
 using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
+using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
@@ -15,8 +16,10 @@ namespace Neo4jClient
         private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
         private const string DefaultTimeSpanFormat = @"d\.hh\:mm\:ss\.fffffff";
 
+        
         public static IStatementResult Run(this ISession session, CypherQuery query, IGraphClient gc)
         {
+            
             return session.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
@@ -28,10 +31,17 @@ namespace Neo4jClient
         // ReSharper disable once InconsistentNaming
         public static Dictionary<string, object> ToNeo4jDriverParameters(this CypherQuery query, IGraphClient gc)
         {
-            return query.QueryParameters.ToDictionary(item => item.Key, item => Serialize(item.Value));
+            return query.QueryParameters.ToDictionary(item => item.Key, item => Serialize(item.Value, gc.JsonConverters, gc));
         }
 
-        private static object Serialize(object value)
+        // ReSharper disable once ClassNeverInstantiated.Local
+        private class CustomJsonConverterHelper
+        {
+            // ReSharper disable once UnusedAutoPropertyAccessor.Local
+            public object Value { get; set; }
+        }
+
+        private static object Serialize(object value, IList<JsonConverter> converters, IGraphClient gc)
         {
             if (value == null)
             {
@@ -41,38 +51,47 @@ namespace Neo4jClient
             var type = value.GetType();
             var typeInfo = type.GetTypeInfo();
 
+            var converter = converters.FirstOrDefault(c => c.CanConvert(type));
+            if (converter != null)
+            {
+                var serializer = new CustomJsonSerializer{JsonConverters = converters, JsonContractResolver = ((IRawGraphClient)gc).JsonContractResolver};
+                return JsonConvert.DeserializeObject<CustomJsonConverterHelper>(serializer.Serialize(new {value})).Value;
+            }
+
             if (typeInfo.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
             {
-                return SerializeDictionary(type, value);
+                return SerializeDictionary(type, value, converters, gc);
             }
 
             if (typeInfo.IsClass && type != typeof(string))
             {
                 if (typeInfo.IsArray || typeInfo.ImplementedInterfaces.Contains(typeof(IEnumerable)))
                 {
-                    return SerializeCollection((IEnumerable)value);
+                    return SerializeCollection((IEnumerable)value, converters, gc);
                 }
 
-                return SerializeObject(type, value);
+                return SerializeObject(type, value, converters, gc);
             }
 
             return SerializePrimitive(type, typeInfo, value);
         }
         
-        private static object SerializeObject(Type type, object value)
+        private static object SerializeObject(Type type, object value, IList<JsonConverter> converters, IGraphClient gc)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute))))
-                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value)));
+                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc));
         }
 
-        private static object SerializeCollection(IEnumerable value)
+        private static object SerializeCollection(IEnumerable value, IList<JsonConverter> converters, IGraphClient gc)
         {
-            return value.Cast<object>().Select(Serialize).ToArray();
+            return value.Cast<object>().Select(x => Serialize(x, converters, gc)).ToArray();
         }
 
         private static object SerializePrimitive(Type type, TypeInfo typeInfo, object instance)
         {
+            
+
             if (type == typeof(DateTime))
             {
                 return SerializeDateTime((DateTime) instance);
@@ -117,7 +136,7 @@ namespace Neo4jClient
             return timeSpan.ToString(DefaultTimeSpanFormat, CultureInfo.CurrentCulture);
         }
 
-        private static object SerializeDictionary(Type type, object value)
+        private static object SerializeDictionary(Type type, object value, IList<JsonConverter> converters, IGraphClient gc)
         {
             var keyType = type.GetGenericArguments()[0];
             if (keyType != typeof(string))
@@ -132,7 +151,7 @@ namespace Neo4jClient
                 string key = item.Key;
                 object entry = item.Value;
 
-                serialized[key] = Serialize(entry);
+                serialized[key] = Serialize(entry, converters, gc);
             }
 
             return serialized;

@@ -50,6 +50,7 @@ namespace Neo4jClient.Serialization
                 return stringWriter.ToString();
             }
         }
+
         public T Deserialize<T>(string content)
         {
             var serializer = new JsonSerializer
