@@ -955,6 +955,16 @@ namespace Neo4jClient
             return results;
         }
 
+        public IEnumerable<TResult> ExecuteGetCypherResultsLazy<TResult>(CypherQuery query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<TResult>> ExecuteGetCypherResultsLazyAsync<TResult>(CypherQuery query)
+        {
+            throw new NotImplementedException();
+        }
+
         void IRawGraphClient.ExecuteCypher(CypherQuery query)
         {
             var context = ExecutionContext.Begin(this);

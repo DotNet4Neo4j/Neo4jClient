@@ -581,7 +581,7 @@ namespace Neo4jClient
                 if (InTransaction)
                 {
                     var result = await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
-                    results = ParseResults<TResult>(result.StatementResult, query);
+                    results = ParseResults<TResult>(result.StatementResult, query).ToList();
                 }
                 else
                 {
@@ -590,7 +590,7 @@ namespace Neo4jClient
                     {
                         
                         var result = session.Run(query, this);
-                        results = ParseResults<TResult>(result, query);
+                        results = ParseResults<TResult>(result, query).ToList();
                     }
                 }
             }
@@ -610,23 +610,117 @@ namespace Neo4jClient
             return results;
         }
 
-        private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
+        /// <inheritdoc />
+        IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResultsLazy<TResult>(CypherQuery query)
+        {
+            var task = ((IRawGraphClient)this).ExecuteGetCypherResultsLazyAsync<TResult>(query);
+            try
+            {
+                Task.WaitAll(task);
+            }
+            catch (AggregateException ex)
+            {
+                Exception unwrappedException;
+                if (ex.TryUnwrap(out unwrappedException))
+                    throw unwrappedException;
+                throw;
+            }
+
+            return task.Result;
+        }
+
+        /// <inheritdoc />
+        async Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsLazyAsync<TResult>(CypherQuery query)
+        {
+            if (Driver == null)
+                throw new InvalidOperationException("Can't execute cypher unless you have connected to the server.");
+
+            var context = ExecutionContext.Begin(this);
+            try
+            {
+                if (InTransaction)
+                {
+                    var result = await transactionManager
+                        .EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
+                    return ResultsParserIterator<TResult>(result.StatementResult, query, context);
+                }
+
+                return ResultsParserIterator<TResult>(null, query, context);
+            }
+            catch (AggregateException aggregateException)
+            {
+                Exception unwrappedException;
+                context.Complete(query,
+                    aggregateException.TryUnwrap(out unwrappedException) ? unwrappedException : aggregateException);
+                throw;
+            }
+            catch (Exception e)
+            {
+                context.Complete(query, e);
+                throw;
+            }
+        }
+
+        private IEnumerable<TResult> ResultsParserIterator<TResult>(IStatementResult result, CypherQuery query, ExecutionContext context)
+        {
+            ISession session = null;
+            IEnumerator<TResult> parsedResultsEnumerator = null;
+            try
+            {
+                var resultsCount = 0;
+                if (result == null) // in transaction
+                {
+                    session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read);
+                    result = session.Run(query, this);
+                }
+
+                parsedResultsEnumerator = ParseResults<TResult>(result, query).GetEnumerator();
+
+                var hasNext = true;
+
+                while (hasNext)
+                {
+                    try
+                    {
+                        hasNext = parsedResultsEnumerator.MoveNext();
+                    }
+                    catch (AggregateException aggregateException)
+                    {
+                        Exception unwrappedException;
+                        context.Complete(query,
+                            aggregateException.TryUnwrap(out unwrappedException)
+                                ? unwrappedException
+                                : aggregateException);
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        context.Complete(query, e);
+                        throw;
+                    }
+
+                    if (hasNext)
+                    {
+                        ++resultsCount;
+                        yield return parsedResultsEnumerator.Current;
+                    }
+                }
+
+                context.Complete(query, resultsCount);
+            }
+            finally
+            {
+                parsedResultsEnumerator?.Dispose();
+                session?.Dispose();
+            }
+        }
+
+        private IEnumerable<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
         {
             var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, false, true);
-            var results = new List<TResult>();
-            if (typeof(TResult).IsAnonymous())
-            {
-                foreach (var record in result)
-                    results.AddRange(deserializer.Deserialize(record.ParseAnonymous(this)));
-            }
-            else
-            {
-                var converted = result.Select(record => record.Deserialize(deserializer, query.ResultMode));
-                foreach (var enumerable in converted)
-                {
-                    results.AddRange(enumerable);
-                }
-            }
+            var results = typeof(TResult).IsAnonymous()
+                ? result.SelectMany(record => deserializer.Deserialize(record.ParseAnonymous(this)))
+                : result.SelectMany(record => record.Deserialize(deserializer, query.ResultMode));
 
             return results;
         }

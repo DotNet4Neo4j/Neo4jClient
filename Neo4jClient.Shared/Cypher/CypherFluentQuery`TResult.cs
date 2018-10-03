@@ -59,5 +59,9 @@ namespace Neo4jClient.Cypher
         public IEnumerable<TResult> Results => Client.ExecuteGetCypherResults<TResult>(Query);
 
         public Task<IEnumerable<TResult>> ResultsAsync => Client.ExecuteGetCypherResultsAsync<TResult>(Query);
+
+        public IEnumerable<TResult> ResultsLazy => Client.ExecuteGetCypherResultsLazy<TResult>(Query);
+
+        public Task<IEnumerable<TResult>> ResultsLazyAsync => Client.ExecuteGetCypherResultsLazyAsync<TResult>(Query);
     }
 }

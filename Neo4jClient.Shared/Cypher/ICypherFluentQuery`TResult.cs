@@ -8,6 +8,9 @@ namespace Neo4jClient.Cypher
         IEnumerable<TResult> Results { get; }
         Task<IEnumerable<TResult>> ResultsAsync { get; }
 
+        IEnumerable<TResult> ResultsLazy { get; }
+        Task<IEnumerable<TResult>> ResultsLazyAsync { get; }
+
         new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName);
         new ICypherFluentQuery<TResult> Limit(int? limit);
         new ICypherFluentQuery<TResult> Skip(int? skip);

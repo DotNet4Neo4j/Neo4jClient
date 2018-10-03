@@ -14,6 +14,10 @@ namespace Neo4jClient
     {
         IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
         Task<IEnumerable<TResult>> ExecuteGetCypherResultsAsync<TResult>(CypherQuery query);
+
+        IEnumerable<TResult> ExecuteGetCypherResultsLazy<TResult>(CypherQuery query);
+        Task<IEnumerable<TResult>> ExecuteGetCypherResultsLazyAsync<TResult>(CypherQuery query);
+
         void ExecuteCypher(CypherQuery query);
         void ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries, NameValueCollection customHeaders = null);
         Task ExecuteCypherAsync(CypherQuery query);
