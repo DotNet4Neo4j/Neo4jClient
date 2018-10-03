@@ -668,7 +668,7 @@ namespace Neo4jClient
             try
             {
                 var resultsCount = 0;
-                if (result == null) // in transaction
+                if (result == null) // not in transaction
                 {
                     session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read);
                     result = session.Run(query, this);
