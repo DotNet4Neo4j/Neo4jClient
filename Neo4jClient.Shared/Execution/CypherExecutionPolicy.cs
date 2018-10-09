@@ -57,7 +57,13 @@ namespace Neo4jClient.Execution
                 return;
             }
 
-            var locationHeader = executionMetadata["Location"] as IEnumerable<string>;
+            object locationValue;
+            if (!executionMetadata.TryGetValue("Location", out locationValue))
+            {
+                return;
+            }
+
+            var locationHeader = locationValue as IEnumerable<string>;
             if (locationHeader == null)
             {
                 return;
