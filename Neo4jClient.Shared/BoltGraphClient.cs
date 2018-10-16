@@ -574,68 +574,6 @@ namespace Neo4jClient
                 throw new InvalidOperationException("Can't execute cypher unless you have connected to the server.");
 
             var context = ExecutionContext.Begin(this);
-            List<TResult> results;
-            try
-            {
-//                var inTransaction = ;
-                if (InTransaction)
-                {
-                    var result = await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
-                    results = ParseResults<TResult>(result.StatementResult, query).ToList();
-                }
-                else
-                {
-
-                    using (var session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read))
-                    {
-                        
-                        var result = session.Run(query, this);
-                        results = ParseResults<TResult>(result, query).ToList();
-                    }
-                }
-            }
-            catch (AggregateException aggregateException)
-            {
-                Exception unwrappedException;
-                context.Complete(query, aggregateException.TryUnwrap(out unwrappedException) ? unwrappedException : aggregateException);
-                throw;
-            }
-            catch (Exception e)
-            {
-                context.Complete(query, e);
-                throw;
-            }
-
-            context.Complete(query, results.Count); //Doesn't this parse all the entries?
-            return results;
-        }
-
-        /// <inheritdoc />
-        IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResultsLazy<TResult>(CypherQuery query)
-        {
-            var task = ((IRawGraphClient)this).ExecuteGetCypherResultsLazyAsync<TResult>(query);
-            try
-            {
-                Task.WaitAll(task);
-            }
-            catch (AggregateException ex)
-            {
-                Exception unwrappedException;
-                if (ex.TryUnwrap(out unwrappedException))
-                    throw unwrappedException;
-                throw;
-            }
-
-            return task.Result;
-        }
-
-        /// <inheritdoc />
-        async Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsLazyAsync<TResult>(CypherQuery query)
-        {
-            if (Driver == null)
-                throw new InvalidOperationException("Can't execute cypher unless you have connected to the server.");
-
-            var context = ExecutionContext.Begin(this);
             try
             {
                 if (InTransaction)
