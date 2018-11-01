@@ -52,7 +52,7 @@ namespace Neo4jClient.Transactions
                 {
                     scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
                     {
-                        Value = ThreadContextHelper.CreateBoltScopedTransactions()
+                        Value = value
                     };
                 }
                 else
