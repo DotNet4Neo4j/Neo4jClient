@@ -18,15 +18,41 @@ namespace Neo4jClient.Transactions
         // holds the transaction objects per thread
 #if NET45
         [ThreadStatic] private static IScopedTransactions<TransactionScopeProxy> scopedTransactions;
-#else
-        private static IScopedTransactions<TransactionScopeProxy> scopedTransactions;
-#endif
-
         internal static IScopedTransactions<TransactionScopeProxy> ScopedTransactions
         {
             get => scopedTransactions ?? (scopedTransactions = ThreadContextHelper.CreateScopedTransactions());
             set => scopedTransactions = value;
         }
+#else
+        private static AsyncLocal<IScopedTransactions<TransactionScopeProxy>> scopedTransactions;
+        internal static IScopedTransactions<TransactionScopeProxy> ScopedTransactions
+        {
+            get
+            {
+                if (scopedTransactions == null)
+                {
+                    scopedTransactions = new AsyncLocal<IScopedTransactions<TransactionScopeProxy>>();
+                }
+
+                if (scopedTransactions.Value == null)
+                {
+                    scopedTransactions.Value = ThreadContextHelper.CreateScopedTransactions();
+                }
+
+                return scopedTransactions.Value;
+            }
+            set
+            {
+                if (scopedTransactions == null)
+                {
+                    scopedTransactions = new AsyncLocal<IScopedTransactions<TransactionScopeProxy>>();
+                }
+
+                scopedTransactions.Value = value;
+            }
+        }
+#endif
+
             
         // holds the transaction contexts for transactions from the System.Transactions framework
         private readonly IDictionary<string, TransactionContext> dtcContexts; 
