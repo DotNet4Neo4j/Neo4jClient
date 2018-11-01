@@ -64,9 +64,14 @@ namespace Neo4jClient.Transactions
                 BoltNeo4jTransaction.DoCommit(transactionExecutionEnvironment);
                 singlePhaseEnlistment.Committed();
             }
+            catch (Exception e)
+            {
+                singlePhaseEnlistment.Aborted(e);
+                // TODO: Should we rethrow?
+            }
             finally
             {
-                singlePhaseEnlistment.Aborted();
+                singlePhaseEnlistment.Done();
             }
         }
 
@@ -141,9 +146,14 @@ namespace Neo4jClient.Transactions
                 Neo4jRestTransaction.DoCommit(transactionExecutionEnvironment);
                 singlePhaseEnlistment.Committed();
             }
+            catch (Exception e)
+            {
+                singlePhaseEnlistment.Aborted(e);
+                // TODO: Should we rethrow?
+            }
             finally
             {
-                singlePhaseEnlistment.Aborted();
+                singlePhaseEnlistment.Done();
             }
         }
 
