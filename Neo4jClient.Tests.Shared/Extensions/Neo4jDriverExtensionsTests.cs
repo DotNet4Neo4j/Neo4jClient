@@ -274,7 +274,7 @@ namespace Neo4jClient.Test.Extensions
                 actual["p"].Should().BeOfType<Dictionary<string, object>>();
                 var serializedObj = (Dictionary<string, object>) actual["p"];
 
-                serializedObj["Dt"].Should().Be(630822816000000000);
+                serializedObj["Dt"].Should().Be(dateTime.ToUniversalTime().Ticks);
             }
         }
     }
