@@ -119,6 +119,7 @@ namespace Neo4jClient.Transactions
             if (transaction != null)
             {
                 transaction.Commit();
+                transaction.Dispose();
                 transaction = null;
             }
             else if (transactionId > 0)
@@ -137,6 +138,7 @@ namespace Neo4jClient.Transactions
             if (transaction != null)
             {
                 transaction.Rollback();
+                transaction.Dispose();
                 transaction = null;
             }
             else if (transactionId > 0)
