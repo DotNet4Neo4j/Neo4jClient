@@ -89,11 +89,13 @@ namespace Neo4jClient.Transactions
         public static void DoCommit(ITransactionExecutionEnvironmentBolt transactionExecutionEnvironment)
         {
             transactionExecutionEnvironment.DriverTransaction.Success();
+            transactionExecutionEnvironment.DriverTransaction.Dispose();
         }
 
         public static void DoRollback(ITransactionExecutionEnvironmentBolt transactionExecutionEnvironment)
         {
             transactionExecutionEnvironment.DriverTransaction.Failure();
+            transactionExecutionEnvironment.DriverTransaction.Dispose();
         }
 
         public static BoltNeo4jTransaction FromIdAndClient(Guid transactionId, IDriver driver)
