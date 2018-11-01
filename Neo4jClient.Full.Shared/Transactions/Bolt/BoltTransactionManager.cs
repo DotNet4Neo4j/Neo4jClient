@@ -34,15 +34,15 @@ namespace Neo4jClient.Transactions
             // [See Issue #284]
             get
             {
-                if (scopedTransactions != null && scopedTransactions.Value != null)
+                if (scopedTransactions == null)
                 {
-                    return scopedTransactions.Value;
+                    scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>();
                 }
 
-                scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
+                if (scopedTransactions.Value == null)
                 {
-                    Value = ThreadContextHelper.CreateBoltScopedTransactions()
-                };
+                    scopedTransactions.Value = ThreadContextHelper.CreateBoltScopedTransactions();
+                }
 
                 return scopedTransactions.Value;
             }
