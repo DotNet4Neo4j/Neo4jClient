@@ -10,6 +10,11 @@ namespace Neo4jClient.Test.Serialization
     
     public class UserSuppliedSerializationTests : IClassFixture<CultureInfoSetupFixture>
     {
+        public UserSuppliedSerializationTests()
+        {
+            CultureInfoSetupFixture.SetDeterministicCulture();
+        }
+
         public class TestValueA
         {
             public char A { get; set; }

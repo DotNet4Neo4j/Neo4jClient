@@ -72,7 +72,12 @@ namespace Neo4jClient.Test.Serialization
                     yield return new object[]{CypherResultMode.Projection, CypherResultFormat.Rest, ProjectionModeContentFormat, "2012-08-31T10:11:00.3642578+10:00", "2012-08-31 10:11:00 +10:00"};
                 }
             }
-        }          
+        }
+
+        public CypherJsonDeserializerTests()
+        {
+            CultureInfoSetupFixture.SetDeterministicCulture();
+        }
                     
         [Theory]
         [MemberData(nameof(DateTimeOffsetCasesFactory.TestCases), MemberType = typeof(DateTimeOffsetCasesFactory))]
