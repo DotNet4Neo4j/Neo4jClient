@@ -59,13 +59,12 @@ namespace Neo4jClient.Transactions
                 transaction.Commit();
                 transaction.Dispose();
                 transaction = null;
-                singlePhaseEnlistment.Committed();
             }
             else if(transactionId != Guid.Empty)
             {
                 ResourceManager.CommitTransaction(transactionId);
-                singlePhaseEnlistment.Committed();
             }
+            singlePhaseEnlistment.Committed();
 
             enlistedInTransactions.Remove(Transaction.Current);
         }

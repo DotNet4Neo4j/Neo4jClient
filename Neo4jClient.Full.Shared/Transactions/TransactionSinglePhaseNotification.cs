@@ -120,13 +120,12 @@ namespace Neo4jClient.Transactions
             {
                 transaction.Commit();
                 transaction = null;
-                singlePhaseEnlistment.Committed();
             }
             else if (transactionId > 0)
             {
                 GetResourceManager().CommitTransaction(transactionId);
-                singlePhaseEnlistment.Committed();
             }
+            singlePhaseEnlistment.Committed();
 
             enlistedInTransactions.Remove(Transaction.Current);
         }
