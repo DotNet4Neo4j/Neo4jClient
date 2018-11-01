@@ -36,7 +36,7 @@ namespace Neo4jClient.Transactions
         {
             try
             {
-              BoltNeo4jTransaction.DoRollback(transactionExecutionEnvironment);
+                BoltNeo4jTransaction.DoRollback(transactionExecutionEnvironment);
             }
             finally
             {
