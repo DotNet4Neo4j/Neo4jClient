@@ -50,15 +50,10 @@ namespace Neo4jClient.Transactions
             {
                 if (scopedTransactions == null)
                 {
-                    scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
-                    {
-                        Value = value
-                    };
+                    scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>();
                 }
-                else
-                {
-                    scopedTransactions.Value = value;
-                }
+
+                scopedTransactions.Value = value;
             }
         }
 #endif
