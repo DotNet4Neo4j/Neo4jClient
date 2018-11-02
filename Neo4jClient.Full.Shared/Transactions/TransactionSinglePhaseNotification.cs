@@ -79,12 +79,23 @@ namespace Neo4jClient.Transactions
                 throw new InvalidOperationException("For some reason we don't have a TransactionContext ID");
             }
 
+            // BUG: .NET 4.7.1 introduced a bug where the current transaction wouldn't get restored
+            // after a call which crosses AppDomain boundaries. We have to restore it ourselves.
+            // Ref https://github.com/Microsoft/dotnet-framework-early-access/issues/7
+            var tx = Transaction.Current;
             var resourceManager = GetResourceManager();
-            return resourceManager.Promote(new TransactionExecutionEnvironment(client.ExecutionConfiguration)
+            var res = resourceManager.Promote(new TransactionExecutionEnvironment(client.ExecutionConfiguration)
             {
                 TransactionId = transactionId,
                 TransactionBaseEndpoint = client.TransactionEndpoint
             });
+            // Only restore if the bug exists to avoid any potentially side-effects
+            // of setting the transaction
+            if (Transaction.Current == null)
+            {
+                Transaction.Current = tx;
+            }
+            return res;
         }
 
         public void Initialize()

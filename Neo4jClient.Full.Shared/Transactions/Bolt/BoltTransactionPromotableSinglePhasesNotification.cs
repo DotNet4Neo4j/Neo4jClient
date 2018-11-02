@@ -30,13 +30,24 @@ namespace Neo4jClient.Transactions
             var driverTx = transaction.DriverTransaction;
             var session = transaction.Session;
             transaction = null;
-            
-            return ResourceManager.Promote(new BoltTransactionExecutionEnvironment(client.ExecutionConfiguration)
+
+            // BUG: .NET 4.7.1 introduced a bug where the current transaction wouldn't get restored
+            // after a call which crosses AppDomain boundaries. We have to restore it ourselves.
+            // Ref https://github.com/Microsoft/dotnet-framework-early-access/issues/7
+            var tx = Transaction.Current;
+            var res = ResourceManager.Promote(new BoltTransactionExecutionEnvironment(client.ExecutionConfiguration)
             {
                 TransactionId = transactionId,
                 Session = session,
                 DriverTransaction = driverTx
             });
+            // Only restore if the bug exists to avoid any potentially side-effects
+            // of setting the transaction
+            if (Transaction.Current == null)
+            {
+                Transaction.Current = tx;
+            }
+            return res;
         }
 
         #endregion
