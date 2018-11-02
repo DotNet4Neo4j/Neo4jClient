@@ -172,8 +172,9 @@ namespace Neo4jClient.Transactions
             CommittableTransaction tx;
             if (transactions.TryGetValue(transactionId, out tx))
             {
-                transactions.Remove(transactionId);
                 tx.Rollback();
+                tx.Dispose();
+                transactions.Remove(transactionId);
             }
         }
 
@@ -233,6 +234,7 @@ namespace Neo4jClient.Transactions
             if (transactions.TryGetValue(transactionId, out tx))
             {
                 tx.Commit();
+                tx.Dispose();
                 transactions.Remove(transactionId);
             }
         }
@@ -242,8 +244,9 @@ namespace Neo4jClient.Transactions
             CommittableTransaction tx;
             if (transactions.TryGetValue(transactionId, out tx))
             {
-                transactions.Remove(transactionId);
                 tx.Rollback();
+                tx.Dispose();
+                transactions.Remove(transactionId);
             }
         }
 
