@@ -15,8 +15,15 @@ namespace Neo4jClient.Transactions
 
         public void Prepare(PreparingEnlistment preparingEnlistment)
         {
-//            BoltNeo4jTransaction.DoKeepAlive(transactionExecutionEnvironment);
-            preparingEnlistment.Done();
+            try
+            {
+                // Nothing to do
+                preparingEnlistment.Prepared();
+            }
+            catch (Exception e)
+            {
+                preparingEnlistment.ForceRollback(e);
+            }
         }
 
         public void Commit(Enlistment enlistment)
@@ -85,8 +92,15 @@ namespace Neo4jClient.Transactions
 
         public void Prepare(PreparingEnlistment preparingEnlistment)
         {
-            Neo4jRestTransaction.DoKeepAlive(transactionExecutionEnvironment);
-            preparingEnlistment.Done();
+            try
+            {
+                Neo4jRestTransaction.DoKeepAlive(transactionExecutionEnvironment);
+                preparingEnlistment.Prepared();
+            }
+            catch (Exception e)
+            {
+                preparingEnlistment.ForceRollback(e);
+            }
         }
 
         public void Commit(Enlistment enlistment)
