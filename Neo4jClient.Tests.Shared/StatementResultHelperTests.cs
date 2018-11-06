@@ -168,6 +168,16 @@ namespace Neo4jClient.Test
                 }
             }
 
+            public class ComplexRecord
+            {
+                public int Id { get; set; }
+            }
+
+            public class RecordWithListOfComplex
+            {
+                public IEnumerable<ComplexRecord> Data { get; set;}
+            }
+
             [Fact]
             public void DeserializeRecordWithListCorrectly()
             {
@@ -185,6 +195,25 @@ namespace Neo4jClient.Test
                 mockDeserializer
                     .Setup(d => d.Deserialize(It.IsAny<string>()))
                     .Returns(new List<RecordWithList>());
+
+                record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+            }
+
+            [Fact]
+            public void DeserializeComplexTypeInList()
+            {
+                var list = new List<object> {new Dictionary<string, object> {{"Id", 1}}};
+
+                var record = Substitute.For<IRecord>();
+                record.Keys.Returns(new List<string> {"Data"});
+                record["Data"].Returns(list);
+              
+                var expectedContent = "{ \"columns\":[\"Data\"], \"data\":[[ [{\"Id\":1}] ]] }";
+                var mockDeserializer = new Mock<ICypherJsonDeserializer<RecordWithListOfComplex>>();
+                mockDeserializer
+                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Returns(new List<RecordWithListOfComplex>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
                 mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);

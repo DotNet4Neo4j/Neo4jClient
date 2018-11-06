@@ -58,7 +58,7 @@ namespace Neo4jClient
             return $"{{\"data\":{{ {string.Join(",", props)} }}}}";
         }
 
-        internal static string ToJsonString(this object o, bool inSet, bool isNested, bool isNestedInList)
+        internal static string ToJsonString(this object o, bool inSet, bool isNested, bool isNestedInList, bool isConcreteType = false)
         {
             if (o == null)
                 return null;
@@ -119,6 +119,8 @@ namespace Neo4jClient
                     output.Add(s);
                 }
 
+                if (isConcreteType)
+                    return string.Join(",", output);
                 return $"{{ {string.Join(",", output)} }}";
             }
 
@@ -144,7 +146,8 @@ namespace Neo4jClient
                     }
                     else if (eType == typeof(Dictionary<string, object>))
                     {
-                        output.Add($"{{{e.ToJsonString(inSet, false, true) ?? "null"}}}");
+                        //here!!
+                        output.Add($"{{{e.ToJsonString(inSet, false, true, isConcreteType) ?? "null"}}}");
                         onlyKvp = false;
                     }
                     else
@@ -189,7 +192,8 @@ namespace Neo4jClient
                     continue;
                 }
 
-                data.Add(o.ToJsonString(convertMode == CypherResultMode.Set, record.Keys.Count > 1, false));
+                var isConcreteComplexType = !typeT.IsPrimitive() && !typeT.IsAnonymous();
+                data.Add(o.ToJsonString(convertMode == CypherResultMode.Set, record.Keys.Count > 1, false, isConcreteComplexType));
             }
 
             var format = "{{ {0}, \"data\":[[ {1} ]] }}";
