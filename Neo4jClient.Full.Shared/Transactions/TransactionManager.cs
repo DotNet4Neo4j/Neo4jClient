@@ -24,16 +24,12 @@ namespace Neo4jClient.Transactions
             set => scopedTransactions = value;
         }
 #else
-        private static AsyncLocal<IScopedTransactions<TransactionScopeProxy>> scopedTransactions;
+        private static readonly AsyncLocal<IScopedTransactions<TransactionScopeProxy>> scopedTransactions
+            = new AsyncLocal<IScopedTransactions<TransactionScopeProxy>>();
         internal static IScopedTransactions<TransactionScopeProxy> ScopedTransactions
         {
             get
             {
-                if (scopedTransactions == null)
-                {
-                    scopedTransactions = new AsyncLocal<IScopedTransactions<TransactionScopeProxy>>();
-                }
-
                 if (scopedTransactions.Value == null)
                 {
                     scopedTransactions.Value = ThreadContextHelper.CreateScopedTransactions();
@@ -41,15 +37,7 @@ namespace Neo4jClient.Transactions
 
                 return scopedTransactions.Value;
             }
-            set
-            {
-                if (scopedTransactions == null)
-                {
-                    scopedTransactions = new AsyncLocal<IScopedTransactions<TransactionScopeProxy>>();
-                }
-
-                scopedTransactions.Value = value;
-            }
+            set => scopedTransactions.Value = value;
         }
 #endif
 
@@ -124,15 +112,7 @@ namespace Neo4jClient.Transactions
             }
         }
 
-        public TransactionScopeProxy CurrentInternalTransaction
-        {
-            get
-            {
-                if (ScopedTransactions.Count == 0)
-                    return null;
-                return ScopedTransactions.Peek();
-            }
-        }
+        public TransactionScopeProxy CurrentInternalTransaction => ScopedTransactions.TryPeek();
 
         public ITransaction CurrentNonDtcTransaction => CurrentInternalTransaction;
 
@@ -183,9 +163,6 @@ namespace Neo4jClient.Transactions
 
         private static void PushScopeTransaction(TransactionScopeProxy transaction)
         {
-            if (!ScopedTransactions.HasValue)
-                ScopedTransactions = ThreadContextHelper.CreateScopedTransactions();
-
             ScopedTransactions.Push(transaction);
         }
 
@@ -228,10 +205,7 @@ namespace Neo4jClient.Transactions
 
         public void EndTransaction()
         {
-            if (ScopedTransactions.Count <= 0)
-                return;
-
-            var currentTransaction = ScopedTransactions.Pop();
+            var currentTransaction = ScopedTransactions.TryPop();
             currentTransaction?.Dispose();
         }
 

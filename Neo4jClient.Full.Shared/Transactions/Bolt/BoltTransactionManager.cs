@@ -14,31 +14,22 @@ namespace Neo4jClient.Transactions
     /// </summary>
     internal class BoltTransactionManager : ITransactionManager<BoltResponse>
     {
-
+#if NET45
         // holds the transaction objects per thread
-#if NET45
         [ThreadStatic] private static IScopedTransactions<BoltTransactionScopeProxy> scopedTransactions;
-#else
-        private static AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>> scopedTransactions;
-#endif
-
-#if NET45
         internal static IScopedTransactions<BoltTransactionScopeProxy> ScopedTransactions
         {
             get => scopedTransactions ?? (scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions());
             set => scopedTransactions = value;
         }
 #else
+        private static readonly AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>> scopedTransactions
+            = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>();
+
         internal static IScopedTransactions<BoltTransactionScopeProxy> ScopedTransactions
         {
-            // [See Issue #284]
             get
             {
-                if (scopedTransactions == null)
-                {
-                    scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>();
-                }
-
                 if (scopedTransactions.Value == null)
                 {
                     scopedTransactions.Value = ThreadContextHelper.CreateBoltScopedTransactions();
@@ -46,18 +37,9 @@ namespace Neo4jClient.Transactions
 
                 return scopedTransactions.Value;
             }
-            set
-            {
-                if (scopedTransactions == null)
-                {
-                    scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>();
-                }
-
-                scopedTransactions.Value = value;
-            }
+            set => scopedTransactions.Value = value;
         }
 #endif
-
 
         // holds the transaction contexts for transactions from the System.Transactions framework
         private readonly IDictionary<string, BoltTransactionContext> dtcContexts;
@@ -69,15 +51,8 @@ namespace Neo4jClient.Transactions
             this.client = client;
             // specifies that we are about to use variables that depend on OS threads
             Thread.BeginThreadAffinity();
+            ScopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
 
-#if NET45
-            scopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
-#else
-            scopedTransactions = new AsyncLocal<IScopedTransactions<BoltTransactionScopeProxy>>
-            {
-                Value = ThreadContextHelper.CreateBoltScopedTransactions()
-            };
-#endif
             // this object enables the interacion with System.Transactions and MSDTC, at first by
             // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
             // then it notifies the library how to do it.
@@ -136,10 +111,7 @@ namespace Neo4jClient.Transactions
         {
             get
             {
-                if (ScopedTransactions == null || ScopedTransactions.Count == 0)
-                    return null;
-
-                return ScopedTransactions.Peek();
+                return ScopedTransactions.TryPeek();
             }
         }
 
@@ -196,10 +168,6 @@ namespace Neo4jClient.Transactions
 
         private void PushScopeTransaction(BoltTransactionScopeProxy transaction)
         {
-            if (ScopedTransactions == null)
-            {
-                ScopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
-            }
             ScopedTransactions.Push(transaction);
         }
 
@@ -242,10 +210,7 @@ namespace Neo4jClient.Transactions
 
         public void EndTransaction()
         {
-            if (ScopedTransactions.Count <= 0)
-                return;
-
-            var currentTransaction = ScopedTransactions.Pop();
+            var currentTransaction = ScopedTransactions.TryPop();
             currentTransaction?.Dispose();
         }
 
@@ -260,7 +225,7 @@ namespace Neo4jClient.Transactions
 
         public void Dispose()
         {
-            scopedTransactions = null;
+            ScopedTransactions = null;
             Thread.EndThreadAffinity();
         }
 

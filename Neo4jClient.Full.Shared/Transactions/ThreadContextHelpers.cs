@@ -21,7 +21,9 @@ namespace Neo4jClient.Transactions
         bool HasValue { get; }
         void Push(T item);
         T Pop();
+        T TryPop();
         T Peek();
+        T TryPeek();
     }
 
     internal class ThreadContextWrapper<T>
@@ -44,9 +46,19 @@ namespace Neo4jClient.Transactions
             return _stack.Peek();
         }
 
+        public T TryPeek()
+        {
+            return _stack.Count > 0 ? _stack.Peek() : null;
+        }
+
         public T Pop()
         {
             return _stack.Pop();
+        }
+
+        public T TryPop()
+        {
+            return _stack.Count > 0 ? _stack.Pop() : null;
         }
 
         public void Push(T item)
