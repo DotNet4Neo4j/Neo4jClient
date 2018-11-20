@@ -400,52 +400,62 @@ This means no query was emitted, so a method that doesn't care about getting res
 
             var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
             var results = rows.Select(row =>
-            {
-                if (inTransaction)
-                {
-                    var rowObject = row as JObject;
-                    if (rowObject == null)
                     {
-                        throw new InvalidOperationException("Expected the row to be a JSON object, but it wasn't.");
+                        if (inTransaction)
+                        {
+                            var rowObject = row as JObject;
+                            if (rowObject == null)
+                            {
+                                throw new InvalidOperationException(
+                                    "Expected the row to be a JSON object, but it wasn't.");
+                            }
+
+                            JToken rowProperty;
+                            if (!rowObject.TryGetValue(dataPropertyNameInTransaction, out rowProperty))
+                            {
+                                throw new InvalidOperationException("There is no row property in the JSON object.");
+                            }
+
+                            row = rowProperty;
+
+                        }
+
+                        if (!(row is JArray))
+                        {
+                            // no transaction mode and the row is not an array
+                            throw new InvalidOperationException(
+                                "Expected the row to be a JSON array of values, but it wasn't.");
+                        }
+
+                        var rowAsArray = (JArray) row;
+                        if (rowAsArray.Count > 1)
+                            throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
+
+                        return rowAsArray;
+                    }
+                )
+                .Where(row => row.Count != 0) // No elements to parse
+                .Select(row =>
+                {
+                    var elementToParse = row[0];
+                    if (elementToParse is JObject)
+                    {
+                        var propertyNames = ((JObject) elementToParse)
+                            .Properties()
+                            .Select(p => p.Name)
+                            .ToArray();
+                        var dataElementLooksLikeANodeOrRelationshipInstance =
+                            new[] {"data", "self", "traverse", "properties"}.All(propertyNames.Contains);
+                        if (!isResultTypeANodeOrRelationshipInstance &&
+                            dataElementLooksLikeANodeOrRelationshipInstance)
+                        {
+                            elementToParse = elementToParse["data"];
+                        }
                     }
 
-                    JToken rowProperty;
-                    if (!rowObject.TryGetValue(dataPropertyNameInTransaction, out rowProperty))
-                    {
-                        throw new InvalidOperationException("There is no row property in the JSON object.");
-                    }
-                    row = rowProperty;
-
-                }
-
-                if (!(row is JArray))
-                {
-                    // no transaction mode and the row is not an array
-                    throw new InvalidOperationException("Expected the row to be a JSON array of values, but it wasn't.");
-                }
-                var rowAsArray = (JArray)row;
-                if (rowAsArray.Count != 1)
-                    throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
-
-                var elementToParse = row[0];
-                if (elementToParse is JObject)
-                {
-                    var propertyNames = ((JObject)elementToParse)
-                        .Properties()
-                        .Select(p => p.Name)
-                        .ToArray();
-                    var dataElementLooksLikeANodeOrRelationshipInstance =
-                        new[] { "data", "self", "traverse", "properties" }.All(propertyNames.Contains);
-                    if (!isResultTypeANodeOrRelationshipInstance &&
-                        dataElementLooksLikeANodeOrRelationshipInstance)
-                    {
-                        elementToParse = elementToParse["data"];
-                    }
-                }
-
-                var parsed = CommonDeserializerMethods.CreateAndMap(context, newType, elementToParse, jsonTypeMappings, 0);
-                return (TResult)(mapping == null ? parsed : mapping.MutationCallback(parsed));
-            });
+                    var parsed = CommonDeserializerMethods.CreateAndMap(context, newType, elementToParse, jsonTypeMappings, 0);
+                    return (TResult) (mapping == null ? parsed : mapping.MutationCallback(parsed));
+                });
 
             return results;
         }

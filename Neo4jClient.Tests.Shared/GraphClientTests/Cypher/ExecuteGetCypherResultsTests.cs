@@ -23,6 +23,33 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         }
 
         [Fact]
+        public void EmptyCollectionShouldDeserializeCorrectly()
+        {
+            const string queryText = @"RETURN [] AS p";
+
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+                {
+                    {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Json(HttpStatusCode.OK,
+                        @"{'columns' : [ 'p' ], 'data' : [[  ]]}")
+                    }
+                })
+            {
+                var graphClient = testHarness.CreateAndConnectGraphClient();
+
+                var results = graphClient
+                    .ExecuteGetCypherResults<PathsResult>(cypherQuery)
+                    .ToArray();
+
+                Assert.Empty(results);
+            }
+        }
+
+        [Fact]
         public void ShouldDeserializePathsResultAsSetBased()
         {
             // Arrange
