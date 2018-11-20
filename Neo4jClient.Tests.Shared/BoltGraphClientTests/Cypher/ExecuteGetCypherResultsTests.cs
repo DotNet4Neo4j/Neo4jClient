@@ -310,6 +310,35 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
             }
         }
 
+        [Fact]
+        public void EmptyCollectionShouldDeserializeCorrectly()
+        {
+            const string queryText = "RETURN [] AS data";
+
+            var queryParams = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["data"])
+                    .Returns(new List<INode>() {});
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "data" });
+
+                var testStatementResult = new TestStatementResult(new[] { "data" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery).ToArray();
+
+                results.Should().BeEmpty();
+            }
+        }
+
         //https://github.com/readify/neo4jclient/issues/266
         [Fact]
         public void CollectionOfComplexTypesShouldDeserializeCorrectlyWhenInConjunctionWithAnotherComplexTypeInAContainer()
