@@ -1,3 +1,9 @@
+using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using Newtonsoft.Json;
+
 namespace Neo4jClient.Serialization.Json
 {
     public class TypeConverterBasedJsonConverter : JsonConverter

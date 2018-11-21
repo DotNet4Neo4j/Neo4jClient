@@ -6,6 +6,7 @@ using NSubstitute;
 using Xunit;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Neo4jClient.Test.Fixtures;
 using Newtonsoft.Json;
 
@@ -1458,7 +1459,7 @@ namespace Neo4jClient.Test.Serialization
                   'columns' : [ 'Cities' ]
                 }".Replace("'", "\"");
 
-            var ex = Assert.Throws<ArgumentException>(() => deserializer.Deserialize(content));
+            var ex = Assert.Throws<DeserializationException>(() => deserializer.Deserialize(content).ToArray());
             Assert.StartsWith("We expected a default public constructor on ClassWithoutDefaultPublicConstructor so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.", ex.Message);
         }
 

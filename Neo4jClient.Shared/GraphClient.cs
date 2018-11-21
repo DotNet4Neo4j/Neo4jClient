@@ -18,6 +18,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

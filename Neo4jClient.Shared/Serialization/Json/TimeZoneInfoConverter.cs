@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Newtonsoft.Json;
 
-namespace Neo4jClient.Serialization
+namespace Neo4jClient.Serialization.Json
 {
     public class TimeZoneInfoConverter : JsonConverter
     {

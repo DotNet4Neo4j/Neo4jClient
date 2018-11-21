@@ -5,6 +5,18 @@
     {
         readonly TData data;
 
+
+        // this constructor is used by DriverDeserializer
+        public RelationshipInstance(
+            long relationshipId,
+            long startNodeId,
+            long endNodeId,
+            string typeKey,
+            TData data)
+            : this(new RelationshipReference<TData>(relationshipId), startNodeId, endNodeId, typeKey, data)
+        {
+        }
+
         public RelationshipInstance(
             RelationshipReference<TData> reference,
             NodeReference startNodeReference,

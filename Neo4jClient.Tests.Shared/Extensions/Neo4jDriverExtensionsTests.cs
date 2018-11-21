@@ -2,9 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4jClient.Cypher;
+using Neo4jClient.Serialization;
 using Neo4jClient.Test.Fixtures;
 using Newtonsoft.Json;
 using Xunit;
@@ -31,7 +35,51 @@ namespace Neo4jClient.Test.Extensions
         public DateTimeOffset Dt { get; set; }
     }
 
-    public class Neo4jDriverExtensionsTests
+    internal class ClassWithJsonAttribute
+    {
+        [JsonProperty(PropertyName = "AnotherName")]
+        public string Prop { get; set; }
+    }
+
+    [DataContract]
+    internal class ClassWithDataMemberAttribute
+    {
+        [DataMember(Name = "AnotherName")]
+        public string Prop { get; set; }
+    }
+
+    internal class ClassHandledByTypeConverter
+    {
+        public int Data { get; set; }
+    }
+
+    internal class ClassToSerializeWithHandler
+    {
+        public ClassHandledByTypeConverter Prop { get; set; }
+    }
+
+    internal class TestSerializer : ITypeSerializer
+    {
+        public bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(ClassHandledByTypeConverter);
+        }
+
+        public object Deserialize(Type objectType, object value)
+        {
+            return new ClassHandledByTypeConverter
+            {
+                Data = (int) Convert.ChangeType(value, typeof(int))
+            };
+        }
+
+        public object Serialize(object value)
+        {
+            return ((ClassHandledByTypeConverter) value).Data;
+        }
+    }
+
+    public class Neo4jDriverExtensionsTests 
     {
         public class ToNeo4jDriverParametersMethod : IClassFixture<CultureInfoSetupFixture>
         {
@@ -40,7 +88,8 @@ namespace Neo4jClient.Test.Extensions
                 get
                 {
                     var mockGc = new Mock<IRawGraphClient>();
-                    mockGc.Setup(x => x.JsonConverters).Returns(new List<JsonConverter>());
+                    var boltGc = mockGc.As<IBoltGraphClient>();
+                    boltGc.Setup(x => x.TypeSerializers).Returns(new List<ITypeSerializer>() {new TestSerializer()});
                     return mockGc;
                 }
             }
@@ -73,6 +122,55 @@ namespace Neo4jClient.Test.Extensions
             private class Foo
             {
                 public string Bar { get; set; }
+            }
+
+            public static IEnumerable<object[]> GenerateObjectToSerialize()
+            {
+                return new[]
+                {
+                    new object[] {new ClassWithJsonAttribute() {Prop = "Stuff"}},
+                    new object[] {new ClassWithDataMemberAttribute() {Prop = "Stuff"}}
+                };
+            }
+
+            [Fact]
+            public void SerializeWithConverter()
+            {
+                var toSerialize = new ClassToSerializeWithHandler
+                {
+                    Prop = new ClassHandledByTypeConverter()
+                    {
+                        Data = 5
+                    }
+                };
+
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node {p})")
+                    .WithParam("p", toSerialize);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("p");
+                var serializedObj = (Dictionary<string, object>)actual["p"];
+                serializedObj.Keys.Should().Contain("Prop");
+                serializedObj["Prop"].Should().Be(5);
+            }
+
+            [Theory]
+            [MemberData(nameof(GenerateObjectToSerialize))]
+            public void SerializeObjectWithDifferentPropertyName(object toSerialize)
+            {
+                var mockGc = MockGc;
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node {p})")
+                    .WithParam("p", toSerialize);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("p");
+                var serializedObj = (Dictionary<string, object>)actual["p"];
+                serializedObj.Keys.Should().Contain("AnotherName");
+                serializedObj.Keys.Should().NotContain("Prop");
+                serializedObj["AnotherName"].Should().Be("Stuff");
             }
 
             [Fact]

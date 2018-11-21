@@ -182,21 +182,27 @@
     <Compile Include="$(MSBuildThisFileDirectory)RelationshipReference`TData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Relationship`TData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RootNode.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\CommonDeserializerMethods.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\CustomJsonDeserializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\CustomJsonSerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\CypherJsonDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BaseDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\DriverDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\EnumValueSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\IDriverDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\NullableEnumValueSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BoltDriver\TimeZoneInfoSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DateDeserializerMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CustomJsonDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CustomJsonSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\CypherJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DeserializationContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\DeserializationException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\EnumValueConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ICypherJsonDeserializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\EnumValueConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\ICypherJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\NullableEnumValueConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\PartialDeserializationContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\TimeZoneInfoConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeConverterBasedJsonConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\NullableEnumValueConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\PartialDeserializationContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\TimeZoneInfoConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Json\TypeConverterBasedJsonConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ITypeSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StatementResultHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\BoltResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\IInternalTransactionalGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\INeo4jTransaction.cs" />
@@ -214,5 +220,8 @@
     <None Include="$(MSBuildThisFileDirectory)Diagrams\Responses.cd" />
     <None Include="$(MSBuildThisFileDirectory)Indexing.cd" />
     <None Include="$(MSBuildThisFileDirectory)packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Serialization\Json\" />
   </ItemGroup>
 </Project>

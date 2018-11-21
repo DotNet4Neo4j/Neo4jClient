@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Mappers

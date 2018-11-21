@@ -2,6 +2,7 @@
 using System.Globalization;
 using FluentAssertions;
 using Neo4jClient.Serialization;
+using Neo4jClient.Serialization.Json;
 using Neo4jClient.Test.Fixtures;
 using Newtonsoft.Json;
 using Xunit;
