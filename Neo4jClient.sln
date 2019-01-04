@@ -35,7 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core, NetStandard Framework
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{50240473-4B2D-4623-8CE9-7DFF91140574}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Neo4jClient.FSharp.Tests", "Neo4jClient.FSharp.Tests\Neo4jClient.FSharp.Tests.fsproj", "{94869E02-1F43-4891-BD6C-0143A273802D}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Neo4jClient.FSharp.Tests", "Neo4jClient.FSharp.Tests\Neo4jClient.FSharp.Tests.fsproj", "{94869E02-1F43-4891-BD6C-0143A273802D}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -77,9 +77,10 @@ Global
 		{D87DA5F1-DA55-43BF-8A6C-F2BF7BEA0940}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E568B54B-F463-4346-818E-9EC8348C6470}.Full - Debug|Any CPU.ActiveCfg = Full - Debug|Any CPU
-		{E568B54B-F463-4346-818E-9EC8348C6470}.Portable - Debug|Any CPU.ActiveCfg = Portable - Debug|Any CPU
-		{E568B54B-F463-4346-818E-9EC8348C6470}.Portable - Debug|Any CPU.Build.0 = Portable - Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Full - Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Full - Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Portable - Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E568B54B-F463-4346-818E-9EC8348C6470}.Portable - Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E568B54B-F463-4346-818E-9EC8348C6470}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F627D73A-CC89-48E8-B603-89035FEEAB2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

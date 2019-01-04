@@ -38,7 +38,7 @@ namespace Neo4jClient
                 Realm = realm
             };
 
-//            transactionManager = new TransactionManager(this);
+            transactionManager = new BoltTransactionManager(this);
         }
     }
 }
