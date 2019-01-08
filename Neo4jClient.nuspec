@@ -12,7 +12,6 @@
     <dependencies>
       <group targetFramework="net452">
         <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="System.Net.Http" version="4.3.2" />
         <dependency id="Neo4j.Driver" version="1.5.2" />        
       </group>
       <group targetFramework="netstandard1.3">
@@ -27,7 +26,6 @@
       </group>
       <group targetFramework="net46">
         <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="System.Net.Http" version="4.3.2" />
         <dependency id="Neo4j.Driver" version="1.5.2" />
       </group>
     </dependencies>
