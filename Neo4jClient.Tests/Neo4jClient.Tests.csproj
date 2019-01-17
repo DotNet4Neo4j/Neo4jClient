@@ -188,6 +188,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bookmarks\BookmarkTests.cs" />
     <Compile Include="Cypher\CypherFluentQueryCustomHeaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transactions\BoltQueriesInTransactionTests.cs" />
