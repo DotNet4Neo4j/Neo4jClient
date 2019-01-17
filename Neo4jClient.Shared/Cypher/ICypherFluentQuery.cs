@@ -153,11 +153,37 @@ namespace Neo4jClient.Cypher
         /// Set the query to be a Read query.
         /// </summary>
         /// <remarks>This is used by the <see cref="BoltGraphClient"/></remarks>
+        /// /// <returns>A <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
         ICypherFluentQuery Read { get; }
+
         /// <summary>
         /// Set the query to be a Write query (which is the default behaviour).
         /// </summary>
         /// <remarks>This is used by the <see cref="BoltGraphClient"/></remarks>
+        /// <returns>A <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
         ICypherFluentQuery Write { get; }
+
+        /// <summary>
+        /// Set an identifier for your query. You don't need to set this, it's intended to allow you to link an <see cref="IGraphClient.OperationCompleted"/> event to a specific query.
+        /// </summary>
+        /// <param name="identifier">An ID you want to use to differentiate the query. If this is <c>null</c> or whitespace - it will be set to <c>null</c>.</param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> to query with.</returns>
+        ICypherFluentQuery WithIdentifier(string identifier);
+
+        /// <summary>
+        /// Perform the query using the given <paramref name="bookmarks"/>.
+        /// </summary>
+        /// <remarks>This only works for a <strong>Bolt</strong> session.</remarks>
+        /// <param name="bookmark">The bookmark to use.</param>
+        /// <returns>A <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
+        ICypherFluentQuery WithBookmark(string bookmark);
+
+        /// <summary>
+        /// Perform the query using the given <paramref name="bookmarks"/>.
+        /// </summary>
+        /// <remarks>This only works for a <strong>Bolt</strong> session.</remarks>
+        /// <param name="bookmarks">The bookmarks to use.</param>
+        /// <returns>A <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
+        ICypherFluentQuery WithBookmarks(params string[] bookmarks);
     }
 }

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using Neo4j.Driver.V1;
 
 namespace Neo4jClient.Transactions
@@ -8,17 +10,19 @@ namespace Neo4jClient.Transactions
     {
         internal readonly Neo4j.Driver.V1.ITransaction DriverTransaction;
         internal ISession Session { get; }
+        internal IList<string> Bookmarks { get; set; }
         public Guid Id { get; private set; }
 
-        public BoltNeo4jTransaction(IDriver driver, bool isWrite = true)
+        public BoltNeo4jTransaction(IDriver driver, IEnumerable<string> bookmarks, bool isWrite = true)
         {
-            Session = driver.Session(isWrite ? AccessMode.Write : AccessMode.Read);
+            Bookmarks = bookmarks?.ToList();
+            Session = driver.Session(isWrite ? AccessMode.Write : AccessMode.Read, Bookmarks);
             DriverTransaction = Session.BeginTransaction();
             IsOpen = true;
             Id = Guid.NewGuid();
         }
 
-        public BoltNeo4jTransaction(ISession session,  Neo4j.Driver.V1.ITransaction transaction)
+        public BoltNeo4jTransaction(ISession session, Neo4j.Driver.V1.ITransaction transaction)
         {
             DriverTransaction = transaction;
             Session = session;
@@ -100,7 +104,7 @@ namespace Neo4jClient.Transactions
 
         public static BoltNeo4jTransaction FromIdAndClient(Guid transactionId, IDriver driver)
         {
-            return new BoltNeo4jTransaction(driver){Id = transactionId};
+            return new BoltNeo4jTransaction(driver, null){Id = transactionId};
         }
     }
 }

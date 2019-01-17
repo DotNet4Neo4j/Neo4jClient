@@ -125,8 +125,9 @@ namespace Neo4jClient.Transactions
         /// <param name="scopeOption">How should the transaction scope be created.
         /// <see cref="Neo4jClient.Transactions.ITransactionalGraphClient.BeginTransaction(Neo4jClient.Transactions.TransactionScopeOption)" />
         ///  for more information.</param>
+        /// <param name="bookmarks">Bookmarks for use with this transaction.</param>
         /// <returns></returns>
-        public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
         {
             if (scopeOption == TransactionScopeOption.Suppress)
             {
@@ -151,12 +152,12 @@ namespace Neo4jClient.Transactions
             }
 
             // then scopeOption == TransactionScopeOption.RequiresNew or we dont have a current transaction
-            return BeginNewTransaction();
+            return BeginNewTransaction(bookmarks);
         }
 
-        private BoltTransactionContext GenerateTransaction()
+        private BoltTransactionContext GenerateTransaction(IEnumerable<string> bookmarks)
         {
-            var session = ((BoltGraphClient)client).Driver.Session();
+            var session = ((BoltGraphClient)client).Driver.Session(bookmarks);
             var transaction = session.BeginTransaction();
             return new BoltTransactionContext(new BoltNeo4jTransaction(session, transaction));
         }
@@ -171,9 +172,9 @@ namespace Neo4jClient.Transactions
             ScopedTransactions.Push(transaction);
         }
 
-        private ITransaction BeginNewTransaction()
+        private ITransaction BeginNewTransaction(IEnumerable<string> bookmarks)
         {
-            var transaction = new BoltNeo4jTransactionProxy(client, GenerateTransaction(), true);
+            var transaction = new BoltNeo4jTransactionProxy(client, GenerateTransaction(bookmarks), true);
             PushScopeTransaction(transaction);
             return transaction;
         }

@@ -12,38 +12,6 @@ using Xunit;
 
 namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
 {
-    public class BoltTestHarness : IDisposable
-    {
-        private readonly Mock<IDriver> mockDriver = new Mock<IDriver>();
-        private readonly Mock<ISession> mockSession = new Mock<ISession>();
-
-        public BoltTestHarness()
-        {
-            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new Extensions.BoltGraphClientTests.ServerInfo());
-            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
-            
-            mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
-        }
-
-        public void Dispose()
-        {
-        }
-
-        public void SetupCypherRequestResponse(string request, IDictionary<string, object> cypherQueryQueryParameters, IStatementResult response)
-        {
-            mockSession.Setup(s => s.Run(request, It.IsAny<IDictionary<string, object>>())).Returns(response);
-        }
-
-        public IRawGraphClient CreateAndConnectBoltGraphClient()
-        {
-            var bgc = new BoltGraphClient(mockDriver.Object);
-            bgc.Connect();
-            return bgc;
-        }
-
-        
-    }
-
     internal class TestPath : IPath
     {
         #region Implementation of IEquatable<IPath>
@@ -200,7 +168,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 var results = graphClient.ExecuteGetCypherResults<RelationGrouper>(cypherQuery).ToArray();
 
                 //Assert
-                Assert.Equal(1, results.Length);
+                results.Length.Should().Be(1);
                 var relation = results.First().Rel;
                 relation.Id.Should().Be(42);
             }

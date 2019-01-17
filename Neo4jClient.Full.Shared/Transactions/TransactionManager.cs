@@ -118,6 +118,11 @@ namespace Neo4jClient.Transactions
 
         public ITransaction CurrentDtcTransaction => Transaction.Current == null ? null : promotable.AmbientTransaction;
 
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
+        {
+            return BeginTransaction(scopeOption);
+        }
+
         /// <summary>
         /// Implements the internal part for ITransactionalGraphClient.BeginTransaction
         /// </summary>
@@ -202,6 +207,8 @@ namespace Neo4jClient.Transactions
             PushScopeTransaction(suppressTransaction);
             return suppressTransaction;
         }
+
+ 
 
         public void EndTransaction()
         {
