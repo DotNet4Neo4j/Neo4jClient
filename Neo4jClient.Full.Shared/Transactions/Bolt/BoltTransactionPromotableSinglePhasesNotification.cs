@@ -22,13 +22,14 @@ namespace Neo4jClient.Transactions
             // we have been promoted to MSTDC, so we have to clean the local resources
             if (transaction == null)
             {
-                transaction = new BoltNeo4jTransaction(((BoltGraphClient)client).Driver );
+                transaction = new BoltNeo4jTransaction(((BoltGraphClient)client).Driver, null );
             }
             
             transaction.Cancel();
             transactionId = transaction.Id;
             var driverTx = transaction.DriverTransaction;
             var session = transaction.Session;
+            var bookmarks = transaction.Bookmarks;
             transaction = null;
 
             // BUG: .NET 4.7.1 introduced a bug where the current transaction wouldn't get restored
@@ -39,7 +40,8 @@ namespace Neo4jClient.Transactions
             {
                 TransactionId = transactionId,
                 Session = session,
-                DriverTransaction = driverTx
+                DriverTransaction = driverTx,
+                Bookmarks = bookmarks
             });
             // Only restore if the bug exists to avoid any potentially side-effects
             // of setting the transaction
@@ -57,7 +59,7 @@ namespace Neo4jClient.Transactions
         /// <inheritdoc />
         public void Initialize()
         {
-            transaction = new BoltNeo4jTransaction(((BoltGraphClient)client).Driver);
+            transaction = new BoltNeo4jTransaction(((BoltGraphClient)client).Driver, null);
         }
 
         /// <inheritdoc />
@@ -123,7 +125,7 @@ namespace Neo4jClient.Transactions
 
                 // we create a transaction directly instead of using BeginTransaction that GraphClient
                 // doesn't store it in its stack of scopes.
-                var localTransaction = new BoltNeo4jTransaction(((BoltGraphClient)client).Driver);
+                var localTransaction = new BoltNeo4jTransaction(((BoltGraphClient)client).Driver, null);
 
                
                 var propagationToken = TransactionInterop.GetTransmitterPropagationToken(transaction);

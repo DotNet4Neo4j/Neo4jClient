@@ -741,10 +741,30 @@ namespace Neo4jClient
 
         public ITransaction BeginTransaction()
         {
-            return BeginTransaction(TransactionScopeOption.Join);
+            return BeginTransaction((IEnumerable<string>) null);
+        }
+
+        public ITransaction BeginTransaction(string bookmark)
+        {
+            return BeginTransaction(new List<string> {bookmark});
+        }
+
+        public ITransaction BeginTransaction(IEnumerable<string> bookmarks)
+        {
+            return BeginTransaction(TransactionScopeOption.Join, bookmarks);
         }
 
         public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
+        {
+            return BeginTransaction(scopeOption, (IEnumerable<string>) null);
+        }
+
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, string bookmark)
+        {
+            return BeginTransaction(scopeOption, new List<string>{bookmark});
+        }
+
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
         {
             CheckRoot();
             if (transactionManager == null)
@@ -752,7 +772,7 @@ namespace Neo4jClient
                 throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
             }
 
-            return transactionManager.BeginTransaction(scopeOption);
+            return transactionManager.BeginTransaction(scopeOption, bookmarks);
         }
 
         public ITransaction Transaction => transactionManager?.CurrentNonDtcTransaction;

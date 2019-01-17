@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -84,14 +85,21 @@ namespace Neo4jClient.Test.Extensions
 
         }
 
+
+
+
+
         [Fact]
         public void SerializesDateTimesProperly()
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
 
+            
+
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
@@ -99,7 +107,7 @@ namespace Neo4jClient.Test.Extensions
 
             var cwd = new ClassWithDateTime{Dt = new DateTime(2000, 1, 1)};;
 
-            bgc.Cypher.Create("(c)").WithParam("testParam", cwd).ExecuteWithoutResults();
+            var cfq = bgc.Cypher.Create("(c)").WithParam("testParam", cwd);
 
             var expectedParameters = new Dictionary<string, object>
             {
@@ -108,7 +116,8 @@ namespace Neo4jClient.Test.Extensions
                 }
             };
 
-            mockSession.Verify(x => x.Run("CREATE (c)", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
+            var query = cfq.Query;
+            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
         }
 
         [Fact]
@@ -119,6 +128,7 @@ namespace Neo4jClient.Test.Extensions
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
@@ -126,7 +136,7 @@ namespace Neo4jClient.Test.Extensions
 
             var cwd = new ClassWithDateTimeOffset { Dt = new DateTimeOffset(new DateTime(2000, 1, 1), TimeSpan.FromHours(1)) }; ;
 
-            bgc.Cypher.Create("(c)").WithParam("testParam", cwd).ExecuteWithoutResults();
+            var cfq = bgc.Cypher.Create("(c)").WithParam("testParam", cwd);
 
             var expectedParameters = new Dictionary<string, object>
             {
@@ -135,7 +145,8 @@ namespace Neo4jClient.Test.Extensions
                 }
             };
 
-            mockSession.Verify(x => x.Run("CREATE (c)", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
+            var query = cfq.Query;
+            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
         }
 
         [Fact]
@@ -146,6 +157,7 @@ namespace Neo4jClient.Test.Extensions
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
@@ -153,14 +165,15 @@ namespace Neo4jClient.Test.Extensions
 
             var cwg = new ClassWithGuid();
 
-            bgc.Cypher.Create("(c)").WithParam("testParam", cwg).ExecuteWithoutResults();
+            var cfq = bgc.Cypher.Create("(c)").WithParam("testParam", cwg);
             
             var expectedParameters = new Dictionary<string, object>
             {
             {"testParam", new Dictionary<string, object>{{"Id", cwg.Id.ToString()} }
             }};
 
-            mockSession.Verify(x => x.Run("CREATE (c)", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
+            var query = cfq.Query;
+            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
         }
 
         [Fact]
@@ -171,6 +184,7 @@ namespace Neo4jClient.Test.Extensions
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient( mockDriver.Object);
@@ -178,11 +192,12 @@ namespace Neo4jClient.Test.Extensions
 
             var cwg = new ClassWithGuid();
 
-            bgc.Cypher.Create("(c)").Where((ClassWithGuid c) => c.Id == cwg.Id).ExecuteWithoutResults();
+            var cfq = bgc.Cypher.Create("(c)").Where((ClassWithGuid c) => c.Id == cwg.Id);
 
             var expectedParameters = new Dictionary<string, object> {{"p0", $"{cwg.Id}"}};
 
-            mockSession.Verify(x => x.Run("CREATE (c)\r\nWHERE (c.Id = {p0})", It.Is<IDictionary<string, object>>(c => CompareDictionaries(c, expectedParameters))), Times.Once);
+            var query = cfq.Query;
+            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
         }
 
         private static bool CompareDictionaries<TKey, TValue>(IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2)

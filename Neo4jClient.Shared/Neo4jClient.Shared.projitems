@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQuery`Return.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQuery`TResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQuery`Where.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQuery`WithBookmark.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQuery`With.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherPlanner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherQuery.cs" />
