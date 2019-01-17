@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Transactions;
@@ -52,10 +53,12 @@ namespace Neo4jClient.Test.Transactions
             var dbmsReturn = GetDbmsComponentsResponse();
             mockSession.Run("CALL dbms.components()").Returns(dbmsReturn);
             mockSession.BeginTransaction().Returns(mockTransaction);
-
+            
             var mockDriver = Substitute.For<IDriver>();
             mockDriver.Session().Returns(mockSession);
             mockDriver.Session(Arg.Any<AccessMode>()).Returns(mockSession);
+            mockDriver.Session(Arg.Any<AccessMode>(), Arg.Any<IEnumerable<string>>()).Returns(mockSession);
+            mockDriver.Session(Arg.Any<IEnumerable<string>>()).Returns(mockSession);
             mockDriver.Uri.Returns(new Uri("bolt://localhost"));
 
             driver = mockDriver;
@@ -93,7 +96,7 @@ namespace Neo4jClient.Test.Transactions
                 var rawGraphClient = (IRawGraphClient) graphClient;
                 rawGraphClient.ExecuteMultipleCypherQueriesInTransaction(new[]{query});
 
-                driver.Received(1).Session();
+                driver.Received(1).Session((IEnumerable<string>) null);
                 session.Received(1).BeginTransaction();
                 transaction.Received(1).Success();
             }
@@ -115,7 +118,7 @@ namespace Neo4jClient.Test.Transactions
                     tx.Commit();
                 }
 
-                driver.Received(1).Session();
+                driver.Received(1).Session((IEnumerable<string>)null);
                 session.Received(1).BeginTransaction();
                 transaction.Received(1).Success();
             }
@@ -145,7 +148,7 @@ namespace Neo4jClient.Test.Transactions
                     tx.Commit();
                 }
 
-                driver.Received(1).Session();
+                driver.Received(1).Session((IEnumerable<string>) null);
                 session.Received(1).BeginTransaction();
                 transaction.Received(1).Success();
             }
@@ -182,7 +185,7 @@ namespace Neo4jClient.Test.Transactions
                         .ExecuteWithoutResults();
                 }
 
-                driver.Received(1).Session(Arg.Any<AccessMode>());
+                driver.Received(1).Session(Arg.Any<AccessMode>(),(IEnumerable<string>) null);
                 transaction.Received(1).Failure();
                 transaction.Received(1).Dispose();
             }
@@ -203,7 +206,7 @@ namespace Neo4jClient.Test.Transactions
                     scope.Complete();
                 }
 
-                driver.Received(1).Session(Arg.Any<AccessMode>());
+                driver.Received(1).Session(Arg.Any<AccessMode>(), (IEnumerable<string>)null);
                 session.Received(1).BeginTransaction();
                 transaction.Received(1).Run(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>());
                 transaction.Received(1).Success();
@@ -228,7 +231,7 @@ namespace Neo4jClient.Test.Transactions
                     scope.Complete();
                 }
 
-                driver.Received(1).Session(Arg.Any<AccessMode>());
+                driver.Received(1).Session(Arg.Any<AccessMode>(), (IEnumerable<string>)null);
                 session.Received(1).BeginTransaction();
                 transaction.Received(1).Success();
                 transaction.Received(1).Dispose();
@@ -259,7 +262,7 @@ namespace Neo4jClient.Test.Transactions
                     scope.Complete();
                 }
 
-                driver.Received(2).Session(Arg.Any<AccessMode>());
+                driver.Received(2).Session(Arg.Any<AccessMode>(), (IEnumerable<string>)null);
                 session.Received(2).BeginTransaction();
                 transaction.Received(2).Success();
                 transaction.Received(2).Dispose();
@@ -292,7 +295,7 @@ namespace Neo4jClient.Test.Transactions
                     scope.Complete();
                 }
 
-                driver.Received(2).Session(Arg.Any<AccessMode>());
+                driver.Received(2).Session(Arg.Any<AccessMode>(), (IEnumerable<string>)null);
                 session.Received(2).BeginTransaction();
                 transaction.Received(2).Success();
                 transaction.Received(2).Dispose();
@@ -315,7 +318,7 @@ namespace Neo4jClient.Test.Transactions
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                 }
 
-                driver.Received(1).Session(Arg.Any<AccessMode>());
+                driver.Received(1).Session(Arg.Any<AccessMode>(), (IEnumerable<string>)null);
                 transaction.Received(1).Failure();
             }
         }

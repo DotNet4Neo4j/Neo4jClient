@@ -19,7 +19,6 @@ namespace Neo4jClient
         
         public static IStatementResult Run(this ISession session, CypherQuery query, IGraphClient gc)
         {
-            
             return session.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
@@ -82,7 +81,7 @@ namespace Neo4jClient
                 .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute))))
                 .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc));
         }
-
+        
         private static object SerializeCollection(IEnumerable value, IList<JsonConverter> converters, IGraphClient gc)
         {
             return value.Cast<object>().Select(x => Serialize(x, converters, gc)).ToArray();

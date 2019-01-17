@@ -12,7 +12,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RootApiResponseTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiUsageIdeas.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClientTests\Bookmarks\BookmarkTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClientTests\ConnectAsyncTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BoltTestHarness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClientTests\Cypher\ExecuteGetCypherResultsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CultureInfoSetupFixture.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\AggregateTests.cs" />
@@ -20,6 +22,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryCallTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryConstraintTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryCreateUniqueTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryWithIdentifierTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryWithBookmarkTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryReadWriteTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryDeleteTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\CypherFluentQueryDetachDeleteTests.cs" />

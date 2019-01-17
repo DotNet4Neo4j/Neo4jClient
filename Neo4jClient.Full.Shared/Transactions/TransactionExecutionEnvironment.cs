@@ -15,6 +15,7 @@ namespace Neo4jClient.Transactions
         public Guid ResourceManagerId { get; set; }
         public ISession Session { get; set; }
         public Neo4j.Driver.V1.ITransaction DriverTransaction { get; set; }
+        public IList<string> Bookmarks { get; set; }
 
         public BoltTransactionExecutionEnvironment(ExecutionConfiguration executionConfiguration)
         {

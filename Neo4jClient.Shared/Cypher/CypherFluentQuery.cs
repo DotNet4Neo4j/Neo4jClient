@@ -48,10 +48,7 @@ namespace Neo4jClient.Cypher
 
         internal CypherFluentQuery(IGraphClient client, QueryWriter queryWriter, bool isWrite = true)
         {
-            if (!(client is IRawGraphClient))
-                throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(client));
-
-            Client = (IRawGraphClient)client;
+            Client = client as IRawGraphClient ?? throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(client));
             QueryWriter = queryWriter;
             CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
             Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter, isWrite);
@@ -505,8 +502,7 @@ namespace Neo4jClient.Cypher
                     throw new ArgumentOutOfRangeException(nameof(planner), planner, null);
             }
         }
-
-
+        
         public ICypherFluentQuery MaxExecutionTime(int milliseconds)
         {
             QueryWriter.MaxExecutionTime = milliseconds;
@@ -524,6 +520,13 @@ namespace Neo4jClient.Cypher
             return isCamelCase 
                 ? $"{propertyName.Substring(0, 1).ToLowerInvariant()}{(propertyName.Length > 1 ? propertyName.Substring(1, propertyName.Length - 1) : string.Empty)}"
                 : propertyName;
+        }
+
+        /// <inheritdoc />
+        public ICypherFluentQuery WithIdentifier(string identifier)
+        {
+            QueryWriter.Identifier = string.IsNullOrWhiteSpace(identifier) ? null : identifier;
+            return this;
         }
     }
 }
