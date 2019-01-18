@@ -12,21 +12,21 @@
     <dependencies>
       <group targetFramework="net452">
         <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="Neo4j.Driver" version="1.5.2" />        
+        <dependency id="Neo4j.Driver.Signed" version="1.7.0" />        
       </group>
       <group targetFramework="netstandard1.3">
-        <dependency id="Neo4j.Driver" version="1.5.2" />
+        <dependency id="Neo4j.Driver.Signed" version="1.7.0" />        
         <dependency id="Newtonsoft.Json" version="9.0.1" />
         <dependency id="System.Net.Http" version="4.3.2" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Neo4j.Driver" version="1.5.2" />
+        <dependency id="Neo4j.Driver.Signed" version="1.7.0" />        
         <dependency id="Newtonsoft.Json" version="9.0.1" />
         <dependency id="System.Net.Http" version="4.3.2" />
       </group>
       <group targetFramework="net46">
         <dependency id="Newtonsoft.Json" version="9.0.1" />
-        <dependency id="Neo4j.Driver" version="1.5.2" />
+        <dependency id="Neo4j.Driver.Signed" version="1.7.0" />        
       </group>
     </dependencies>
   </metadata>
