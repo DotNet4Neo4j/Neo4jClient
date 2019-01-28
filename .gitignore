@@ -20,3 +20,5 @@ TestResult.xml
 \.idea/
 *\.vs\*
 *.nuget.targets
+
+Neo4jClient/Neo4jClient\.nuget\.props

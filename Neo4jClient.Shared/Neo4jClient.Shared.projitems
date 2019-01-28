@@ -9,6 +9,7 @@
     <Import_RootNamespace>Neo4jClient</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AddressResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AggregateExceptionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AmbiguousRelationshipDirectionException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\BatchResponse.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\VbComparer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeleteMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DetachedNodeException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DriverWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Execution\BatchExecutionPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Execution\CypherExecutionPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Execution\CypherTransactionExecutionPolicy.cs" />
@@ -207,6 +209,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransactionManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\ITransactionResourceManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionHttpUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UriCreator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
