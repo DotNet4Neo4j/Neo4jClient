@@ -9,6 +9,7 @@
     <Import_RootNamespace>Neo4jClient.Tests.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AddressResolverTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\GremlinTableCapResponseTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RootApiResponseTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiUsageIdeas.cs" />

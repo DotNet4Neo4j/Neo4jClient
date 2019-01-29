@@ -21,88 +21,6 @@ using ITransaction = Neo4jClient.Transactions.ITransaction;
 
 namespace Neo4jClient
 {
-    internal class DriverWrapper : IDriver
-    {
-        private readonly IDriver driver;
-        public string Username { get;  }
-        public string Password { get; }
-        public string Realm { get; }
-
-        public DriverWrapper(IDriver driver)
-        {
-            this.driver = driver;
-        }
-
-        public DriverWrapper(string uri, string username, string pass, string realm)
-            :this(new Uri(uri), username, pass, realm)
-        {
-        }
-        public DriverWrapper(Uri uri, string username, string pass, string realm)
-        {
-            Uri = uri;
-            Username = username;
-            Password = pass;
-            Realm = realm;
-
-            var authToken = GetAuthToken(username, pass, realm);
-            this.driver = GraphDatabase.Driver(uri, authToken);
-        }
-
-
-        public ISession Session()
-        {
-            return driver.Session();
-        }
-
-        public ISession Session(AccessMode defaultMode)
-        {
-            return driver.Session(defaultMode);
-        }
-
-        public ISession Session(string bookmark)
-        {
-            return driver.Session(bookmark);
-        }
-
-        public ISession Session(AccessMode defaultMode, string bookmark)
-        {
-            return driver.Session(defaultMode, bookmark);
-        }
-
-        public ISession Session(AccessMode defaultMode, IEnumerable<string> bookmarks)
-        {
-            return driver.Session(defaultMode, bookmarks);
-        }
-
-        public ISession Session(IEnumerable<string> bookmarks)
-        {
-            return driver.Session(bookmarks);
-        }
-
-        public void Close()
-        {
-            driver.Close();
-        }
-
-        public Task CloseAsync()
-        {
-            return driver.CloseAsync();
-        }
-
-        public Uri Uri { get; }
-
-        private static IAuthToken GetAuthToken(string username, string password, string realm)
-        {
-            return string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password)
-                ? AuthTokens.None
-                : AuthTokens.Basic(username, password, realm);
-        }
-        public void Dispose()
-        {
-            driver?.Dispose();
-        }
-    }
-
     /// <summary>
     ///     The <see cref="BoltGraphClient" /> is the client for connecting to the Bolt protocol of Neo4j.
     /// </summary>
@@ -124,8 +42,21 @@ namespace Neo4jClient
         private readonly string realm;
 
         private readonly ITransactionManager<BoltResponse> transactionManager;
-        private readonly Uri uri;
+        private readonly IServerAddressResolver addressResolver;
         private readonly string username;
+        private readonly Uri uri;
+
+        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null)
+            : this(uri, null, username, password, realm)
+        { }
+
+        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null)
+            : this(new Uri("bolt+routing://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm)
+        { }
+
+        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null)
+        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm)
+        {}
 
         public BoltGraphClient(string uri, string username = null, string password= null, string realm = null)
             : this(new Uri(uri), username, password, realm)
@@ -138,6 +69,7 @@ namespace Neo4jClient
         }
 
         internal IDriver Driver { get; set; }
+        internal IServerAddressResolver AddressResolver => addressResolver;
         private IExecutionPolicyFactory PolicyFactory { get; }
 
         #region Implementation of ICypherGraphClient
@@ -511,8 +443,8 @@ namespace Neo4jClient
             if (Driver == null)
             {
                 var driver = configuration == null
-                    ? new DriverWrapper(uri, username, password, realm)
-                    : new DriverWrapper(uri, configuration.Username, configuration.Password, configuration.Realm);
+                    ? new DriverWrapper(uri, addressResolver, username, password, realm)
+                    : new DriverWrapper(uri, addressResolver, configuration.Username, configuration.Password, configuration.Realm);
                 Driver = driver;
             }
 
@@ -796,5 +728,7 @@ namespace Neo4jClient
         }
 
         #endregion
+
+        
     }
 }

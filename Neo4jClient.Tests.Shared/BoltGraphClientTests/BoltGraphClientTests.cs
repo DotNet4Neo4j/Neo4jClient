@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -84,11 +85,7 @@ namespace Neo4jClient.Test.Extensions
             public IResultSummary Summary { get; }
 
         }
-
-
-
-
-
+        
         [Fact]
         public void SerializesDateTimesProperly()
         {
@@ -306,6 +303,79 @@ namespace Neo4jClient.Test.Extensions
             ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
         }
 
+        public class Constructor : IClassFixture<CultureInfoSetupFixture>
+        {
+            [Fact]
+            public void DoesntUseAddressResolverWhenPassingInOneUri()
+            {
+                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com");
+                bgc.AddressResolver.Should().BeNull();
+            }
 
+            [Fact]
+            public void UsesAddressResolverWhenPassingInMultipleUris()
+            {
+                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"});
+                var resolved = bgc.AddressResolver.Resolve(null);
+                resolved.Should().HaveCount(2);
+            }
+
+
+            [Fact]
+            public void ValidForBoltPlusRoutingUris()
+            {
+                var ex = Record.Exception(() => new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"}));
+                ex.Should().BeNull();
+            }
+
+            [Fact]
+            public void DoesntNeedVirtualUriToBeSupplied()
+            {
+                const string uri = "x.foo.com";
+
+                var bgc = new BoltGraphClient( new[] { $"{uri}" });
+                var resolved = bgc.AddressResolver.Resolve(null);
+                resolved.Should().HaveCount(1);
+                resolved.First().Host.Should().Be(uri);
+            }
+
+            [Theory]
+            [InlineData("bolt")]
+            [InlineData("https")]
+            [InlineData("http")]
+            [InlineData("ftp")]
+            public void NotValidForOtherUriSchemes(string scheme)
+            {
+                var ex = Record.Exception(() => new BoltGraphClient($"{scheme}://virtual.foo.com", new [] {"x.foo.com", "y.foo.com"} ));
+                ex.Should().NotBeNull();
+                ex.Should().BeOfType<NotSupportedException>();
+            }
+
+            [Theory]
+            [InlineData("bolt")]
+            [InlineData("https")]
+            [InlineData("http")]
+            [InlineData("ftp")]
+            public void WorksIfYouPassInWholeUris(string schema)
+            {
+                const string uri = "x.foo.com";
+                
+                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] { $"{schema}://{uri}" });
+                var resolved = bgc.AddressResolver.Resolve(null);
+                resolved.Should().HaveCount(1);
+                resolved.First().Host.Should().Be(uri);
+            }
+
+            [Fact]
+            public void WorksIfYouPassInUrisWithoutScheme()
+            {
+                const string uri = "x.foo.com";
+
+                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] { uri });
+                var resolved = bgc.AddressResolver.Resolve(null);
+                resolved.Should().HaveCount(1);
+                resolved.First().Host.Should().Be(uri);
+            }
+        }
     }
 }
