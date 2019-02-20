@@ -9,6 +9,7 @@ using Moq;
 using Neo4j.Driver.V1;
 using Neo4jClient.Test.BoltGraphClientTests;
 using Neo4jClient.Test.Fixtures;
+using Neo4jClient.Tests.Shared;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -91,9 +92,7 @@ namespace Neo4jClient.Test.Extensions
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
-
             
-
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
@@ -114,7 +113,7 @@ namespace Neo4jClient.Test.Extensions
             };
 
             var query = cfq.Query;
-            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
 
         [Fact]
@@ -143,7 +142,7 @@ namespace Neo4jClient.Test.Extensions
             };
 
             var query = cfq.Query;
-            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
 
         [Fact]
@@ -170,7 +169,7 @@ namespace Neo4jClient.Test.Extensions
             }};
 
             var query = cfq.Query;
-            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
 
         [Fact]
@@ -194,33 +193,7 @@ namespace Neo4jClient.Test.Extensions
             var expectedParameters = new Dictionary<string, object> {{"p0", $"{cwg.Id}"}};
 
             var query = cfq.Query;
-            CompareDictionaries(query.ToNeo4jDriverParameters(bgc), expectedParameters).Should().BeTrue();
-        }
-
-        private static bool CompareDictionaries<TKey, TValue>(IDictionary<TKey, TValue> d1, IDictionary<TKey, TValue> d2)
-        {
-            if (d1 == null && d2 == null)
-                return true;
-            if (d1 == null || d2 == null)
-                return false;
-
-            if (d1.Count != d2.Count)
-                return false;
-
-            foreach (var d1Key in d1.Keys)
-            {
-                if (!d2.ContainsKey(d1Key))
-                    return false;
-
-                var v1 = d1[d1Key];
-                var v2 = d2[d1Key];
-                if (v1.GetType() == typeof(Dictionary<TKey, TValue>))
-                    return CompareDictionaries((IDictionary<TKey, TValue>)v1, (IDictionary<TKey, TValue>)v2);
-
-                if (!d1[d1Key].Equals(d2[d1Key]))
-                    return false;
-            }
-            return true;
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
 
         [Fact]

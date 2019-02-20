@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Neo4j.Driver.V1;
 using Neo4jClient.Execution;
+using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 

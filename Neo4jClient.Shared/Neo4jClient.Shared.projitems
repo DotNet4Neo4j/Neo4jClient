@@ -32,6 +32,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RelationshipApiResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RelationshipTemplate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RootApiResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Neo4jDateTimeAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CypherPartialResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\All.cs" />
@@ -199,6 +200,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TimeZoneInfoConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeConverterBasedJsonConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TypeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ZonedDateTimeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StatementResultHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\BoltResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\IInternalTransactionalGraphClient.cs" />

@@ -93,6 +93,12 @@ namespace Neo4jClient.Test
             public DateTimeOffset Offset { get; set; }
         }
 
+        private class ClassWithDateTimeAndAttribute
+        {
+            [Neo4jDateTime]
+            public DateTimeOffset Offset { get; set; }
+        }
+
         private class ClassWithArray
         {
             public string[] StrArr { get; set; }
@@ -409,6 +415,22 @@ namespace Neo4jClient.Test
                 var result = record.Parse<ClassWithArray>(GraphClient);
                 result.Should().NotBeNull();
                 result.StrArr.Should().HaveCount(2);
+            }
+
+            [Fact]
+            public void ParsesDateTimesFromNeo4jCorrectly()
+            {
+                LocalDateTime ldt = new LocalDateTime(2000,3,1,1,1,1);
+                var node = new TestNode(new Dictionary<string, object> { { "Offset", ldt } });
+                var record = Substitute.For<IRecord>();
+                record.Keys.Returns(new List<string> { "X" });
+                record["X"].Returns(node);
+
+                var result = record.Parse<ClassWithDateTimeAndAttribute>(GraphClient);
+                result.Should().NotBeNull();
+                result.Offset.Year.Should().Be(2000);
+                result.Offset.Month.Should().Be(3);
+                result.Offset.Day.Should().Be(1);
             }
 
             [Fact]

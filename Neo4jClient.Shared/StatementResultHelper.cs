@@ -16,11 +16,17 @@ namespace Neo4jClient
 {
     internal static class StatementResultHelper
     {
+        internal static JsonSerializerSettings JsonSettings { get; set; } =
+            new JsonSerializerSettings
+            {
+                Converters = BoltGraphClient.DefaultJsonConverters.Reverse().ToList()
+            };
+
         internal static string ToJsonString(this INode node, bool inSet = false, bool isNested = false, bool isNestedInList = false)
         {
             var props = node
                 .Properties
-                .Select(p => $"\"{p.Key}\":{JsonConvert.SerializeObject(p.Value)}");
+                .Select(p => $"\"{p.Key}\":{JsonConvert.SerializeObject(p.Value, JsonSettings)}");
 
             if (isNestedInList)
             {
@@ -41,7 +47,7 @@ namespace Neo4jClient
         {
             var props = relationship
                 .Properties
-                .Select(p => $"\"{p.Key}\":{JsonConvert.SerializeObject(p.Value)}");
+                .Select(p => $"\"{p.Key}\":{JsonConvert.SerializeObject(p.Value, JsonSettings)}");
 
             if (isNestedInList)
             {
