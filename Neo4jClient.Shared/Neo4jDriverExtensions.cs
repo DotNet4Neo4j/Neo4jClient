@@ -40,7 +40,7 @@ namespace Neo4jClient
             public object Value { get; set; }
         }
 
-        private static object Serialize(object value, IList<JsonConverter> converters, IGraphClient gc)
+        private static object Serialize(object value, IList<JsonConverter> converters, IGraphClient gc, IEnumerable<CustomAttributeData> customAttributes = null)
         {
             if (value == null)
             {
@@ -55,6 +55,11 @@ namespace Neo4jClient
             {
                 var serializer = new CustomJsonSerializer{JsonConverters = converters, JsonContractResolver = ((IRawGraphClient)gc).JsonContractResolver};
                 return JsonConvert.DeserializeObject<CustomJsonConverterHelper>(serializer.Serialize(new {value})).Value;
+            }
+
+            if (customAttributes != null && customAttributes.Any(x => x.AttributeType == typeof(Neo4jDateTimeAttribute)))
+            {
+                return value;
             }
 
             if (typeInfo.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
@@ -79,7 +84,7 @@ namespace Neo4jClient
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute))))
-                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc));
+                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc, pi.CustomAttributes));
         }
         
         private static object SerializeCollection(IEnumerable value, IList<JsonConverter> converters, IGraphClient gc)

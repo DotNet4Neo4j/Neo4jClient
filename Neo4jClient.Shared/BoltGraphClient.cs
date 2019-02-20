@@ -33,7 +33,9 @@ namespace Neo4jClient
             new TypeConverterBasedJsonConverter(),
             new NullableEnumValueConverter(),
             new TimeZoneInfoConverter(),
-            new EnumValueConverter()
+            new EnumValueConverter(),
+            new ZonedDateTimeConverter(), 
+            new LocalDateTimeConverter()
         };
 
         private static readonly DefaultContractResolver DefaultJsonContractResolver = new DefaultContractResolver();
@@ -558,7 +560,20 @@ namespace Neo4jClient
             }
             else
             {
-                var converted = result.Select(record => record.Deserialize(deserializer, query.ResultMode));
+
+                StatementResultHelper.JsonSettings = new JsonSerializerSettings
+                {
+                    Converters = JsonConverters,
+                    ContractResolver = JsonContractResolver
+                };
+
+                List<IEnumerable<TResult>> converted = new List<IEnumerable<TResult>>();
+                foreach (var record in result)
+                {
+                    var des = record.Deserialize(deserializer, query.ResultMode);
+                    converted.Add(des);
+                }
+
                 foreach (var enumerable in converted)
                 {
                     results.AddRange(enumerable);
