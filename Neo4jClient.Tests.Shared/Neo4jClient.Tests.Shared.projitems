@@ -64,6 +64,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MemberInfoExtensionsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\Neo4jDriverExtensionsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClientTests\BoltGraphClientTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ObjectExtensionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClientTests\ConnectAsyncTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClientTests\ConnectTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClientTests\CreateIndexTests.cs" />
