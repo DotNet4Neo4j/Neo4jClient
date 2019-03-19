@@ -41,6 +41,8 @@ namespace Neo4jClient.Cypher
                 { "StartsWith",  VisitStartsWithMethod },
                 { "Contains",  VisitContainsMethod },
                 { "EndsWith",  VisitEndsWithMethod },
+                { "In", VisitInMethod },
+                { "NotIn", VisitNotInMethod }
             };
         }
 
@@ -53,6 +55,28 @@ namespace Neo4jClient.Cypher
             }
 
             return base.VisitMethodCall(node);
+        }
+
+        private Expression VisitInMethod(MethodCallExpression node)
+        {
+            TextOutput.Append("(");
+            Visit(node.Arguments[0]);
+            TextOutput.Append(" IN ");
+            Visit(node.Arguments[1]);
+            TextOutput.Append(")");
+
+            return node;
+        }
+
+        private Expression VisitNotInMethod(MethodCallExpression node)
+        {
+            TextOutput.Append("NOT (");
+            Visit(node.Arguments[0]);
+            TextOutput.Append(" IN ");
+            Visit(node.Arguments[1]);
+            TextOutput.Append(")");
+
+            return node;
         }
 
         private Expression VisitStartsWithMethod(MethodCallExpression node)

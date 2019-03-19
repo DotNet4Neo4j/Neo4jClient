@@ -107,6 +107,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Execution\RestExecutionPolicy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\EnumerableExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\MemberInfoExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ObjectExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClientExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GraphClientFactory.cs" />

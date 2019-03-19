@@ -3,6 +3,7 @@ using Newtonsoft.Json.Serialization;
 using NSubstitute;
 using Xunit;
 using Neo4jClient.Cypher;
+using Neo4jClient.Extensions;
 using Neo4jClient.Test.Fixtures;
 using Newtonsoft.Json;
 
@@ -44,6 +45,31 @@ namespace Neo4jClient.Test.Cypher
         // ReSharper restore ClassNeverInstantiated.Local
         // ReSharper restore UnusedAutoPropertyAccessor.Local
 
+        [Fact]
+        public void CreatesNotInQuery()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher19);
+            var arr = new[] { 1, 2, 3, 4 };
+            var query = new CypherFluentQuery(client).Where((Foo foo) => foo.Bar.NotIn(arr)).Query;
+
+            Assert.Equal("WHERE NOT (foo.Bar IN {p0})", query.QueryText);
+            Assert.Equal(1, query.QueryParameters.Count);
+            Assert.Equal(arr, query.QueryParameters["p0"]);
+        }
+
+        [Fact]
+        public void CreatesInQuery()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher19);
+            var arr = new[] {1, 2, 3, 4};
+            var query = new CypherFluentQuery(client).Where((Foo foo) => foo.Bar.In(arr)).Query;
+
+            Assert.Equal("WHERE (foo.Bar IN {p0})", query.QueryText);
+            Assert.Equal(1, query.QueryParameters.Count);
+            Assert.Equal(arr, query.QueryParameters["p0"]);
+        }
 
         [Fact]
         public void CreatesStartWithQuery()
