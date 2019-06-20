@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualBasic.CompilerServices;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace Neo4jClient.Cypher
 {
