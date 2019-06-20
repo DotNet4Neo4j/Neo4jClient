@@ -33,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RelationshipTemplate.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ApiModels\RootApiResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Attributes\Neo4jDateTimeAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Attributes\Neo4jIgnoreAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BoltGraphClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CypherPartialResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Cypher\All.cs" />
@@ -196,6 +197,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\EnumValueConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ICypherJsonDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\ISerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Neo4jContractResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\NullableEnumValueConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\PartialDeserializationContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Serialization\TimeZoneInfoConverter.cs" />
