@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4j.Driver.V1;
@@ -23,7 +24,7 @@ namespace Neo4jClient.Tests.Shared.Serialization
         public void SerializesDateTimeAsNeoDateInBolt()
         {
             var mockSession = new Mock<ISession>();
-            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new BoltGraphClientTests.ServerInfo());
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new BoltGraphClientTests.ServerInfo()));
             var dt = new DateTime(2000, 1, 1, 0, 0, 0);
 
             var mockDriver = new Mock<IDriver>();

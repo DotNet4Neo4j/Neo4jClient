@@ -2,12 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Transactions;
 using FluentAssertions;
 using Neo4j.Driver.V1;
+using Neo4jClient.Test.BoltGraphClientTests;
 using Neo4jClient.Test.Fixtures;
 using Neo4jClient.Transactions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace Neo4jClient.Test.Transactions
@@ -18,7 +21,7 @@ namespace Neo4jClient.Test.Transactions
         private class Foo { }
         #region Helper Methods
 
-        private static IStatementResult GetDbmsComponentsResponse()
+        private static IStatementResultCursor GetDbmsComponentsResponse()
         {
             var record = Substitute.For<IRecord>();
             record["name"].Returns("neo4j kernel");
@@ -26,8 +29,7 @@ namespace Neo4jClient.Test.Transactions
 
             var response = new List<IRecord> {record};
 
-            var statementResult = Substitute.For<IStatementResult>();
-            statementResult.GetEnumerator().Returns(response.GetEnumerator());
+            var statementResult = new TestStatementResult(response);
             return statementResult;
         }
 
@@ -43,15 +45,14 @@ namespace Neo4jClient.Test.Transactions
             mockRecord["Node"].Returns(mockNode);
             mockRecord.Values["Node"].Returns(mockNode);
 
-            var mockStatementResult = Substitute.For<IStatementResult>();
-            mockStatementResult.GetEnumerator().Returns(new List<IRecord>(new[]{mockRecord}).GetEnumerator());
+            var mockStatementResult = new TestStatementResult(new List<IRecord>(new[] {mockRecord}));
 
             var mockTransaction = Substitute.For<Neo4j.Driver.V1.ITransaction>();
-            mockTransaction.Run(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(mockStatementResult);
+            mockTransaction.RunAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(mockStatementResult);
 
             var mockSession = Substitute.For<ISession>();
             var dbmsReturn = GetDbmsComponentsResponse();
-            mockSession.Run("CALL dbms.components()").Returns(dbmsReturn);
+            mockSession.RunAsync("CALL dbms.components()").Returns(dbmsReturn);
             mockSession.BeginTransaction().Returns(mockTransaction);
             
             var mockDriver = Substitute.For<IDriver>();
@@ -70,7 +71,7 @@ namespace Neo4jClient.Test.Transactions
         {
             GetDriverAndSession(out driver, out session, out transaction);
             var client = new BoltGraphClient(driver);
-            client.Connect();
+            client.ConnectAsync().Wait();
 
             driver.ClearReceivedCalls();
             session.ClearReceivedCalls();
@@ -165,9 +166,9 @@ namespace Neo4jClient.Test.Transactions
                 IGraphClient graphClient;
 
                 GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    using (var scope2 = new TransactionScope())
+                    using (var scope2 = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
                         graphClient.Cypher
                             .Match("n")
@@ -200,7 +201,7 @@ namespace Neo4jClient.Test.Transactions
 
                 GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                     scope.Complete();
@@ -208,14 +209,14 @@ namespace Neo4jClient.Test.Transactions
 
                 driver.Received(1).Session(Arg.Any<AccessMode>(), (IEnumerable<string>)null);
                 session.Received(1).BeginTransaction();
-                transaction.Received(1).Run(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>());
+                transaction.Received(1).RunAsync(Arg.Any<string>(), Arg.Any<Dictionary<string, object>>());
                 transaction.Received(1).Success();
             }
 
 
 
             [Fact]
-            public void SimpleTransaction_2Queries()
+            public async Task SimpleTransaction_2Queries()
             {
                 ISession session;
                 IDriver driver;
@@ -224,10 +225,10 @@ namespace Neo4jClient.Test.Transactions
 
                 GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
-                    graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
+                    await graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResultsAsync().ConfigureAwait(false);
+                    await graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResultsAsync().ConfigureAwait(false);
                     scope.Complete();
                 }
 
@@ -248,14 +249,14 @@ namespace Neo4jClient.Test.Transactions
 
                 GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                     scope.Complete();
                 }
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
@@ -279,7 +280,7 @@ namespace Neo4jClient.Test.Transactions
 
                 GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                     var res = graphClient.Cypher.Match("(n)").Return(n => n.As<Foo>()).Results;
@@ -287,7 +288,7 @@ namespace Neo4jClient.Test.Transactions
                     scope.Complete();
                 }
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                     var res = graphClient.Cypher.Match("(n)").Return(n => n.As<Foo>()).Results;
@@ -313,7 +314,7 @@ namespace Neo4jClient.Test.Transactions
 
                 GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     graphClient.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResults();
                 }

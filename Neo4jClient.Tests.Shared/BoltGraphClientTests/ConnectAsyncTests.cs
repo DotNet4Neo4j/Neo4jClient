@@ -23,8 +23,8 @@ namespace Neo4jClient.Test.BoltGraphClientTests
             var testSr = new TestStatementResult(new[] { recordMock.Object });
             var sessionMock = new Mock<ISession>();
             sessionMock
-                .Setup(s => s.Run("CALL dbms.components()"))
-                .Returns(testSr);
+                .Setup(s => s.RunAsync("CALL dbms.components()"))
+                .Returns(Task.FromResult<IStatementResultCursor>(testSr));
 
             var driverMock = new Mock<IDriver>();
             driverMock.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(sessionMock.Object);
@@ -34,9 +34,10 @@ namespace Neo4jClient.Test.BoltGraphClientTests
         }
     }
 
-    internal class TestStatementResult : IStatementResult
+    public class TestStatementResult : IStatementResultCursor
     {
         private readonly IList<IRecord> records;
+        private int pos = -1;
 
         public TestStatementResult(IEnumerable<string> keys, params IRecord[] records)
         {
@@ -49,29 +50,33 @@ namespace Neo4jClient.Test.BoltGraphClientTests
             this.records = new List<IRecord>(records);
         }
 
-        public IEnumerator<IRecord> GetEnumerator()
-        {
-            return records.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-
-        public IRecord Peek()
+        public Task<IResultSummary> SummaryAsync()
         {
             throw new NotImplementedException();
         }
 
-        public IResultSummary Consume()
+        public Task<IRecord> PeekAsync()
+        {
+            return Task.FromResult(Current);
+        }
+
+        public Task<IResultSummary> ConsumeAsync()
         {
             throw new NotImplementedException();
+        }
+
+        public Task<bool> FetchAsync()
+        {
+            if (pos == records.Count - 1) return Task.FromResult(false);
+            else
+            {
+                pos++;
+                return Task.FromResult(true);
+            }
         }
 
         public IReadOnlyList<string> Keys { get; }
-        public IResultSummary Summary { get; }
+        public IRecord Current => records[pos];
     }
 
     public class ConnectAsyncTests : IClassFixture<CultureInfoSetupFixture>
@@ -91,8 +96,8 @@ namespace Neo4jClient.Test.BoltGraphClientTests
             var testSr = new TestStatementResult(new[] { record1Mock.Object, record2Mock.Object });
             var sessionMock = new Mock<ISession>();
             sessionMock
-                .Setup(s => s.Run("CALL dbms.components()"))
-                .Returns(testSr);
+                .Setup(s => s.RunAsync("CALL dbms.components()"))
+                .Returns(Task.FromResult<IStatementResultCursor>(testSr));
 
             var driverMock = new Mock<IDriver>();
             driverMock.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(sessionMock.Object);
