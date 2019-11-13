@@ -44,54 +44,26 @@ namespace Neo4jClient.Test.Extensions
 
            
         }
-        public class ServerInfo : IStatementResult
+        public class ServerInfo : TestStatementResult
         {
-            private IList<IRecord> _list = new List<IRecord>();
-
-            public IEnumerator<IRecord> GetEnumerator()
+            public ServerInfo(): base(new List<IRecord> {new TestRecord(new Dictionary<string, object>
             {
-                return _list.GetEnumerator();
+                {"name", "neo4j kernel"},
+                {"versions", new List<object>{"3.2.3"} }
+            })})
+            {
             }
 
-            IEnumerator IEnumerable.GetEnumerator()
+            public ServerInfo(IList<IRecord> records): base(records)
             {
-                return GetEnumerator();
             }
-
-            public ServerInfo()
-            {
-                _list.Add(new TestRecord(new Dictionary<string, object>
-                {
-                    {"name", "neo4j kernel"},
-                    {"versions", new List<object>{"3.2.3"} }
-                }));
-            }
-
-            public ServerInfo(IList<IRecord> records)
-            {
-                _list = records;
-            }
-
-            public IRecord Peek()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IResultSummary Consume()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IReadOnlyList<string> Keys { get; }
-            public IResultSummary Summary { get; }
-
         }
         
         [Fact]
         public void SerializesDateTimesProperly()
         {
             var mockSession = new Mock<ISession>();
-            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
             
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
@@ -120,7 +92,7 @@ namespace Neo4jClient.Test.Extensions
         public void SerializesDateTimeOffsetsProperly()
         {
             var mockSession = new Mock<ISession>();
-            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
@@ -149,7 +121,7 @@ namespace Neo4jClient.Test.Extensions
         public void SerializesGuidsProperly()
         {
             var mockSession = new Mock<ISession>();
-            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
@@ -176,7 +148,7 @@ namespace Neo4jClient.Test.Extensions
         public void SerializesGuidsProperlyWhenAutoGeneratingParams()
         {
             var mockSession = new Mock<ISession>();
-            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);

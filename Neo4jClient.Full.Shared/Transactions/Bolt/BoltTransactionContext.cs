@@ -25,80 +25,43 @@ namespace Neo4jClient.Transactions
         /// <summary>
         /// The Neo4j transaction object.
         /// </summary>
-        public ITransaction Transaction { get; protected set; }
+        public ITransaction Transaction { get; }
 
         internal BoltNeo4jTransaction BoltTransaction => Transaction as BoltNeo4jTransaction;
 
         /// <summary>
-        /// The consumer of all the tasks (a single thread)
+        /// This replaces the synchronous queue. It is picked up and replaced atomically.
         /// </summary>
-        private Action consumer;
-        
-        /// <summary>
-        /// This is where the producer generates all the tasks
-        /// </summary>
-        private readonly BlockingCollection<Task> taskQueue;
+        private Task previousTask;
 
         public NameValueCollection CustomHeaders { get; set; }
-
-        /// <summary>
-        /// Where the cancellation token generates
-        /// </summary>
-        private readonly CancellationTokenSource cancellationTokenSource;
         
         public BoltTransactionContext(ITransaction transaction)
         {
             Transaction = transaction;
-            cancellationTokenSource = new CancellationTokenSource();
-            taskQueue = new BlockingCollection<Task>();
         }
         
-        public Task<BoltResponse> EnqueueTask(string commandDescription, BoltGraphClient graphClient, IExecutionPolicy policy, CypherQuery query)
+        public async Task<BoltResponse> EnqueueTask(string commandDescription, BoltGraphClient graphClient, IExecutionPolicy policy, CypherQuery query)
         {
-            var task = new Task<BoltResponse>(() =>
-                {
-                   var result = BoltTransaction.DriverTransaction.Run(query, graphClient);
-                    
-                    var resp = new BoltResponse{StatementResult = result};
-                    return resp;
-                }
-            );
-            taskQueue.Add(task, cancellationTokenSource.Token);
-
-            if (consumer == null)
+            var taskCompletion = new TaskCompletionSource<BoltResponse>();
+            try
             {
-                consumer = () =>
-                {
-                    while (true)
-                    {
-                        try
-                        {
-                            Task queuedTask;
-                            if (!taskQueue.TryTake(out queuedTask, 0, cancellationTokenSource.Token))
-                            {
-                                // no items to consume
-                                consumer = null;
-                                break;
-                            }
-                            queuedTask.RunSynchronously();
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            // we are done, CompleteAdding has been called 
-                            break;
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            // we are done, we were canceled
-                            break;
-                        }
-                    }
-                };
-
-                consumer.BeginInvoke(null, null);
+                var localPreviousTask = Interlocked.Exchange(ref previousTask, taskCompletion.Task);
+                if (localPreviousTask != null) await localPreviousTask.ConfigureAwait(false);
+                var result = await BoltTransaction.DriverTransaction.RunAsync(query, graphClient);
+                var resp = new BoltResponse {StatementResult = result};
+                taskCompletion.SetResult(resp);
+            }
+            catch (OperationCanceledException)
+            {
+                taskCompletion.SetCanceled();
+            }
+            catch (Exception e)
+            {
+                taskCompletion.SetException(e);
             }
 
-            return task;
+            return await taskCompletion.Task.ConfigureAwait(false);
         }
 
         public void Dispose()
@@ -106,26 +69,33 @@ namespace Neo4jClient.Transactions
             Transaction.Dispose();
         }
 
-        public void Commit()
+        public void Commit() => CommitAsync().Wait(); // todo ideally the async endpoint would be in the interface
+
+        public async Task CommitAsync()
         {
-            taskQueue.CompleteAdding();
-            if (taskQueue.Count > 0)
-            {
-                cancellationTokenSource.Cancel();
-                throw new InvalidOperationException("Cannot commit unless all tasks have been completed");
-            }
+            await PreventAddingAndWait().ConfigureAwait(false);
+            
             if (CustomHeaders != null)
             {
                 Transaction.CustomHeaders = CustomHeaders;
             }
-            Transaction.Commit();
+            
+            Transaction.Commit(); // todo ideally async
         }
 
-        public void Rollback()
+        private async Task PreventAddingAndWait()
         {
-            taskQueue.CompleteAdding();
-            cancellationTokenSource.Cancel();
-            Transaction.Rollback();
+            var cancelled = new TaskCompletionSource<BoltResponse>();
+            cancelled.SetCanceled();
+            await Interlocked.Exchange(ref previousTask, cancelled.Task).ConfigureAwait(false); // cancel any newly created tasks
+        }
+
+        public void Rollback() => RollbackAsync().Wait();
+        
+        public async Task RollbackAsync()
+        {
+            await PreventAddingAndWait().ConfigureAwait(false);
+            Transaction.Rollback(); // todo ideally async
         }
 
         public void KeepAlive()

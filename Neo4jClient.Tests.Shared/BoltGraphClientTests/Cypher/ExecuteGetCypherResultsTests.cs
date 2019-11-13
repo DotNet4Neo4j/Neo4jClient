@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4j.Driver.V1;
@@ -236,7 +237,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void CollectionShouldDeserializeCorrectly()
+        public async Task CollectionShouldDeserializeCorrectly()
         {
             // simulate a collect()
             const string queryText = "MATCH (start:Node) RETURN collect(start) AS data";
@@ -267,7 +268,7 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
                 var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var results = graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery).ToArray();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery)).ToArray();
 
                 //Assert
                 var deserializedObject = results.First().First();
