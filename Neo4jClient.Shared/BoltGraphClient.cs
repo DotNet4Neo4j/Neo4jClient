@@ -440,7 +440,7 @@ namespace Neo4jClient
         }
 
         /// <inheritdoc />
-        public Task ConnectAsync(NeoServerConfiguration configuration = null)
+        public async Task ConnectAsync(NeoServerConfiguration configuration = null)
         {
             if (Driver == null)
             {
@@ -452,8 +452,8 @@ namespace Neo4jClient
 
             using (var session = Driver.Session(AccessMode.Read))
             {
-                var serverInformation = session.Run("CALL dbms.components()");
-                foreach (var record in serverInformation)
+                var serverInformation = await session.RunAsync("CALL dbms.components()").ConfigureAwait(false);
+                foreach (var record in await serverInformation.ToListAsync().ConfigureAwait(false))
                 {
                     var name = record["name"].As<string>();
                     if (name.ToLowerInvariant() != "neo4j kernel")
@@ -468,11 +468,6 @@ namespace Neo4jClient
             }
 
             IsConnected = true;
-#if NET45
-            return Task.FromResult(0);
-#else
-            return Task.CompletedTask;
-#endif
         }
 
         /// <inheritdoc />
@@ -518,17 +513,17 @@ namespace Neo4jClient
                 if (InTransaction)
                 {
                     var result = await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
-                    results = ParseResults<TResult>(result.StatementResult, query);
+                    results = ParseResults<TResult>(await result.StatementResult.ToListAsync().ConfigureAwait(false), query);
                 }
                 else
                 {
                     using (var session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read, query.Bookmarks))
                     {
                         var result = query.IsWrite 
-                            ? session.WriteTransaction(s => s.Run(query, this)) 
-                            : session.ReadTransaction(s => s.Run(query, this));
+                            ? await session.WriteTransactionAsync( s => s.RunAsync(query, this)).ConfigureAwait(false)
+                            : await session.ReadTransactionAsync(s => s.RunAsync(query, this)).ConfigureAwait(false);
 
-                        results = ParseResults<TResult>(result, query);
+                        results = ParseResults<TResult>(await result.ToListAsync().ConfigureAwait(false), query);
                         lastBookmark = session.LastBookmark;
                     }
                 }
@@ -549,7 +544,7 @@ namespace Neo4jClient
             return results;
         }
 
-        private List<TResult> ParseResults<TResult>(IStatementResult result, CypherQuery query)
+        private List<TResult> ParseResults<TResult>(IEnumerable<IRecord> result, CypherQuery query)
         {
             var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, false, true);
             var results = new List<TResult>();
@@ -607,7 +602,7 @@ namespace Neo4jClient
         }
 
         /// <inheritdoc />
-       Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
+       async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
            var tx = ExecutionContext.Begin(this);
 
@@ -615,25 +610,22 @@ namespace Neo4jClient
                 throw new InvalidOperationException("Can't execute cypher unless you have connected to the server.");
 
             if (InTransaction)
-                return transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query)
-                    .ContinueWith(responseTask => OperationCompleted?.Invoke(this, new OperationCompletedEventArgs
-                    {
-                        QueryText = $"BOLT:{query.QueryText}"
-                    }));
+            {
+                await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
+                OperationCompleted?.Invoke(this, new OperationCompletedEventArgs
+                {
+                    QueryText = $"BOLT:{query.QueryText}"
+                });
+            }
 
             using (var session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read, query.Bookmarks))
             {
                 if (query.IsWrite)
-                    session.WriteTransaction(s => s.Run(query, this));
+                    await session.WriteTransactionAsync(async s => await s.RunAsync(query, this)).ConfigureAwait(false);
                 else
-                    session.ReadTransaction(s => s.Run(query, this));
+                    await session.ReadTransactionAsync(async s => await s.RunAsync(query, this)).ConfigureAwait(false);
                 tx.Complete(query, session.LastBookmark);
             }
-#if NET45
-            return Task.FromResult(0);
-#else
-            return Task.CompletedTask;
-#endif
         }
 
         #endregion

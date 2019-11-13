@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Globalization;
+using System.Threading.Tasks;
 using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
@@ -25,6 +26,16 @@ namespace Neo4jClient
         public static IStatementResult Run(this ITransaction session, CypherQuery query, IGraphClient gc)
         {
             return session.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
+        }
+        
+        public static async Task<IStatementResultCursor> RunAsync(this ISession session, CypherQuery query, IGraphClient gc)
+        {
+            return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc)).ConfigureAwait(false);
+        }
+
+        public static async Task<IStatementResultCursor> RunAsync(this ITransaction session, CypherQuery query, IGraphClient gc)
+        {
+            return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc)).ConfigureAwait(false);
         }
 
         // ReSharper disable once InconsistentNaming

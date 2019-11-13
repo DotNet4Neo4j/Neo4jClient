@@ -4,6 +4,6 @@ namespace Neo4jClient.Transactions
 {
     public class BoltResponse
     {
-        public IStatementResult StatementResult { get; set; }
+        public IStatementResultCursor StatementResult { get; set; }
     }
 }

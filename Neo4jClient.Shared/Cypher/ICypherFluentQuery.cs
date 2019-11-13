@@ -47,9 +47,9 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Start(params ICypherStartBit[] startBits);
         ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences);
         ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences);
-        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
+        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(â€¦) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value);
-        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
+        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(â€¦) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
         ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameterText);
         ICypherFluentQuery Match(params string[] matchText);
         ICypherFluentQuery UsingIndex(string index);
