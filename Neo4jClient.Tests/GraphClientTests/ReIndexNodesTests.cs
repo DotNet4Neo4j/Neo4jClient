@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -9,7 +10,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class ReIndexNodesTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldReindexNodeWithIndexEntryContainingSpace()
+        public async Task ShouldReindexNodeWithIndexEntryContainingSpace()
         {
             //Arrange
             var indexEntries = new List<IndexEntry>
@@ -43,10 +44,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                graphClient.ReIndex((NodeReference)123, indexEntries);
+                await graphClient.ReIndexAsync((NodeReference)123, indexEntries);
 
                 // Assert
                 
@@ -54,7 +55,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldReindexNodeWithDateTimeOffsetIndexEntry()
+        public async Task ShouldReindexNodeWithDateTimeOffsetIndexEntry()
         {
             //Arrange
             var indexEntries = new List<IndexEntry>
@@ -88,10 +89,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                graphClient.ReIndex((NodeReference)123, indexEntries);
+                await graphClient.ReIndexAsync((NodeReference)123, indexEntries);
 
                 // Assert
                 
@@ -99,7 +100,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldAcceptQuestionMarkInIndexValue()
+        public async Task ShouldAcceptQuestionMarkInIndexValue()
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
@@ -134,10 +135,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                graphClient.ReIndex((NodeReference)123, indexEntries);
+                await graphClient.ReIndexAsync((NodeReference)123, indexEntries);
 
                 // Assert
                 
@@ -145,7 +146,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldPreserveSlashInIndexValue()
+        public async Task ShouldPreserveSlashInIndexValue()
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
@@ -180,10 +181,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                graphClient.ReIndex((NodeReference)123, indexEntries);
+                await graphClient.ReIndexAsync((NodeReference)123, indexEntries);
 
                 // Assert
                 

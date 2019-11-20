@@ -56,8 +56,6 @@ namespace Neo4jClient.Cypher
                 w.AppendToClause($", {string.Join(" DESC, ", properties)} DESC"));
         }
 
-        public IEnumerable<TResult> Results => Client.ExecuteGetCypherResults<TResult>(Query);
-
         public Task<IEnumerable<TResult>> ResultsAsync => Client.ExecuteGetCypherResultsAsync<TResult>(Query);
     }
 }

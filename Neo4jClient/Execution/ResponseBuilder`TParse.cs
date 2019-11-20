@@ -21,11 +21,11 @@ namespace Neo4jClient.Execution
         {
         }
 
-        private TParse CastIntoResult(HttpResponseMessage response)
+        private async Task<TParse> CastIntoResult(HttpResponseMessage response)
         {
             return response == null || response.Content == null ?
                 default(TParse) :
-                response.Content.ReadAsJson<TParse>(_executionConfiguration.JsonConverters);
+                await response.Content.ReadAsJsonAsync<TParse>(_executionConfiguration.JsonConverters).ConfigureAwait(false);
         }
 
         public new IResponseBuilder<TParse> WithExpectedStatusCodes(params HttpStatusCode[] statusCodes)
@@ -43,19 +43,16 @@ namespace Neo4jClient.Execution
             return ExecuteAsync(commandDescription, null);
         }
 
-        public Task<TParse> ExecuteAsync(Func<Task<TParse>, TParse> continuationFunction)
+        public Task<TParse> ExecuteAsync(Func<TParse, TParse> continuationFunction)
         {
             return ExecuteAsync(null, continuationFunction);
         }
-
-
-        public Task<TParse> ExecuteAsync(string commandDescription, Func<Task<TParse>, TParse> continuationFunction)
+        
+        public async Task<TParse> ExecuteAsync(string commandDescription, Func<TParse, TParse> continuationFunction)
         {
-            var executionTask = base.ExecuteAsync(commandDescription, null)
-                .ContinueWith(
-                    responseAction =>
-                        responseAction.Result == null ? default(TParse) : CastIntoResult(responseAction.Result));
-            return continuationFunction == null ? executionTask : executionTask.ContinueWith(continuationFunction);
+            var response = await base.ExecuteAsync(commandDescription, null).ConfigureAwait(false);
+            var parsed = response == null ? default(TParse) : await CastIntoResult(response).ConfigureAwait(false);
+            return continuationFunction == null ? parsed : continuationFunction(parsed);
         }
 
         public new Task<TParse> ExecuteAsync()
@@ -63,24 +60,14 @@ namespace Neo4jClient.Execution
             return ExecuteAsync(null, null);
         }
 
-        public Task<TExpected> ExecuteAsync<TExpected>(Func<Task<TParse>, TExpected> continuationFunction)
+        public Task<TExpected> ExecuteAsync<TExpected>(Func<TParse, TExpected> continuationFunction)
         {
             return ExecuteAsync(null, continuationFunction);
         }
 
-        public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<TParse>, TExpected> continuationFunction)
+        public async Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<TParse, TExpected> continuationFunction)
         {
-            return ExecuteAsync(commandDescription).ContinueWith(continuationFunction);
-        }
-
-        public new TParse Execute(string commandDescription)
-        {
-            return CastIntoResult(base.Execute(commandDescription));
-        }
-
-        public new TParse Execute()
-        {
-            return Execute(null);
+            return continuationFunction(await ExecuteAsync(commandDescription).ConfigureAwait(false));
         }
     }
 }

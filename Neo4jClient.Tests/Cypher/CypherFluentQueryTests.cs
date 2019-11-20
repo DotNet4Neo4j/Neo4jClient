@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Neo4jClient.Cypher;
 using Neo4jClient.Tests.GraphClientTests;
 using NSubstitute;
@@ -12,20 +13,20 @@ namespace Neo4jClient.Tests.Cypher
     public class CypherFluentQueryTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ExecutesQuery()
+        public async Task ExecutesQuery()
         {
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             CypherQuery executedQuery = null;
             client
-                .When(c => c.ExecuteCypher(Arg.Any<CypherQuery>()))
+                .When(c => c.ExecuteCypherAsync(Arg.Any<CypherQuery>()))
                 .Do(ci => { executedQuery = ci.Arg<CypherQuery>(); });
 
             // Act
-            new CypherFluentQuery(client)
+            await new CypherFluentQuery(client)
                 .Start("n", (NodeReference) 5)
                 .Delete("n")
-                .ExecuteWithoutResults();
+                .ExecuteWithoutResultsAsync();
 
             // Assert
             Assert.NotNull(executedQuery);

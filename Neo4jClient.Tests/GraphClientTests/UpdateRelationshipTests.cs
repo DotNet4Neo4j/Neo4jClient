@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -7,7 +8,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class UpdateRelationshipTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldUpdatePayload()
+        public async Task ShouldUpdatePayload()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -23,21 +24,21 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                graphClient.Update(
+                await graphClient.UpdateAsync(
                     new RelationshipReference<TestPayload>(456),
                     payloadFromDb =>
-                        {
-                            payloadFromDb.Foo = "fooUpdated";
-                            payloadFromDb.Baz = "bazUpdated";
-                        }
-                    );
+                    {
+                        payloadFromDb.Foo = "fooUpdated";
+                        payloadFromDb.Baz = "bazUpdated";
+                    }
+                );
             }
         }
 
         [Fact]
-        public void ShouldInitializePayloadDuringUpdate()
+        public async Task ShouldInitializePayloadDuringUpdate()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -53,9 +54,9 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                graphClient.Update(
+                await graphClient.UpdateAsync(
                     new RelationshipReference<TestPayload>(456),
                     payloadFromDb =>
                     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
@@ -17,7 +18,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldThrowExceptionIfRootApiIsNotDefined()
+        public async Task ShouldThrowExceptionIfRootApiIsNotDefined()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -35,12 +36,12 @@ namespace Neo4jClient.Tests.GraphClientTests
                     JsonConverters = GraphClient.DefaultJsonConverters
                 };
 
-                Assert.Throws<InvalidOperationException>(() => NeoServerConfiguration.GetConfiguration(new Uri(testHarness.BaseUri), null, null, null, executeConfiguration));
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await NeoServerConfiguration.GetConfigurationAsync(new Uri(testHarness.BaseUri), null, null, null, executeConfiguration));
             }
         }
 
         [Fact]
-        public void GraphClientFactoryUseCase()
+        public async Task GraphClientFactoryUseCase()
         {
             const string queryText = @"MATCH (d) RETURN d";
 
@@ -64,13 +65,13 @@ namespace Neo4jClient.Tests.GraphClientTests
                     JsonConverters = GraphClient.DefaultJsonConverters
                 };
 
-                var configuration = NeoServerConfiguration.GetConfiguration(new Uri(testHarness.BaseUri), null, null,null, executeConfiguration);
+                var configuration = await NeoServerConfiguration.GetConfigurationAsync(new Uri(testHarness.BaseUri), null, null,null, executeConfiguration);
 
                 var factory = new GraphClientFactory(configuration);
 
-                using (var client = factory.Create(httpClient))
+                using (var client = await factory.CreateAsync(httpClient))
                 {
-                    client.Cypher.Match("(d)").Return<object>("d").ExecuteWithoutResults();
+                    await client.Cypher.Match("(d)").Return<object>("d").ExecuteWithoutResultsAsync();
                 }
             }
         }

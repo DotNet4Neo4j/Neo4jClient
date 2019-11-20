@@ -1,5 +1,4 @@
-﻿using Neo4jClient.Gremlin;
-using NSubstitute;
+﻿using NSubstitute;
 using Xunit;
 
 namespace Neo4jClient.Tests
@@ -13,18 +12,7 @@ namespace Neo4jClient.Tests
             var client = Substitute.For<IGraphClient>();
             var reference = new NodeReference<object>(123, client);
             var node = new Node<object>(new object(), reference);
-            Assert.Equal(client, ((IGremlinQuery)node).Client);
-        }
-
-        [Fact]
-        public void GremlinQueryShouldReturnSimpleVectorStep()
-        {
-            var client = Substitute.For<IGraphClient>();
-            var reference = new NodeReference<object>(123, client);
-            var node = new Node<object>(new object(), reference);
-            var query = (IGremlinQuery)node;
-            Assert.Equal("g.v(p0)", query.QueryText);
-            Assert.Equal(123L, query.QueryParameters["p0"]);
+            Assert.Equal(client, ((IAttachedReference)node).Client);
         }
 
         [Fact]

@@ -175,50 +175,10 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
 
         [Fact]
-        public void Create_ThrowsInvalidOperationException()
+        public async Task Create_ThrowsInvalidOperationException()
         {
             var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = Record.Exception(() => bgc.Create("value", null));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
-
-        [Fact]
-        public void Get_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = Record.Exception(() => bgc.Get<string>(new NodeReference(1)));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
-
-        [Fact]
-        public void GetNode_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = Record.Exception(() => bgc.Get(new NodeReference<string>(1)));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
-
-        [Fact]
-        public void Get_RelationReferenceTNode_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = Record.Exception(() => bgc.Get<TestNode>(new RelationshipReference(1)));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
-
-        [Fact]
-        public void Get_RelationReference_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = Record.Exception(() => bgc.Get(new RelationshipReference<TestNode>(1)));
+            var ex = await Record.ExceptionAsync(async () => await bgc.CreateAsync("value", null));
             ex.Should().NotBeNull();
             ex.Should().BeOfType<InvalidOperationException>();
             ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
@@ -228,7 +188,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task GetAsync_ThrowsInvalidOperationException()
         {
             var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = await Record.ExceptionAsync(() => bgc.GetAsync<string>(new NodeReference(1)));
+            var ex = await Record.ExceptionAsync(async () => await bgc.GetAsync<string>(new NodeReference(1)));
             ex.Should().NotBeNull();
             ex.Should().BeOfType<InvalidOperationException>();
             ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
@@ -238,7 +198,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task GetAsync_RelationReference_ThrowsInvalidOperationException()
         {
             var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = await Record.ExceptionAsync(() => bgc.GetAsync<TestNode>(new RelationshipReference<TestNode>(1)));
+            var ex = await Record.ExceptionAsync(async () => await bgc.GetAsync<TestNode>(new RelationshipReference<TestNode>(1)));
             ex.Should().NotBeNull();
             ex.Should().BeOfType<InvalidOperationException>();
             ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);

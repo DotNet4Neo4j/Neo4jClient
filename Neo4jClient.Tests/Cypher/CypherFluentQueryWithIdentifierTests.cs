@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4j.Driver.V1;
@@ -42,7 +43,7 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
-        public void ArgsContainIdentifier()
+        public async Task ArgsContainIdentifier()
         {
             const string identifier = "identifier";
 
@@ -61,10 +62,10 @@ namespace Neo4jClient.Tests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "data" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
                 graphClient.OperationCompleted += (s, e) => { e.Identifier.Should().Be(identifier); };
 
-                graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery);
+                await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery);
             }
         }
 

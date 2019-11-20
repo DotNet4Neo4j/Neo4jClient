@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
     [DebuggerDisplay("Relationship {id}")]
-    public class RelationshipReference : IGremlinQuery, IAttachedReference
+    public class RelationshipReference : IAttachedReference
     {
         readonly long id;
         readonly IGraphClient client;
@@ -54,21 +53,6 @@ namespace Neo4jClient
         IGraphClient IAttachedReference.Client
         {
             get { return client; }
-        }
-
-        string IGremlinQuery.QueryText
-        {
-            get { return "g.e(p0)"; }
-        }
-
-        IDictionary<string, object> IGremlinQuery.QueryParameters
-        {
-            get { return new Dictionary<string, object> { { "p0", Id }}; }
-        }
-
-        IList<string> IGremlinQuery.QueryDeclarations
-        {
-            get { return new List<string>(); }
         }
     }
 }

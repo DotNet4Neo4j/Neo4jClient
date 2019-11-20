@@ -87,17 +87,17 @@ namespace Neo4jClient.Tests
             return graphClient;
         }
 
-        public ITransactionalGraphClient CreateAndConnectTransactionalGraphClient()
+        public async Task<ITransactionalGraphClient> CreateAndConnectTransactionalGraphClient()
         {
             var graphClient = CreateGraphClient(Neo4jVersion.Neo20);
-            graphClient.Connect();
+            await graphClient.ConnectAsync();
             return graphClient;
         }
 
-        public IRawGraphClient CreateAndConnectGraphClient(Neo4jVersion version = Neo4jVersion.Neo19)
+        public async Task<IRawGraphClient> CreateAndConnectGraphClient(Neo4jVersion version = Neo4jVersion.Neo19)
         {
             var graphClient = CreateGraphClient(version);
-            graphClient.Connect();
+            await graphClient.ConnectAsync();
             return graphClient;
         }
 

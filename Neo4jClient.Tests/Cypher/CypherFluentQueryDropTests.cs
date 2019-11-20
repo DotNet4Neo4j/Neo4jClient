@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Neo4jClient.Cypher;
 using NSubstitute;
 using Xunit;
@@ -56,20 +57,20 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
-        public void DeleteWithoutReturn()
+        public async Task DeleteWithoutReturn()
         {
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             CypherQuery executedQuery = null;
             client
-                .When(c => c.ExecuteCypher(Arg.Any<CypherQuery>()))
+                .When(c => c.ExecuteCypherAsync(Arg.Any<CypherQuery>()))
                 .Do(ci => { executedQuery = ci.Arg<CypherQuery>(); });
 
             // Act
-            new CypherFluentQuery(client)
+            await new CypherFluentQuery(client)
                 .Start("n", (NodeReference)3)
                 .Delete("n")
-                .ExecuteWithoutResults();
+                .ExecuteWithoutResultsAsync();
 
             // Assert
             Assert.NotNull(executedQuery);

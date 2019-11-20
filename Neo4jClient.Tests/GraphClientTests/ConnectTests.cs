@@ -17,7 +17,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class ConnectTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldThrowConnectionExceptionFor500Response()
+        public async Task ShouldThrowConnectionExceptionFor500Response()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -27,17 +27,17 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var ex = Assert.Throws<Exception>(() => testHarness.CreateAndConnectGraphClient());
+                var ex = await Assert.ThrowsAsync<Exception>(async () => await testHarness.CreateAndConnectGraphClient());
                 Assert.Equal("Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError", ex.Message);
             }
         }
 
         [Fact]
-        public void ShouldRetrieveApiEndpoints()
+        public async Task ShouldRetrieveApiEndpoints()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
+                var graphClient = (GraphClient)await testHarness.CreateAndConnectGraphClient();
                 Assert.Equal("/node", graphClient.RootApiResponse.Node);
                 Assert.Equal("/index/node", graphClient.RootApiResponse.NodeIndex);
                 Assert.Equal("/index/relationship", graphClient.RootApiResponse.RelationshipIndex);
@@ -57,11 +57,11 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void RootNode_ShouldReturnReferenceNode()
+        public async Task RootNode_ShouldReturnReferenceNode()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 Assert.NotNull(graphClient.RootNode);
                 Assert.Equal(123, graphClient.RootNode.Id);
@@ -69,7 +69,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void RootNode_ShouldReturnNullReferenceNode_WhenNoReferenceNodeDefined()
+        public async Task RootNode_ShouldReturnNullReferenceNode_WhenNoReferenceNodeDefined()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -87,45 +87,45 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 Assert.Null(graphClient.RootNode);
             }
         }
 
         [Fact]
-        public void ShouldParse15M02Version()
+        public async Task ShouldParse15M02Version()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var graphClient = (GraphClient)testHarness.CreateAndConnectGraphClient();
+                var graphClient = (GraphClient)await testHarness.CreateAndConnectGraphClient();
 
                 Assert.Equal("1.5.0.2", graphClient.RootApiResponse.Version.ToString());
             }
         }
 
         [Fact]
-        public void ShouldReturnCypher19CapabilitiesForPre20Version()
+        public async Task ShouldReturnCypher19CapabilitiesForPre20Version()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
                 Assert.Equal(CypherCapabilities.Cypher19, graphClient.CypherCapabilities);
             }
         }
 
         [Fact]
-        public void ShouldSetCypher22CapabilitiesForPost22Version()
+        public async Task ShouldSetCypher22CapabilitiesForPost22Version()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient(RestTestHarness.Neo4jVersion.Neo22);
+                var graphClient = await testHarness.CreateAndConnectGraphClient(RestTestHarness.Neo4jVersion.Neo22);
                 Assert.Equal(CypherCapabilities.Cypher22, graphClient.CypherCapabilities);
             }
         }
 
         [Fact]
-        public void ShouldReturnCypher19CapabilitiesForVersion20()
+        public async Task ShouldReturnCypher19CapabilitiesForVersion20()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -135,7 +135,7 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
                 Assert.Equal(CypherCapabilities.Cypher20, graphClient.CypherCapabilities);
             }
         }
@@ -149,7 +149,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void CredentialsPreservedAllTheWayThroughToHttpStack()
+        public async Task CredentialsPreservedAllTheWayThroughToHttpStack()
         {
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
@@ -160,7 +160,7 @@ namespace Neo4jClient.Tests.GraphClientTests
 
             try
             {
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
             }
             // ReSharper disable EmptyGeneralCatchClause
             catch (NotImplementedException)
@@ -178,7 +178,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void PassesCorrectStreamHeader_WhenUseStreamIsTrue()
+        public async Task PassesCorrectStreamHeader_WhenUseStreamIsTrue()
         {
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
@@ -189,7 +189,7 @@ namespace Neo4jClient.Tests.GraphClientTests
 
             try
             {
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
             }
             // ReSharper disable EmptyGeneralCatchClause
             catch (NotImplementedException)
@@ -207,7 +207,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void PassesCorrectStreamHeader_WhenUseStreamIsFalse()
+        public async Task PassesCorrectStreamHeader_WhenUseStreamIsFalse()
         {
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
@@ -218,7 +218,7 @@ namespace Neo4jClient.Tests.GraphClientTests
             graphClient.ExecutionConfiguration.UseJsonStreaming = false;
             try
             {
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
             }
             // ReSharper disable EmptyGeneralCatchClause
             catch (NotImplementedException)
@@ -236,7 +236,7 @@ namespace Neo4jClient.Tests.GraphClientTests
 
 
         [Fact]
-        public void ShouldParseRootApiResponseFromAuthenticatedConnection()
+        public async Task ShouldParseRootApiResponseFromAuthenticatedConnection()
         {
             using (var testHarness = new RestTestHarness()
             {
@@ -245,13 +245,13 @@ namespace Neo4jClient.Tests.GraphClientTests
             {
                 var httpClient = testHarness.GenerateHttpClient("http://foo/db/data");
                 var graphClient = new GraphClient(new Uri("http://username:password@foo/db/data"), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
                 Assert.Equal("/node", graphClient.RootApiResponse.Node);
             }
         }
 
         [Fact]
-        public void ShouldSendCustomUserAgent()
+        public async Task ShouldSendCustomUserAgent()
         {
             // Arrange
             var httpClient = Substitute.For<IHttpClient>();
@@ -290,7 +290,7 @@ namespace Neo4jClient.Tests.GraphClientTests
                 });
 
             // Act
-            graphClient.Connect();
+            await graphClient.ConnectAsync();
         }
 
         [Fact]
@@ -315,7 +315,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldFireOnCompletedEvenWhenException()
+        public async Task ShouldFireOnCompletedEvenWhenException()
         {
             var httpClient = Substitute.For<IHttpClient>();
             httpClient
@@ -331,7 +331,7 @@ namespace Neo4jClient.Tests.GraphClientTests
             };
 
             // act
-            Assert.Throws<NotImplementedException>(() => graphClient.Connect());
+            await Assert.ThrowsAsync<NotImplementedException>(async () => await graphClient.ConnectAsync());
 
             Assert.NotNull(operationCompletedArgs);
             Assert.True(operationCompletedArgs.HasException);

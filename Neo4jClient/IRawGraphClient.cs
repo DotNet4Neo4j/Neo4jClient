@@ -12,10 +12,7 @@ namespace Neo4jClient
     /// </summary>
     public interface IRawGraphClient : IGraphClient
     {
-        IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query);
         Task<IEnumerable<TResult>> ExecuteGetCypherResultsAsync<TResult>(CypherQuery query);
-        void ExecuteCypher(CypherQuery query);
-        void ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries, NameValueCollection customHeaders = null);
         Task ExecuteCypherAsync(CypherQuery query);
     }
 }

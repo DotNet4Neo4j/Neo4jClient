@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Neo4jClient.Cypher;
 using NSubstitute;
 using Xunit;
@@ -10,7 +11,7 @@ namespace Neo4jClient.Tests.Cypher
     public class CypherFluentQueryResultsTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ReturnColumnAlias()
+        public async Task ReturnColumnAlias()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
             // START a=node(1)
@@ -19,24 +20,24 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
 
             client
-                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
+                .ExecuteGetCypherResultsAsync<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
                 .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
 
             var cypher = new CypherFluentQuery(client);
-            var results = cypher
+            var results = await cypher
                 .Start("a", (NodeReference)1)
                 .Return(a => new ReturnPropertyQueryResult
                 {
                     SomethingTotallyDifferent = a.As<FooNode>().Age,
                 })
-                .Results;
+                .ResultsAsync;
 
             Assert.IsAssignableFrom<IEnumerable<ReturnPropertyQueryResult>>(results);
         }
 
       
         [Fact]
-        public void ReturnColumnAliasOfTypeEnum()
+        public async Task ReturnColumnAliasOfTypeEnum()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
             // START a=node(1)
@@ -45,74 +46,74 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
 
             client
-                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
+                .ExecuteGetCypherResultsAsync<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
                 .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
 
             var cypher = new CypherFluentQuery(client);
-            var results = cypher
+            var results = await cypher
                 .Start("a", (NodeReference)1)
                 .Return(a => new FooNode
                 {
                     TheType = a.As<FooNode>().TheType,
                 })
-                .Results;
+                .ResultsAsync;
 
             Assert.IsAssignableFrom<IEnumerable<FooNode>>(results);
         }
 
         [Fact]
-        public void ReturnNodeAsSet()
+        public async Task ReturnNodeAsSet()
         {
             var client = Substitute.For<IRawGraphClient>();
             var set = new[] { new Node<FooNode>(new FooNode(), new NodeReference<FooNode>(123)) };
             client
-                .ExecuteGetCypherResults<Node<FooNode>>(
+                .ExecuteGetCypherResultsAsync<Node<FooNode>>(
                     Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
                 .Returns(set);
 
             var cypher = new CypherFluentQuery(client);
-            var results = cypher
+            var results = await cypher
                 .Start("a", (NodeReference)1)
                 .Return<Node<FooNode>>("a")
-                .Results;
+                .ResultsAsync;
 
             Assert.Equal(set, results);
         }
 
         [Fact]
-        public void ReturnRelationshipWithDataAsSet()
+        public async Task ReturnRelationshipWithDataAsSet()
         {
             var client = Substitute.For<IRawGraphClient>();
             var set = new[] { new RelationshipInstance<FooNode>(new RelationshipReference<FooNode>(1), new NodeReference(0), new NodeReference(2),"Type", new FooNode()) };
             client
-                .ExecuteGetCypherResults<RelationshipInstance<FooNode>>(
+                .ExecuteGetCypherResultsAsync<RelationshipInstance<FooNode>>(
                     Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
                 .Returns(set);
 
             var cypher = new CypherFluentQuery(client);
-            var results = cypher
+            var results = await cypher
                 .Start("a", (RelationshipReference)1)
                 .Return<RelationshipInstance<FooNode>>("a")
-                .Results;
+                .ResultsAsync;
 
             Assert.Equal(set, results);
         }
 
         [Fact]
-        public void ReturnRelationshipAsSet()
+        public async Task ReturnRelationshipAsSet()
         {
             var client = Substitute.For<IRawGraphClient>();
             var set = new[] { new RelationshipInstance(new RelationshipReference(1), new NodeReference(0), new NodeReference(2), "Type") };
             client
-                .ExecuteGetCypherResults<RelationshipInstance>(
+                .ExecuteGetCypherResultsAsync<RelationshipInstance>(
                     Arg.Is<CypherQuery>(q => q.ResultMode == CypherResultMode.Set))
                 .Returns(set);
 
             var cypher = new CypherFluentQuery(client);
-            var results = cypher
+            var results = await cypher
                 .Start("a", (RelationshipReference)1)
                 .Return<RelationshipInstance>("a")
-                .Results;
+                .ResultsAsync;
 
             Assert.Equal(set, results);
         }
@@ -123,7 +124,7 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
 
             client
-                .ExecuteGetCypherResults<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
+                .ExecuteGetCypherResultsAsync<ReturnPropertyQueryResult>(Arg.Any<CypherQuery>())
                 .Returns(Enumerable.Empty<ReturnPropertyQueryResult>());
 
             var cypher = new CypherFluentQuery(client);
