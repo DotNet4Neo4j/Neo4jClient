@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Threading.Tasks;
-using Neo4j.Driver.V1;
 
-namespace Neo4jClient.Transactions
+namespace Neo4jClient.Transactions.Bolt
 {
     /// <summary>
     /// Represents a TransactionContext scope within an ITransactionalManager. Encapsulates the real TransactionContext, so that in reality
@@ -40,17 +38,7 @@ namespace Neo4jClient.Transactions
             client.EndTransaction();
             if (!markCommitted && Committable && TransactionContext.IsOpen)
             {
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await RollbackAsync().ConfigureAwait(false);
-                    }
-                    catch (Exception)
-                    {
-                        // no-where to throw it
-                    }
-                });
+                RollbackAsync().Wait(); // annoying, but can't dispose asynchronously
             }
 
             if (transactionContext != null && ShouldDisposeTransaction())

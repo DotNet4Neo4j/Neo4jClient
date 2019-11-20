@@ -10,6 +10,7 @@ using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using NSubstitute;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Neo4jClient.Tests.GraphClientTests.Cypher
 {
@@ -112,41 +113,41 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// happens elsewhere, and I thing that's probably the desired behaviour rather than this. Commented out for
         /// now pending removal. ~tobymiller1
         /// </summary>
-        [Fact]
+        [Fact(Skip = "Undesired behaviour. See comment.")]
         public async Task WhenAsyncCommandFails_ShouldNotRaiseCompleted()
         {
-//            // Arrange
-//            const string queryText = @"return 1";
-//            var parameters = new Dictionary<string, object>();
-//
-//            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
-//            var cypherApiQuery = new CypherApiQuery(cypherQuery);
-//
-//            using (var testHarness = new RestTestHarness
-//            {
-//                {
-//                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
-//                    MockResponse.Throws()
-//                }
-//            })
-//            {
-//                var graphClient = await testHarness.CreateAndConnectGraphClient();
-//
-//                bool raisedEvent = false;
-//
-//                graphClient.OperationCompleted += (sender, e) => { raisedEvent = true; };
-//
-//                //Act
-//                var task = graphClient.ExecuteCypherAsync(cypherQuery)
-//                    .ContinueWith(t =>
-//                    {
-//                        Assert.True(t.IsFaulted);
-//                        Assert.IsAssignableFrom<MockResponseThrowsException>(t.Exception.Flatten().InnerException);
-//                    });
-//                task.Wait();
-//
-//                Assert.False(raisedEvent, "Raised OperationCompleted");
-//            }
+            // Arrange
+            const string queryText = @"return 1";
+            var parameters = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+                    MockResponse.Throws()
+                }
+            })
+            {
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
+
+                bool raisedEvent = false;
+
+                graphClient.OperationCompleted += (sender, e) => { raisedEvent = true; };
+
+                //Act
+                var task = graphClient.ExecuteCypherAsync(cypherQuery)
+                    .ContinueWith(t =>
+                    {
+                        Assert.True(t.IsFaulted);
+                        Assert.IsAssignableFrom<MockResponseThrowsException>(t.Exception.Flatten().InnerException);
+                    });
+                task.Wait();
+
+                Assert.False(raisedEvent, "Raised OperationCompleted");
+            }
         }
 
         /// <summary>

@@ -114,7 +114,7 @@ namespace Neo4jClient
 
                 if (!string.IsNullOrWhiteSpace(RootApiResponse.Transaction))
                 {
-                    //  transactionManager = new TransactionManager(this);
+                    transactionManager = new TransactionManager(this);
                 }
 
                 rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
