@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Specialized;
+using System.Threading.Tasks;
 
 namespace Neo4jClient.Transactions
 {
@@ -15,17 +16,17 @@ namespace Neo4jClient.Transactions
         /// <summary>
         /// Commits our open transaction.
         /// </summary>
-        void Commit();
+        Task CommitAsync();
 
         /// <summary>
         /// Rollbacks any changes made by our open transaction
         /// </summary>
-        void Rollback();
+        Task RollbackAsync();
 
         /// <summary>
         /// Prevents the transaction from being claimed as an orphaned transaction.
         /// </summary>
-        void KeepAlive();
+        Task KeepAliveAsync();
 
         /// <summary>
         /// Returns true if the transaction is still open, that is, if the programmer has not called

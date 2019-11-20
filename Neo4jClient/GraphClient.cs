@@ -751,11 +751,6 @@ namespace Neo4jClient
         {
             bool inTransaction = InTransaction;
 
-            if (transactionManager != null)
-            {
-                transactionManager.RegisterToTransactionIfNeeded();
-            }
-
             if (inTransaction && policy.TransactionExecutionPolicy == TransactionExecutionPolicy.Denied)
             {
                 throw new InvalidOperationException("Cannot be done inside a transaction scope.");
