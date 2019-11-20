@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         [InlineData(IndexFor.Node, "/index/node/MyIndex", HttpStatusCode.NotFound, false)]
         [InlineData(IndexFor.Relationship, "/index/relationship/MyIndex", HttpStatusCode.OK, true)]
         [InlineData(IndexFor.Relationship, "/index/relationship/MyIndex", HttpStatusCode.NotFound, false)]
-        public void ShouldReturnIfIndexIsFound(
+        public async Task ShouldReturnIfIndexIsFound(
             IndexFor indexFor,
             string indexPath,
             HttpStatusCode httpStatusCode, bool expectedResult)
@@ -25,8 +26,8 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
-                graphClient.CheckIndexExists("MyIndex", indexFor).Should().Be(expectedResult);
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
+                (await graphClient.CheckIndexExistsAsync("MyIndex", indexFor)).Should().Be(expectedResult);
             }
         }
     }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -8,23 +9,21 @@ namespace Neo4jClient
 {
     internal static class HttpContentExtensions
     {
-        public static string ReadAsString(this HttpContent content)
+        public static Task<string> ReadAsStringAsync(this HttpContent content)
         {
-            var readTask = content.ReadAsStringAsync();
-            readTask.Wait();
-            return readTask.Result;
+            return content.ReadAsStringAsync();
         }
 
-        public static T ReadAsJson<T>(this HttpContent content, IEnumerable<JsonConverter> jsonConverters, DefaultContractResolver resolver)
+        public static async Task<T> ReadAsJsonAsync<T>(this HttpContent content, IEnumerable<JsonConverter> jsonConverters, DefaultContractResolver resolver)
             where T : new()
         {
-            var stringContent = content.ReadAsString();
+            var stringContent = await content.ReadAsStringAsync().ConfigureAwait(false);
             return new CustomJsonDeserializer(jsonConverters, resolver:resolver).Deserialize<T>(stringContent);
         }
 
-        public static T ReadAsJson<T>(this HttpContent content, IEnumerable<JsonConverter> jsonConverters) where T : new()
+        public static Task<T> ReadAsJsonAsync<T>(this HttpContent content, IEnumerable<JsonConverter> jsonConverters) where T : new()
         {
-            return content.ReadAsJson<T>(jsonConverters, null);
+            return content.ReadAsJsonAsync<T>(jsonConverters, null);
         }
     }
 }

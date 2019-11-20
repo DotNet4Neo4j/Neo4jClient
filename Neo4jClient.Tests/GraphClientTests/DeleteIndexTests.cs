@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
 {
@@ -6,7 +7,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class DeleteIndexTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldExecuteSilentlyForSuccessfulDelete()
+        public async Task ShouldExecuteSilentlyForSuccessfulDelete()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -16,10 +17,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                graphClient.DeleteIndex("MyIndex", IndexFor.Node);
+                await graphClient.DeleteIndexAsync("MyIndex", IndexFor.Node);
             }
         }
     }

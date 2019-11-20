@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -8,7 +9,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class GetIndexesTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldReturnNodeIndexes()
+        public async Task ShouldReturnNodeIndexes()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -34,8 +35,8 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
-                var indexes = graphClient.GetIndexes(IndexFor.Node);
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
+                var indexes = await graphClient.GetIndexesAsync(IndexFor.Node);
                 Assert.Equal(2, indexes.Count());
 
                 var index = indexes.ElementAt(0);
@@ -55,7 +56,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldReturnEmptyDictionaryOfIndexesForHttpResponse204()
+        public async Task ShouldReturnEmptyDictionaryOfIndexesForHttpResponse204()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -65,8 +66,8 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
-                var indexes = graphClient.GetIndexes(IndexFor.Node);
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
+                var indexes = await graphClient.GetIndexesAsync(IndexFor.Node);
                 Assert.False(indexes.Any());
             }
         }

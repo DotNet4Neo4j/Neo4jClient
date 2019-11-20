@@ -11,14 +11,11 @@ namespace Neo4jClient.Execution
         IResponseBuilder<TResult> WithExpectedStatusCodes(params HttpStatusCode[] statusCodes);
         IResponseFailBuilder<TResult> FailOnCondition(Func<HttpResponseMessage, bool> condition);
         Task<TResult> ExecuteAsync(string commandDescription);
-        Task<TResult> ExecuteAsync(Func<Task<TResult>, TResult> continuationFunction);
-        Task<TResult> ExecuteAsync(string commandDescription, Func<Task<TResult>, TResult> continuationFunction);
+        Task<TResult> ExecuteAsync(Func<TResult, TResult> continuationFunction);
+        Task<TResult> ExecuteAsync(string commandDescription, Func<TResult, TResult> continuationFunction);
         Task<TResult> ExecuteAsync();
 
-        Task<TExpected> ExecuteAsync<TExpected>(Func<Task<TResult>, TExpected> continuationFunction);
-        Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<TResult>, TExpected> continuationFunction);
-
-        TResult Execute(string commandDescription);
-        TResult Execute();
+        Task<TExpected> ExecuteAsync<TExpected>(Func<TResult, TExpected> continuationFunction);
+        Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<TResult, TExpected> continuationFunction);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -9,7 +10,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class UpdateNodeTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldUpdateNode()
+        public async Task ShouldUpdateNode()
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
@@ -40,11 +41,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var pocoReference = new NodeReference<TestNode>(456);
-                graphClient.Update(
+                await graphClient.UpdateAsync(
                     pocoReference, nodeFromDb =>
                     {
                         nodeFromDb.Foo = "fooUpdated";
@@ -60,7 +61,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldReturnNodeAfterUpdating()
+        public async Task ShouldReturnNodeAfterUpdating()
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
@@ -91,11 +92,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var pocoReference = new NodeReference<TestNode>(456);
-                var updatedNode = graphClient.Update(
+                var updatedNode = await graphClient.UpdateAsync(
                     pocoReference, nodeFromDb =>
                     {
                         nodeFromDb.Foo = "fooUpdated";
@@ -110,7 +111,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldUpdateNodeWithIndexEntries()
+        public async Task ShouldUpdateNodeWithIndexEntries()
         {
             var nodeToUpdate = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
@@ -149,11 +150,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 // Act
                 var pocoReference = new NodeReference<TestNode>(456);
-                graphClient.Update(
+                await graphClient.UpdateAsync(
                     pocoReference, nodeFromDb =>
                     {
                         nodeFromDb.Foo = "fooUpdated";
@@ -162,10 +163,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }, nodeFromDb => new List<IndexEntry>
                     {
                         new IndexEntry
-                            {
-                                Name = "foo", 
-                                KeyValues = new Dictionary<string, object> {{"foo", "bar"}},
-                            }
+                        {
+                            Name = "foo", 
+                            KeyValues = new Dictionary<string, object> {{"foo", "bar"}},
+                        }
                     });
 
                 Assert.Equal("fooUpdated", nodeToUpdate.Foo);
@@ -175,7 +176,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldRunDelegateForChanges()
+        public async Task ShouldRunDelegateForChanges()
         {
             var nodeToUpdate = new TestNode { Id = 1, Foo = "foo", Bar = "bar", Baz = "baz" };
 
@@ -206,13 +207,13 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var hasChanged = false;
 
                 var pocoReference = new NodeReference<TestNode>(456);
-                graphClient.Update(
+                await graphClient.UpdateAsync(
                     pocoReference, nodeFromDb =>
                     {
                         nodeFromDb.Foo = "fooUpdated";
@@ -221,14 +222,14 @@ namespace Neo4jClient.Tests.GraphClientTests
                     },
                     null,
                     diff => { hasChanged = diff.Any(); }
-                    );
+                );
 
                 Assert.True(hasChanged);
             }
         }
 
         [Fact]
-        public void ShouldReplaceNode()
+        public async Task ShouldReplaceNode()
         {
             var newData = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
@@ -240,16 +241,16 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var pocoReference = new NodeReference<TestNode>(456);
-                graphClient.Update(pocoReference, newData);
+                await graphClient.UpdateAsync(pocoReference, newData);
             }
         }
 
         [Fact]
-        public void ShouldReplaceNodeWithIndexEntries()
+        public async Task ShouldReplaceNodeWithIndexEntries()
         {
             var newData = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
 
@@ -269,11 +270,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 // Act
                 var pocoReference = new NodeReference<TestNode>(456);
-                graphClient.Update(
+                await graphClient.UpdateAsync(
                     pocoReference,
                     newData,
                     new []

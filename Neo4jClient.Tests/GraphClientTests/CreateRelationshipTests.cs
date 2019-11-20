@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -8,7 +9,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class CreateRelationshipTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldReturnRelationshipReference()
+        public async Task ShouldReturnRelationshipReference()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -34,11 +35,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 var testRelationship = new TestRelationship(81);
-                var relationshipReference = graphClient.CreateRelationship(new NodeReference<TestNode>(81), testRelationship);
-
+                var relationshipReference = await graphClient.CreateRelationshipAsync(new NodeReference<TestNode>(81), testRelationship);
+                
                 Assert.IsAssignableFrom<RelationshipReference>(relationshipReference);
                 Assert.IsNotType<RelationshipReference<object>>(relationshipReference);
                 Assert.Equal(38, relationshipReference.Id);
@@ -46,7 +47,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldReturnAttachedRelationshipReference()
+        public async Task ShouldReturnAttachedRelationshipReference()
         {
             using (var testHarness = new RestTestHarness
             {
@@ -72,36 +73,36 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 var testRelationship = new TestRelationship(81);
-                var relationshipReference = graphClient.CreateRelationship(new NodeReference<TestNode>(81), testRelationship);
+                var relationshipReference = await graphClient.CreateRelationshipAsync(new NodeReference<TestNode>(81), testRelationship);
 
                 Assert.Equal(graphClient, ((IAttachedReference)relationshipReference).Client);
             }
         }
 
         [Fact]
-        public void ShouldThrowArgumentNullExceptionForNullNodeReference()
+        public async Task ShouldThrowArgumentNullExceptionForNullNodeReference()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            Assert.Throws<ArgumentNullException>(() => client.CreateRelationship((NodeReference<TestNode>)null, new TestRelationship(10)));
+            await Assert.ThrowsAsync<ArgumentNullException>(async() => await client.CreateRelationshipAsync((NodeReference<TestNode>)null, new TestRelationship(10)));
         }
 
         [Fact]
-        public void ShouldThrowInvalidOperationExceptionIfNotConnected()
+        public async Task ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            Assert.Throws<InvalidOperationException>(() => client.CreateRelationship(new NodeReference<TestNode>(5), new TestRelationship(10)));
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await client.CreateRelationshipAsync(new NodeReference<TestNode>(5), new TestRelationship(10)));
         }
 
         [Fact]
-        public void ShouldThrowNotSupportedExceptionForIncomingRelationship()
+        public async Task ShouldThrowNotSupportedExceptionForIncomingRelationship()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectGraphClient();
-                Assert.Throws<NotSupportedException>(() => client.CreateRelationship(new NodeReference<TestNode>(5), new TestRelationship(10) { Direction = RelationshipDirection.Incoming }));
+                var client = await testHarness.CreateAndConnectGraphClient();
+                await Assert.ThrowsAsync<NotSupportedException>(async () => await client.CreateRelationshipAsync(new NodeReference<TestNode>(5), new TestRelationship(10) { Direction = RelationshipDirection.Incoming }));
             }
         }
 

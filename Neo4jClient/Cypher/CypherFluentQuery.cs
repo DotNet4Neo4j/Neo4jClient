@@ -446,11 +446,6 @@ namespace Neo4jClient.Cypher
 
         public CypherQuery Query => QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver, IsWrite);
 
-        public void ExecuteWithoutResults()
-        {
-            Client.ExecuteCypher(Query);
-        }
-
         public Task ExecuteWithoutResultsAsync()
         {
             return Client.ExecuteCypherAsync(Query);

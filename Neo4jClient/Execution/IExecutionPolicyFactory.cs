@@ -14,7 +14,6 @@
     public enum PolicyType
     {
         Cypher,
-        Gremlin,
         Rest,
         Batch,
         Transaction,

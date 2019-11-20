@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Neo4jClient.Cypher;
-using Neo4jClient.Gremlin;
 
 namespace Neo4jClient
 {
-    public class Node<TNode> : IGremlinQuery, IHasNodeReference
+    public class Node<TNode> : IHasNodeReference, IAttachedReference
     {
         readonly TNode data;
         readonly NodeReference<TNode> reference;
@@ -51,21 +50,6 @@ namespace Neo4jClient
         IGraphClient IAttachedReference.Client
         {
             get { return ((IAttachedReference)reference).Client; }
-        }
-
-        string IGremlinQuery.QueryText
-        {
-            get { return ((IGremlinQuery)reference).QueryText; }
-        }
-
-        IDictionary<string, object> IGremlinQuery.QueryParameters
-        {
-            get { return ((IGremlinQuery) reference).QueryParameters; }
-        }
-
-        IList<string> IGremlinQuery.QueryDeclarations
-        {
-            get { return ((IGremlinQuery)reference).QueryDeclarations; }
         }
 
         public static bool operator ==(Node<TNode> lhs, Node<TNode> rhs)

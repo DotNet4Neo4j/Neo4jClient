@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -10,7 +11,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     {
         [Fact]
         [Obsolete]
-        public void ShouldReturnQueryResults()
+        public async Task ShouldReturnQueryResults()
         {
             //Arrange
             using (var testHarness = new RestTestHarness
@@ -34,10 +35,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                var results = graphClient
-                    .QueryIndex<TestNode>("indexName", IndexFor.Node, "name:foo")
+                var results = (await graphClient
+                    .QueryIndexAsync<TestNode>("indexName", IndexFor.Node, "name:foo"))
                     .ToArray();
 
                 Assert.Equal(1, results.Count());

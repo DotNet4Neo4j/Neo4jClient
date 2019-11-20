@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4j.Driver.V1;
@@ -18,7 +19,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
             }
 
             [Fact]
-            public void ArgsContainBookmarksUsed()
+            public async Task ArgsContainBookmarksUsed()
             {
                 // Arrange
                 var bookmarks = new List<string> {"Bookmark1", "Bookmark2"};
@@ -38,20 +39,20 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                     var testStatementResult = new TestStatementResult(new[] {"data"}, recordMock.Object);
                     testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                    var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                    var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
                     graphClient.OperationCompleted += (s, e) =>
                     {
                         e.BookmarksUsed.Should().Contain(bookmarks[0]);
                         e.BookmarksUsed.Should().Contain(bookmarks[1]);
                     };
 
-                    graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery);
+                    await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery);
                 }
             }
 
 
             [Fact]
-            public void ArgsContainBookmarkUsed()
+            public async Task ArgsContainBookmarkUsed()
             {
                 // Arrange
                 const string bookmark = "Bookmark1";
@@ -72,15 +73,15 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                     var testStatementResult = new TestStatementResult(new[] {"data"}, recordMock.Object);
                     testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                    var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                    var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
                     graphClient.OperationCompleted += (s, e) => { e.BookmarksUsed.Should().Contain(bookmarks[0]); };
 
-                    graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery);
+                    await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery);
                 }
             }
 
             [Fact]
-            public void ArgsContainLastBookmark()
+            public async Task ArgsContainLastBookmark()
             {
                 const string lastBookmark = "LastBookmark";
 
@@ -101,15 +102,15 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                     var testStatementResult = new TestStatementResult(new[] {"data"}, recordMock.Object);
                     testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                    var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                    var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
                     graphClient.OperationCompleted += (s, e) => { e.LastBookmark.Should().Be(lastBookmark); };
 
-                    graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery);
+                    await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery);
                 }
             }
 
             [Fact]
-            public void SessionIsCalledWithBookmark()
+            public async Task SessionIsCalledWithBookmark()
             {
                 // Arrange
                 const string bookmark = "Bookmark1";
@@ -120,7 +121,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                 {
                     try
                     {
-                        testHarness.CreateAndConnectBoltGraphClient().ExecuteGetCypherResults<object>(cypherQuery).ToArray();
+                        (await (await testHarness.CreateAndConnectBoltGraphClient()).ExecuteGetCypherResultsAsync<object>(cypherQuery)).ToArray();
                     }
                     catch
                     {
@@ -133,7 +134,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
             }
 
             [Fact]
-            public void SessionIsCalledWithBookmarks()
+            public async Task SessionIsCalledWithBookmarks()
             {
                 // Arrange
                 var bookmarks = new List<string> {"Bookmark1", "Bookmark2"};
@@ -144,7 +145,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                 {
                     try
                     {
-                        testHarness.CreateAndConnectBoltGraphClient().ExecuteGetCypherResults<object>(cypherQuery).ToArray();
+                        (await (await testHarness.CreateAndConnectBoltGraphClient()).ExecuteGetCypherResultsAsync<object>(cypherQuery)).ToArray();
                     }
                     catch
                     {

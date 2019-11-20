@@ -9,7 +9,6 @@ using Neo4j.Driver.V1;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
-using Neo4jClient.Gremlin;
 using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
@@ -25,7 +24,7 @@ namespace Neo4jClient
     /// <summary>
     ///     The <see cref="BoltGraphClient" /> is the client for connecting to the Bolt protocol of Neo4j.
     /// </summary>
-    public partial class BoltGraphClient : IBoltGraphClient, IRawGraphClient, ITransactionalGraphClient
+    public class BoltGraphClient : IBoltGraphClient, IRawGraphClient, ITransactionalGraphClient
     {
         internal const string NotValidForBolt = "This is not available using the BoltGraphClient.";
 
@@ -246,15 +245,8 @@ namespace Neo4jClient
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public NodeReference<TNode> Create<TNode>(TNode node, IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries)
+        public Task<NodeReference<TNode>> CreateAsync<TNode>(TNode node, IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries)
             where TNode : class
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Node<TNode> Get<TNode>(NodeReference reference)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
@@ -268,22 +260,14 @@ namespace Neo4jClient
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public Node<TNode> Get<TNode>(NodeReference<TNode> reference)
+        public Task<Node<TNode>> GetAsync<TNode>(NodeReference<TNode> reference)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public RelationshipInstance<TData> Get<TData>(RelationshipReference<TData> reference) 
-            where TData : class, new()
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public RelationshipInstance<TData> Get<TData>(RelationshipReference reference) where TData : class, new()
+        public Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference<TData> reference) where TData : class, new()
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
@@ -297,154 +281,119 @@ namespace Neo4jClient
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void Update<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
+        public Task UpdateAsync<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public Node<TNode> Update<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null, Action<IEnumerable<FieldChange>> changeCallback = null)
+        public Task<Node<TNode>> UpdateAsync<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null, Action<IEnumerable<FieldChange>> changeCallback = null)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void Update<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback) where TRelationshipData : class, new()
+        public Task UpdateAsync<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback) where TRelationshipData : class, new()
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void Delete(NodeReference reference, DeleteMode mode)
+        public Task DeleteAsync(NodeReference reference, DeleteMode mode)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public RelationshipReference CreateRelationship<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship) where TRelationship : Relationship, IRelationshipAllowingSourceNode<TSourceNode>
+        public Task<RelationshipReference> CreateRelationshipAsync<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship) where TRelationship : Relationship, IRelationshipAllowingSourceNode<TSourceNode>
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void DeleteRelationship(RelationshipReference reference)
+        public Task DeleteRelationshipAsync(RelationshipReference reference)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public string ExecuteScalarGremlin(string query, IDictionary<string, object> parameters)
+        public Task<Dictionary<string, IndexMetaData>> GetIndexesAsync(IndexFor indexFor)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public IEnumerable<TResult> ExecuteGetAllProjectionsGremlin<TResult>(IGremlinQuery query) where TResult : new()
+        public Task<bool> CheckIndexExistsAsync(string indexName, IndexFor indexFor)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public IEnumerable<Node<TNode>> ExecuteGetAllNodesGremlin<TNode>(IGremlinQuery query)
+        public Task CreateIndexAsync(string indexName, IndexConfiguration config, IndexFor indexFor)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public IEnumerable<RelationshipInstance> ExecuteGetAllRelationshipsGremlin(string query, IDictionary<string, object> parameters)
+        public Task ReIndexAsync(NodeReference node, IEnumerable<IndexEntry> indexEntries)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public IEnumerable<RelationshipInstance<TData>> ExecuteGetAllRelationshipsGremlin<TData>(string query, IDictionary<string, object> parameters) where TData : class, new()
+        public Task ReIndexAsync(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public Dictionary<string, IndexMetaData> GetIndexes(IndexFor indexFor)
+        public Task DeleteIndexAsync(string indexName, IndexFor indexFor)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public bool CheckIndexExists(string indexName, IndexFor indexFor)
+        public Task DeleteIndexEntriesAsync(string indexName, NodeReference relationshipReference)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void CreateIndex(string indexName, IndexConfiguration config, IndexFor indexFor)
+        public Task DeleteIndexEntriesAsync(string indexName, RelationshipReference relationshipReference)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void ReIndex(NodeReference node, IEnumerable<IndexEntry> indexEntries)
+        public Task<IEnumerable<Node<TNode>>> QueryIndexAsync<TNode>(string indexName, IndexFor indexFor, string query)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void ReIndex(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries)
+        public Task<IEnumerable<Node<TNode>>> LookupIndexAsync<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
 
         /// <inheritdoc />
         [Obsolete(NotValidForBolt)]
-        public void DeleteIndex(string indexName, IndexFor indexFor)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public void DeleteIndexEntries(string indexName, NodeReference relationshipReference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public void DeleteIndexEntries(string indexName, RelationshipReference relationshipReference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public IEnumerable<Node<TNode>> QueryIndex<TNode>(string indexName, IndexFor indexFor, string query)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public IEnumerable<Node<TNode>> LookupIndex<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id)
+        public Task<IEnumerable<Node<TNode>>> LookupIndexAsync<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
@@ -454,20 +403,6 @@ namespace Neo4jClient
         public void ShutdownServer()
         {
             throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public IGremlinClient Gremlin
-        {
-            get { throw new InvalidOperationException(NotValidForBolt); }
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Uri GremlinEndpoint
-        {
-            get { throw new InvalidOperationException(NotValidForBolt); }
         }
 
         /// <inheritdoc />
@@ -532,25 +467,6 @@ namespace Neo4jClient
 #endregion
 
         #region Implementation of IRawGraphClient
-
-        /// <inheritdoc />
-        IEnumerable<TResult> IRawGraphClient.ExecuteGetCypherResults<TResult>(CypherQuery query)
-        {
-            var task = ((IRawGraphClient) this).ExecuteGetCypherResultsAsync<TResult>(query);
-            try
-            {
-                Task.WaitAll(task);
-            }
-            catch (AggregateException ex)
-            {
-                Exception unwrappedException;
-                if (ex.TryUnwrap(out unwrappedException))
-                    throw unwrappedException;
-                throw;
-            }
-
-            return task.Result;
-        }
 
         /// <inheritdoc />
         async Task<IEnumerable<TResult>> IRawGraphClient.ExecuteGetCypherResultsAsync<TResult>(CypherQuery query)
@@ -629,29 +545,6 @@ namespace Neo4jClient
             }
 
             return results;
-        }
-
-        /// <inheritdoc />
-        void IRawGraphClient.ExecuteCypher(CypherQuery query)
-        {
-            var task = ((IRawGraphClient) this).ExecuteCypherAsync(query);
-            task.Wait();
-        }
-
-        /// <inheritdoc />
-        [Obsolete]
-        void IRawGraphClient.ExecuteMultipleCypherQueriesInTransaction(IEnumerable<CypherQuery> queries, NameValueCollection customHeaders = null)
-        {
-            using (var tx = BeginTransaction())
-            {
-                // the HTTP endpoint executed the transactions in a serial fashion
-                foreach (var query in queries)
-                {
-                    ((IRawGraphClient) this).ExecuteCypher(query);
-                }
-
-                tx.Commit();
-            }
         }
 
         /// <inheritdoc />

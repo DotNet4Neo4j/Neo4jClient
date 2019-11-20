@@ -1,4 +1,5 @@
-﻿using Neo4jClient.Cypher;
+﻿using System.Threading.Tasks;
+using Neo4jClient.Cypher;
 
 // ReSharper disable ClassNeverInstantiated.Local
 // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -13,7 +14,7 @@ namespace Neo4jClient.Tests.Cypher
             return null;
         }
 
-        public void NodeById()
+        public async Task NodeById()
         {
             // ##start Cypher
             // START n=node(1)
@@ -24,10 +25,10 @@ namespace Neo4jClient.Tests.Cypher
 
             var someNodeReferenceAlreadyLoaded = (NodeReference)1;
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Start(new { n = someNodeReferenceAlreadyLoaded })
                 .Return(n => n.Node<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
 
             // ##start Note
@@ -35,7 +36,7 @@ namespace Neo4jClient.Tests.Cypher
             // ##end Note
         }
 
-        public void RelationshipById()
+        public async Task RelationshipById()
         {
             // ##start Cypher
             // START n=relationship(1)
@@ -46,10 +47,10 @@ namespace Neo4jClient.Tests.Cypher
 
             var someRelationshipReferenceAlreadyLoaded = (RelationshipReference)1;
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Start(new { r = someRelationshipReferenceAlreadyLoaded })
                 .Return(r => r.As<RelationshipInstance>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
 
             // ##start Note
@@ -57,7 +58,7 @@ namespace Neo4jClient.Tests.Cypher
             // ##end Note
         }
 
-        public void MultipleNodesById()
+        public async Task MultipleNodesById()
         {
             // ##start Cypher
             // START n=node(1, 2, 3)
@@ -70,14 +71,14 @@ namespace Neo4jClient.Tests.Cypher
             var n2 = (NodeReference)1;
             var n3 = (NodeReference)1;
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Start(new { n = new[] { n1, n2, n3 } })
                 .Return(n => n.Node<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void AllNodes()
+        public async Task AllNodes()
         {
             // ##start Cypher
             // START n=node(*)
@@ -87,14 +88,14 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Start(new { n = All.Nodes })
                 .Return(n => n.Node<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void NodeByIndexLookup()
+        public async Task NodeByIndexLookup()
         {
             // ##start Cypher
             // START n=node:people(name = 'Bob')
@@ -104,14 +105,14 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Start(new { n = Node.ByIndexLookup("people", "name", "Bob") })
                 .Return(n => n.Node<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example1()
+        public async Task Example1()
         {
             // ##start Cypher
             // START john=node:node_auto_index(name = 'John')
@@ -122,7 +123,7 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Start(new {john = Node.ByIndexLookup("node_auto_index", "name", "John")})
                 .Match("john-[:friend]->()-[:friend]->fof")
                 .Return((john, fof) => new
@@ -130,11 +131,11 @@ namespace Neo4jClient.Tests.Cypher
                     John = john.As<Person>(),
                     FriendOfFriend = fof.As<Person>()
                 })
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example2()
+        public async Task Example2()
         {
             // ##start Cypher
             // MATCH n
@@ -145,15 +146,15 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("n")
                 .Where<Person>(n => n.Name == "B")
                 .Return(n => n.As<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example3()
+        public async Task Example3()
         {
             // ##start Cypher
             // MATCH n
@@ -164,15 +165,15 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("n")
                 .Where<Person>(n => n.Name == "B")
                 .Return(n => n.As<Person>().Age)
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example4()
+        public async Task Example4()
         {
             // ##start Cypher
             // MATCH a-->b
@@ -183,15 +184,15 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("a-->b")
                 .Where<Person>(a => a.Name == "A")
                 .ReturnDistinct(b => b.As<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example5()
+        public async Task Example5()
         {
             // ##start Cypher
             // MATCH n
@@ -203,16 +204,16 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("n")
                 .Return(n => n.As<Person>())
                 .Skip(1)
                 .Limit(2)
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example6()
+        public async Task Example6()
         {
             // ##start Cypher
             // MATCH david--otherPerson-->()
@@ -225,7 +226,7 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("david--otherPerson-->()")
                 .Where<Person>(david => david.Name == "David")
                 .With(otherPerson => new
@@ -235,11 +236,11 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Where<int>(foaf => foaf > 1)
                 .Return(otherPerson => otherPerson.As<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example7()
+        public async Task Example7()
         {
             // ##start Cypher
             // MATCH n
@@ -252,17 +253,17 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("n")
                 .With("n")
                 .OrderByDescending("n.name")
                 .Limit(3)
                 .Return(n => n.CollectAs<Person>())
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 
-        public void Example8()
+        public async Task Example8()
         {
             // ##start Cypher
             // MATCH n:Actor
@@ -275,7 +276,7 @@ namespace Neo4jClient.Tests.Cypher
             var client = BuildClient();
 
             // ##start C#
-            var results = client.Cypher
+            var results = await client.Cypher
                 .Match("n:Actor")
                 .Return(n => n.As<Person>().Name)
                 .UnionAll()
@@ -283,7 +284,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Return(n => new {
                     Name = n.As<Movie>().Title
                 })
-                .Results;
+                .ResultsAsync;
             // ##end C#
         }
 

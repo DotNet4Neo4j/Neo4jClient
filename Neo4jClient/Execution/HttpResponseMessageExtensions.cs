@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Newtonsoft.Json;
 
@@ -9,19 +10,19 @@ namespace Neo4jClient.Execution
 {
     internal static class HttpResponseMessageExtensions
     {
-        internal static void EnsureExpectedStatusCode(this HttpResponseMessage response, params HttpStatusCode[] expectedStatusCodes)
+        internal static Task EnsureExpectedStatusCode(this HttpResponseMessage response, params HttpStatusCode[] expectedStatusCodes)
         {
-            response.EnsureExpectedStatusCode(null, expectedStatusCodes);
+            return response.EnsureExpectedStatusCode(null, expectedStatusCodes);
         }
 
-        internal static void EnsureExpectedStatusCode(this HttpResponseMessage response, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
+        internal static async Task EnsureExpectedStatusCode(this HttpResponseMessage response, string commandDescription, params HttpStatusCode[] expectedStatusCodes)
         {
             if (expectedStatusCodes.Contains(response.StatusCode))
                 return;
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-                var neoException = TryBuildNeoException(response);
+                var neoException = await TryBuildNeoException(response).ConfigureAwait(false);
                 if (neoException != null) throw neoException;
             }
 
@@ -46,12 +47,12 @@ namespace Neo4jClient.Execution
                 rawBody));
         }
 
-        static NeoException TryBuildNeoException(HttpResponseMessage response)
+        static async Task<NeoException> TryBuildNeoException(HttpResponseMessage response)
         {
             var isJson = response.Content.Headers.ContentType.MediaType.Equals("application/json", StringComparison.OrdinalIgnoreCase);
             if (!isJson) return null;
 
-            var exceptionResponse = response.Content.ReadAsJson<ExceptionResponse>(new JsonConverter[0]);
+            var exceptionResponse = await response.Content.ReadAsJsonAsync<ExceptionResponse>(new JsonConverter[0]).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(exceptionResponse.Message) ||
                 string.IsNullOrEmpty(exceptionResponse.Exception))
