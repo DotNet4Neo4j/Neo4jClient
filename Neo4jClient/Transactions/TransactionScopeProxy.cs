@@ -45,17 +45,7 @@ namespace Neo4jClient.Transactions
             client.EndTransaction();
             if (!markCommitted && Committable && TransactionContext.IsOpen)
             {
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await RollbackAsync();
-                    }
-                    catch (Exception)
-                    {
-                        // no-where to throw it
-                    }
-                });
+                RollbackAsync().Wait(); // annoying, but can't dispose asynchronously
             }
 
             if (transactionContext != null && ShouldDisposeTransaction())

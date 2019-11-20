@@ -272,17 +272,7 @@ namespace Neo4jClient.Transactions
         {
             if (IsOpen)
             {
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await RollbackAsync();
-                    }
-                    catch (Exception)
-                    {
-                        // no-where to throw it, but the transaction should rollback anyway if it's not committed so it's probably fine
-                    }
-                });
+                RollbackAsync().Wait(); // annoying but can't dispose asynchronously
             }
         }
     }

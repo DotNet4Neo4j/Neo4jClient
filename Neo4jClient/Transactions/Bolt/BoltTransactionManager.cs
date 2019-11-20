@@ -6,7 +6,7 @@ using System.Transactions;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 
-namespace Neo4jClient.Transactions
+namespace Neo4jClient.Transactions.Bolt
 {
 
     /// <summary>

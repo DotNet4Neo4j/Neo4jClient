@@ -11,6 +11,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
+using Neo4jClient.Transactions.Bolt;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using ITransaction = Neo4jClient.Transactions.ITransaction;
@@ -97,7 +98,7 @@ namespace Neo4jClient
                 Realm = realm
             };
 
-//            transactionManager = new TransactionManager(this);
+            transactionManager = new BoltTransactionManager(this);
         }
 
         public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null)
@@ -416,13 +417,6 @@ namespace Neo4jClient
         public Uri RelationshipIndexEndpoint
         {
             get { throw new InvalidOperationException(NotValidForBolt); }
-        }
-
-        /// <inheritdoc />
-        public void Connect(NeoServerConfiguration configuration = null)
-        {
-            var connectTask = ConnectAsync(configuration);
-            connectTask.Wait();
         }
 
         /// <inheritdoc />

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Neo4jClient.Transactions.Bolt;
 
 namespace Neo4jClient.Transactions
 {
