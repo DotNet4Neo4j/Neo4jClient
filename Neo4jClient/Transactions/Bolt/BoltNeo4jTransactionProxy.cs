@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Neo4j.Driver.V1;
 
-namespace Neo4jClient.Transactions
+namespace Neo4jClient.Transactions.Bolt
 {
     /// <summary>
     ///     Implements the TransactionScopeProxy interfaces for INeo4jTransaction

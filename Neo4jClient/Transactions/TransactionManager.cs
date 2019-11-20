@@ -135,7 +135,7 @@ namespace Neo4jClient.Transactions
 
         private TransactionContext GenerateTransaction(TransactionContext reference)
         {
-            return new TransactionContext(reference.Transaction);
+            return new TransactionContext(reference.NeoTransaction);
         }
 
         private static void PushScopeTransaction(TransactionScopeProxy transaction)

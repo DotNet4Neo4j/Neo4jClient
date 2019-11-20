@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Neo4j.Driver.V1;
 
-namespace Neo4jClient.Transactions
+namespace Neo4jClient.Transactions.Bolt
 {
     internal class BoltNeo4jTransaction : ITransaction
     {

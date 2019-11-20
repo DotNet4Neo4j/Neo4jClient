@@ -1,6 +1,6 @@
 ﻿using Neo4j.Driver.V1;
 
-namespace Neo4jClient.Transactions
+namespace Neo4jClient.Transactions.Bolt
 {
     public class BoltResponse
     {

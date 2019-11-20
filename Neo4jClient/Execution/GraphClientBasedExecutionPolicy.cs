@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Transactions;
+using Neo4jClient.Transactions;
 
 namespace Neo4jClient.Execution
 {
@@ -12,10 +14,9 @@ namespace Neo4jClient.Execution
             Client = client;
         }
 
-        public bool InTransaction
-        {
-            get { return false; }
-        }
+        public bool InTransaction =>
+            Client is ITransactionalGraphClient transactionalGraphClient &&
+            (transactionalGraphClient.InTransaction || Transaction.Current != null);
 
         public abstract TransactionExecutionPolicy TransactionExecutionPolicy { get; }
 

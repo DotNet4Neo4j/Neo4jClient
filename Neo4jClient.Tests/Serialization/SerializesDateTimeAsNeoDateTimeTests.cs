@@ -17,7 +17,7 @@ namespace Neo4jClient.Tests.Serialization
         }
 
         [Fact]
-        public void SerializesDateTimeAsNeoDateInBolt()
+        public async Task SerializesDateTimeAsNeoDateInBolt()
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
@@ -29,7 +29,7 @@ namespace Neo4jClient.Tests.Serialization
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
-            bgc.Connect();
+            await bgc.ConnectAsync();
 
             var cwd = new ClassWithNeo4jDateTime { Dt = dt }; ;
 

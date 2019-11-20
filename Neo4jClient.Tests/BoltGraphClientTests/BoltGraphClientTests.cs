@@ -56,7 +56,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
         
         [Fact]
-        public void SerializesDateTimesProperly()
+        public async Task SerializesDateTimesProperly()
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
@@ -67,7 +67,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
-            bgc.Connect();
+            await bgc.ConnectAsync();
 
             var cwd = new ClassWithDateTime{Dt = new DateTime(2000, 1, 1)};;
 
@@ -85,7 +85,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
 
         [Fact]
-        public void SerializesDateTimeOffsetsProperly()
+        public async Task SerializesDateTimeOffsetsProperly()
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
@@ -96,7 +96,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
-            bgc.Connect();
+            await bgc.ConnectAsync();
 
             var cwd = new ClassWithDateTimeOffset { Dt = new DateTimeOffset(new DateTime(2000, 1, 1), TimeSpan.FromHours(1)) }; ;
 
@@ -114,7 +114,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
 
         [Fact]
-        public void SerializesGuidsProperly()
+        public async Task SerializesGuidsProperly()
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
@@ -125,7 +125,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
-            bgc.Connect();
+            await bgc.ConnectAsync();
 
             var cwg = new ClassWithGuid();
 
@@ -141,7 +141,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
 
         [Fact]
-        public void SerializesGuidsProperlyWhenAutoGeneratingParams()
+        public async Task SerializesGuidsProperlyWhenAutoGeneratingParams()
         {
             var mockSession = new Mock<ISession>();
             mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new ServerInfo()));
@@ -152,7 +152,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient( mockDriver.Object);
-            bgc.Connect();
+            await bgc.ConnectAsync();
 
             var cwg = new ClassWithGuid();
 

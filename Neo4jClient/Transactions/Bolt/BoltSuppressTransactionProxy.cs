@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Neo4jClient.Transactions
+namespace Neo4jClient.Transactions.Bolt
 {
     internal class BoltSuppressTransactionProxy : BoltTransactionScopeProxy
     {

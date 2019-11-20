@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Neo4jClient.Execution;
 using Neo4jClient.Transactions;
@@ -133,15 +134,13 @@ namespace Neo4jClient.Tests
             httpClient.SendAsync(Arg.Any<HttpRequestMessage>()).ReturnsForAnyArgs(ci =>
             {
                 var request = ci.Arg<HttpRequestMessage>();
-                var task = new Task<HttpResponseMessage>(() => HandleRequest(request, baseUri));
-                task.Start();
-                return task;
+                return HandleRequest(request, baseUri);
             });
 
             return httpClient;
         }
 
-        protected virtual HttpResponseMessage HandleRequest(HttpRequestMessage request, string baseUri)
+        protected virtual async Task<HttpResponseMessage> HandleRequest(HttpRequestMessage request, string baseUri)
         {
             // User info isn't transmitted over the wire, so we need to strip it here too
             var requestUri = request.RequestUri;
@@ -154,8 +153,7 @@ namespace Neo4jClient.Tests
             if (request.Content != null)
             {
                 var requestBodyTask = request.Content.ReadAsStringAsync();
-                requestBodyTask.Wait();
-                requestBody = requestBodyTask.Result;
+                requestBody = await requestBodyTask;
             }
 
             if (request.Method == HttpMethod.Post)

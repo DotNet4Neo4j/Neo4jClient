@@ -1,55 +1,44 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System;
 using System.Collections.Specialized;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Neo4j.Driver.V1;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
-using Newtonsoft.Json;
+using Neo4jClient.Transactions.Bolt;
 
 namespace Neo4jClient.Transactions
 {
-    /// <summary>
-    /// Encapsulates a transaction object with its transaction scheduler.
-    /// </summary>
-    /// <remarks>
-    /// All requests to the same transaction have to made sequentially. The purpose of this class is to ensure
-    /// that such calls are made in that fashion.
-    /// </remarks>
-    internal class BoltTransactionContext : ITransaction
+    internal abstract class TransactionContextBase<TClient, TResponse> : ITransaction
     {
-        /// <summary>
-        /// The Neo4j transaction object.
-        /// </summary>
-        public ITransaction Transaction { get; }
-
-        internal BoltNeo4jTransaction BoltTransaction => Transaction as BoltNeo4jTransaction;
-
         /// <summary>
         /// This replaces the synchronous queue. It is picked up and replaced atomically.
         /// </summary>
         private Task previousTask;
 
-        public NameValueCollection CustomHeaders { get; set; }
-        
-        public BoltTransactionContext(ITransaction transaction)
+        public TransactionContextBase(ITransaction transaction)
         {
             Transaction = transaction;
         }
-        
-        public async Task<BoltResponse> EnqueueTask(string commandDescription, BoltGraphClient graphClient, IExecutionPolicy policy, CypherQuery query)
+
+        /// <summary>
+        /// The Neo4j transaction object.
+        /// </summary>
+        public ITransaction Transaction { get; }
+
+        public NameValueCollection CustomHeaders { get; set; }
+        public bool IsOpen => Transaction.IsOpen;
+
+        protected abstract Task<TResponse> RunQuery(TClient client, CypherQuery query, IExecutionPolicy policy,
+            string commandDescription);
+
+        public async Task<TResponse> EnqueueTask(string commandDescription, TClient graphClient, IExecutionPolicy policy, CypherQuery query)
         {
-            var taskCompletion = new TaskCompletionSource<BoltResponse>();
+            var taskCompletion = new TaskCompletionSource<TResponse>();
             try
             {
                 var localPreviousTask = Interlocked.Exchange(ref previousTask, taskCompletion.Task);
                 if (localPreviousTask != null) await localPreviousTask.ConfigureAwait(false);
-                var result = await BoltTransaction.DriverTransaction.RunAsync(query, graphClient);
-                var resp = new BoltResponse {StatementResult = result};
+                var resp = await RunQuery(graphClient, query, policy, commandDescription).ConfigureAwait(false);
                 taskCompletion.SetResult(resp);
             }
             catch (OperationCanceledException)
@@ -85,9 +74,10 @@ namespace Neo4jClient.Transactions
         {
             var cancelled = new TaskCompletionSource<BoltResponse>();
             cancelled.SetCanceled();
-            await Interlocked.Exchange(ref previousTask, cancelled.Task).ConfigureAwait(false); // cancel any newly created tasks
+            var task = Interlocked.Exchange(ref previousTask, cancelled.Task); // cancel any newly created tasks
+            if (task != null) await task.ConfigureAwait(false);
         }
-        
+
         public async Task RollbackAsync()
         {
             await PreventAddingAndWait().ConfigureAwait(false);
@@ -98,8 +88,5 @@ namespace Neo4jClient.Transactions
         {
             return Transaction.KeepAliveAsync();
         }
-
-        public bool IsOpen => Transaction.IsOpen;
-
     }
 }
