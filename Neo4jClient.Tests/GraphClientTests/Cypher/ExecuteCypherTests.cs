@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using NSubstitute;
@@ -19,7 +20,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         ///     When executing cypher queries when no parameters are needed, the REST interface doesn't care if we don't send parameters.
         /// </summary>
         [Fact]
-        public void SendingNullParametersShouldNotRaiseExceptionWhenExecutingCypher()
+        public async Task SendingNullParametersShouldNotRaiseExceptionWhenExecutingCypher()
         {
             const string queryText = @"MATCH (d) RETURN d";
             
@@ -34,15 +35,15 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 // execute cypher with "null" parameters
-                graphClient.ExecuteCypher(cypherQuery);
+                await graphClient.ExecuteCypherAsync(cypherQuery);
             }
         }
 
         [Fact]
-        public void ShouldSendCommandAndNotCareAboutResults()
+        public async Task ShouldSendCommandAndNotCareAboutResults()
         {
             // Arrange
             const string queryText = @"START d=node($p0), e=node($p1) CREATE UNIQUE d-[:foo]->e";
@@ -63,15 +64,15 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                graphClient.ExecuteCypher(cypherQuery);
+                await graphClient.ExecuteCypherAsync(cypherQuery);
             }
         }
 
         [Fact]
-        public void ShouldSendCommandAndNotCareAboutResultsAsync()
+        public async Task ShouldSendCommandAndNotCareAboutResultsAsync()
         {
             // Arrange
             const string queryText = @"return 1";
@@ -88,7 +89,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 bool raisedEvent = false;
 
@@ -105,49 +106,54 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// <summary>
         /// This predates #106. Given Tatham's guidance that the event should fire irrespective is this test proving correct behaviour?
         /// In any case the sync method calls async so it might be hard to avoid double firing an event.
+        ///
+        /// Update: At the time of removing all non-async calls I've made the async behaviour in line with the old
+        /// sync behaviour (which is to fire the event with an exception). There is already a test making sure this
+        /// happens elsewhere, and I thing that's probably the desired behaviour rather than this. Commented out for
+        /// now pending removal. ~tobymiller1
         /// </summary>
         [Fact]
-        public void WhenAsyncCommandFails_ShouldNotRaiseCompleted()
+        public async Task WhenAsyncCommandFails_ShouldNotRaiseCompleted()
         {
-            // Arrange
-            const string queryText = @"return 1";
-            var parameters = new Dictionary<string, object>();
-
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
-            var cypherApiQuery = new CypherApiQuery(cypherQuery);
-
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
-                    MockResponse.Throws()
-                }
-            })
-            {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
-
-                bool raisedEvent = false;
-
-                graphClient.OperationCompleted += (sender, e) => { raisedEvent = true; };
-
-                //Act
-                var task = graphClient.ExecuteCypherAsync(cypherQuery)
-                    .ContinueWith(t =>
-                    {
-                        Assert.True(t.IsFaulted);
-                        Assert.IsAssignableFrom<MockResponseThrowsException>(t.Exception.Flatten().InnerException);
-                    });
-                task.Wait();
-
-                Assert.False(raisedEvent, "Raised OperationCompleted");
-            }
+//            // Arrange
+//            const string queryText = @"return 1";
+//            var parameters = new Dictionary<string, object>();
+//
+//            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+//            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+//
+//            using (var testHarness = new RestTestHarness
+//            {
+//                {
+//                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
+//                    MockResponse.Throws()
+//                }
+//            })
+//            {
+//                var graphClient = await testHarness.CreateAndConnectGraphClient();
+//
+//                bool raisedEvent = false;
+//
+//                graphClient.OperationCompleted += (sender, e) => { raisedEvent = true; };
+//
+//                //Act
+//                var task = graphClient.ExecuteCypherAsync(cypherQuery)
+//                    .ContinueWith(t =>
+//                    {
+//                        Assert.True(t.IsFaulted);
+//                        Assert.IsAssignableFrom<MockResponseThrowsException>(t.Exception.Flatten().InnerException);
+//                    });
+//                task.Wait();
+//
+//                Assert.False(raisedEvent, "Raised OperationCompleted");
+//            }
         }
 
         /// <summary>
         /// #106
         /// </summary>
         [Fact]
-        public void WhenExecuteGetCypherResultsFails_ShouldRaiseCompletedWithException()
+        public async Task WhenExecuteGetCypherResultsFails_ShouldRaiseCompletedWithException()
         {
             // Arrange
             const string queryText = @"return 1";
@@ -164,16 +170,16 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 OperationCompletedEventArgs eventArgs = null;
 
                 graphClient.OperationCompleted += (sender, e) => { eventArgs = e; };
 
                 //Act
-                Assert.Throws<MockResponseThrowsException>(() =>
+                await Assert.ThrowsAsync<MockResponseThrowsException>(async () =>
                 {
-                    graphClient.ExecuteGetCypherResults<ExecuteGetCypherResultsTests.SimpleResultDto>(cypherQuery);
+                    await graphClient.ExecuteGetCypherResultsAsync<ExecuteGetCypherResultsTests.SimpleResultDto>(cypherQuery);
                 });
                 
                 Assert.NotNull(eventArgs);
@@ -187,7 +193,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// #106
         /// </summary>
         [Fact]
-        public void WhenExecuteCypherFails_ShouldRaiseCompletedWithException()
+        public async Task WhenExecuteCypherFails_ShouldRaiseCompletedWithException()
         {
             // Arrange
             const string queryText = @"bad cypher";
@@ -204,14 +210,14 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 OperationCompletedEventArgs eventArgs = null;
 
                 graphClient.OperationCompleted += (sender, e) => { eventArgs = e; };
 
                 //Act
-                Assert.Throws<MockResponseThrowsException>(() => { graphClient.ExecuteCypher(cypherQuery); });
+                await Assert.ThrowsAsync<MockResponseThrowsException>(async () => { await graphClient.ExecuteCypherAsync(cypherQuery); });
 
                 Assert.NotNull(eventArgs);
                 Assert.True(eventArgs.HasException);
@@ -224,7 +230,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// #75
         /// </summary>
         [Fact]
-        public void SendsCommandWithCorrectTimeout()
+        public async Task SendsCommandWithCorrectTimeout()
         {
             const string queryText = "MATCH n SET n.Value = 'value'";
             const int expectedMaxExecutionTime = 100;
@@ -246,10 +252,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
                 var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
                 var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
@@ -262,7 +268,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// #75
         /// </summary>
         [Fact]
-        public void DoesntSetMaxExecutionTime_WhenNotSet()
+        public async Task DoesntSetMaxExecutionTime_WhenNotSet()
         {
             const string queryText = "MATCH n SET n.Value = 'value'";
 
@@ -283,10 +289,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
                 var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
                 var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
@@ -298,7 +304,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// #141
         /// </summary>
         [Fact]
-        public void SendsCommandWithCustomHeaders()
+        public async Task SendsCommandWithCustomHeaders()
         {
             const string queryText = "MATCH n SET n.Value = 'value'";
             const int expectedMaxExecutionTime = 100;
@@ -325,10 +331,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
                 var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
                 var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
@@ -345,7 +351,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         /// #141
         /// </summary>
         [Fact]
-        public void DoesntSetHeaders_WhenNotSet()
+        public async Task DoesntSetHeaders_WhenNotSet()
         {
             const string queryText = "MATCH n SET n.Value = 'value'";
 
@@ -366,10 +372,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
                 var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                ((IRawGraphClient)graphClient).ExecuteCypher(cypherQuery);
+                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
                 var requestMessage = (HttpRequestMessage)call.GetArguments()[0];

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Neo4jClient.ApiModels;
-using Neo4jClient.Gremlin;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -14,38 +14,38 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class CreateNodeTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldThrowArgumentNullExceptionForNullNode()
+        public async Task ShouldThrowArgumentNullExceptionForNullNode()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            Assert.Throws<ArgumentNullException>(() => client.Create<object>(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await client.CreateAsync<object>(null));
         }
 
         [Fact]
-        public void ShouldThrowInvalidOperationExceptionIfNotConnected()
+        public async Task ShouldThrowInvalidOperationExceptionIfNotConnected()
         {
             var client = new GraphClient(new Uri("http://foo"));
-            Assert.Throws<InvalidOperationException>(() => client.Create(new object()));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => client.CreateAsync(new object()));
         }
 
         [Fact]
-        public void ShouldThrowValidationExceptionForInvalidNodes()
+        public async Task ShouldThrowValidationExceptionForInvalidNodes()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
 
             var testNode = new TestNode {Foo = "text is too long", Bar = null, Baz = "123"};
-            Assert.Throws<ValidationException>(() => graphClient.Create(testNode));
+            await Assert.ThrowsAsync<ValidationException>(() => graphClient.CreateAsync(testNode));
         }
 
         [Fact]
-        public void ShouldThrowArgumentExceptionForPreemptivelyWrappedNode()
+        public async Task ShouldThrowArgumentExceptionForPreemptivelyWrappedNode()
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
-            var ex = Assert.Throws<ArgumentException>(() => graphClient.Create((Node<TestNode>)null));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => graphClient.CreateAsync((Node<TestNode>)null));
             ex.Message.Should().Be($"You're trying to pass in a Node<TestNode> instance. Just pass the TestNode instance instead.{Environment.NewLine}Parameter name: node");
         }
 
         [Fact]
-        public void ShouldThrowNeoExceptionWhenBatchCreationStepJobFails()
+        public async Task ShouldThrowNeoExceptionWhenBatchCreationStepJobFails()
         {
             var testHarness = new RestTestHarness
             {
@@ -77,8 +77,8 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
-            var ex = Assert.Throws<NeoException>(() => graphClient.Create(new NestedTestNode()
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
+            var ex = await Assert.ThrowsAsync<NeoException>(async () => await graphClient.CreateAsync(new NestedTestNode()
                                    {
                                        Foo = "foo",
                                        TestNode2 = new TestNode2() {Bar = "bar", Foo = "foo"}
@@ -87,7 +87,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldNotThrowANotSupportedExceptionForPre15M02DatabaseWhenThereAreNoIndexEntries()
+        public async Task ShouldNotThrowANotSupportedExceptionForPre15M02DatabaseWhenThereAreNoIndexEntries()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
@@ -127,15 +127,15 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            graphClient.Create(testNode, null, null);
+            await graphClient.CreateAsync(testNode, null, null);
 
             testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Fact]
-        public void ShouldSerializeAllProperties()
+        public async Task ShouldSerializeAllProperties()
         {
             var testHarness = new RestTestHarness
             {
@@ -177,15 +177,15 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            graphClient.Create(new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" });
+            await graphClient.CreateAsync(new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" });
 
             testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Fact]
-        public void ShouldPreserveUnicodeCharactersInStringProperties()
+        public async Task ShouldPreserveUnicodeCharactersInStringProperties()
         {
             var testHarness = new RestTestHarness
             {
@@ -223,15 +223,15 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            graphClient.Create(new TestNode { Foo = "foo東京", Bar = "bar", Baz = "baz" });
+            await graphClient.CreateAsync(new TestNode { Foo = "foo東京", Bar = "bar", Baz = "baz" });
 
             testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Fact]
-        public void ShouldReturnReferenceToCreatedNode()
+        public async Task ShouldReturnReferenceToCreatedNode()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
@@ -267,16 +267,16 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            var node = graphClient.Create(testNode);
+            var node = await graphClient.CreateAsync(testNode);
 
             Assert.Equal(760, node.Id);
             testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Fact]
-        public void ShouldReturnReferenceToCreatedNodeWithLongId()
+        public async Task ShouldReturnReferenceToCreatedNodeWithLongId()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
@@ -312,16 +312,16 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            var node = graphClient.Create(testNode);
+            var node = await graphClient.CreateAsync(testNode);
 
             Assert.Equal(2157483647, node.Id);
             testHarness.AssertRequestConstraintsAreMet();
         }
 
         [Fact]
-        public void ShouldReturnAttachedNodeReference()
+        public async Task ShouldReturnAttachedNodeReference()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
@@ -357,15 +357,15 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            var node = graphClient.Create(testNode);
+            var node = await graphClient.CreateAsync(testNode);
 
-            Assert.NotNull(((IGremlinQuery)node).Client);
+            Assert.NotNull(((IAttachedReference)node).Client);
         }
 
         [Fact]
-        public void ShouldCreateOutgoingRelationship()
+        public async Task ShouldCreateOutgoingRelationship()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var testRelationshipPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
@@ -418,9 +418,9 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            graphClient.Create(
+            await graphClient.CreateAsync(
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 
@@ -428,7 +428,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldCreateIndexEntries()
+        public async Task ShouldCreateIndexEntries()
         {
             var testNode = new TestNode { Foo = "foo", Bar = "bar", Baz = "baz" };
             var batch = new List<BatchStep>();
@@ -487,9 +487,9 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            graphClient.Create(
+            await graphClient.CreateAsync(
                 testNode,
                 null,
                 new[]
@@ -508,7 +508,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldCreateIncomingRelationship()
+        public async Task ShouldCreateIncomingRelationship()
         {
             var testNode = new TestNode2 { Foo = "foo", Bar = "bar" };
             var testRelationshipPayload = new TestPayload { Foo = "123", Bar = "456", Baz = "789" };
@@ -561,9 +561,9 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             };
 
-            var graphClient = testHarness.CreateAndConnectGraphClient();
+            var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-            graphClient.Create(
+            await graphClient.CreateAsync(
                 testNode,
                 new TestRelationship(789, testRelationshipPayload));
 

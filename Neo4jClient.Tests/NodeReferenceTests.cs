@@ -1,6 +1,5 @@
 ﻿using System;
 using FluentAssertions;
-using Neo4jClient.Gremlin;
 using NSubstitute;
 using Xunit;
 
@@ -143,15 +142,6 @@ namespace Neo4jClient.Tests
             var ex = Assert.Throws<NotSupportedException>(() => new NodeReference<Node<TimeZone>>(123));
             Assert.Equal("You're trying to initialize NodeReference<Node<System.TimeZone>> which is too many levels of nesting. You should just be using NodeReference<System.TimeZone> instead. (You use a Node, or a NodeReference, but not both together.)", ex.Message);
 // ReSharper restore ObjectCreationAsStatement
-        }
-
-        [Fact]
-        public void GremlinQueryTextShouldReturnSimpleVectorStep()
-        {
-            var reference = new NodeReference(123);
-            var query = ((IGremlinQuery) reference);
-            Assert.Equal("g.v(p0)", query.QueryText);
-            Assert.Equal(123L, query.QueryParameters["p0"]);
         }
 
         [Fact]

@@ -101,7 +101,7 @@ namespace Neo4jClient.Tests.GraphClientTests
 
 
         [Fact]
-        public void ShouldFireOnCompletedEvenWhenException()
+        public async Task ShouldFireOnCompletedEvenWhenException()
         {
             var httpClient = Substitute.For<IHttpClient>();
             httpClient

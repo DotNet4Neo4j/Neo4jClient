@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -43,7 +44,7 @@ namespace Neo4jClient.Tests.GraphClientTests
                 'name': 'foo',
                 'config': { 'type': 'exact', 'provider': 'lucene' }
             }")]
-        public void ShouldCreateIndex(
+        public async Task ShouldCreateIndex(
             IndexFor indexFor,
             IndexProvider indexProvider,
             IndexType indexType,
@@ -59,14 +60,14 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 var indexConfiguration = new IndexConfiguration
                 {
                     Provider = indexProvider,
                     Type = indexType
                 };
-                graphClient.CreateIndex("foo", indexConfiguration, indexFor);
+                await graphClient.CreateIndexAsync("foo", indexConfiguration, indexFor);
             }
         }
 
@@ -107,7 +108,7 @@ namespace Neo4jClient.Tests.GraphClientTests
                 'name': 'foo',
                 'config': { 'type': 'exact', 'provider': 'lucene' }
             }")]
-        public void ShouldThrowExceptionIfHttpCodeIsNot201(
+        public async Task ShouldThrowExceptionIfHttpCodeIsNot201(
             IndexFor indexFor,
             IndexProvider indexProvider,
             IndexType indexType,
@@ -123,14 +124,14 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 var indexConfiguration = new IndexConfiguration
                 {
                     Provider = indexProvider,
                     Type = indexType
                 };
-                Assert.Throws<Exception>(() => graphClient.CreateIndex("foo", indexConfiguration, indexFor));
+                await Assert.ThrowsAsync<Exception>(async () => await graphClient.CreateIndexAsync("foo", indexConfiguration, indexFor));
             }
         }
     }

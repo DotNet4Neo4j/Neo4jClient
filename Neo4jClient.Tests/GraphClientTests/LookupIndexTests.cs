@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -8,7 +9,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class LookupIndexTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldReturnLookupIndexResult()
+        public async Task ShouldReturnLookupIndexResult()
         {
             //Arrange
             using (var testHarness = new RestTestHarness
@@ -32,10 +33,10 @@ namespace Neo4jClient.Tests.GraphClientTests
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                var results = graphClient
-                    .LookupIndex<UserTestNode>("users", IndexFor.Node, "Id", 1000)
+                var results = (await graphClient
+                    .LookupIndexAsync<UserTestNode>("users", IndexFor.Node, "Id", 1000))
                     .ToArray();
 
                 Assert.Equal(1, results.Count());

@@ -5,7 +5,6 @@ namespace Neo4jClient.Cypher
 {
     public interface ICypherFluentQuery<TResult> : ICypherFluentQuery
     {
-        IEnumerable<TResult> Results { get; }
         Task<IEnumerable<TResult>> ResultsAsync { get; }
 
         new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Neo4jClient.Tests.GraphClientTests
@@ -9,7 +10,7 @@ namespace Neo4jClient.Tests.GraphClientTests
     public class ReIndexRelationshipsTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
-        public void ShouldReindexRelationshipWithIndexEntryContainingSpace()
+        public async Task ShouldReindexRelationshipWithIndexEntryContainingSpace()
         {
             //Arrange
             var indexEntries = new List<IndexEntry>
@@ -43,11 +44,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var relReference = new RelationshipReference(1234);
-                graphClient.ReIndex(relReference, indexEntries);
+                await graphClient.ReIndexAsync(relReference, indexEntries);
 
                 // Assert
                 
@@ -55,7 +56,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldReindexRelationshipWithDateTimeOffsetIndexEntry()
+        public async Task ShouldReindexRelationshipWithDateTimeOffsetIndexEntry()
         {
             //Arrange
             var indexEntries = new List<IndexEntry>
@@ -89,11 +90,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var relReference = new RelationshipReference(1234);
-                graphClient.ReIndex(relReference, indexEntries);
+                await graphClient.ReIndexAsync(relReference, indexEntries);
 
                 // Assert
                 
@@ -101,7 +102,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldAcceptQuestionMarkInRelationshipIndexValue()
+        public async Task ShouldAcceptQuestionMarkInRelationshipIndexValue()
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
@@ -136,11 +137,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var relReference = new RelationshipReference(1234);
-                graphClient.ReIndex(relReference, indexEntries);
+                await graphClient.ReIndexAsync(relReference, indexEntries);
 
                 // Assert
                 
@@ -148,7 +149,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        public void ShouldPreserveSlashInRelationshipIndexValue()
+        public async Task ShouldPreserveSlashInRelationshipIndexValue()
         {
             //Arrange
             var indexKeyValues = new Dictionary<string, object>
@@ -183,11 +184,11 @@ namespace Neo4jClient.Tests.GraphClientTests
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 var relReference = new RelationshipReference(123);
-                graphClient.ReIndex(relReference, indexEntries);
+                await graphClient.ReIndexAsync(relReference, indexEntries);
 
                 // Assert
                 

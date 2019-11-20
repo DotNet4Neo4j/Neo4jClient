@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Neo4jClient.Execution;
 
 namespace Neo4jClient
@@ -15,23 +16,23 @@ namespace Neo4jClient
             _configuration = configuration;
         }
 
-        public IGraphClient Create()
+        public async Task<IGraphClient> CreateAsync()
         {
             var client = new GraphClient(
                 _configuration.RootUri,
                 _configuration.Username,
                 _configuration.Password);
 
-            client.Connect(_configuration);
+            await client.ConnectAsync(_configuration).ConfigureAwait(false);
 
             return client;
         }
 
-        public IGraphClient Create(IHttpClient httpClient)
+        public async Task<IGraphClient> CreateAsync(IHttpClient httpClient)
         {
             var client = new GraphClient(_configuration.RootUri, httpClient);
 
-            client.Connect(_configuration);
+            await client.ConnectAsync(_configuration).ConfigureAwait(false);
 
             return client;
         }

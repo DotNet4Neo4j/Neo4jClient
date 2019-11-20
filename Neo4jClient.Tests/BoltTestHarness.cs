@@ -36,10 +36,10 @@ namespace Neo4jClient.Tests
             MockSession.Setup(s => s.WriteTransactionAsync(It.IsAny<Func<ITransaction, Task<IStatementResultCursor>>>())).Returns(Task.FromResult(response));
         }
 
-        public IRawGraphClient CreateAndConnectBoltGraphClient()
+        public async Task<IRawGraphClient> CreateAndConnectBoltGraphClient()
         {
             var bgc = new BoltGraphClient(MockDriver.Object);
-            bgc.ConnectAsync().Wait();
+            await bgc.ConnectAsync();
             return bgc;
         }
     }

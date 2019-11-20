@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Neo4jClient.Gremlin;
 using Xunit;
 
 namespace Neo4jClient.Tests
@@ -64,15 +63,6 @@ namespace Neo4jClient.Tests
         {
             var lhs = new RelationshipReference(3);
             Assert.False(lhs.Equals(new object()));
-        }
-
-        [Fact]
-        public void GremlinQueryTextShouldReturnSimpleEdgeStep()
-        {
-            var reference = new RelationshipReference(123);
-            var query = ((IGremlinQuery)reference);
-            Assert.Equal("g.e(p0)", query.QueryText);
-            Assert.Equal(123L, query.QueryParameters["p0"]);
         }
     }
 }

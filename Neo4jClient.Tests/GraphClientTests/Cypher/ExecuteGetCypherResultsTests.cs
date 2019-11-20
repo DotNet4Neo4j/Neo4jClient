@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using NSubstitute;
@@ -22,7 +23,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void EmptyCollectionShouldDeserializeCorrectly()
+        public async Task EmptyCollectionShouldDeserializeCorrectly()
         {
             const string queryText = @"RETURN [] AS p";
 
@@ -38,10 +39,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                var results = graphClient
-                    .ExecuteGetCypherResults<PathsResult>(cypherQuery)
+                var results = (await graphClient
+                    .ExecuteGetCypherResultsAsync<PathsResult>(cypherQuery))
                     .ToArray();
 
                 Assert.Empty(results);
@@ -49,7 +50,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializePathsResultAsSetBased()
+        public async Task ShouldDeserializePathsResultAsSetBased()
         {
             // Arrange
             const string queryText = @"START d=node($p0), e=node($p1)
@@ -89,11 +90,11 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var results = graphClient
-                    .ExecuteGetCypherResults<PathsResult>(cypherQuery)
+                var results = (await graphClient
+                    .ExecuteGetCypherResultsAsync<PathsResult>(cypherQuery))
                     .ToArray();
 
                 //Assert
@@ -108,7 +109,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeSimpleTableStructure()
+        public async Task ShouldDeserializeSimpleTableStructure()
         {
             // Arrange
             const string queryText = @"
@@ -138,10 +139,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var results = graphClient.ExecuteGetCypherResults<SimpleResultDto>(cypherQuery);
+                var results = await graphClient.ExecuteGetCypherResultsAsync<SimpleResultDto>(cypherQuery);
 
                 //Assert
                 Assert.IsAssignableFrom<IEnumerable<SimpleResultDto>>(results);
@@ -167,7 +168,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeArrayOfNodesInPropertyAsResultOfCollectFunctionInCypherQuery()
+        public async Task ShouldDeserializeArrayOfNodesInPropertyAsResultOfCollectFunctionInCypherQuery()
         {
             // Arrange
             var cypherQuery = new CypherQuery(
@@ -246,10 +247,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var results = graphClient.ExecuteGetCypherResults<CollectResult>(cypherQuery);
+                var results = await graphClient.ExecuteGetCypherResultsAsync<CollectResult>(cypherQuery);
 
                 //Assert
                 Assert.IsAssignableFrom<IEnumerable<CollectResult>>(results);
@@ -321,7 +322,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeTableStructureWithNodes()
+        public async Task ShouldDeserializeTableStructureWithNodes()
         {
             // Arrange
             const string queryText = @"
@@ -408,10 +409,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
              {
-                 var graphClient = testHarness.CreateAndConnectGraphClient();
+                 var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                  //Act
-                 var results = graphClient.ExecuteGetCypherResults<ResultWithNodeDto>(cypherQuery);
+                 var results = await graphClient.ExecuteGetCypherResultsAsync<ResultWithNodeDto>(cypherQuery);
 
                  //Assert
                  Assert.IsAssignableFrom<IEnumerable<ResultWithNodeDto>>(results);
@@ -446,7 +447,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeTableStructureWithNodeDataObjects()
+        public async Task ShouldDeserializeTableStructureWithNodeDataObjects()
         {
             // Arrange
             const string queryText = @"
@@ -533,10 +534,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
-                var results = graphClient.ExecuteGetCypherResults<ResultWithNodeDataObjectsDto>(cypherQuery);
+                var results = await graphClient.ExecuteGetCypherResultsAsync<ResultWithNodeDataObjectsDto>(cypherQuery);
 
                 //Assert
                 Assert.IsAssignableFrom<IEnumerable<ResultWithNodeDataObjectsDto>>(results);
@@ -568,7 +569,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeTableStructureWithRelationships()
+        public async Task ShouldDeserializeTableStructureWithRelationships()
         {
             // Arrange
             const string queryText = @"
@@ -637,11 +638,11 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
                 //Act
                 //Act
-                var results = graphClient.ExecuteGetCypherResults<ResultWithRelationshipDto>(cypherQuery);
+                var results = await graphClient.ExecuteGetCypherResultsAsync<ResultWithRelationshipDto>(cypherQuery);
 
                 //Assert
                 Assert.IsAssignableFrom<IEnumerable<ResultWithRelationshipDto>>(results);
@@ -676,7 +677,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldPromoteBadQueryResponseToNiceException()
+        public async Task ShouldPromoteBadQueryResponseToNiceException()
         {
             // Arrange
             const string queryText = @"broken query";
@@ -696,9 +697,9 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                var ex = Assert.Throws<NeoException>(() => graphClient.ExecuteGetCypherResults<ResultWithRelationshipDto>(cypherQuery));
+                var ex = await Assert.ThrowsAsync<NeoException>(async () => await graphClient.ExecuteGetCypherResultsAsync<ResultWithRelationshipDto>(cypherQuery));
                 Assert.Equal("SyntaxException: expected START or CREATE\n'bad query'\n ^", ex.Message);
                 Assert.Equal("expected START or CREATE\n'bad query'\n ^", ex.NeoMessage);
                 Assert.Equal("SyntaxException", ex.NeoExceptionName);
@@ -724,7 +725,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void SendsCommandWithCorrectTimeout()
+        public async Task SendsCommandWithCorrectTimeout()
         {
             const int expectedMaxExecutionTime = 100;
 
@@ -772,10 +773,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
                 var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                ((IRawGraphClient)graphClient).ExecuteGetCypherResults<object>(cypherQuery);
+                await ((IRawGraphClient)graphClient).ExecuteGetCypherResultsAsync<object>(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
                 var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
@@ -785,7 +786,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         [Fact]
-        public void DoesntSendMaxExecutionTime_WhenNotAddedToQuery()
+        public async Task DoesntSendMaxExecutionTime_WhenNotAddedToQuery()
         {
             const string queryText = @"START d=node($p0), e=node($p1)
                                         MATCH p = allShortestPaths( d-[*..15]-e )
@@ -830,10 +831,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
                 var graphClient = new GraphClient(new Uri(testHarness.BaseUri), httpClient);
-                graphClient.Connect();
+                await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                ((IRawGraphClient)graphClient).ExecuteGetCypherResults<object>(cypherQuery);
+                await ((IRawGraphClient)graphClient).ExecuteGetCypherResultsAsync<object>(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
                 var requestMessage = (HttpRequestMessage)call.GetArguments()[0];

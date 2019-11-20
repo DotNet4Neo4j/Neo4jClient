@@ -26,8 +26,6 @@ namespace Neo4jClient.Execution
             {
                 case PolicyType.Cypher:
                     return new CypherExecutionPolicy(_client);
-                case PolicyType.Gremlin:
-                    return new GremlinExecutionPolicy(_client);
                 case PolicyType.Batch:
                     return new BatchExecutionPolicy(_client);
                 case PolicyType.Rest:

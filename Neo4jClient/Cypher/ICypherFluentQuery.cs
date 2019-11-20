@@ -10,7 +10,6 @@ namespace Neo4jClient.Cypher
     public partial interface ICypherFluentQuery
     {
         CypherQuery Query { get; }
-        void ExecuteWithoutResults();
         Task ExecuteWithoutResultsAsync();
 
         ICypherFluentQueryAdvanced Advanced { get; }

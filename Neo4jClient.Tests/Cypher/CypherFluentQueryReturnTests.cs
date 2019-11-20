@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Threading.Tasks;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json;
@@ -396,7 +397,7 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
-        public void ShouldSupportAnonymousReturnTypesEndToEnd()
+        public async Task ShouldSupportAnonymousReturnTypesEndToEnd()
         {
             const string queryText = "START root=node($p0)\r\nMATCH root-->other\r\nRETURN other AS Foo";
             var parameters = new Dictionary<string, object>
@@ -475,9 +476,9 @@ namespace Neo4jClient.Tests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                var results = graphClient
+                var results = (await graphClient
                     .Cypher
                     .Start("root", graphClient.RootNode)
                     .Match("root-->other")
@@ -485,7 +486,7 @@ namespace Neo4jClient.Tests.Cypher
                     {
                         Foo = other.As<Commodity>()
                     })
-                    .Results
+                    .ResultsAsync)
                     .ToList();
 
                 Assert.Equal(3L, results.Count());
@@ -505,7 +506,7 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
-        public void ShouldSupportAnonymousReturnTypesEndToEndCamel()
+        public async Task ShouldSupportAnonymousReturnTypesEndToEndCamel()
         {
             const string queryText = "START root=node($p0)\r\nMATCH root-->other\r\nRETURN other AS Foo";
             var parameters = new Dictionary<string, object>
@@ -584,9 +585,9 @@ namespace Neo4jClient.Tests.Cypher
                 }
             })
             {
-                var graphClient = testHarness.CreateAndConnectGraphClient();
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
                 graphClient.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
-                var results = graphClient
+                var results = (await graphClient
                     .Cypher
                     .Start("root", graphClient.RootNode)
                     .Match("root-->other")
@@ -594,7 +595,7 @@ namespace Neo4jClient.Tests.Cypher
                     {
                         Foo = other.As<Commodity>()
                     })
-                    .Results
+                    .ResultsAsync)
                     .ToList();
 
                 Assert.Equal(3L, results.Count());

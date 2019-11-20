@@ -124,79 +124,51 @@ namespace Neo4jClient.Execution
         }
 
 
-        public Task<HttpResponseMessage> ExecuteAsync(Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
+        public Task<HttpResponseMessage> ExecuteAsync(Func<HttpResponseMessage, HttpResponseMessage> continuationFunction)
         {
             return ExecuteAsync(null, continuationFunction);
         }
 
-        public Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<Task<HttpResponseMessage>, HttpResponseMessage> continuationFunction)
+        public async Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<HttpResponseMessage, HttpResponseMessage> continuationFunction)
         {
-            var executionTask = PrepareAsync().ContinueWith(requestTask =>
+            var response = await PrepareAsync().ConfigureAwait(false);
+            if (string.IsNullOrEmpty(commandDescription))
             {
-                var response = requestTask.Result;
-                if (string.IsNullOrEmpty(commandDescription))
-                {
-                    response.EnsureExpectedStatusCode(_expectedStatusCodes.ToArray());
-                }
-                else
-                {
-                    response.EnsureExpectedStatusCode(commandDescription, _expectedStatusCodes.ToArray());
-                }
+                await response.EnsureExpectedStatusCode(_expectedStatusCodes.ToArray()).ConfigureAwait(false);
+            }
+            else
+            {
+                await response.EnsureExpectedStatusCode(commandDescription, _expectedStatusCodes.ToArray()).ConfigureAwait(false);
+            }
 
-                // if there is condition for an error, but its generator is null then return null
-                // for generics this will get converted to default(TParse)
-                foreach (var errorGenerator in _errorGenerators)
+            // if there is condition for an error, but its generator is null then return null
+            // for generics this will get converted to default(TParse)
+            foreach (var errorGenerator in _errorGenerators)
+            {
+                if (errorGenerator.Condition(response))
                 {
-                    if (errorGenerator.Condition(response))
+                    if (errorGenerator.Generator != null)
                     {
-                        if (errorGenerator.Generator != null)
-                        {
-                            throw errorGenerator.Generator(response);
-                        }
-
-                        return null;
+                        throw errorGenerator.Generator(response);
                     }
-                }
 
-                return response;
-            });
+                    return null;
+                }
+            }
 
             return continuationFunction != null ?
-                executionTask.ContinueWith(continuationFunction) :
-                executionTask;
+                continuationFunction(response) :
+                response;
         }
 
-        public Task<TExpected> ExecuteAsync<TExpected>(Func<Task<HttpResponseMessage>, TExpected> continuationFunction)
+        public Task<TExpected> ExecuteAsync<TExpected>(Func<HttpResponseMessage, TExpected> continuationFunction)
         {
             return ExecuteAsync(null, continuationFunction);
         }
 
-        public Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<Task<HttpResponseMessage>, TExpected> continuationFunction)
+        public async Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<HttpResponseMessage, TExpected> continuationFunction)
         {
-            return ExecuteAsync(commandDescription, null).ContinueWith(continuationFunction);
-        }
-
-        public HttpResponseMessage Execute()
-        {
-            return Execute(null);
-        }
-
-
-        public HttpResponseMessage Execute(string commandDescription)
-        {
-            var task = ExecuteAsync(commandDescription, null);
-            try
-            {
-                Task.WaitAll(task);
-            }
-            catch (AggregateException ex)
-            {
-                Exception e;
-                if (ex.TryUnwrap(out e))
-                    throw e;
-                throw;
-            }
-            return task.Result;
+            return continuationFunction(await ExecuteAsync(commandDescription, null).ConfigureAwait(false));
         }
 
         public IResponseBuilder<TParse> ParseAs<TParse>() where TParse : new()

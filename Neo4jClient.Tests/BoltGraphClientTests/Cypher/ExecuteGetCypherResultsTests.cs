@@ -124,7 +124,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void RelationshipShouldDeserializeInDefinedType()
+        public async Task RelationshipShouldDeserializeInDefinedType()
         {
             // Arrange
             const string queryText = "MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
@@ -164,8 +164,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "Rel" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var results = graphClient.ExecuteGetCypherResults<RelationGrouper>(cypherQuery).ToArray();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<RelationGrouper>(cypherQuery)).ToArray();
 
                 //Assert
                 results.Length.Should().Be(1);
@@ -175,7 +175,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void RelationshipShouldDeserializeInAnonymousType()
+        public async Task RelationshipShouldDeserializeInAnonymousType()
         {
             // Arrange
             const string queryText = @"MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
@@ -221,10 +221,12 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                     Rel = new RelationType()
                 };
                 var anonType = dummy.GetType();
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResultsAsync));
                 var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
-                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                var genericResultsTask = anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                await (Task) genericResultsTask;
+                var genericResults = (IEnumerable) ((dynamic) genericResultsTask).Result;
 
                 var results = genericResults.Cast<object>().ToArray();
 
@@ -266,7 +268,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "data" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
                 var results = (await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery)).ToArray();
 
                 //Assert
@@ -279,7 +281,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void EmptyCollectionShouldDeserializeCorrectly()
+        public async Task EmptyCollectionShouldDeserializeCorrectly()
         {
             const string queryText = "RETURN [] AS data";
 
@@ -300,8 +302,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "data" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var results = graphClient.ExecuteGetCypherResults<IEnumerable<ObjectWithIds>>(cypherQuery).ToArray();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<IEnumerable<ObjectWithIds>>(cypherQuery)).ToArray();
 
                 results.Should().BeEmpty();
             }
@@ -309,7 +311,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
         //https://github.com/readify/neo4jclient/issues/266
         [Fact]
-        public void CollectionOfComplexTypesShouldDeserializeCorrectlyWhenInConjunctionWithAnotherComplexTypeInAContainer()
+        public async Task CollectionOfComplexTypesShouldDeserializeCorrectlyWhenInConjunctionWithAnotherComplexTypeInAContainer()
         {
             const string queryText = "MATCH (start:Node)-->(next:Node) RETURN start AS Start, collect(next) AS Next";
 
@@ -351,8 +353,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "Start", "Next" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var results = graphClient.ExecuteGetCypherResults<Container>(cypherQuery).ToArray();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<Container>(cypherQuery)).ToArray();
 
                 //Assert
                 var deserializedObject = results.First();
@@ -372,7 +374,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void CreateWithArrayParametersShouldSerializeAndDeserializeOnReturn()
+        public async Task CreateWithArrayParametersShouldSerializeAndDeserializeOnReturn()
         {
             // Arrange
             const string queryText = "CREATE (start:Node {obj}) RETURN start";
@@ -399,8 +401,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "start" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var results = graphClient.ExecuteGetCypherResults<ObjectWithIds>(cypherQuery).ToArray();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<ObjectWithIds>(cypherQuery)).ToArray();
 
                 //Assert
                 Assert.IsAssignableFrom<IEnumerable<ObjectWithIds>>(results);
@@ -418,7 +420,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeMapWithAnonymousReturnAsDictionary()
+        public async Task ShouldDeserializeMapWithAnonymousReturnAsDictionary()
         {
             // simulates the following query
             const string queryText = "MATCH (start:Node) WITH {Node: 3, Count: 1} AS Node, start RETURN Node, start";
@@ -463,10 +465,12 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                     Start = new ObjectWithIds()
                 };
                 var anonType = dummy.GetType();
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResultsAsync));
                 var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
-                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                var genericResultsTask = anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                await (Task) genericResultsTask;
+                var genericResults = (IEnumerable) ((dynamic) genericResultsTask).Result;;
 
                 var results = genericResults.Cast<object>().ToArray();
 
@@ -487,7 +491,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeMapWithAnonymousReturn()
+        public async Task ShouldDeserializeMapWithAnonymousReturn()
         {
             // simulates the following query
             const string queryText = "MATCH (start:Node) WITH {Node: start, Count: 1} AS Node, start RETURN Node, start";
@@ -532,10 +536,12 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                     Start = new ObjectWithIds()
                 };
                 var anonType = dummy.GetType();
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResultsAsync));
                 var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
-                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                var genericResultsTask = anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                await (Task) genericResultsTask;
+                var genericResults = (IEnumerable) ((dynamic) genericResultsTask).Result;
 
                 var results = genericResults.Cast<object>().ToArray();
 
@@ -561,7 +567,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializeCollectionsWithAnonymousReturn()
+        public async Task ShouldDeserializeCollectionsWithAnonymousReturn()
         {
             // Arrange
             const string queryText = @"MATCH (start:Node) RETURN [start.Id, start.Id] AS Ids";
@@ -587,10 +593,12 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                     Ids = new List<int>()
                 };
                 var anonType = dummy.GetType();
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResults));
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var genericGetCypherResults = typeof(IRawGraphClient).GetMethod(nameof(graphClient.ExecuteGetCypherResultsAsync));
                 var anonymousGetCypherResults = genericGetCypherResults.MakeGenericMethod(anonType);
-                var genericResults = (IEnumerable)anonymousGetCypherResults.Invoke(graphClient, new object[] {cypherQuery});
+                var genericResultsTask = anonymousGetCypherResults.Invoke(graphClient, new object[] { cypherQuery });
+                await (Task) genericResultsTask;
+                var genericResults = (IEnumerable) ((dynamic) genericResultsTask).Result;
 
                 var results = genericResults.Cast<object>().ToArray();
 
@@ -605,7 +613,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         }
 
         [Fact]
-        public void ShouldDeserializePathsResultAsSetBased()
+        public async Task ShouldDeserializePathsResultAsSetBased()
         {
             // Arrange
             const string queryText = @"MATCH (start:Node {Id:$p0}),(end:Node {Id: $p1}), p = shortestPath((start)-[*..5]->(end)) RETURN p";
@@ -632,8 +640,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
                 //Session mock???
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
-                var results = graphClient.ExecuteGetCypherResults<PathsResultBolt>(cypherQuery).ToArray();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<PathsResultBolt>(cypherQuery)).ToArray();
 
                 //Assert
                 Assert.IsAssignableFrom<IEnumerable<PathsResultBolt>>(results);
@@ -681,7 +689,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //                var graphClient = testHarness.CreateAndConnectGraphClient();
         //
         //                //Act
-        //                var results = graphClient.ExecuteGetCypherResults<SimpleResultDto>(cypherQuery);
+        //                var results = await graphClient.ExecuteGetCypherResultsAsync<SimpleResultDto>(cypherQuery);
         //
         //                //Assert
         //                Assert.IsAssignableFrom<IEnumerable<SimpleResultDto>>(results);
@@ -789,7 +797,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //                var graphClient = testHarness.CreateAndConnectGraphClient();
         //
         //                //Act
-        //                var results = graphClient.ExecuteGetCypherResults<CollectResult>(cypherQuery);
+        //                var results = await graphClient.ExecuteGetCypherResultsAsync<CollectResult>(cypherQuery);
         //
         //                //Assert
         //                Assert.IsAssignableFrom<IEnumerable<CollectResult>>(results);
@@ -951,7 +959,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //                 var graphClient = testHarness.CreateAndConnectGraphClient();
         //
         //                 //Act
-        //                 var results = graphClient.ExecuteGetCypherResults<ResultWithNodeDto>(cypherQuery);
+        //                 var results = await graphClient.ExecuteGetCypherResultsAsync<ResultWithNodeDto>(cypherQuery);
         //
         //                 //Assert
         //                 Assert.IsAssignableFrom<IEnumerable<ResultWithNodeDto>>(results);
@@ -1076,7 +1084,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //                var graphClient = testHarness.CreateAndConnectGraphClient();
         //
         //                //Act
-        //                var results = graphClient.ExecuteGetCypherResults<ResultWithNodeDataObjectsDto>(cypherQuery);
+        //                var results = await graphClient.ExecuteGetCypherResultsAsync<ResultWithNodeDataObjectsDto>(cypherQuery);
         //
         //                //Assert
         //                Assert.IsAssignableFrom<IEnumerable<ResultWithNodeDataObjectsDto>>(results);
@@ -1181,7 +1189,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //
         //                //Act
         //                //Act
-        //                var results = graphClient.ExecuteGetCypherResults<ResultWithRelationshipDto>(cypherQuery);
+        //                var results = await graphClient.ExecuteGetCypherResultsAsync<ResultWithRelationshipDto>(cypherQuery);
         //
         //                //Assert
         //                Assert.IsAssignableFrom<IEnumerable<ResultWithRelationshipDto>>(results);
