@@ -812,16 +812,7 @@ namespace Neo4jClient
         }
 
         public CypherCapabilities CypherCapabilities => cypherCapabilities;
-
-        [Obsolete(
-            "This method is for use by the framework internally. Use IGraphClient.Cypher instead, and read the documentation at https://bitbucket.org/Readify/neo4jclient/wiki/cypher. If you really really want to call this method directly, and you accept the fact that YOU WILL LIKELY INTRODUCE A RUNTIME SECURITY RISK if you do so, then it shouldn't take you too long to find the correct explicit interface implementation that you have to call. This hurdle is for your own protection. You really really should not do it. This signature may be removed or renamed at any time.",
-            true)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public virtual IEnumerable<TResult> ExecuteGetCypherResults<TResult>(CypherQuery query)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         private async Task<CypherPartialResult> PrepareCypherRequest<TResult>(CypherQuery query, IExecutionPolicy policy)
         {
             if (InTransaction)
@@ -1227,10 +1218,7 @@ namespace Neo4jClient
 
         public DefaultContractResolver JsonContractResolver { get; set; }
 
-        public ITransactionManager<HttpResponseMessage> TransactionManager
-        {
-            get { return transactionManager; }
-        }
+        public ITransactionManager<HttpResponseMessage> TransactionManager => transactionManager;
 
         #region ExecutionContext class
         private class ExecutionContext
