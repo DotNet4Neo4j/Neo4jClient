@@ -13,6 +13,7 @@ namespace Neo4jClient.Transactions
     public interface ITransactionManager<T> : IDisposable
     {
         bool InTransaction { get; }
+        //TODO: Remove - there is no concept of a DTC/NonDTC transaction anymore
         ITransaction CurrentNonDtcTransaction { get; }
         ITransaction BeginTransaction(TransactionScopeOption option, IEnumerable<string> bookmarks);
         void EndTransaction();
