@@ -135,7 +135,11 @@ namespace Neo4jClient.Transactions
             // no need to issue a request as we haven't sent a single request
             if (Endpoint == null)
             {
+#if NET45
+                return Task.FromResult(0);
+#else
                 return Task.CompletedTask;
+#endif
             }
 
             return DoKeepAlive(Endpoint, client.ExecutionConfiguration, client.Serializer);
