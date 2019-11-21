@@ -57,13 +57,33 @@ namespace Neo4jClient.Transactions.Bolt
         /// <inheritdoc />
         public Task CommitAsync()
         {
-            return DriverTransaction?.CommitAsync() ?? Task.CompletedTask;
+            var task = DriverTransaction?.CommitAsync();
+            if (task != null)
+            {
+                return task;
+            }
+
+#if NET45
+            return Task.FromResult(0);
+#else
+            return Task.CompletedTask;
+#endif
         }
 
         /// <inheritdoc />
         public Task RollbackAsync()
         {
-            return DriverTransaction?.RollbackAsync() ?? Task.CompletedTask;
+            var task = DriverTransaction?.RollbackAsync();
+            if (task != null)
+            {
+                return task;
+            }
+
+#if NET45
+            return Task.FromResult(0);
+#else
+            return Task.CompletedTask;
+#endif
         }
 
         //TODO: Not needed
@@ -71,7 +91,11 @@ namespace Neo4jClient.Transactions.Bolt
         public Task KeepAliveAsync()
         {
             /*Not needed for Bolt.*/
+#if NET45
+            return Task.FromResult(0);
+#else
             return Task.CompletedTask;
+#endif
         }
 
         /// <inheritdoc />

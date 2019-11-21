@@ -8,7 +8,7 @@
     <licenseUrl>https://github.com/Readify/Neo4jClient/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Readify/Neo4jClient</projectUrl>
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
-    <tags>neo4j nosql cypher</tags>
+    <tags>neo4j nosql cypher bolt graph</tags>
     <dependencies>
       <group targetFramework="net452">
         <dependency id="Newtonsoft.Json" version="9.0.1" />
@@ -31,12 +31,12 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Neo4jClient.Full452\bin\$configuration$\Neo4jClient.dll" target="lib\net452"/>
-    <file src="Neo4jClient.Full452\bin\$configuration$\Neo4jClient.pdb" target="lib\net452"/>
-    <file src="Neo4jClient.Full452\bin\$configuration$\Neo4jClient.xml" target="lib\net452"/>
-    <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.dll" target="lib\net46" />
-    <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.pdb" target="lib\net46" />
-    <file src="Neo4jClient.Full\bin\$configuration$\Neo4jClient.xml" target="lib\net46" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.dll" target="lib\net452"/>
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.pdb" target="lib\net452"/>
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.xml" target="lib\net452"/>
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.dll" target="lib\net46" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.pdb" target="lib\net46" />
+    <file src="Neo4jClient\bin\$configuration$\Neo4jClient.xml" target="lib\net46" />
     <file src="Neo4jClient\bin\$configuration$\Neo4jClient.dll" target="lib\netstandard1.3" />
     <file src="Neo4jClient\bin\$configuration$\Neo4jClient.pdb" target="lib\netstandard1.3" />
     <file src="Neo4jClient\bin\$configuration$\Neo4jClient.xml" target="lib\netstandard1.3" />

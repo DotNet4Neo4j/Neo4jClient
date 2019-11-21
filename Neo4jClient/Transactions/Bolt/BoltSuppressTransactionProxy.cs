@@ -30,7 +30,11 @@ namespace Neo4jClient.Transactions.Bolt
         public override Task KeepAliveAsync()
         {
             // no-op
+#if NET45
+            return Task.FromResult(0);
+#else
             return Task.CompletedTask;
+#endif
         }
 
         public override bool IsOpen => true;

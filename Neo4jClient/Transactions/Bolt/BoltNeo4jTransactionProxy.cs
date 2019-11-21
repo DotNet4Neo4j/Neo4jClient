@@ -22,7 +22,13 @@ namespace Neo4jClient.Transactions.Bolt
 
         protected override Task DoCommitAsync()
         {
-            return doCommitInScope ? TransactionContext.CommitAsync() : Task.CompletedTask;
+            if (doCommitInScope)
+                return TransactionContext.CommitAsync();
+#if NET45
+            return Task.FromResult(0);
+#else
+            return Task.CompletedTask;
+#endif
         }
 
         protected override bool ShouldDisposeTransaction()

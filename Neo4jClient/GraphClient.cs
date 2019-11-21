@@ -1077,7 +1077,11 @@ namespace Neo4jClient
         {
             var encodedIndexValue = EncodeIndexValue(indexValue);
             if (string.IsNullOrWhiteSpace(encodedIndexValue))
+#if NET45 
+                return Task.FromResult(0);
+#else
                 return Task.CompletedTask;
+#endif
 
             var indexAddress = BuildIndexAddress(indexName, indexFor);
 
@@ -1220,7 +1224,7 @@ namespace Neo4jClient
 
         public ITransactionManager<HttpResponseMessage> TransactionManager => transactionManager;
 
-        #region ExecutionContext class
+#region ExecutionContext class
         private class ExecutionContext
         {
             private GraphClient owner;
@@ -1285,6 +1289,6 @@ namespace Neo4jClient
             }
         }
 
-        #endregion
+#endregion
     }
 }
