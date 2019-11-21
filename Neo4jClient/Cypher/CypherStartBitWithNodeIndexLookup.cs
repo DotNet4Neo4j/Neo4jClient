@@ -2,7 +2,7 @@ using System;
 
 namespace Neo4jClient.Cypher
 {
-    [Obsolete("Use IGraphClient.Cypher.Start(new { foo = Node.ByIndexLookup(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
+    [Obsolete("Use IGraphClient.Cypher.Start(new { foo = Node.ByIndexLookup(...) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
     public class CypherStartBitWithNodeIndexLookup : ICypherStartBit
     {
         readonly string identifier;

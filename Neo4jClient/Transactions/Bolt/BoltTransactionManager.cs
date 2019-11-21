@@ -66,8 +66,7 @@ namespace Neo4jClient.Transactions.Bolt
                 return nonDtcTransaction.TransactionContext;
             }
 
-            // if we are not in a native transaction get the context of our ambient transaction
-            throw new NotImplementedException();
+            throw new InvalidOperationException("There is no active transaction");
         }
 
         public bool InTransaction
