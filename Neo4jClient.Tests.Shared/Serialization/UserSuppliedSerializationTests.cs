@@ -240,11 +240,12 @@ namespace Neo4jClient.Test.Serialization
             public string Text { get; set; }
             [Neo4jIgnore]
             public string TextIgnore { get; set; }
-            public int TestInt { get; set; }
+            [JsonProperty("TestInt")]
+            public int TestIntRenamed { get; set; }
             [Neo4jIgnore]
-            public int TestNeo4jIntgnore { get; set; }
+            public int TestNeo4jIntIgnore { get; set; }
             [JsonIgnore]
-            public int TestJsonIntgnore { get; set; }
+            public int TestJsonIntIgnore { get; set; }
         }
 
         [Fact]
@@ -252,7 +253,7 @@ namespace Neo4jClient.Test.Serialization
         public void JsonSerializerShouldNotSerializeNeo4JIgnoreAttribute()
         {
             // Arrange
-            var testNode = new TestNodeWithSomeNeo4JIgnoreAttributes() { Text = "foo", TextIgnore = "fooignore", TestInt = 42, TestNeo4jIntgnore = 42, TestJsonIntgnore = 42 };
+            var testNode = new TestNodeWithSomeNeo4JIgnoreAttributes() { Text = "foo", TextIgnore = "fooignore", TestIntRenamed = 42, TestNeo4jIntIgnore = 42, TestJsonIntIgnore = 42 };
             var serializer = new CustomJsonSerializer
             {
                 NullHandling = NullValueHandling.Ignore,
