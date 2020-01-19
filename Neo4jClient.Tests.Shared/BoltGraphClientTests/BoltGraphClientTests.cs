@@ -196,6 +196,47 @@ namespace Neo4jClient.Test.Extensions
             query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
 
+
+        public class ClasseWithSomeNeo4JIgnoreAttributes
+        {
+            public string Text { get; set; }
+            [Neo4jIgnore]
+            public string TextIgnore { get; set; }
+            public int TestInt { get; set; }
+            [Neo4jIgnore]
+            public int TestNeo4jIntIgnore { get; set; }
+            [JsonIgnore]
+            public int TestJsonIntgnore { get; set; }
+        }
+
+        [Fact]
+        //[Description("test bolt part of https://github.com/Readify/Neo4jClient/issues/336  https://github.com/Readify/Neo4jClient/pull/337 - see UserSuppliedSerializationTests for https part")]
+        public void JsonSerializerShouldNotSerializeNeo4JIgnoreAttribute()
+        {
+            var mockSession = new Mock<ISession>();
+            mockSession.Setup(s => s.Run("CALL dbms.components()")).Returns(new ServerInfo());
+
+            var mockDriver = new Mock<IDriver>();
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
+            mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
+
+            var bgc = new BoltGraphClient(mockDriver.Object);
+            bgc.Connect();
+
+            var cwa = new ClasseWithSomeNeo4JIgnoreAttributes() { Text = "foo", TextIgnore = "fooignore", TestInt = 42, TestNeo4jIntIgnore = 42, TestJsonIntgnore = 42};
+
+            var cfq = bgc.Cypher.Create("(c)").WithParam("testParam", cwa);
+            
+            var expectedParameters = new Dictionary<string, object>
+            {
+            {"testParam", new Dictionary<string, object> {{"Text", "foo"}, { "TestInt", 42} }
+            }};
+
+            var query = cfq.Query;
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
+        }
+
         [Fact]
         public void RootNode_ThrowsInvalidOperationException()
         {

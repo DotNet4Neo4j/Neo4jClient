@@ -234,5 +234,40 @@ namespace Neo4jClient.Test.Serialization
             Assert.NotNull(model.MyPoint);
             Assert.Equal(new System.Drawing.Point(100, 200), model.MyPoint);
         }
+
+        public class TestNodeWithSomeNeo4JIgnoreAttributes
+        {
+            public string Text { get; set; }
+            [Neo4jIgnore]
+            public string TextIgnore { get; set; }
+            public int TestInt { get; set; }
+            [Neo4jIgnore]
+            public int TestNeo4jIntgnore { get; set; }
+            [JsonIgnore]
+            public int TestJsonIntgnore { get; set; }
+        }
+
+        [Fact]
+        //[Description("test https part of https://github.com/Readify/Neo4jClient/issues/336  https://github.com/Readify/Neo4jClient/pull/337  - see BoltGraphClientTests for bolt part")]
+        public void JsonSerializerShouldNotSerializeNeo4JIgnoreAttribute()
+        {
+            // Arrange
+            var testNode = new TestNodeWithSomeNeo4JIgnoreAttributes() { Text = "foo", TextIgnore = "fooignore", TestInt = 42, TestNeo4jIntgnore = 42, TestJsonIntgnore = 42 };
+            var serializer = new CustomJsonSerializer
+            {
+                NullHandling = NullValueHandling.Ignore,
+                JsonConverters = GraphClient.DefaultJsonConverters
+            };
+
+            // Act
+            var result = serializer.Serialize(testNode);
+
+            const string expectedValue = "{\r\n  \"Text\": \"foo\",\r\n  \"TestInt\": 42\r\n}";
+
+            // Assert
+            Assert.Equal(expectedValue, result);
+        }
+
+
     }
 }
