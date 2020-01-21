@@ -1,9 +1,9 @@
-﻿using Neo4j.Driver.V1;
+﻿using Neo4j.Driver;
 
 namespace Neo4jClient.Transactions.Bolt
 {
     public class BoltResponse
     {
-        public IStatementResultCursor StatementResult { get; set; }
+        public IResultCursor StatementResult { get; set; }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Xunit;
 
 namespace Neo4jClient.Tests.Serialization
@@ -19,14 +19,14 @@ namespace Neo4jClient.Tests.Serialization
         [Fact]
         public async Task SerializesDateTimeAsNeoDateInBolt()
         {
-            var mockSession = new Mock<ISession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IStatementResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
+            var mockSession = new Mock<IAsyncSession>();
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
             var dt = new DateTime(2000, 1, 1, 0, 0, 0);
 
             var mockDriver = new Mock<IDriver>();
-            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(mockSession.Object);
-            mockDriver.Setup(d => d.Session(It.IsAny<AccessMode>(), It.IsAny<IEnumerable<string>>())).Returns(mockSession.Object);
-            mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
+            mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
+            
+            // mockDriver.Setup(d => d.Uri).Returns(new Uri("bolt://localhost"));
 
             var bgc = new BoltGraphClient(mockDriver.Object);
             await bgc.ConnectAsync();

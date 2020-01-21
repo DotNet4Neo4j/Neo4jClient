@@ -6,7 +6,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;

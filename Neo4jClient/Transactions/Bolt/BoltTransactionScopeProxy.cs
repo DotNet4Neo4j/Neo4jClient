@@ -15,7 +15,7 @@ namespace Neo4jClient.Transactions.Bolt
         private bool disposing = false;
         private BoltTransactionContext transactionContext;
 
-        internal Neo4j.Driver.V1.ITransaction DriverTransaction => TransactionContext.BoltTransaction.DriverTransaction;
+        internal Neo4j.Driver.IAsyncTransaction DriverTransaction => TransactionContext.BoltTransaction.DriverTransaction;
         public BoltTransactionContext TransactionContext => transactionContext;
 
         protected BoltTransactionScopeProxy(ITransactionalGraphClient client, BoltTransactionContext transactionContext)

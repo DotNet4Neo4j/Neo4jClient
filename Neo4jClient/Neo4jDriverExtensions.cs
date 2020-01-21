@@ -5,9 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Globalization;
 using System.Threading.Tasks;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
+using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 
 namespace Neo4jClient
@@ -18,25 +19,30 @@ namespace Neo4jClient
         private const string DefaultTimeSpanFormat = @"d\.hh\:mm\:ss\.fffffff";
 
         
-        public static IStatementResult Run(this ISession session, CypherQuery query, IGraphClient gc)
+        public static async Task<IResultCursor> Run(this IAsyncSession session, CypherQuery query, IGraphClient gc)
         {
-            return session.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
+            return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
-        public static IStatementResult Run(this ITransaction session, CypherQuery query, IGraphClient gc)
+        public static async Task<IResultCursor> RunAsync(this IAsyncTransaction transaction, CypherQuery query, IGraphClient gc)
         {
-            return session.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
-        }
-        
-        public static async Task<IStatementResultCursor> RunAsync(this ISession session, CypherQuery query, IGraphClient gc)
-        {
-            return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc)).ConfigureAwait(false);
+            return await transaction.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
-        public static async Task<IStatementResultCursor> RunAsync(this ITransaction session, CypherQuery query, IGraphClient gc)
-        {
-            return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc)).ConfigureAwait(false);
-        }
+        // public static IStatementResult Run(this ITransaction transaction, CypherQuery query, IGraphClient gc)
+        // {
+        //     return transaction.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
+        // }
+        //
+        // public static async Task<IResultCursor> RunAsync(this IAsyncSession session, CypherQuery query, IGraphClient gc)
+        // {
+        //     return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc)).ConfigureAwait(false);
+        // }
+        //
+        // public static async Task<IResultCursor> RunAsync(this ITransaction session, CypherQuery query, IGraphClient gc)
+        // {
+        //     return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc)).ConfigureAwait(false);
+        // }
 
         // ReSharper disable once InconsistentNaming
         public static Dictionary<string, object> ToNeo4jDriverParameters(this CypherQuery query, IGraphClient gc)

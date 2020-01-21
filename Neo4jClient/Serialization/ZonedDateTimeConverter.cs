@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Serialization
