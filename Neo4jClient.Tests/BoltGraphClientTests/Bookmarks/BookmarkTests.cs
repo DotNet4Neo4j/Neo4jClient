@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Xunit;
 
@@ -97,7 +98,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                     recordMock.Setup(r => r["data"]).Returns(new List<INode>());
                     recordMock.Setup(r => r.Keys).Returns(new[] {"data"});
 
-                    testHarness.MockSession.Setup(s => s.LastBookmark).Returns(lastBookmark);
+                    testHarness.MockSession.Setup(s => s.LastBookmark).Returns(Bookmark.From(lastBookmark));
 
                     var testStatementResult = new TestStatementResult(new[] {"data"}, recordMock.Object);
                     testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -128,8 +129,11 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                         /*Not interested in actually getting results*/
                     }
 
+                    
                     //Assert
-                    testHarness.MockDriver.Verify(d => d.Session(It.IsAny<AccessMode>(), It.Is<IEnumerable<string>>(s => s.Contains(bookmark))), Times.Once);
+                    // testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<AccessMode>(), It.Is<IEnumerable<string>>(s => s.Contains(bookmark))), Times.Once);
+                    testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Once);
+                    throw new NotImplementedException();
                 }
             }
 
@@ -153,7 +157,10 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                     }
 
                     //Assert
-                    testHarness.MockDriver.Verify(d => d.Session(It.IsAny<AccessMode>(), It.Is<IEnumerable<string>>(s => s.Contains(bookmarks[0]) && s.Contains(bookmarks[1]))), Times.Once);
+                    // testHarness.MockDriver.Verify(d => d.Session(It.IsAny<AccessMode>(), It.Is<IEnumerable<string>>(s => s.Contains(bookmarks[0]) && s.Contains(bookmarks[1]))), Times.Once);
+                    testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Once);
+
+                    throw new NotImplementedException();
                 }
             }
         }

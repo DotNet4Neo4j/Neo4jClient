@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
+using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 
@@ -132,8 +134,10 @@ namespace Neo4jClient.Transactions.Bolt
 
         private BoltTransactionContext GenerateTransaction(IEnumerable<string> bookmarks)
         {
-            var session = ((BoltGraphClient)client).Driver.Session(bookmarks);
-            var transaction = session.BeginTransaction();
+            var session = ((BoltGraphClient)client).Driver.AsyncSession(x => x.WithBookmarks(Bookmark.From(bookmarks.ToArray())));
+            var transactionTask = session.BeginTransactionAsync();
+            transactionTask.Wait();
+            var transaction = transactionTask.Result;
             return new BoltTransactionContext(new BoltNeo4jTransaction(session, transaction));
         }
 
