@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using Neo4j.Driver;
 
 namespace Neo4jClient
 {
@@ -9,7 +10,7 @@ namespace Neo4jClient
     public class OperationCompletedEventArgs : EventArgs
     {
         public string Identifier { get; set; }
-        public string LastBookmark { get; set; }
+        public Bookmark LastBookmark { get; set; }
         public string QueryText { get; set; }
         public int ResourcesReturned { get; set; }
         public TimeSpan TimeTaken { get; set; }

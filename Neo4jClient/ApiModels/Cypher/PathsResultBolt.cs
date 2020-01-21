@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.Extensions;
 using Newtonsoft.Json;
 
