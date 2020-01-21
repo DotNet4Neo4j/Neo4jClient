@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;

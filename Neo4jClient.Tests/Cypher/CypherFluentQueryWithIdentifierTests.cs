@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Tests.BoltGraphClientTests;
 using Xunit;

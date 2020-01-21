@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Xunit;
 
 namespace Neo4jClient.Tests.BoltGraphClientTests
@@ -15,23 +15,23 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             const string uri = "bolt://localhost";
             var recordMock = new Mock<IRecord>();
             recordMock.Setup(r => r["name"]).Returns("neo4j kernel");
-            recordMock.Setup(r => r["versions"]).Returns(new List<object> { "3.2.3" });
+            recordMock.Setup(r => r["versions"]).Returns(new List<object> {"3.2.3"});
 
-            var testSr = new TestStatementResult(new[] { recordMock.Object });
-            var sessionMock = new Mock<ISession>();
+            var testSr = new TestStatementResult(new[] {recordMock.Object});
+            var sessionMock = new Mock<IAsyncSession>();
             sessionMock
                 .Setup(s => s.RunAsync("CALL dbms.components()"))
-                .Returns(Task.FromResult<IStatementResultCursor>(testSr));
+                .Returns(Task.FromResult<IResultCursor>(testSr));
 
             var driverMock = new Mock<IDriver>();
-            driverMock.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(sessionMock.Object);
-            driverMock.Setup(d => d.Session()).Returns(sessionMock.Object);
-            driverMock.Setup(d => d.Uri).Returns(new Uri(uri));
+            driverMock.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(sessionMock.Object);
+            driverMock.Setup(d => d.AsyncSession()).Returns(sessionMock.Object);
+            //driverMock.Setup(d => d.Uri).Returns(new Uri(uri));
             return driverMock;
         }
     }
 
-    public class TestStatementResult : IStatementResultCursor
+    public class TestStatementResult : IResultCursor
     {
         private readonly IList<IRecord> records;
         private int pos = -1;
@@ -55,6 +55,11 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public Task<IRecord> PeekAsync()
         {
             return Task.FromResult(Current);
+        }
+
+        public Task<string[]> KeysAsync()
+        {
+            throw new NotImplementedException();
         }
 
         public Task<IResultSummary> ConsumeAsync()
@@ -88,24 +93,22 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
 
             var record2Mock = new Mock<IRecord>();
             record2Mock.Setup(r => r["name"]).Returns("neo4j kernel");
-            record2Mock.Setup(r => r["versions"]).Returns(new List<object> { "3.2.3" });
+            record2Mock.Setup(r => r["versions"]).Returns(new List<object> {"3.2.3"});
 
-            var testSr = new TestStatementResult(new[] { record1Mock.Object, record2Mock.Object });
-            var sessionMock = new Mock<ISession>();
+            var testSr = new TestStatementResult(new[] {record1Mock.Object, record2Mock.Object});
+            var sessionMock = new Mock<IAsyncSession>();
             sessionMock
                 .Setup(s => s.RunAsync("CALL dbms.components()"))
-                .Returns(Task.FromResult<IStatementResultCursor>(testSr));
+                .Returns(Task.FromResult<IResultCursor>(testSr));
 
             var driverMock = new Mock<IDriver>();
-            driverMock.Setup(d => d.Session(It.IsAny<AccessMode>())).Returns(sessionMock.Object);
-            driverMock.Setup(d => d.Session()).Returns(sessionMock.Object);
-            driverMock.Setup(d => d.Uri).Returns(new Uri(uri));
+            driverMock.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(sessionMock.Object);
+            
 
             var bgc = new BoltGraphClient(driverMock.Object);
             await bgc.ConnectAsync();
             bgc.ServerVersion.Should().Be(new Version(3, 2, 3));
         }
-
 
 
         [Fact]

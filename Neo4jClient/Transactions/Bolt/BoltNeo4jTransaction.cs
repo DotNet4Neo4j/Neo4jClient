@@ -3,27 +3,31 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 
 namespace Neo4jClient.Transactions.Bolt
 {
     internal class BoltNeo4jTransaction : ITransaction
     {
-        internal readonly Neo4j.Driver.V1.ITransaction DriverTransaction;
-        internal ISession Session { get; }
+        internal readonly IAsyncTransaction DriverTransaction;
+        internal IAsyncSession Session { get; }
         internal IList<string> Bookmarks { get; set; }
         public Guid Id { get; private set; }
 
         public BoltNeo4jTransaction(IDriver driver, IEnumerable<string> bookmarks, bool isWrite = true)
         {
             Bookmarks = bookmarks?.ToList();
-            Session = driver.Session(isWrite ? AccessMode.Write : AccessMode.Read, Bookmarks);
-            DriverTransaction = Session.BeginTransaction();
+            var accessMode = isWrite ? AccessMode.Write : AccessMode.Read;
+            Session = driver.AsyncSession(x => x.WithDefaultAccessMode(accessMode).WithBookmarks(Bookmark.From(Bookmarks.ToArray())));
+
+            var tx = Session.BeginTransactionAsync();
+            tx.Wait();
+            DriverTransaction = tx.Result;
             IsOpen = true;
             Id = Guid.NewGuid();
         }
 
-        public BoltNeo4jTransaction(ISession session, Neo4j.Driver.V1.ITransaction transaction)
+        public BoltNeo4jTransaction(IAsyncSession session, IAsyncTransaction transaction)
         {
             DriverTransaction = transaction;
             Session = session;
@@ -39,8 +43,8 @@ namespace Neo4jClient.Transactions.Bolt
                 return;
 
             IsOpen = false;
-            DriverTransaction?.Dispose();
-            Session?.Dispose();
+            // DriverTransaction?
+            // Session?.Dispose();
         }
 
         /// <inheritdoc />
@@ -118,14 +122,14 @@ namespace Neo4jClient.Transactions.Bolt
 
         public static void DoCommit(ITransactionExecutionEnvironmentBolt transactionExecutionEnvironment)
         {
-            transactionExecutionEnvironment.DriverTransaction.Success();
-            transactionExecutionEnvironment.DriverTransaction.Dispose();
+            transactionExecutionEnvironment.DriverTransaction.CommitAsync().Wait();
+            // transactionExecutionEnvironment.DriverTransaction.Dispose();
         }
 
         public static void DoRollback(ITransactionExecutionEnvironmentBolt transactionExecutionEnvironment)
         {
-            transactionExecutionEnvironment.DriverTransaction.Failure();
-            transactionExecutionEnvironment.DriverTransaction.Dispose();
+            transactionExecutionEnvironment.DriverTransaction.RollbackAsync().Wait();
+            // transactionExecutionEnvironment.DriverTransaction.Dispose();
         }
 
         public static BoltNeo4jTransaction FromIdAndClient(Guid transactionId, IDriver driver)
