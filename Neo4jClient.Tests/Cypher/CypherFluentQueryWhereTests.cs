@@ -169,7 +169,7 @@ namespace Neo4jClient.Tests.Cypher
                 .AndWhere((Foo c) => c.Bar == 789)
                 .Query;
 
-            Assert.Equal("WHERE ((a.Bar = $p0) OR (b.Bar = $p1))\r\nAND (c.Bar = $p2)", query.QueryText);
+            Assert.Equal("WHERE ((a.Bar = $p0) OR (b.Bar = $p1))" + Environment.NewLine + "AND (c.Bar = $p2)", query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count);
         }
 
@@ -209,7 +209,7 @@ namespace Neo4jClient.Tests.Cypher
                 .AndWhere((FooCamel c) => c.B == 789)
                 .Query;
 
-            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))\r\nAND (c.b = $p2)", query.QueryText);
+            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))" + Environment.NewLine + "AND (c.b = $p2)", query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count);
         }
     }

@@ -685,7 +685,7 @@ namespace Neo4jClient.Tests.Cypher
 
         static string CreateParameter(IDictionary<string, object> parameters, object paramValue)
         {
-            var paramName = string.Format("p{0}", parameters.Count);
+            var paramName = $"p{parameters.Count}";
             parameters.Add(paramName, paramValue);
             return $"${paramName}";
         }

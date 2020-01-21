@@ -24,7 +24,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Return<object>("x")
                 .Query;
 
-            Assert.Equal("START n=node($p0)\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "MATCH (n)--(x)" + Environment.NewLine + "RETURN x", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
 
@@ -84,7 +84,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Where((FooBarBaz a) => a.Baz == "ghi")
                 .Query;
 
-            const string expected = "MATCH (n)\r\nWHERE (n.Foo = $p0)\r\nOPTIONAL MATCH (n)--(x)\r\nWHERE (x.Bar = $p1)\r\nOPTIONAL MATCH (x)--(a)\r\nWHERE (a.Baz = $p2)";
+            string expected = "MATCH (n)" + Environment.NewLine + "WHERE (n.Foo = $p0)" + Environment.NewLine + "OPTIONAL MATCH (n)--(x)" + Environment.NewLine + "WHERE (x.Bar = $p1)" + Environment.NewLine + "OPTIONAL MATCH (x)--(a)" + Environment.NewLine + "WHERE (a.Baz = $p2)";
 
             Assert.Equal(expected, query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count());

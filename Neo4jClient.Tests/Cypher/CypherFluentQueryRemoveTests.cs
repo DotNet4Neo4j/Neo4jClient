@@ -20,7 +20,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)\r\nREMOVE n.age\r\nRETURN n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "REMOVE n.age" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
 
@@ -36,7 +36,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)\r\nREMOVE n:Person\r\nRETURN n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "REMOVE n:Person" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
     }
