@@ -20,7 +20,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node({p0})", query.QueryText);
+            Assert.Equal("START n=node($p0)", query.QueryText);
             Assert.Equal(2, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(123, query.QueryParameters["foo"]);
@@ -41,7 +41,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node({p0})", query.QueryText);
+            Assert.Equal("START n=node($p0)", query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(123, query.QueryParameters["foo"]);
