@@ -21,7 +21,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)\r\nRETURN n\r\nLIMIT $p1", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n" + Environment.NewLine + "LIMIT $p1", query.QueryText);
             Assert.Equal(2, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(2, query.QueryParameters["p1"]);
@@ -54,7 +54,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)\r\nRETURN n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
@@ -73,7 +73,7 @@ namespace Neo4jClient.Tests.Cypher
 
 
             // Assert
-            Assert.Equal("START n=node($p0)\r\nWITH foo\r\nLIMIT $p1", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "WITH foo" + Environment.NewLine + "LIMIT $p1", query.QueryText);
             Assert.Equal(2, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(2, query.QueryParameters["p1"]);

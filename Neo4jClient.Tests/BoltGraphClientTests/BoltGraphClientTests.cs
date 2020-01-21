@@ -201,14 +201,14 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             [Fact]
             public void DoesntUseAddressResolverWhenPassingInOneUri()
             {
-                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com");
+                var bgc = new BoltGraphClient($"neo4j://virtual.foo.com");
                 bgc.AddressResolver.Should().BeNull();
             }
 
             [Fact]
             public void UsesAddressResolverWhenPassingInMultipleUris()
             {
-                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"});
+                var bgc = new BoltGraphClient($"neo4j://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"});
                 var resolved = bgc.AddressResolver.Resolve(null);
                 resolved.Should().HaveCount(2);
             }
@@ -217,7 +217,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             [Fact]
             public void ValidForBoltPlusRoutingUris()
             {
-                var ex = Record.Exception(() => new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"}));
+                var ex = Record.Exception(() => new BoltGraphClient($"neo4j://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"}));
                 ex.Should().BeNull();
             }
 
@@ -253,7 +253,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             {
                 const string uri = "x.foo.com";
                 
-                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] { $"{schema}://{uri}" });
+                var bgc = new BoltGraphClient($"neo4j://virtual.foo.com", new[] { $"{schema}://{uri}" });
                 var resolved = bgc.AddressResolver.Resolve(null);
                 resolved.Should().HaveCount(1);
                 resolved.First().Host.Should().Be(uri);
@@ -264,7 +264,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             {
                 const string uri = "x.foo.com";
 
-                var bgc = new BoltGraphClient($"bolt+routing://virtual.foo.com", new[] { uri });
+                var bgc = new BoltGraphClient($"neo4j://virtual.foo.com", new[] { uri });
                 var resolved = bgc.AddressResolver.Resolve(null);
                 resolved.Should().HaveCount(1);
                 resolved.First().Host.Should().Be(uri);

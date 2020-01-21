@@ -68,14 +68,14 @@ namespace Neo4jClient
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
             {
-                if (uri.Scheme.ToLowerInvariant() != "bolt+routing")
+                if (uri.Scheme.ToLowerInvariant() != "neo4j")
                     throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' scheme, not '{uri.Scheme}'.");
 
                 addressResolver = new AddressResolver(uri, localUris);
             }
-            else if (uri.Scheme.ToLowerInvariant() != "bolt" && uri.Scheme.ToLowerInvariant() != "bolt+routing")
+            else if (uri.Scheme.ToLowerInvariant() != "bolt" && uri.Scheme.ToLowerInvariant() != "neo4j")
             {
-                throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' or 'bolt+routing://' scheme, not '{uri.Scheme}'.");
+                throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' or 'neo4j://' scheme, not '{uri.Scheme}'.");
             }
 
             this.uri = uri;
@@ -106,7 +106,7 @@ namespace Neo4jClient
         { }
 
         public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null)
-            : this(new Uri("bolt+routing://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm)
+            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm)
         { }
 
         public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null)

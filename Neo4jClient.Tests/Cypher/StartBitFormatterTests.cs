@@ -348,17 +348,18 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Contains("foo", ex.Message);
         }
 
-        static CypherQuery ToCypher(object startBits)
+        private static CypherQuery ToCypher(object startBits)
         {
             var parameters = new Dictionary<string, object>();
-            Func<object, string> createParameter = value =>
+
+            string CreateParameter(object value)
             {
                 var name = "p" + parameters.Count;
                 parameters.Add(name, value);
                 return $"${name}";
-            };
+            }
 
-            var cypherText = StartBitFormatter.FormatAsCypherText(startBits, createParameter);
+            var cypherText = StartBitFormatter.FormatAsCypherText(startBits, CreateParameter);
 
             var query = new CypherQuery(cypherText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest);
             return query;
