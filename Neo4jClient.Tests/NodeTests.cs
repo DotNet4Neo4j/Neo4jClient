@@ -22,7 +22,7 @@ namespace Neo4jClient.Tests
             var reference = new NodeReference<object>(123, client);
             var node = new Node<object>(new object(), reference);
             var query = node.StartCypher("foo").Query;
-            Assert.Equal("START foo=node({p0})", query.QueryText);
+            Assert.Equal("START foo=node($p0)", query.QueryText);
             Assert.Equal(123L, query.QueryParameters["p0"]);
         }
 
@@ -32,7 +32,7 @@ namespace Neo4jClient.Tests
             var client = Substitute.For<IRawGraphClient>();
             client.RootNode.ReturnsForAnyArgs(new RootNode(4, client));
             var query = client.RootNode.StartCypher("foo").Query;
-            Assert.Equal("START foo=node({p0})", query.QueryText);
+            Assert.Equal("START foo=node($p0)", query.QueryText);
             Assert.Equal(4L, query.QueryParameters["p0"]);
         }
 
