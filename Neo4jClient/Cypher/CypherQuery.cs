@@ -107,7 +107,7 @@ namespace Neo4jClient.Cypher
                         {
                             var value = queryParameters[paramName];
                             value = serializer.Serialize(value);                           
-                            return current.Replace("$" + paramName, value.ToString()).Replace("{" + paramName + "}", value.ToString());
+                            return current.Replace($"${paramName}", value.ToString());
                         });
 
                 return text;

@@ -67,7 +67,7 @@ namespace Neo4jClient.Tests.Cypher
             writer.AppendClause("{0} qoo {1} zoo", "abc", "xyz");
 
             var query = writer.ToCypherQuery();
-            var expectedText = string.Format("foo {$p0} bar {$p1}{0}{$p2} qoo {$p3} zoo", Environment.NewLine);
+            var expectedText = string.Format("foo $p0 bar $p1{0}$p2 qoo $p3 zoo", Environment.NewLine);
             Assert.Equal(expectedText, query.QueryText);
             Assert.Equal(4, query.QueryParameters.Count);
             Assert.Equal("baz", query.QueryParameters["p0"]);
