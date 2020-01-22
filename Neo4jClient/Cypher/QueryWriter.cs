@@ -160,9 +160,9 @@ namespace Neo4jClient.Cypher
 
         string CreateParameterAndReturnPlaceholder(object paramValue)
         {
-            var paramName = string.Format("p{0}", queryParameters.Count);
+            var paramName = $"p{queryParameters.Count}";
             queryParameters.Add(paramName, paramValue);
-            return "{" + paramName + "}";
+            return $"${paramName}";
         }
     }
 }

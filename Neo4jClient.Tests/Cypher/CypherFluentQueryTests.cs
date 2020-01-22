@@ -407,7 +407,7 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node({$p0}){0}MATCH (a)-->(b){0}RETURN b.Age AS SomeAge, b.Name AS SomeName", Environment.NewLine);
+            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b.Age AS SomeAge, b.Name AS SomeName", Environment.NewLine);
 
             Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.Equal(1L, query.QueryParameters["p0"]);
@@ -428,7 +428,7 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node({$p0}){0}MATCH (a)-->(b){0}RETURN b.Age AS Age, b.Name AS Name", Environment.NewLine);
+            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b.Age AS Age, b.Name AS Name", Environment.NewLine);
 
             Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.Equal(1L, query.QueryParameters["p0"]);
@@ -489,7 +489,7 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node({$p0}){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
+            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
 
             Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.Equal(1L, query.QueryParameters["p0"]);
@@ -509,7 +509,7 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node({$p0}){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
+            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
 
             Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
             Assert.Equal(1L, query.QueryParameters["p0"]);
@@ -1081,7 +1081,7 @@ namespace Neo4jClient.Tests.Cypher
 // ReSharper restore InconsistentNaming
                 .Query;
 
-            Assert.Equal(string.Format("START me=node:`node_auto_index`(name = {$p0}){0}MATCH me-[r?:STATUS]-secondlatestupdate{0}DELETE r{0}WITH me, secondlatestupdate{0}CREATE me-[:STATUS]->(latest_update {{update}}){0}WITH latest_update,secondlatestupdate{0}CREATE latest_update-[:NEXT]-secondlatestupdate{0}WHERE secondlatestupdate <> null{0}RETURN latest_update.text AS new_status", Environment.NewLine), query.QueryText);
+            Assert.Equal(string.Format("START me=node:`node_auto_index`(name = $p0){0}MATCH me-[r?:STATUS]-secondlatestupdate{0}DELETE r{0}WITH me, secondlatestupdate{0}CREATE me-[:STATUS]->(latest_update {{update}}){0}WITH latest_update,secondlatestupdate{0}CREATE latest_update-[:NEXT]-secondlatestupdate{0}WHERE secondlatestupdate <> null{0}RETURN latest_update.text AS new_status", Environment.NewLine), query.QueryText);
             Assert.Equal("Bob", query.QueryParameters["p0"]);
             Assert.Equal(update, query.QueryParameters["update"]);
         }
