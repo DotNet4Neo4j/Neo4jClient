@@ -84,7 +84,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
             [Fact]
             public async Task ArgsContainLastBookmark()
             {
-                const string lastBookmark = "LastBookmark";
+                var lastBookmark = Bookmark.From("LastBookmark");
 
                 const string queryText = "RETURN [] AS data";
 
@@ -98,7 +98,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                     recordMock.Setup(r => r["data"]).Returns(new List<INode>());
                     recordMock.Setup(r => r.Keys).Returns(new[] {"data"});
 
-                    testHarness.MockSession.Setup(s => s.LastBookmark).Returns(Bookmark.From(lastBookmark));
+                    testHarness.MockSession.Setup(s => s.LastBookmark).Returns(lastBookmark);
 
                     var testStatementResult = new TestStatementResult(new[] {"data"}, recordMock.Object);
                     testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
@@ -114,9 +114,9 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
             public async Task SessionIsCalledWithBookmark()
             {
                 // Arrange
-                const string bookmark = "Bookmark1";
+                var bookmark = Bookmark.From("Bookmark1");
 
-                var cypherQuery = new CypherQuery("RETURN 1", new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional) {Bookmarks = new List<string> {bookmark}};
+                var cypherQuery = new CypherQuery("RETURN 1", new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional) {Bookmarks = new List<string>(bookmark.Values)};
 
                 using (var testHarness = new BoltTestHarness())
                 {
@@ -129,9 +129,43 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Bookmarks
                         /*Not interested in actually getting results*/
                     }
 
-                    
+                    Action<SessionConfigBuilder> scb;
+
                     //Assert
                     // testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<AccessMode>(), It.Is<IEnumerable<string>>(s => s.Contains(bookmark))), Times.Once);
+                    // testHarness.MockDriver.Verify(d => d.AsyncSession(It.Is<Action<SessionConfigBuilder>>()));
+
+                    // testHarness.MockDriver.Object.Config
+                    testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Once);
+                    throw new NotImplementedException();
+                }
+            }
+
+
+            [Fact]
+            public async Task SessionIsCalledWithBookmark_TEST()
+            {
+                // Arrange
+                var bookmark = Bookmark.From("Bookmark1");
+                
+                var cypherQuery = new CypherQuery("RETURN 1", new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional) { Bookmarks = new List<string>(bookmark.Values) };
+
+                using (var testHarness = new BoltTestHarness())
+                {
+                    try
+                    {
+                        (await (await testHarness.CreateAndConnectBoltGraphClient()).ExecuteGetCypherResultsAsync<object>(cypherQuery)).ToArray();
+                    }
+                    catch
+                    {
+                        /*Not interested in actually getting results*/
+                    }
+
+
+                    //Assert
+                    // testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<AccessMode>(), It.Is<IEnumerable<string>>(s => s.Contains(bookmark))), Times.Once);
+                    
+                    // testHarness.MockDriver.Object.Config
                     testHarness.MockDriver.Verify(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Once);
                     throw new NotImplementedException();
                 }
