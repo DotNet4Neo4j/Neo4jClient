@@ -145,7 +145,7 @@ namespace Neo4jClient.Tests.Cypher
                 .OrderBy("common.FirstName")
                 .Query;
 
-            Assert.Equal(string.Format("START me=node({$p0}), viewer=node({$p1}){0}MATCH me-[:FRIEND]-common-[:FRIEND]-viewer{0}RETURN common{0}LIMIT {$p2}{0}ORDER BY common.FirstName", Environment.NewLine), query.QueryText);
+            Assert.Equal(string.Format("START me=node($p0), viewer=node($p1){0}MATCH me-[:FRIEND]-common-[:FRIEND]-viewer{0}RETURN common{0}LIMIT $p2{0}ORDER BY common.FirstName", Environment.NewLine), query.QueryText);
             Assert.Equal(123L, query.QueryParameters["p0"]);
             Assert.Equal(456L, query.QueryParameters["p1"]);
             Assert.Equal(5, query.QueryParameters["p2"]);
