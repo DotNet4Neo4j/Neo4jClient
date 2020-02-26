@@ -38,32 +38,26 @@ namespace Neo4jClient.Execution
             return null;
         }
 
-        public override Uri BaseEndpoint
+        public override Uri BaseEndpoint(string database = null)
         {
-            get
+            if (!InTransaction && Client.CypherEndpoint != null)
+                return Client.CypherEndpoint;
+
+            var proxiedTransaction = GetTransactionInScope();
+            var transactionalClient = (ITransactionalGraphClient) Client;
+            if (proxiedTransaction == null)
             {
-                if (!InTransaction)
-                {
-                    return Client.CypherEndpoint;
-                }
-
-                var proxiedTransaction = GetTransactionInScope();
-                var transactionalClient = (ITransactionalGraphClient) Client;
-                if (proxiedTransaction == null)
-                {
-                    return transactionalClient.TransactionEndpoint;
-                }
-
-                var startingReference = proxiedTransaction.Endpoint ?? transactionalClient.TransactionEndpoint;
-                return startingReference;
+                return Replace(transactionalClient.TransactionEndpoint, database);
             }
+
+            var startingReference = proxiedTransaction.Endpoint ?? transactionalClient.TransactionEndpoint;
+            return startingReference;
         }
 
-        public override TransactionExecutionPolicy TransactionExecutionPolicy
-        {
-            get { return Execution.TransactionExecutionPolicy.Allowed; }
-        }
-        
+
+
+        public override TransactionExecutionPolicy TransactionExecutionPolicy => Execution.TransactionExecutionPolicy.Allowed;
+
         public override string SerializeRequest(object toSerialize)
         {
             var query = toSerialize as CypherQuery;

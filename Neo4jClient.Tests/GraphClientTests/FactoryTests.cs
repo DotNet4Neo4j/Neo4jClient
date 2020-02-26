@@ -45,7 +45,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         {
             const string queryText = @"MATCH (d) RETURN d";
 
-            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness

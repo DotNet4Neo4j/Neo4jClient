@@ -26,16 +26,16 @@ namespace Neo4jClient.Execution
             {
                 case PolicyType.Cypher:
                     return new CypherExecutionPolicy(_client);
-                case PolicyType.Batch:
-                    return new BatchExecutionPolicy(_client);
+                // case PolicyType.Batch:
+                //     return new BatchExecutionPolicy(_client);
                 case PolicyType.Rest:
                     return new RestExecutionPolicy(_client);
                 case PolicyType.Transaction:
                     return new CypherTransactionExecutionPolicy(_client);
-                case PolicyType.NodeIndex:
-                    return new NodeIndexExecutionPolicy(_client);
-                case PolicyType.RelationshipIndex:
-                    return new RelationshipIndexExecutionPolicy(_client);
+                // case PolicyType.NodeIndex:
+                    // return new NodeIndexExecutionPolicy(_client);
+                // case PolicyType.RelationshipIndex:
+                    // return new RelationshipIndexExecutionPolicy(_client);
                 default:
                     throw new InvalidOperationException("Unknown execution policy:" + type.ToString());
             }

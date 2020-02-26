@@ -361,7 +361,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypherText = StartBitFormatter.FormatAsCypherText(startBits, CreateParameter);
 
-            var query = new CypherQuery(cypherText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest);
+            var query = new CypherQuery(cypherText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest, "neo4j");
             return query;
         }
     }
