@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Neo4j.Driver;
 
 namespace Neo4jClient.Cypher
 {
@@ -10,14 +11,14 @@ namespace Neo4jClient.Cypher
             if (string.IsNullOrWhiteSpace(bookmark))
                 return this;
 
-            QueryWriter.Bookmarks.Add(bookmark);
+            QueryWriter.Bookmarks.Add(Bookmark.From(bookmark));
             return this;
         }
 
         /// <inheritdoc />
         public ICypherFluentQuery WithBookmarks(params string[] bookmarks)
         {
-            QueryWriter.Bookmarks.AddRange(bookmarks.Where(b => !string.IsNullOrWhiteSpace(b)));
+            QueryWriter.Bookmarks.AddRange(bookmarks.Where(b => !string.IsNullOrWhiteSpace(b)).Select(b => Bookmark.From(b)));
             return this;
         }
     }

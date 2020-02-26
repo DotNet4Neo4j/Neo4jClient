@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-
 using Moq;
 using Neo4j.Driver;
-using Neo4jClient.Transactions;
 
 namespace Neo4jClient.Tests
 {
@@ -14,33 +10,40 @@ namespace Neo4jClient.Tests
     {
         public BoltTestHarness()
         {
-            MockSession
+            var mockSession = new Mock<IAsyncSession>(MockBehavior.Loose);
+            mockSession
                 .Setup(s => s.RunAsync("CALL dbms.components()"))
                 .Returns(Task.FromResult<IResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
-            MockSession
+            mockSession
                 .Setup(s => s.RunAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
                 .Throws(new Exception("Should never use synchronous method"));
-            MockSession
+            mockSession
                 .Setup(s => s.WriteTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task>>()))
                 .Throws(new Exception("Should never use synchronous method"));
-            MockSession
+            mockSession
                 .Setup(s => s.ReadTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task>>()))
                 .Throws(new Exception("Should never use synchronous method"));
 
-            MockDriver
+            var mockDriver = new Mock<IDriver>(MockBehavior.Strict);
+            mockDriver
+                .Setup(d => d.AsyncSession())
+                .Returns(mockSession.Object);
+            mockDriver
                 .Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()))
-                .Returns(MockSession.Object);
+                .Returns(mockSession.Object);
+
+            MockSession = mockSession;
+            MockDriver = mockDriver;
         }
 
-       
 
-
-        public Mock<IDriver> MockDriver { get; } = new Mock<IDriver>();
-        public Mock<IAsyncSession> MockSession { get; } = new Mock<IAsyncSession>();
+        public Mock<IDriver> MockDriver { get; }
+        public Mock<IAsyncSession> MockSession { get; }
 
         public void Dispose()
         {
         }
+
         //
         // public static readonly Func<SessionConfigBuilder> SessionConfigBuilderCreator = 
         //     Expression.Lambda<Func<SessionConfigBuilder>>(Expression.New(typeof(SessionConfigBuilder).GetConstructor(Type.EmptyTypes))).Compile();
@@ -61,7 +64,7 @@ namespace Neo4jClient.Tests
         {
             var bgc = new BoltGraphClient(MockDriver.Object);
             await bgc.ConnectAsync();
-            MockDriver.Reset();
+            MockDriver.Invocations.Clear();
             return bgc;
         }
     }

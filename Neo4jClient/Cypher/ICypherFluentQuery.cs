@@ -163,6 +163,13 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Write { get; }
 
         /// <summary>
+        /// Sets the database instance to use to run the queries against.
+        /// </summary>
+        /// <param name="databaseName">The name of the database instance.</param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
+        ICypherFluentQuery WithDatabase(string databaseName);
+
+        /// <summary>
         /// Set an identifier for your query. You don't need to set this, it's intended to allow you to link an <see cref="IGraphClient.OperationCompleted"/> event to a specific query.
         /// </summary>
         /// <param name="identifier">An ID you want to use to differentiate the query. If this is <c>null</c> or whitespace - it will be set to <c>null</c>.</param>
