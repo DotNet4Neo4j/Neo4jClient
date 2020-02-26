@@ -39,6 +39,18 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("neo4j_version")]
         public string Neo4jVersion { get; set; }
 
+        [JsonProperty("neo4j_edition")]
+        public string Neo4jEdition { get; set; }
+
+        [JsonProperty("bolt_direct")]
+        public string BoltDirect { get; set; }
+
+        [JsonProperty("bolt_routing")]
+        public string BoltRouting { get; set; }
+
+        [JsonProperty("cluster")]
+        public string Cluster { get; set; }
+
         /// <summary>
         /// Returns a structured representation of the Neo4j server version, but only with partial data.
         /// The version type (milestone, preview, release candidate, stable) is not taken in to account,
@@ -66,6 +78,28 @@ namespace Neo4jClient.ApiModels
             var parsed = Version.TryParse(numericalVersionString, out result);
 
             return parsed ? result : new Version(0, 0);
+        }
+
+        internal void TrimUriFromProperties(string absoluteUri)
+        {
+            var baseUriLengthToTrim = absoluteUri.Length - 1;
+
+            Batch = (string.IsNullOrWhiteSpace(Batch)) ? null : Batch.Substring(baseUriLengthToTrim);
+            Node = (string.IsNullOrWhiteSpace(Node)) ? null : Node.Substring(baseUriLengthToTrim);
+            NodeIndex = (string.IsNullOrWhiteSpace(NodeIndex)) ? null : NodeIndex.Substring(baseUriLengthToTrim);
+            Relationship = "/relationship"; //Doesn't come in on the Service Root
+            RelationshipIndex = (string.IsNullOrWhiteSpace(RelationshipIndex)) ? null : RelationshipIndex.Substring(baseUriLengthToTrim);
+            ExtensionsInfo = (string.IsNullOrWhiteSpace(ExtensionsInfo)) ? null : ExtensionsInfo.Substring(baseUriLengthToTrim);
+
+            Transaction = (string.IsNullOrWhiteSpace(Transaction)) ? null : Transaction.Substring(baseUriLengthToTrim);
+            Cypher = (string.IsNullOrWhiteSpace(Cypher)) ? null : Cypher.Substring(baseUriLengthToTrim);
+            Cluster = (string.IsNullOrWhiteSpace(Cluster)) ? null : Cluster.Substring(baseUriLengthToTrim);
+
+            if (Extensions?.GremlinPlugin != null)
+            {
+                Extensions.GremlinPlugin.ExecuteScript =
+                    Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Neo4jClient.Execution;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -179,6 +180,45 @@ namespace Neo4jClient.Tests.GraphClientTests
 
             // Act
             await graphClient.ConnectAsync();
+        }
+
+        [Fact]
+        public async Task ShouldParseRootApiResponseFromA4xServer()
+        {
+            // Arrange
+            var httpClient = Substitute.For<IHttpClient>();
+            var graphClient = new GraphClient(new Uri("http://localhost:7474/"), httpClient);
+
+            httpClient
+                .SendAsync(Arg.Any<HttpRequestMessage>())
+                .Returns(ci =>
+                {
+                    var response = new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent(@"{
+                            'bolt_direct': 'neo4j://localhost:7687/bolt',
+                            'bolt_routing': 'neo4j://localhost:7687/route',
+                            'cluster': 'http://localhost:7474/db/{databaseName}/cluster',
+                            'transaction': 'http://localhost:7474/db/{databaseName}/tx',
+                            'neo4j_version': '4.0.0',
+                            'neo4j_edition': 'enterprise'
+                        }")
+                    };
+                    var task = new Task<HttpResponseMessage>(() => response);
+                    task.Start();
+                    return task;
+                });
+
+            // Act
+            await graphClient.ConnectAsync();
+
+            graphClient.RootApiResponse.BoltDirect.Should().Be("neo4j://localhost:7687/bolt");
+            graphClient.RootApiResponse.BoltRouting.Should().Be("neo4j://localhost:7687/route");
+
+            graphClient.RootApiResponse.Cluster.Should().Be("/db/{databaseName}/cluster");
+            graphClient.RootApiResponse.Transaction.Should().Be("/db/{databaseName}/tx");
+            graphClient.RootApiResponse.Neo4jVersion.Should().Be("4.0.0");
+            graphClient.RootApiResponse.Neo4jEdition.Should().Be("enterprise");
         }
     }
 }

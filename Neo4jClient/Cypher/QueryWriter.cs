@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using Neo4j.Driver;
 using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
@@ -13,7 +14,7 @@ namespace Neo4jClient.Cypher
         readonly IDictionary<string, object> queryParameters;
         CypherResultMode resultMode;
         private CypherResultFormat resultFormat;
-        private readonly List<string> bookmarks = new List<string>();
+        private readonly List<Bookmark> bookmarks = new List<Bookmark>();
     
         public QueryWriter()
         {
@@ -21,6 +22,7 @@ namespace Neo4jClient.Cypher
             queryParameters = new Dictionary<string, object>();
             resultMode = CypherResultMode.Set;
             resultFormat = CypherResultFormat.DependsOnEnvironment;
+            DatabaseName = "neo4j";
         }
 
         QueryWriter(
@@ -28,7 +30,7 @@ namespace Neo4jClient.Cypher
             IDictionary<string, object> queryParameters,
             CypherResultMode resultMode,
             CypherResultFormat resultFormat,
-            List<string> bookmarks,
+            List<Bookmark> bookmarks,
             string identifier)
         {
             this.queryTextBuilder = queryTextBuilder;
@@ -39,7 +41,7 @@ namespace Neo4jClient.Cypher
             this.bookmarks = bookmarks;
         }
 
-        public List<string> Bookmarks => bookmarks;
+        public List<Bookmark> Bookmarks => bookmarks;
 
         public CypherResultMode ResultMode
         {
@@ -57,12 +59,13 @@ namespace Neo4jClient.Cypher
 
         public NameValueCollection CustomHeaders { get; set; }
         public string Identifier { get; set; }
+        public string DatabaseName { get; set; }
 
         public QueryWriter Clone()
         {
             var clonedQueryTextBuilder = new StringBuilder(queryTextBuilder.ToString());
             var clonedParameters = new Dictionary<string, object>(queryParameters);
-            var clonedBookmarks = new List<string>(bookmarks);
+            var clonedBookmarks = new List<Bookmark>(bookmarks);
             
             return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode, resultFormat, clonedBookmarks, Identifier)
             {
@@ -82,6 +85,7 @@ namespace Neo4jClient.Cypher
                 new Dictionary<string, object>(queryParameters),
                 resultMode,
                 resultFormat,
+                DatabaseName,
 				contractResolver,
                 MaxExecutionTime,
                 CustomHeaders,

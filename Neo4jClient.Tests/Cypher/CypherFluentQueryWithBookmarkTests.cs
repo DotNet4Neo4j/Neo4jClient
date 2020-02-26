@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Moq;
 using Neo4jClient.Cypher;
@@ -49,7 +50,7 @@ namespace Neo4jClient.Tests.Cypher
             var query = cfq.Query;
 
             query.Bookmarks.Should().HaveCount(1);
-            query.Bookmarks.Should().Contain(bookmarkName);
+            query.Bookmarks.SelectMany(b => b.Values).Should().Contain(bookmarkName);
         }
 
         [Fact]
@@ -64,8 +65,9 @@ namespace Neo4jClient.Tests.Cypher
             var query = cfq.Query;
 
             query.Bookmarks.Should().HaveCount(2);
-            query.Bookmarks.Should().Contain(bookmarkName1);
-            query.Bookmarks.Should().Contain(bookmarkName2);
+            var bmarks = query.Bookmarks.SelectMany(b => b.Values).ToList();
+            bmarks.Should().Contain(bookmarkName1);
+            bmarks.Should().Contain(bookmarkName2);
         }
 
         [Fact]
@@ -81,8 +83,9 @@ namespace Neo4jClient.Tests.Cypher
             var query = cfq.Query;
 
             query.Bookmarks.Should().HaveCount(2);
-            query.Bookmarks.Should().Contain(bookmarkName1);
-            query.Bookmarks.Should().Contain(bookmarkName2);
+            var bmarks = query.Bookmarks.SelectMany(b => b.Values).ToList();
+            bmarks.Should().Contain(bookmarkName1);
+            bmarks.Should().Contain(bookmarkName2);
         }
     }
 }

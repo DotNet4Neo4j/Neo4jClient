@@ -315,7 +315,7 @@ namespace Neo4jClient.Tests.Transactions
             const string queryText = @"MATCH (n) RETURN count(n) as Total";
             const string resultColumn = @"{'columns':['Total'], 'data':[{'row':[1]}]}";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, "neo4j");
             var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
             var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
             using (var testHarness = new RestTestHarness
@@ -384,7 +384,7 @@ namespace Neo4jClient.Tests.Transactions
             for (int i = 0; i < asyncRequests; i++)
             {
                 queries[i] = new CypherQuery(string.Format(queryTextBase, i), new Dictionary<string, object>(),
-                    CypherResultMode.Projection);
+                    CypherResultMode.Projection, "neo4j");
                 apiQueries[i] = new CypherStatementList {new CypherTransactionStatement(queries[i], false)};
                 responses[i] = MockResponse.Json(200,
                     @"{'results':[" + string.Format(resultColumnBase, i) + @"], 'errors':[] }");
@@ -452,7 +452,7 @@ namespace Neo4jClient.Tests.Transactions
             const string queryText = @"MATCH (n) RETURN count(n) as Total";
             const string resultColumn = @"{'columns':['Total'], 'data':[{'row':[1]}]}";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, "neo4j");
             var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
 
             using (var testHarness = new RestTestHarness(false)

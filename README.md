@@ -13,6 +13,8 @@ The official Neo4jClient build and nuget package is automated via [AppVeyor](htt
 
 [![Build status](https://ci.appveyor.com/api/projects/status/gu4ra8yufideqrjh/branch/40-development?svg=true)](https://ci.appveyor.com/project/ChrisSkardon/neo4jclient-40/branch/40-development)
 
+It's worth noting - due to a lot of the changes that are taking place - at the moment this will be super unstable - bugs will be introduced, features added/removed/changed etc.
+
 ### Plans
 
 * Finally transactions in Core
@@ -22,7 +24,7 @@ The official Neo4jClient build and nuget package is automated via [AppVeyor](htt
 ### Things being considered
 
 * Removal of Gremlin support
-  * No-one uses it anymore, and it's not supported by Neo4j anymore
+  * No-one uses it anymore, and it's not supported by Neo4j anymore.
 * Removal of `Root` property 
   * This has been out of favour since Neo4j `2.0` and been marked as `Obsolete` since then.
 * Having a _Signed_ version of the Client.
@@ -32,6 +34,7 @@ The official Neo4jClient build and nuget package is automated via [AppVeyor](htt
 
 * Transactions will no longer use the `TransactionScope` class which means that [MSDTC](https://en.wikipedia.org/wiki/Microsoft_Distributed_Transaction_Coordinator) will no longer work.
   * This has been an issue since the dawn of Core/NetStandard - `TransactionScope` may be in NetStandard now - but the other classes the Transaction code was relying on wasn't. 
+* `BoltGraphClient` will no longer support Neo4j 3.4 or lower - this is due to the underlying bolt protocol being changed in the `Neo4j-Driver` dependency.
 
 ### Dependency Changes
 

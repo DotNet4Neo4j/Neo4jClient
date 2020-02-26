@@ -15,10 +15,13 @@ namespace Neo4jClient
         public int ResourcesReturned { get; set; }
         public TimeSpan TimeTaken { get; set; }
         public Exception Exception { get; set; }
-        public bool HasException { get { return Exception != null; } }
+        public bool HasException => Exception != null;
         public int? MaxExecutionTime { get; set; }
-        public NameValueCollection CustomHeaders { get; set; }
-        public IEnumerable<string> BookmarksUsed { get; set; }
+        public NameValueCollection CustomHeaders { get; set; } 
+        public IEnumerable<Bookmark> BookmarksUsed { get; set; }
+        
+        /// <summary>This is only set with the <see cref="BoltGraphClient"/>.</summary>
+        public Config ConfigUsed { get; set; }
 
         public override string ToString()
         {

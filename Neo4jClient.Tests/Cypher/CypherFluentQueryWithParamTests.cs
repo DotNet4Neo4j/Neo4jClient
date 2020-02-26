@@ -90,7 +90,6 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Theory]
-        [InlineData("{obj}")]
         [InlineData("$obj")]
         public void ComplexObjectInWithParam(string param)
         {
@@ -127,7 +126,6 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Theory]
-        [InlineData("{obj}")]
         [InlineData("$obj")]
         public void ComplexObjectInWithParamCamelCase(string param)
         {

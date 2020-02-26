@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Moq;
 using Neo4j.Driver;
 using Neo4jClient.Tests.BoltGraphClientTests;
 using Neo4jClient.Transactions;
 using NSubstitute;
+using NSubstitute.Core.Arguments;
 using Xunit;
 
 namespace Neo4jClient.Tests.Transactions
@@ -76,16 +78,32 @@ namespace Neo4jClient.Tests.Transactions
 
         public class TransactionGraphClientTests : IClassFixture<CultureInfoSetupFixture>
         {
+            [Fact]
+            public async Task SimpleTransaction_AsTransactionalGc_1Query_Moq()
+            {
+                using (var harness = new BoltTestHarness())
+                {
+                    var graphClient = await harness.CreateAndConnectBoltGraphClient();
+                    
+                    
+
+                    ITransactionalGraphClient txGc = (ITransactionalGraphClient)graphClient;
+                    using (var tx = txGc.BeginTransaction())
+                    {
+                        var query = txGc.Cypher.Match("(n)").Set("n.Value = 'test'");
+                        await query.ExecuteWithoutResultsAsync();
+                        await tx.CommitAsync();
+                    }
+
+                    harness.MockDriver.Verify(md => md.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Once);
+                }
+            }
+
 
             [Fact]
             public async Task SimpleTransaction_AsTransactionalGc_1Query()
             {
-                IAsyncSession session;
-                IDriver driver;
-                IAsyncTransaction transaction;
-                IGraphClient graphClient;
-
-                GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
+                GetAndConnectGraphClient(out var graphClient, out var driver, out var session, out var transaction);
 
                 ITransactionalGraphClient txGc = (ITransactionalGraphClient) graphClient;
                 using (var tx = txGc.BeginTransaction())
@@ -94,7 +112,7 @@ namespace Neo4jClient.Tests.Transactions
                     await tx.CommitAsync();
                 }
 
-                driver.Received(1).AsyncSession();
+                driver.Received(1).AsyncSession(Arg.Any<Action<SessionConfigBuilder>>());
                 await session.Received(1).BeginTransactionAsync();
                 await transaction.Received(1).CommitAsync();
             }
@@ -107,12 +125,7 @@ namespace Neo4jClient.Tests.Transactions
             [Fact]
             public async Task SimpleTransaction_RetrieveAndSerializeAnonymousResult()
             {
-                IAsyncSession session;
-                IDriver driver;
-                IAsyncTransaction transaction;
-                IGraphClient graphClient;
-
-                GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
+                GetAndConnectGraphClient(out var graphClient, out var driver, out var session, out var transaction);
 
                 ITransactionalGraphClient txGc = (ITransactionalGraphClient)graphClient;
                 using (var tx = txGc.BeginTransaction())

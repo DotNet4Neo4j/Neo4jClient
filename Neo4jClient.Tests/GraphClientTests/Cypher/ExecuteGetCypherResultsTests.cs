@@ -27,7 +27,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         {
             const string queryText = @"RETURN [] AS p";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -63,7 +63,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     {"p1", 219}
                 };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -124,7 +124,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     {"p0", 123}
                 },
                 CypherResultMode.Projection,
-                CypherResultFormat.Rest);
+                CypherResultFormat.Rest, "neo4j");
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -175,7 +175,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 @"START root=node(0) MATCH root-[:HAS_COMPANIES]->()-[:HAS_COMPANY]->company, company--foo RETURN company, collect(foo) as Bar",
                 new Dictionary<string, object>(),
                 CypherResultMode.Projection,
-                CypherResultFormat.Rest);
+                CypherResultFormat.Rest, "neo4j");
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -337,7 +337,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     {"p0", 123}
                 },
                 CypherResultMode.Projection,
-                CypherResultFormat.Rest);
+                CypherResultFormat.Rest, "neo4j");
 
              var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -462,7 +462,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                         {"p0", 123}
                     },
                 CypherResultMode.Projection,
-                CypherResultFormat.Rest);
+                CypherResultFormat.Rest, "neo4j");
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -584,7 +584,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     {"p0", 123}
                 },
                 CypherResultMode.Projection,
-                CypherResultFormat.Rest);
+                CypherResultFormat.Rest, "neo4j");
 
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -681,7 +681,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         {
             // Arrange
             const string queryText = @"broken query";
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -740,7 +740,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 };
 
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set,CypherResultFormat.Transactional ,maxExecutionTime: expectedMaxExecutionTime);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set,CypherResultFormat.Transactional, "neo4j", maxExecutionTime: expectedMaxExecutionTime);
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -798,7 +798,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                     {"p1", 219}
                 };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
