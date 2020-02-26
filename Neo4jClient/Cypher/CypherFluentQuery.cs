@@ -22,6 +22,15 @@ namespace Neo4jClient.Cypher
         protected readonly bool CamelCaseProperties;
         internal bool IsWrite { get; private set; }
 
+        public string Database { get; set; }
+
+        public ICypherFluentQuery WithDatabase(string databaseName)
+        {
+            Database = databaseName;
+            QueryWriter.DatabaseName = databaseName;
+            return this;
+        }
+
         public ICypherFluentQuery Read
         {
             get
@@ -226,6 +235,7 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause("ON MATCH"));
         }
 
+        
         public ICypherFluentQuery Call(string storedProcedureText)
         {
             if (!Client.CypherCapabilities.SupportsStoredProcedures)
@@ -453,10 +463,7 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQueryAdvanced Advanced { get; }
 
-        IGraphClient IAttachedReference.Client
-        {
-            get { return Client; }
-        }
+        IGraphClient IAttachedReference.Client => Client;
 
         public ICypherFluentQuery ParserVersion(string version)
         {

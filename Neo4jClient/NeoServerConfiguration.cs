@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Execution;
+using Neo4jClient.Mappers;
 
 namespace Neo4jClient
 {
@@ -72,31 +73,8 @@ namespace Neo4jClient
                 }.Uri;
             }
 
-            var baseUriLengthToTrim = rootUriWithoutUserInfo.AbsoluteUri.Length - 1;
-
-            result.Batch = result.Batch.Substring(baseUriLengthToTrim);
-            result.Node = result.Node.Substring(baseUriLengthToTrim);
-            result.NodeIndex = result.NodeIndex.Substring(baseUriLengthToTrim);
-            result.Relationship = "/relationship"; //Doesn't come in on the Service Root
-            result.RelationshipIndex = result.RelationshipIndex.Substring(baseUriLengthToTrim);
-            result.ExtensionsInfo = result.ExtensionsInfo.Substring(baseUriLengthToTrim);
-
-            if (!string.IsNullOrEmpty(result.Transaction))
-            {
-                result.Transaction = result.Transaction.Substring(baseUriLengthToTrim);
-            }
-
-            if (result.Extensions != null && result.Extensions.GremlinPlugin != null)
-            {
-                result.Extensions.GremlinPlugin.ExecuteScript =
-                    result.Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-            }
-
-            if (result.Cypher != null)
-            {
-                result.Cypher = result.Cypher.Substring(baseUriLengthToTrim);
-            }
-
+            result.TrimUriFromProperties(rootUriWithoutUserInfo.AbsoluteUri);
+            
             return new NeoServerConfiguration(result)
             {
                 RootUri = rootUri,

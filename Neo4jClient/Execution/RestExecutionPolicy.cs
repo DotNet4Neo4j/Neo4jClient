@@ -20,9 +20,9 @@ namespace Neo4jClient.Execution
         {
         }
 
-        public override Uri BaseEndpoint
+        public override Uri BaseEndpoint(string database = null)
         {
-            get { return Client.RootEndpoint; }
+            return Replace(Client.RootEndpoint, database); 
         }
 
         public override Uri AddPath(Uri startUri, object startReference)

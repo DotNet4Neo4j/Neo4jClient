@@ -155,26 +155,26 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             var query = cfq.Query;
             query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
-
-        [Fact]
-        public void RootNode_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = Record.Exception(() => bgc.RootNode);
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
-
-        [Fact]
-        public async Task Create_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = await Record.ExceptionAsync(async () => await bgc.CreateAsync("value", null));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
+        //
+        // [Fact]
+        // public void RootNode_ThrowsInvalidOperationException()
+        // {
+        //     var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
+        //     var ex = Record.Exception(() => bgc.RootNode);
+        //     ex.Should().NotBeNull();
+        //     ex.Should().BeOfType<InvalidOperationException>();
+        //     ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
+        // }
+        //
+        // [Fact]
+        // public async Task Create_ThrowsInvalidOperationException()
+        // {
+        //     var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
+        //     var ex = await Record.ExceptionAsync(async () => await bgc.CreateAsync("value", null));
+        //     ex.Should().NotBeNull();
+        //     ex.Should().BeOfType<InvalidOperationException>();
+        //     ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
+        // }
 
         [Fact]
         public async Task GetAsync_ThrowsInvalidOperationException()

@@ -51,7 +51,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var queryParams = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional){Identifier = identifier};
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional, "neo4j") {Identifier = identifier};
 
             using (var testHarness = new BoltTestHarness())
             {

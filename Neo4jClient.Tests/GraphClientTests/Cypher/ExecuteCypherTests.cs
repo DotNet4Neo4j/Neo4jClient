@@ -25,7 +25,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         {
             const string queryText = @"MATCH (d) RETURN d";
             
-            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -54,7 +54,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 {"p1", 219}
             };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -79,7 +79,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = @"return 1";
             var parameters = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -120,7 +120,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = @"return 1";
             var parameters = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -160,7 +160,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = @"return 1";
             var parameters = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -200,7 +200,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = @"bad cypher";
             var parameters = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -236,7 +236,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = "MATCH n SET n.Value = 'value'";
             const int expectedMaxExecutionTime = 100;
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set,CypherResultFormat.DependsOnEnvironment , maxExecutionTime: expectedMaxExecutionTime);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, "neo4j", maxExecutionTime: expectedMaxExecutionTime);
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -273,7 +273,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         {
             const string queryText = "MATCH n SET n.Value = 'value'";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -314,7 +314,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             var customHeaders = new NameValueCollection();
             customHeaders.Add(headerName, headerValue);
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, maxExecutionTime: expectedMaxExecutionTime, customHeaders: customHeaders);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, "neo4j", maxExecutionTime: expectedMaxExecutionTime, customHeaders: customHeaders);
             
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
@@ -356,7 +356,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         {
             const string queryText = "MATCH n SET n.Value = 'value'";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness

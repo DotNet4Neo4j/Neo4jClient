@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -97,3 +98,4 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
     }
 }
+*/

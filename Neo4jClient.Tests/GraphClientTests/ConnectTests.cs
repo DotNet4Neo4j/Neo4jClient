@@ -47,53 +47,6 @@ namespace Neo4jClient.Tests.GraphClientTests
         }
 
         [Fact]
-        
-        public void RootNode_ShouldThrowInvalidOperationException_WhenNotConnectedYet()
-        {
-            var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
-
-            var ex = Assert.Throws<InvalidOperationException>(() => graphClient.RootNode.ToString());
-            Assert.Equal("The graph client is not connected to the server. Call the Connect method first.", ex.Message);
-        }
-
-        [Fact]
-        public async Task RootNode_ShouldReturnReferenceNode()
-        {
-            using (var testHarness = new RestTestHarness())
-            {
-                var graphClient = await testHarness.CreateAndConnectGraphClient();
-
-                Assert.NotNull(graphClient.RootNode);
-                Assert.Equal(123, graphClient.RootNode.Id);
-            }
-        }
-
-        [Fact]
-        public async Task RootNode_ShouldReturnNullReferenceNode_WhenNoReferenceNodeDefined()
-        {
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get(""),
-                    MockResponse.Json(HttpStatusCode.OK, @"{
-                        'batch' : 'http://foo/db/data/batch',
-                        'node' : 'http://foo/db/data/node',
-                        'node_index' : 'http://foo/db/data/index/node',
-                        'relationship_index' : 'http://foo/db/data/index/relationship',
-                        'extensions_info' : 'http://foo/db/data/ext',
-                        'extensions' : {
-                        }
-                    }")
-                }
-            })
-            {
-                var graphClient = await testHarness.CreateAndConnectGraphClient();
-
-                Assert.Null(graphClient.RootNode);
-            }
-        }
-
-        [Fact]
         public async Task ShouldParse15M02Version()
         {
             using (var testHarness = new RestTestHarness())
