@@ -24,6 +24,8 @@ namespace Neo4jClient
 {
     public class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient<HttpResponseMessage>, IDisposable
     {
+
+
         internal const string GremlinPluginUnavailable =
             "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
         internal const string MaxExecutionTimeHeaderKey = "max-execution-time";
@@ -125,20 +127,24 @@ namespace Neo4jClient
                 ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
                                                           RootApiResponse.Version >= new Version(1, 8);
 
-                if (RootApiResponse.Version < new Version(2, 0))
+                var version = RootApiResponse.Version;
+                if (version < new Version(2, 0))
                     cypherCapabilities = CypherCapabilities.Cypher19;
 
-                if (RootApiResponse.Version >= new Version(2, 2))
+                if (version >= new Version(2, 2))
                     cypherCapabilities = CypherCapabilities.Cypher22;
 
-                if (RootApiResponse.Version >= new Version(2, 2, 6))
+                if (version >= new Version(2, 2, 6))
                     cypherCapabilities = CypherCapabilities.Cypher226;
 
-                if (RootApiResponse.Version >= new Version(2, 3))
+                if (version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
 
-                if (RootApiResponse.Version >= new Version(3, 0))
+                if (version >= new Version(3, 0))
                     cypherCapabilities = CypherCapabilities.Cypher30;
+
+                if (version >= new Version(4, 0))
+                    cypherCapabilities = CypherCapabilities.Cypher40;
             }
             catch (AggregateException ex)
             {
@@ -182,6 +188,9 @@ namespace Neo4jClient
             policyFactory = new ExecutionPolicyFactory(this);
         }
 
+
+        // This is where the issue comes in - the 'Cypher' endpoint doesn't exist on a 4.x db - so 
+        //
         private Uri BuildUri(string relativeUri)
         {
             var baseUri = RootUri;
@@ -193,6 +202,33 @@ namespace Neo4jClient
 
             return new Uri(baseUri, relativeUri);
         }
+
+        private Uri BuildUri(string relativeUri, string database, bool supportsMultipleTenancy, string end) //todo bad name
+        {
+            var baseUri = RootUri;
+            if (!RootUri.AbsoluteUri.EndsWith("/"))
+                baseUri = new Uri(RootUri.AbsoluteUri + "/");
+
+            if (supportsMultipleTenancy && relativeUri.Contains("{databaseName}")) //TODO Const
+            {
+                if (string.IsNullOrWhiteSpace(database))
+                    database = "neo4j"; //TODO Const
+
+                relativeUri = relativeUri.Replace("{databaseName}", database);
+            }
+
+            if (relativeUri.StartsWith("/"))
+                relativeUri = relativeUri.Substring(1);
+            if (!string.IsNullOrWhiteSpace(end))
+            {
+                if (end.StartsWith("/"))
+                    end = end.Substring(1);
+                relativeUri += $"/{end}";
+            }
+
+            return new Uri(baseUri, relativeUri);
+        }
+
 
         private string SerializeAsJson(object contents)
         {
@@ -256,15 +292,6 @@ namespace Neo4jClient
             {
                 CheckRoot();
                 return BuildUri(RootApiResponse.Transaction);
-            }
-        }
-
-        public Uri CypherEndpoint
-        {
-            get
-            {
-                CheckRoot();
-                return BuildUri(RootApiResponse.Cypher);
             }
         }
 
@@ -487,6 +514,12 @@ namespace Neo4jClient
         }
 
         public DefaultContractResolver JsonContractResolver { get; set; }
+        public Uri GetTransactionEndpoint(string database)
+        {
+            CheckRoot();
+            var uri = BuildUri(RootApiResponse.Transaction, database, RootApiResponse.Version.Major >= 4, "commit");
+            return uri;
+        }
 
         public ITransactionManager<HttpResponseMessage> TransactionManager => transactionManager;
 

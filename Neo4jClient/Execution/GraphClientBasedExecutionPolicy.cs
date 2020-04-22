@@ -37,7 +37,7 @@ namespace Neo4jClient.Execution
         protected static Uri Replace(Uri toReplace, string replaceWith)
         {
             //TODO: Less CopyPasta
-            return new Uri(toReplace.AbsoluteUri.Replace("{database}", replaceWith ?? "neo4j"));
+            return new Uri(toReplace.AbsoluteUri.Replace("{databaseName}", replaceWith ?? "neo4j"));
         }
     }
 }

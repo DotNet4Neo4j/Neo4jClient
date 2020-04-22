@@ -38,10 +38,16 @@ namespace Neo4jClient.Execution
             return null;
         }
 
+        /*
+         * What I need to do here, is:
+         * IF v4 or > THEN we need to put the database name in the commit call
+         * ELSE just use default - BUT - maybe that can just use the DEfault
+         */
+
         public override Uri BaseEndpoint(string database = null)
         {
-            if (!InTransaction && Client.CypherEndpoint != null)
-                return Client.CypherEndpoint;
+           if (!InTransaction && Client.TransactionEndpoint != null)
+                return Client.GetTransactionEndpoint(database);
 
             var proxiedTransaction = GetTransactionInScope();
             var transactionalClient = (ITransactionalGraphClient) Client;
@@ -67,16 +73,16 @@ namespace Neo4jClient.Execution
                     "Unsupported operation: Attempting to serialize something that was not a query.");
             }
 
-            if (InTransaction)
-            {
+            // if (InTransaction)
+            // {
                 return Client
                     .Serializer
                     .Serialize(new CypherStatementList
                     {
                         new CypherTransactionStatement(query, query.ResultFormat == CypherResultFormat.Rest)
                     });
-            }
-            return Client.Serializer.Serialize(new CypherApiQuery(query));
+            // }
+            // return Client.Serializer.Serialize(new CypherApiQuery(query));
         }
 
         public override void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext)
