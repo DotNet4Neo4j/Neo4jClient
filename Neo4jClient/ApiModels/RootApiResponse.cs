@@ -6,11 +6,33 @@ namespace Neo4jClient.ApiModels
 {
     class RootApiResponse
     {
-        [JsonProperty("transaction")]
-        public string Transaction { get; set; }
+        private string _transactionFormat;
+        private string _transaction;
 
-        [JsonProperty("cypher")]
-        public string Cypher { get; set; }
+        [JsonProperty("transaction")]
+        public string Transaction
+        {
+            get => _transaction;
+            set
+            {
+                _transaction = value;
+                _transactionFormat = null;
+            }
+        }
+
+        internal string TransactionFormat
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_transactionFormat))
+                    _transactionFormat = Transaction?.Replace("databaseName", "0");
+
+                return _transactionFormat;
+            } 
+        }
+
+        // [JsonProperty("cypher")]
+        // public string Cypher { get; set; }
 
         [JsonProperty("batch")]
         public string Batch { get; set; }
@@ -92,7 +114,7 @@ namespace Neo4jClient.ApiModels
             ExtensionsInfo = (string.IsNullOrWhiteSpace(ExtensionsInfo)) ? null : ExtensionsInfo.Substring(baseUriLengthToTrim);
 
             Transaction = (string.IsNullOrWhiteSpace(Transaction)) ? null : Transaction.Substring(baseUriLengthToTrim);
-            Cypher = (string.IsNullOrWhiteSpace(Cypher)) ? null : Cypher.Substring(baseUriLengthToTrim);
+            //Cypher = (string.IsNullOrWhiteSpace(Cypher)) ? string.Empty : Cypher.Substring(baseUriLengthToTrim);
             Cluster = (string.IsNullOrWhiteSpace(Cluster)) ? null : Cluster.Substring(baseUriLengthToTrim);
 
             if (Extensions?.GremlinPlugin != null)

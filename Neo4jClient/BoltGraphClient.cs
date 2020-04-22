@@ -458,7 +458,12 @@ namespace Neo4jClient
         /// <inheritdoc />
         public DefaultContractResolver JsonContractResolver { get; set; }
 
-#endregion
+        public Uri GetTransactionEndpoint(string database)
+        {
+            throw new InvalidOperationException(NotValidForBolt);
+        }
+
+        #endregion
 
         #region Implementation of IRawGraphClient
 
