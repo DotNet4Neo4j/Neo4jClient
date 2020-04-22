@@ -20,7 +20,7 @@ namespace Neo4jClient
 
         Uri RootEndpoint { get; }
 
-        Uri CypherEndpoint { get; }
+        Uri TransactionEndpoint { get; }
 
         //Uri BoltEndpoint { get; }
 
@@ -36,5 +36,6 @@ namespace Neo4jClient
 
         List<JsonConverter> JsonConverters { get; }
         DefaultContractResolver JsonContractResolver { get; set; }
+        Uri GetTransactionEndpoint(string database);
     }
 }
