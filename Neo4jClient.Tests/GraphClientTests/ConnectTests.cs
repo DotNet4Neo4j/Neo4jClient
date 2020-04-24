@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 using NSubstitute;
@@ -49,12 +50,12 @@ namespace Neo4jClient.Tests.GraphClientTests
         [Fact]
         public async Task ShouldParse15M02Version()
         {
-            using (var testHarness = new RestTestHarness())
+            RootApiResponse rar = new RootApiResponse
             {
-                var graphClient = (GraphClient)await testHarness.CreateAndConnectGraphClient();
-
-                Assert.Equal("1.5.0.2", graphClient.RootApiResponse.Version.ToString());
-            }
+                Neo4jVersion = "1.5.M02"
+            };
+            
+            Assert.Equal("1.5.0.2", rar.Version.ToString());
         }
 
         [Fact]
@@ -193,7 +194,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         {
             using (var testHarness = new RestTestHarness()
             {
-                { MockRequest.Get(""), MockResponse.NeoRoot() }
+                { MockRequest.Get(""), MockResponse.NeoRoot20() }
             })
             {
                 var httpClient = testHarness.GenerateHttpClient("http://foo/db/data");

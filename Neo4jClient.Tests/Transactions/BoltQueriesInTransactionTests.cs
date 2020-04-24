@@ -48,11 +48,15 @@ namespace Neo4jClient.Tests.Transactions
             var mockTransaction = Substitute.For<IAsyncTransaction>();
             mockTransaction.RunAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(mockStatementResult);
 
+            var task = Task.FromResult(mockTransaction);
+            task.Result.Should().NotBe(null);
+
             var mockSession = Substitute.For<IAsyncSession>();
             var dbmsReturn = GetDbmsComponentsResponse();
             mockSession.RunAsync("CALL dbms.components()").Returns(dbmsReturn);
-            mockSession.BeginTransactionAsync().Returns(mockTransaction);
-            
+            mockSession.BeginTransactionAsync().Returns(Task.FromResult(mockTransaction));
+            mockSession.BeginTransactionAsync(Arg.Any<Action<TransactionConfigBuilder>>()).Returns(Task.FromResult(mockTransaction));
+
             var mockDriver = Substitute.For<IDriver>();
             mockDriver.AsyncSession().Returns(mockSession);
             mockDriver.AsyncSession(Arg.Any<Action<SessionConfigBuilder>>()).Returns(mockSession);

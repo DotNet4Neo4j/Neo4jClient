@@ -10,6 +10,13 @@ namespace Neo4jClient.Tests
     {
         public BoltTestHarness()
         {
+            var mockResultCursor = new Mock<IResultCursor>();
+            
+            var mockTransaction = new Mock<IAsyncTransaction>();
+            mockTransaction
+                .Setup(t => t.RunAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
+                .Returns(Task.FromResult(mockResultCursor.Object));
+
             var mockSession = new Mock<IAsyncSession>(MockBehavior.Loose);
             mockSession
                 .Setup(s => s.RunAsync("CALL dbms.components()"))
@@ -23,6 +30,12 @@ namespace Neo4jClient.Tests
             mockSession
                 .Setup(s => s.ReadTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task>>()))
                 .Throws(new Exception("Should never use synchronous method"));
+            mockSession
+                .Setup(s => s.BeginTransactionAsync(It.IsAny<Action<TransactionConfigBuilder>>()))
+                .Returns(Task.FromResult(mockTransaction.Object));
+            mockSession
+                .Setup(s => s.BeginTransactionAsync())
+                .Returns(Task.FromResult(mockTransaction.Object));
 
             var mockDriver = new Mock<IDriver>(MockBehavior.Strict);
             mockDriver

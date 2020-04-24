@@ -27,10 +27,7 @@ namespace Neo4jClient.ApiModels.Cypher
         }
 
         [JsonProperty("statements")]
-        public IList<CypherTransactionStatement> Statements
-        {
-            get { return _statements; }
-        }
+        public IList<CypherTransactionStatement> Statements => _statements;
 
         public IEnumerator<CypherTransactionStatement> GetEnumerator()
         {
