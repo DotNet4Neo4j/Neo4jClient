@@ -32,7 +32,7 @@ namespace Neo4jClient.Tests.Cypher
                 .ReturnDistinct<object>("n")
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "RETURN distinct n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN distinct n", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
@@ -47,7 +47,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "LIMIT {p1}", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "LIMIT $p1", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(5, query.QueryParameters["p1"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
@@ -64,7 +64,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT {p1}", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT $p1", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(5, query.QueryParameters["p1"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
@@ -79,7 +79,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Return<object>("n")
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "RETURN n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
@@ -105,7 +105,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "RETURN n" + Environment.NewLine + "LIMIT {p1}", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n" + Environment.NewLine + "LIMIT $p1", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(5, query.QueryParameters["p1"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
@@ -122,7 +122,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "RETURN n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT {p1}", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT $p1", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(5, query.QueryParameters["p1"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
@@ -145,7 +145,7 @@ namespace Neo4jClient.Tests.Cypher
                 .OrderBy("common.FirstName")
                 .Query;
 
-            Assert.Equal(string.Format("START me=node({{p0}}), viewer=node({{p1}}){0}MATCH me-[:FRIEND]-common-[:FRIEND]-viewer{0}RETURN common{0}LIMIT {{p2}}{0}ORDER BY common.FirstName", Environment.NewLine), query.QueryText);
+            Assert.Equal(string.Format("START me=node($p0), viewer=node($p1){0}MATCH me-[:FRIEND]-common-[:FRIEND]-viewer{0}RETURN common{0}LIMIT $p2{0}ORDER BY common.FirstName", Environment.NewLine), query.QueryText);
             Assert.Equal(123L, query.QueryParameters["p0"]);
             Assert.Equal(456L, query.QueryParameters["p1"]);
             Assert.Equal(5, query.QueryParameters["p2"]);
@@ -396,16 +396,17 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
+        /*
         [Fact]
         public async Task ShouldSupportAnonymousReturnTypesEndToEnd()
         {
-            string queryText = "START root=node({p0})" + Environment.NewLine + "MATCH root-->other" + Environment.NewLine + "RETURN other AS Foo";
+            string queryText = "START root=node($p0)" + Environment.NewLine + "MATCH root-->other" + Environment.NewLine + "RETURN other AS Foo";
             var parameters = new Dictionary<string, object>
             {
                 {"p0", 123}
             };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -508,13 +509,13 @@ namespace Neo4jClient.Tests.Cypher
         [Fact]
         public async Task ShouldSupportAnonymousReturnTypesEndToEndCamel()
         {
-            string queryText = "START root=node({p0})" + Environment.NewLine + "MATCH root-->other" + Environment.NewLine + "RETURN other AS Foo";
+            string queryText = "START root=node($p0)" + Environment.NewLine + "MATCH root-->other" + Environment.NewLine + "RETURN other AS Foo";
             var parameters = new Dictionary<string, object>
             {
                 {"p0", 123}
             };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection, "neo4j");
             var cypherApiQuery = new CypherApiQuery(cypherQuery);
 
             using (var testHarness = new RestTestHarness
@@ -613,6 +614,7 @@ namespace Neo4jClient.Tests.Cypher
                 Assert.Equal(37, result.Foo.UniqueId);
             }
         }
+        */
 
         [Fact]
         public void BinaryExpressionIsNotNull()

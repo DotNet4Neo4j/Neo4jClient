@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Neo4j.Driver.V1;
+using Moq;
+using Neo4j.Driver;
 using Neo4jClient.Tests.BoltGraphClientTests;
 using Neo4jClient.Transactions;
 using NSubstitute;
@@ -11,13 +12,77 @@ using Xunit;
 
 namespace Neo4jClient.Tests.Transactions
 {
-
     public class BoltQueriesInTransactionTests : IClassFixture<CultureInfoSetupFixture>
     {
-        private class Foo { }
+        private class Foo
+        {
+        }
+
+        public class TransactionGraphClientTests : IClassFixture<CultureInfoSetupFixture>
+        {
+            private class MockNode
+            {
+                public string Name { get; set; }
+            }
+
+            [Fact]
+            public async Task SimpleTransaction_AsTransactionalGc_1Query()
+            {
+                GetAndConnectGraphClient(out var graphClient, out var driver, out var session, out var transaction);
+
+                var txGc = (ITransactionalGraphClient) graphClient;
+                using (var tx = txGc.BeginTransaction())
+                {
+                    await txGc.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResultsAsync();
+                    await tx.CommitAsync();
+                }
+
+                driver.Received(2).AsyncSession(Arg.Any<Action<SessionConfigBuilder>>()); //one for 'Begin Tx', one for Execute.
+                await session.Received(1).BeginTransactionAsync();
+                await transaction.Received(1).CommitAsync();
+            }
+
+            [Fact]
+            public async Task SimpleTransaction_AsTransactionalGc_1Query_Moq()
+            {
+                using (var harness = new BoltTestHarness())
+                {
+                    var graphClient = await harness.CreateAndConnectBoltGraphClient();
+
+                    var txGc = (ITransactionalGraphClient) graphClient;
+                    using (var tx = txGc.BeginTransaction())
+                    {
+                        var query = txGc.Cypher.Match("(n)").Set("n.Value = 'test'");
+                        await query.ExecuteWithoutResultsAsync();
+                        await tx.CommitAsync();
+                    }
+
+                    harness.MockDriver.Verify(md => md.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Exactly(2));
+                }
+            }
+
+            [Fact]
+            public async Task SimpleTransaction_RetrieveAndSerializeAnonymousResult()
+            {
+                GetAndConnectGraphClient(out var graphClient, out var driver, out var session, out var transaction);
+
+                var txGc = (ITransactionalGraphClient) graphClient;
+                using (var tx = txGc.BeginTransaction())
+                {
+                    var node = (await txGc.Cypher.Match("(n:Node)").Return(n => new {Node = n.As<MockNode>()}).ResultsAsync).SingleOrDefault();
+                    node?.Node.Name.Should().Be("Value");
+                    await tx.CommitAsync();
+                }
+
+                driver.Received(1).AsyncSession(Arg.Any<Action<SessionConfigBuilder>>());
+                await session.Received(1).BeginTransactionAsync();
+                await transaction.Received(1).CommitAsync();
+            }
+        }
+
         #region Helper Methods
 
-        private static IStatementResultCursor GetDbmsComponentsResponse()
+        private static IResultCursor GetDbmsComponentsResponse()
         {
             var record = Substitute.For<IRecord>();
             record["name"].Returns("neo4j kernel");
@@ -29,41 +94,43 @@ namespace Neo4jClient.Tests.Transactions
             return statementResult;
         }
 
-        private static void GetDriverAndSession(out IDriver driver, out ISession session, out Neo4j.Driver.V1.ITransaction transaction)
+        private static void GetDriverAndSession(out IDriver driver, out IAsyncSession session, out IAsyncTransaction transaction)
         {
             var mockNode = Substitute.For<INode>();
             mockNode["Name"].Returns("Value");
-            mockNode.Labels.Returns(new List<string>() {"Node"});
-            mockNode.Properties.Returns(new Dictionary<string, object>() {{"Name", "Value"}});
+            mockNode.Labels.Returns(new List<string> {"Node"});
+            mockNode.Properties.Returns(new Dictionary<string, object> {{"Name", "Value"}});
 
             var mockRecord = Substitute.For<IRecord>();
-            mockRecord.Keys.Returns(new List<string>(){"Node"});
+            mockRecord.Keys.Returns(new List<string> {"Node"});
             mockRecord["Node"].Returns(mockNode);
             mockRecord.Values["Node"].Returns(mockNode);
 
             var mockStatementResult = new TestStatementResult(new List<IRecord>(new[] {mockRecord}));
 
-            var mockTransaction = Substitute.For<Neo4j.Driver.V1.ITransaction>();
+            var mockTransaction = Substitute.For<IAsyncTransaction>();
             mockTransaction.RunAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(mockStatementResult);
 
-            var mockSession = Substitute.For<ISession>();
+            var task = Task.FromResult(mockTransaction);
+            task.Result.Should().NotBe(null);
+
+            var mockSession = Substitute.For<IAsyncSession>();
             var dbmsReturn = GetDbmsComponentsResponse();
             mockSession.RunAsync("CALL dbms.components()").Returns(dbmsReturn);
-            mockSession.BeginTransaction().Returns(mockTransaction);
-            
+            mockSession.BeginTransactionAsync().Returns(Task.FromResult(mockTransaction));
+            mockSession.BeginTransactionAsync(Arg.Any<Action<TransactionConfigBuilder>>()).Returns(Task.FromResult(mockTransaction));
+
             var mockDriver = Substitute.For<IDriver>();
-            mockDriver.Session().Returns(mockSession);
-            mockDriver.Session(Arg.Any<AccessMode>()).Returns(mockSession);
-            mockDriver.Session(Arg.Any<AccessMode>(), Arg.Any<IEnumerable<string>>()).Returns(mockSession);
-            mockDriver.Session(Arg.Any<IEnumerable<string>>()).Returns(mockSession);
-            mockDriver.Uri.Returns(new Uri("bolt://localhost"));
+            mockDriver.AsyncSession().Returns(mockSession);
+            mockDriver.AsyncSession(Arg.Any<Action<SessionConfigBuilder>>()).Returns(mockSession);
+            // mockDriver.Uri.Returns(new Uri("bolt://localhost"));
 
             driver = mockDriver;
             session = mockSession;
             transaction = mockTransaction;
         }
 
-        private static void GetAndConnectGraphClient(out IGraphClient graphClient, out IDriver driver, out ISession session, out Neo4j.Driver.V1.ITransaction transaction)
+        private static void GetAndConnectGraphClient(out IGraphClient graphClient, out IDriver driver, out IAsyncSession session, out IAsyncTransaction transaction)
         {
             GetDriverAndSession(out driver, out session, out transaction);
             var client = new BoltGraphClient(driver);
@@ -75,62 +142,5 @@ namespace Neo4jClient.Tests.Transactions
         }
 
         #endregion Helper Methods
-
-        public class TransactionGraphClientTests : IClassFixture<CultureInfoSetupFixture>
-        {
-
-            [Fact]
-            public async Task SimpleTransaction_AsTransactionalGc_1Query()
-            {
-                ISession session;
-                IDriver driver;
-                Neo4j.Driver.V1.ITransaction transaction;
-                IGraphClient graphClient;
-
-                GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
-
-                ITransactionalGraphClient txGc = (ITransactionalGraphClient) graphClient;
-                using (var tx = txGc.BeginTransaction())
-                {
-                    await txGc.Cypher.Match("(n)").Set("n.Value = 'test'").ExecuteWithoutResultsAsync();
-                    await tx.CommitAsync();
-                }
-
-                driver.Received(1).Session((IEnumerable<string>)null);
-                session.Received(1).BeginTransaction();
-                transaction.Received(1).CommitAsync();
-            }
-
-            private class MockNode
-            {
-                public string Name { get; set; }
-            }
-
-            [Fact]
-            public async Task SimpleTransaction_RetrieveAndSerializeAnonymousResult()
-            {
-                ISession session;
-                IDriver driver;
-                Neo4j.Driver.V1.ITransaction transaction;
-                IGraphClient graphClient;
-
-                GetAndConnectGraphClient(out graphClient, out driver, out session, out transaction);
-
-                ITransactionalGraphClient txGc = (ITransactionalGraphClient)graphClient;
-                using (var tx = txGc.BeginTransaction())
-                {
-                    var node = (await txGc.Cypher.Match("(n:Node)").Return(n => new {Node = n.As<MockNode>()}).ResultsAsync).SingleOrDefault();
-
-                    node.Node.Name.Should().Be("Value");
-
-                    await tx.CommitAsync();
-                }
-
-                driver.Received(1).Session((IEnumerable<string>) null);
-                session.Received(1).BeginTransaction();
-                transaction.Received(1).CommitAsync();
-            }
-        }
     }
 }
-

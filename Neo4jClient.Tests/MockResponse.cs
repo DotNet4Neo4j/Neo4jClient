@@ -41,24 +41,24 @@ namespace Neo4jClient.Tests
             };
         }
 
-        public static MockResponse NeoRoot()
-        {
-            return Json(HttpStatusCode.OK, @"{
-                'cypher' : 'http://foo/db/data/cypher',
-                'batch' : 'http://foo/db/data/batch',
-                'node' : 'http://foo/db/data/node',
-                'node_index' : 'http://foo/db/data/index/node',
-                'relationship_index' : 'http://foo/db/data/index/relationship',
-                'reference_node' : 'http://foo/db/data/node/123',
-                'neo4j_version' : '1.5.M02',
-                'extensions_info' : 'http://foo/db/data/ext',
-                'extensions' : {
-                    'GremlinPlugin' : {
-                        'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
-                    }
-                }
-            }");
-        }
+        // public static MockResponse NeoRoot()
+        // {
+        //     return Json(HttpStatusCode.OK, @"{
+        //         'cypher' : 'http://foo/db/data/cypher',
+        //         'batch' : 'http://foo/db/data/batch',
+        //         'node' : 'http://foo/db/data/node',
+        //         'node_index' : 'http://foo/db/data/index/node',
+        //         'relationship_index' : 'http://foo/db/data/index/relationship',
+        //         'reference_node' : 'http://foo/db/data/node/123',
+        //         'neo4j_version' : '1.5.M02',
+        //         'extensions_info' : 'http://foo/db/data/ext',
+        //         'extensions' : {
+        //             'GremlinPlugin' : {
+        //                 'execute_script' : 'http://foo/db/data/ext/GremlinPlugin/graphdb/execute_script'
+        //             }
+        //         }
+        //     }");
+        // }
 
         public static MockResponse NeoRoot20()
         {

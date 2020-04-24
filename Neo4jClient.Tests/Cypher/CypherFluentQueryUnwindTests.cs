@@ -43,7 +43,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Unwind(collection, "alias")
                 .Query;
 
-            Assert.Equal("UNWIND {p0} AS alias", query.QueryText);
+            Assert.Equal("UNWIND $p0 AS alias", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(collection, query.QueryParameters["p0"]);
         }

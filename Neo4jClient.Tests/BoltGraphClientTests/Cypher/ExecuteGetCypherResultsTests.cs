@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Xunit;
@@ -129,7 +129,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
             // Arrange
             const string queryText = "MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -180,7 +180,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
             // Arrange
             const string queryText = @"MATCH (n:Test)-[r]->(t:Test) RETURN r AS Rel";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -245,7 +245,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
             var queryParams = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -287,7 +287,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
             var queryParams = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -317,7 +317,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
             var queryParams = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -386,7 +386,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
             var queryParams = new Dictionary<string, object>() {{"obj", testNode}};
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -426,7 +426,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
             const string queryText = "MATCH (start:Node) WITH {Node: 3, Count: 1} AS Node, start RETURN Node, start";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection,
-                CypherResultFormat.Transactional);
+                CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -497,7 +497,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
             const string queryText = "MATCH (start:Node) WITH {Node: start, Count: 1} AS Node, start RETURN Node, start";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection,
-                CypherResultFormat.Transactional);
+                CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -572,7 +572,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
             // Arrange
             const string queryText = @"MATCH (start:Node) RETURN [start.Id, start.Id] AS Ids";
 
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -616,7 +616,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         public async Task ShouldDeserializePathsResultAsSetBased()
         {
             // Arrange
-            const string queryText = @"MATCH (start:Node {Id:{p0}}),(end:Node {Id: {p1}}), p = shortestPath((start)-[*..5]->(end)) RETURN p";
+            const string queryText = @"MATCH (start:Node {Id:$p0}),(end:Node {Id: $p1}), p = shortestPath((start)-[*..5]->(end)) RETURN p";
 
             var parameters = new Dictionary<string, object>
             {
@@ -624,7 +624,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 {"p1", 219}
             };
 
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest);
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
             
             using (var testHarness = new BoltTestHarness())
             {
@@ -660,7 +660,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //        {
         //            // Arrange
         //            const string queryText = @"
-        //                START x = node({p0})
+        //                START x = node($p0)
         //                MATCH x-[r]->n
         //                RETURN type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
         //                LIMIT 3";
@@ -873,7 +873,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //        {
         //            // Arrange
         //            const string queryText = @"
-        //                START x = node({p0})
+        //                START x = node($p0)
         //                MATCH x-[r]->n
         //                RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
         //                LIMIT 3";
@@ -998,7 +998,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //        {
         //            // Arrange
         //            const string queryText = @"
-        //                START x = node({p0})
+        //                START x = node($p0)
         //                MATCH x-[r]->n
         //                RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
         //                LIMIT 3";
@@ -1120,7 +1120,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //        {
         //            // Arrange
         //            const string queryText = @"
-        //                START x = node({p0})
+        //                START x = node($p0)
         //                MATCH x-[r]->n
         //                RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
         //                LIMIT 3";
@@ -1276,7 +1276,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //        {
         //            const int expectedMaxExecutionTime = 100;
         //
-        //            const string queryText = @"START d=node({p0}), e=node({p1})
+        //            const string queryText = @"START d=node($p0), e=node($p1)
         //                                        MATCH p = allShortestPaths( d-[*..15]-e )
         //                                        RETURN p";
         //
@@ -1294,7 +1294,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //            {
         //                {
         //                    MockRequest.Get(""),
-        //                    MockResponse.NeoRoot()
+        //                    MockResponse.NeoRoot20()
         //                },
         //                {
         //                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
@@ -1335,7 +1335,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //        [Fact]
         //        public void DoesntSendMaxExecutionTime_WhenNotAddedToQuery()
         //        {
-        //            const string queryText = @"START d=node({p0}), e=node({p1})
+        //            const string queryText = @"START d=node($p0), e=node($p1)
         //                                        MATCH p = allShortestPaths( d-[*..15]-e )
         //                                        RETURN p";
         //
@@ -1352,7 +1352,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //            {
         //                {
         //                    MockRequest.Get(""),
-        //                    MockResponse.NeoRoot()
+        //                    MockResponse.NeoRoot20()
         //                },
         //                {
         //                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),

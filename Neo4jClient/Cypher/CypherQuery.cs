@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using Neo4j.Driver;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json.Serialization;
 
@@ -29,9 +30,10 @@ namespace Neo4jClient.Cypher
         public CypherQuery(
             string queryText,
             IDictionary<string, object> queryParameters,
-            CypherResultMode resultMode,
+            CypherResultMode resultMode, 
+            string database,
             IContractResolver contractResolver = null) :
-            this(queryText, queryParameters, resultMode, CypherResultFormat.DependsOnEnvironment, contractResolver)
+            this(queryText, queryParameters, resultMode, CypherResultFormat.DependsOnEnvironment, database, contractResolver)
         {
         }
 
@@ -40,11 +42,12 @@ namespace Neo4jClient.Cypher
             IDictionary<string, object> queryParameters,
             CypherResultMode resultMode,
             CypherResultFormat resultFormat,
+            string database,
             IContractResolver contractResolver = null, 
             int? maxExecutionTime = null, 
             NameValueCollection customHeaders = null,
             bool isWrite = true,
-            IEnumerable<string> bookmarks = null,
+            IEnumerable<Bookmark> bookmarks = null,
             string identifier = null
             )
         {
@@ -58,13 +61,14 @@ namespace Neo4jClient.Cypher
             IsWrite = isWrite;
             Bookmarks = bookmarks;
             Identifier = identifier;
+            Database = database;
         }
 
         public bool IsWrite { get; }
 
         public string Identifier { get; set; }
 
-        public IEnumerable<string> Bookmarks { get; set; }
+        public IEnumerable<Bookmark> Bookmarks { get; set; }
 
         public IDictionary<string, object> QueryParameters => queryParameters;
 
@@ -75,6 +79,8 @@ namespace Neo4jClient.Cypher
         public CypherResultMode ResultMode => resultMode;
 
         public IContractResolver JsonContractResolver => jsonContractResolver;
+
+        public string Database { get; }
 
         public int? MaxExecutionTime => maxExecutionTime;
 
@@ -107,7 +113,7 @@ namespace Neo4jClient.Cypher
                         {
                             var value = queryParameters[paramName];
                             value = serializer.Serialize(value);                           
-                            return current.Replace("$" + paramName, value.ToString()).Replace("{" + paramName + "}", value.ToString());
+                            return current.Replace($"${paramName}", value.ToString());
                         });
 
                 return text;

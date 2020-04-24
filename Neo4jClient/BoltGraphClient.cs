@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
@@ -68,14 +68,14 @@ namespace Neo4jClient
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
             {
-                if (uri.Scheme.ToLowerInvariant() != "bolt+routing")
+                if (uri.Scheme.ToLowerInvariant() != "neo4j")
                     throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' scheme, not '{uri.Scheme}'.");
 
                 addressResolver = new AddressResolver(uri, localUris);
             }
-            else if (uri.Scheme.ToLowerInvariant() != "bolt" && uri.Scheme.ToLowerInvariant() != "bolt+routing")
+            else if (uri.Scheme.ToLowerInvariant() != "bolt" && uri.Scheme.ToLowerInvariant() != "neo4j")
             {
-                throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' or 'bolt+routing://' scheme, not '{uri.Scheme}'.");
+                throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' or 'neo4j://' scheme, not '{uri.Scheme}'.");
             }
 
             this.uri = uri;
@@ -106,7 +106,7 @@ namespace Neo4jClient
         { }
 
         public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null)
-            : this(new Uri("bolt+routing://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm)
+            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm)
         { }
 
         public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null)
@@ -118,7 +118,7 @@ namespace Neo4jClient
         { }
 
         public BoltGraphClient(IDriver driver)
-            : this(driver.Uri, null, null, null)
+            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null)
         {
             Driver = driver;
         }
@@ -174,28 +174,29 @@ namespace Neo4jClient
                 return executionContext;
             }
 
-            public void Complete(CypherQuery query, string lastBookmark)
+            public void Complete(CypherQuery query, Bookmark lastBookmark)
             {
                 // only parse the events when there's an event handler
                 Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, 0, null, identifier: query.Identifier, bookmarks: query.Bookmarks);
             }
 
-            public void Complete(CypherQuery query, string lastBookmark, int resultsCount)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, int resultsCount)
             {
                 // only parse the events when there's an event handler
                 Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, resultsCount, null, query.CustomHeaders, identifier: query.Identifier, bookmarks: query.Bookmarks);
             }
 
-            public void Complete(CypherQuery query, string lastBookmark, Exception exception)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, Exception exception)
             {
                 // only parse the events when there's an event handler
                 Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, -1, exception, identifier:query.Identifier, bookmarks:query.Bookmarks);
             }
 
-            public void Complete(string queryText, string lastBookmark, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null, string identifier = null, IEnumerable<string> bookmarks = null)
+            public void Complete(string queryText, Bookmark lastBookmark, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null, string identifier = null, IEnumerable<Bookmark> bookmarks = null)
             {
                 var args = new OperationCompletedEventArgs
                 {
+                    
                     LastBookmark = lastBookmark,
                     QueryText = queryText,
                     ResourcesReturned = resultsCount,
@@ -430,22 +431,23 @@ namespace Neo4jClient
                 Driver = driver;
             }
 
-            using (var session = Driver.Session(AccessMode.Read))
+            var session = Driver.AsyncSession(x => x.WithDefaultAccessMode(AccessMode.Read));
+
+            var serverInformation = await session.RunAsync("CALL dbms.components()").ConfigureAwait(false);
+            foreach (var record in await serverInformation.ToListAsync().ConfigureAwait(false))
             {
-                var serverInformation = await session.RunAsync("CALL dbms.components()").ConfigureAwait(false);
-                foreach (var record in await serverInformation.ToListAsync().ConfigureAwait(false))
-                {
-                    var name = record["name"].As<string>();
-                    if (name.ToLowerInvariant() != "neo4j kernel")
-                        continue;
+                var name = record["name"].As<string>();
+                if (name.ToLowerInvariant() != "neo4j kernel")
+                    continue;
 
-                    var version = record["versions"].As<List<object>>();
-                    ServerVersion = RootApiResponse.GetVersion(version?.First()?.ToString());
+                var version = record["versions"].As<List<object>>();
+                ServerVersion = RootApiResponse.GetVersion(version?.First()?.ToString());
 
-                    if (ServerVersion > new Version(3, 0))
-                        CypherCapabilities = CypherCapabilities.Cypher30;
-                }
+                if (ServerVersion > new Version(3, 0))
+                    CypherCapabilities = CypherCapabilities.Cypher30;
             }
+
+            await session.CloseAsync();
 
             IsConnected = true;
         }
@@ -456,7 +458,12 @@ namespace Neo4jClient
         /// <inheritdoc />
         public DefaultContractResolver JsonContractResolver { get; set; }
 
-#endregion
+        public Uri GetTransactionEndpoint(string database)
+        {
+            throw new InvalidOperationException(NotValidForBolt);
+        }
+
+        #endregion
 
         #region Implementation of IRawGraphClient
 
@@ -468,7 +475,7 @@ namespace Neo4jClient
 
             var context = ExecutionContext.Begin(this);
             List<TResult> results;
-            string lastBookmark = null;
+            Bookmark lastBookmark = null;
             try
             {
                 if (InTransaction)
@@ -478,15 +485,15 @@ namespace Neo4jClient
                 }
                 else
                 {
-                    using (var session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read, query.Bookmarks))
-                    {
-                        var result = query.IsWrite 
-                            ? await session.WriteTransactionAsync( s => s.RunAsync(query, this)).ConfigureAwait(false)
-                            : await session.ReadTransactionAsync(s => s.RunAsync(query, this)).ConfigureAwait(false);
+                    var session = Driver.AsyncSession(x => x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read).WithBookmarks(query.Bookmarks.ToArray()));
 
-                        results = ParseResults<TResult>(await result.ToListAsync().ConfigureAwait(false), query);
-                        lastBookmark = session.LastBookmark;
-                    }
+                    var result = query.IsWrite
+                        ? await session.WriteTransactionAsync(s => s.RunAsync(query, this)).ConfigureAwait(false)
+                        : await session.ReadTransactionAsync(s => s.RunAsync(query, this)).ConfigureAwait(false);
+
+                    results = ParseResults<TResult>(await result.ToListAsync().ConfigureAwait(false), query);
+                    lastBookmark = session.LastBookmark;
+                    await session.CloseAsync();
                 }
             }
             catch (AggregateException aggregateException)
@@ -556,7 +563,7 @@ namespace Neo4jClient
                 });
             }
 
-            using (var session = Driver.Session(query.IsWrite ? AccessMode.Write : AccessMode.Read, query.Bookmarks))
+            var session = Driver.AsyncSession(x => x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read).WithBookmarks().WithBookmarks(query.Bookmarks.ToArray()) );
             {
                 if (query.IsWrite)
                     await session.WriteTransactionAsync(async s => await s.RunAsync(query, this)).ConfigureAwait(false);

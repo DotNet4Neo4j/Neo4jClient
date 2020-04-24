@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Neo4jClient.ApiModels.Cypher;
@@ -43,15 +44,15 @@ namespace Neo4jClient.Tests.GraphClientTests
         [Fact]
         public async Task GraphClientFactoryUseCase()
         {
-            const string queryText = @"MATCH (d) RETURN d";
+            const string queryText = @"RETURN d";
 
-            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest);
-            var cypherApiQuery = new CypherApiQuery(cypherQuery);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
 
             using (var testHarness = new RestTestHarness
             {
-                { MockRequest.Get("/"), MockResponse.NeoRoot() },
-                { MockRequest.PostObjectAsJson("/cypher", cypherApiQuery), new MockResponse { StatusCode = HttpStatusCode.OK } }
+                { MockRequest.Get("/"), MockResponse.NeoRoot20() },
+                { MockRequest.PostObjectAsJson("/transaction/commit", cypherApiQuery), new MockResponse { StatusCode = HttpStatusCode.OK } }
             })
             {
                 var httpClient = testHarness.GenerateHttpClient(testHarness.BaseUri);
@@ -59,8 +60,7 @@ namespace Neo4jClient.Tests.GraphClientTests
                 var executeConfiguration = new ExecutionConfiguration
                 {
                     HttpClient = httpClient,
-                    UserAgent =
-                        string.Format("Neo4jClient/{0}", typeof(NeoServerConfiguration).Assembly.GetName().Version),
+                    UserAgent = $"Neo4jClient/{typeof(NeoServerConfiguration).Assembly.GetName().Version}",
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters
                 };
@@ -71,7 +71,7 @@ namespace Neo4jClient.Tests.GraphClientTests
 
                 using (var client = await factory.CreateAsync(httpClient))
                 {
-                    await client.Cypher.Match("(d)").Return<object>("d").ExecuteWithoutResultsAsync();
+                    await client.Cypher.Return<object>("d").ExecuteWithoutResultsAsync();
                 }
             }
         }

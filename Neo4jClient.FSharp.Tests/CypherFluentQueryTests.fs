@@ -16,7 +16,7 @@ module Neo4jClient.Tests.Cypher.Where
         cfq
             .Where(fun u -> u.Count = 1000).Query
     Assert.NotNull query
-    Assert.Equal(query.QueryText, "WHERE (u.Count = {p0})")
+    Assert.Equal(query.QueryText, "WHERE (u.Count = $p0)")
     Assert.Equal(query.QueryParameters.["p0"], 1000)
 
   [<Fact>]
