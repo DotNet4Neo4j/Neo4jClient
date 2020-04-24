@@ -41,7 +41,7 @@ namespace Neo4jClient.Execution
         /*
          * What I need to do here, is:
          * IF v4 or > THEN we need to put the database name in the commit call
-         * ELSE just use default - BUT - maybe that can just use the DEfault
+         * ELSE just use default - BUT - maybe that can just use the Default
          */
 
         public override Uri BaseEndpoint(string database = null)

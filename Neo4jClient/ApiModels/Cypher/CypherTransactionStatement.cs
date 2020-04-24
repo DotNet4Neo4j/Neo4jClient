@@ -8,35 +8,25 @@ namespace Neo4jClient.ApiModels.Cypher
     /// Very similar to CypherApiQuery but it's used for opened transactions as their serialization
     /// is different
     /// </summary>
-    class CypherTransactionStatement
+    internal class CypherTransactionStatement
     {
-        private readonly string _queryText;
-        private readonly IDictionary<string, object> _queryParameters;
-        private readonly string[] _formatContents; 
+        private readonly string[] formatContents; 
 
         public CypherTransactionStatement(CypherQuery query, bool restFormat)
         {
-            _queryText = query.QueryText;
-            _queryParameters = query.QueryParameters ?? new Dictionary<string, object>();
-            _formatContents = restFormat ? new[] {"REST"} : new string[] {};
+            Statement = query.QueryText;
+            Parameters = query.QueryParameters ?? new Dictionary<string, object>();
+            // formatContents = restFormat ? new[] {"REST"} : new string[] {}; //TODO: What is this for?!?!
+            formatContents = new string[] {};
         }
 
         [JsonProperty("statement")]
-        public string Statement
-        {
-            get { return _queryText; }
-        }
+        public string Statement { get; }
 
         [JsonProperty("resultDataContents")]
-        public IEnumerable<string> ResultDataContents
-        {
-            get { return _formatContents; }
-        }
+        public IEnumerable<string> ResultDataContents => formatContents;
 
         [JsonProperty("parameters")]
-        public IDictionary<string, object> Parameters
-        {
-            get { return _queryParameters; }
-        }
+        public IDictionary<string, object> Parameters { get; }
     }
 }
