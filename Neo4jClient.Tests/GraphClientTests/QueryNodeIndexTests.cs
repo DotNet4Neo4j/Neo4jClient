@@ -1,56 +1,56 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using Xunit;
-
-namespace Neo4jClient.Tests.GraphClientTests
-{
-    
-    public class QueryNodeIndexTests : IClassFixture<CultureInfoSetupFixture>
-    {
-        [Fact]
-        [Obsolete]
-        public async Task ShouldReturnQueryResults()
-        {
-            //Arrange
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.Get("/index/node/indexName?query=name%3Afoo"),
-                    MockResponse.Json(HttpStatusCode.OK, 
-                        @"[{ 'self': 'http://foo/db/data/node/456',
-                          'data': { 'Name': 'Foo' },
-                          'create_relationship': 'http://foo/db/data/node/456/relationships',
-                          'all_relationships': 'http://foo/db/data/node/456/relationships/all',
-                          'all_typed relationships': 'http://foo/db/data/node/456/relationships/all/{-list|&|types}',
-                          'incoming_relationships': 'http://foo/db/data/node/456/relationships/in',
-                          'incoming_typed relationships': 'http://foo/db/data/node/456/relationships/in/{-list|&|types}',
-                          'outgoing_relationships': 'http://foo/db/data/node/456/relationships/out',
-                          'outgoing_typed relationships': 'http://foo/db/data/node/456/relationships/out/{-list|&|types}',
-                          'properties': 'http://foo/db/data/node/456/properties',
-                          'property': 'http://foo/db/data/node/456/property/{key}',
-                          'traverse': 'http://foo/db/data/node/456/traverse/{returnType}'
-                        }]")
-                }
-            })
-            {
-                var graphClient = await testHarness.CreateAndConnectGraphClient();
-
-                var results = (await graphClient
-                    .QueryIndexAsync<TestNode>("indexName", IndexFor.Node, "name:foo"))
-                    .ToArray();
-
-                Assert.Equal(1, results.Count());
-                var result = results[0];
-                Assert.Equal(456, result.Reference.Id);
-                Assert.Equal("Foo", result.Data.Name);
-            }
-        }
-
-        public class TestNode
-        {
-            public string Name { get; set; }
-        }
-    }
-}
+﻿// using System;
+// using System.Linq;
+// using System.Net;
+// using System.Threading.Tasks;
+// using Xunit;
+//
+// namespace Neo4jClient.Tests.GraphClientTests
+// {
+//     
+//     public class QueryNodeIndexTests : IClassFixture<CultureInfoSetupFixture>
+//     {
+//         [Fact]
+//         [Obsolete]
+//         public async Task ShouldReturnQueryResults()
+//         {
+//             //Arrange
+//             using (var testHarness = new RestTestHarness
+//             {
+//                 {
+//                     MockRequest.Get("/index/node/indexName?query=name%3Afoo"),
+//                     MockResponse.Json(HttpStatusCode.OK, 
+//                         @"[{ 'self': 'http://foo/db/data/node/456',
+//                           'data': { 'Name': 'Foo' },
+//                           'create_relationship': 'http://foo/db/data/node/456/relationships',
+//                           'all_relationships': 'http://foo/db/data/node/456/relationships/all',
+//                           'all_typed relationships': 'http://foo/db/data/node/456/relationships/all/{-list|&|types}',
+//                           'incoming_relationships': 'http://foo/db/data/node/456/relationships/in',
+//                           'incoming_typed relationships': 'http://foo/db/data/node/456/relationships/in/{-list|&|types}',
+//                           'outgoing_relationships': 'http://foo/db/data/node/456/relationships/out',
+//                           'outgoing_typed relationships': 'http://foo/db/data/node/456/relationships/out/{-list|&|types}',
+//                           'properties': 'http://foo/db/data/node/456/properties',
+//                           'property': 'http://foo/db/data/node/456/property/{key}',
+//                           'traverse': 'http://foo/db/data/node/456/traverse/{returnType}'
+//                         }]")
+//                 }
+//             })
+//             {
+//                 var graphClient = await testHarness.CreateAndConnectGraphClient();
+//
+//                 var results = (await graphClient
+//                     .QueryIndexAsync<TestNode>("indexName", IndexFor.Node, "name:foo"))
+//                     .ToArray();
+//
+//                 Assert.Equal(1, results.Count());
+//                 var result = results[0];
+//                 Assert.Equal(456, result.Reference.Id);
+//                 Assert.Equal("Foo", result.Data.Name);
+//             }
+//         }
+//
+//         public class TestNode
+//         {
+//             public string Name { get; set; }
+//         }
+//     }
+// }

@@ -1,50 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 
 namespace Neo4jClient
 {
-    /*
-     *
-     private IDriver CreateDriverWithCustomResolver(string virtualUri, IAuthToken token,
-    params ServerAddress[] addresses)
-{
-    return GraphDatabase.Driver(virtualUri, token,
-        new Config {Resolver = new ListAddressResolver(addresses), EncryptionLevel = EncryptionLevel.None});
-}
-
-public void AddPerson(string name)
-{
-    using (var driver = CreateDriverWithCustomResolver("bolt+routing://x.acme.com",
-        AuthTokens.Basic(Username, Password),
-        ServerAddress.From("a.acme.com", 7687), ServerAddress.From("b.acme.com", 7877),
-        ServerAddress.From("c.acme.com", 9092)))
-    {
-        using (var session = driver.Session())
-        {
-            session.Run("CREATE (a:Person {name: $name})", new {name});
-        }
-    }
-}
-
-private class ListAddressResolver : IServerAddressResolver
-{
-    private readonly ServerAddress[] servers;
-
-    public ListAddressResolver(params ServerAddress[] servers)
-    {
-        this.servers = servers;
-    }
-
-    public ISet<ServerAddress> Resolve(ServerAddress address)
-    {
-        return new HashSet<ServerAddress>(servers);
-    }
-}
-     *
-     */
-
     internal class DriverWrapper : IDriver
     {
         private readonly IDriver driver;
@@ -72,42 +33,47 @@ private class ListAddressResolver : IServerAddressResolver
             var authToken = GetAuthToken(username, pass, realm);
             this.driver = addressResolver == null
                 ? GraphDatabase.Driver(uri, authToken) 
-                : GraphDatabase.Driver(uri, authToken, new Config { Resolver = addressResolver });
+                : GraphDatabase.Driver(uri, authToken, builder => builder.WithResolver(addressResolver));
         }
         
-        public ISession Session()
+        public IAsyncSession Session()
         {
-            return driver.Session();
+            return driver.AsyncSession();
         }
 
-        public ISession Session(AccessMode defaultMode)
+        public IAsyncSession Session(AccessMode defaultMode)
         {
-            return driver.Session(defaultMode);
+            return driver.AsyncSession(x => x.WithDefaultAccessMode(defaultMode));
         }
 
-        public ISession Session(string bookmark)
+        public IAsyncSession Session(string bookmark)
         {
-            return driver.Session(bookmark);
+            return driver.AsyncSession(x => x.WithBookmarks(Bookmark.From(bookmark)));
         }
 
-        public ISession Session(AccessMode defaultMode, string bookmark)
+        public IAsyncSession Session(AccessMode defaultMode, string bookmark)
         {
-            return driver.Session(defaultMode, bookmark);
+            return driver.AsyncSession(x => x.WithDefaultAccessMode(defaultMode).WithBookmarks(Bookmark.From(bookmark)));
         }
 
-        public ISession Session(AccessMode defaultMode, IEnumerable<string> bookmarks)
+        public IAsyncSession Session(AccessMode defaultMode, IEnumerable<string> bookmarks)
         {
-            return driver.Session(defaultMode, bookmarks);
+            return driver.AsyncSession(x => x.WithDefaultAccessMode(defaultMode).WithBookmarks(Bookmark.From(bookmarks.ToArray())));
         }
 
-        public ISession Session(IEnumerable<string> bookmarks)
+        public IAsyncSession Session(IEnumerable<string> bookmarks)
         {
-            return driver.Session(bookmarks);
+            return driver.AsyncSession(x => x.WithBookmarks(Bookmark.From(bookmarks.ToArray())));
+        }
+        
+        public IAsyncSession AsyncSession()
+        {
+            return driver.AsyncSession();
         }
 
-        public void Close()
+        public IAsyncSession AsyncSession(Action<SessionConfigBuilder> action)
         {
-            driver.Close();
+            return driver.AsyncSession(action);
         }
 
         public Task CloseAsync()
@@ -115,9 +81,21 @@ private class ListAddressResolver : IServerAddressResolver
             return driver.CloseAsync();
         }
 
-        public Uri Uri { get; }
+        public Task VerifyConnectivityAsync()
+        {
+            return driver.VerifyConnectivityAsync();
+        }
 
-        public IServerAddressResolver AddressResolver { get; }
+        public Task<bool> SupportsMultiDbAsync()
+        {
+            return driver.SupportsMultiDbAsync();
+        }
+
+        public Config Config => driver.Config;
+
+        public Uri Uri { get; private set; }
+
+        public IServerAddressResolver AddressResolver => Config.Resolver;
 
         private static IAuthToken GetAuthToken(string username, string password, string realm)
         {

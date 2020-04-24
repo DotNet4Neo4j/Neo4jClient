@@ -11,7 +11,7 @@ namespace Neo4jClient.Transactions
         string Username { get; set; }
         string Password { get; set; }
         Guid ResourceManagerId { get; set; }
-        Neo4j.Driver.V1.ITransaction DriverTransaction { get; set; }
+        Neo4j.Driver.IAsyncTransaction DriverTransaction { get; set; }
     }
 
     internal interface ITransactionExecutionEnvironment

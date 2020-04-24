@@ -560,7 +560,7 @@ namespace Neo4jClient.Tests.Transactions
         {
             // Arrange
             const string queryText = @"broken query";
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, "neo4j");
             var cypherApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery, false)};
 
             using (var testHarness = new RestTestHarness

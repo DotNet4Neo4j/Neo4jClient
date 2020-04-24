@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Tests.BoltGraphClientTests;
 using Xunit;
@@ -51,7 +51,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var queryParams = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional){Identifier = identifier};
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Set, CypherResultFormat.Transactional, "neo4j") {Identifier = identifier};
 
             using (var testHarness = new BoltTestHarness())
             {

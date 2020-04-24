@@ -24,6 +24,8 @@ namespace Neo4jClient
 {
     public class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient<HttpResponseMessage>, IDisposable
     {
+
+
         internal const string GremlinPluginUnavailable =
             "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
         internal const string MaxExecutionTimeHeaderKey = "max-execution-time";
@@ -125,20 +127,24 @@ namespace Neo4jClient
                 ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
                                                           RootApiResponse.Version >= new Version(1, 8);
 
-                if (RootApiResponse.Version < new Version(2, 0))
+                var version = RootApiResponse.Version;
+                if (version < new Version(2, 0))
                     cypherCapabilities = CypherCapabilities.Cypher19;
 
-                if (RootApiResponse.Version >= new Version(2, 2))
+                if (version >= new Version(2, 2))
                     cypherCapabilities = CypherCapabilities.Cypher22;
 
-                if (RootApiResponse.Version >= new Version(2, 2, 6))
+                if (version >= new Version(2, 2, 6))
                     cypherCapabilities = CypherCapabilities.Cypher226;
 
-                if (RootApiResponse.Version >= new Version(2, 3))
+                if (version >= new Version(2, 3))
                     cypherCapabilities = CypherCapabilities.Cypher23;
 
-                if (RootApiResponse.Version >= new Version(3, 0))
+                if (version >= new Version(3, 0))
                     cypherCapabilities = CypherCapabilities.Cypher30;
+
+                if (version >= new Version(4, 0))
+                    cypherCapabilities = CypherCapabilities.Cypher40;
             }
             catch (AggregateException ex)
             {
@@ -182,6 +188,9 @@ namespace Neo4jClient
             policyFactory = new ExecutionPolicyFactory(this);
         }
 
+
+        // This is where the issue comes in - the 'Cypher' endpoint doesn't exist on a 4.x db - so 
+        //
         private Uri BuildUri(string relativeUri)
         {
             var baseUri = RootUri;
@@ -193,6 +202,33 @@ namespace Neo4jClient
 
             return new Uri(baseUri, relativeUri);
         }
+
+        private Uri BuildUri(string relativeUri, string database, bool supportsMultipleTenancy, string end) //todo bad name
+        {
+            var baseUri = RootUri;
+            if (!RootUri.AbsoluteUri.EndsWith("/"))
+                baseUri = new Uri(RootUri.AbsoluteUri + "/");
+
+            if (supportsMultipleTenancy && relativeUri.Contains("{databaseName}")) //TODO Const
+            {
+                if (string.IsNullOrWhiteSpace(database))
+                    database = "neo4j"; //TODO Const
+
+                relativeUri = relativeUri.Replace("{databaseName}", database);
+            }
+
+            if (relativeUri.StartsWith("/"))
+                relativeUri = relativeUri.Substring(1);
+            if (!string.IsNullOrWhiteSpace(end))
+            {
+                if (end.StartsWith("/"))
+                    end = end.Substring(1);
+                relativeUri += $"/{end}";
+            }
+
+            return new Uri(baseUri, relativeUri);
+        }
+
 
         private string SerializeAsJson(object contents)
         {
@@ -213,447 +249,12 @@ namespace Neo4jClient
             }
         }
 
-        public virtual async Task<NodeReference<TNode>> CreateAsync<TNode>(
-            TNode node,
-            IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships,
-            IEnumerable<IndexEntry> indexEntries)
-            where TNode : class
-        {
-            if (typeof (TNode).GetTypeInfo().IsGenericType &&
-                typeof (TNode).GetGenericTypeDefinition() == typeof (Node<>))
-            {
-                throw new ArgumentException(string.Format(
-                    "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
-                    typeof (TNode).GetGenericArguments()[0].Name),
-                    "node");
-            }
-
-            if (node == null)
-                throw new ArgumentNullException("node");
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            relationships = relationships ?? Enumerable.Empty<IRelationshipAllowingParticipantNode<TNode>>();
-            indexEntries = (indexEntries ?? Enumerable.Empty<IndexEntry>()).ToArray();
-
-            var validationContext = new ValidationContext(node, null, null);
-            Validator.ValidateObject(node, validationContext);
-
-            var calculatedRelationships = relationships
-                .Cast<Relationship>()
-                .Select(r => new
-                {
-                    CalculatedDirection = Relationship.DetermineRelationshipDirection(typeof(TNode), r),
-                    Relationship = r
-                })
-                .ToArray();
-
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Batch);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var batchSteps = new List<BatchStep>();
-
-            var createNodeStep = batchSteps.Add(HttpMethod.Post, "/node", node);
-
-            foreach (var relationship in calculatedRelationships)
-            {
-                var participants = new[]
-                {
-                    string.Format("{{{0}}}", createNodeStep.Id),
-                    string.Format("/node/{0}", relationship.Relationship.OtherNode.Id)
-                };
-                string sourceNode, targetNode;
-                switch (relationship.CalculatedDirection)
-                {
-                    case RelationshipDirection.Outgoing:
-                        sourceNode = participants[0];
-                        targetNode = participants[1];
-                        break;
-                    case RelationshipDirection.Incoming:
-                        sourceNode = participants[1];
-                        targetNode = participants[0];
-                        break;
-                    default:
-                        throw new NotSupportedException(string.Format(
-                            "The specified relationship direction is not supported: {0}",
-                            relationship.CalculatedDirection));
-                }
-
-                var relationshipTemplate = new RelationshipTemplate
-                {
-                    To = targetNode,
-                    Data = relationship.Relationship.Data,
-                    Type = relationship.Relationship.RelationshipTypeKey
-                };
-                batchSteps.Add(HttpMethod.Post, sourceNode + "/relationships", relationshipTemplate);
-            }
-
-            var entries = indexEntries
-                .SelectMany(i => i
-                    .KeyValues
-                    .Select(kv => new
-                    {
-                        IndexAddress = BuildRelativeIndexAddress(i.Name, IndexFor.Node),
-                        kv.Key,
-                        Value = EncodeIndexValue(kv.Value)
-                    })
-                    .Where(e => !string.IsNullOrEmpty(e.Value)));
-            foreach (var indexEntry in entries)
-            {
-                batchSteps.Add(HttpMethod.Post, indexEntry.IndexAddress, new
-                {
-                    key = indexEntry.Key,
-                    value = indexEntry.Value,
-                    uri = "{0}"
-                });
-            }
-
-            var batchResponse = await ExecuteBatch(batchSteps, policy).ConfigureAwait(false);
-            var createResponse = batchResponse[createNodeStep];
-            EnsureNodeWasCreated(createResponse);
-            var nodeId = long.Parse(GetLastPathSegment(createResponse.Location));
-            var nodeReference = new NodeReference<TNode>(nodeId, this);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = string.Format("Create<{0}>", typeof(TNode).Name),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return nodeReference;
-        }
-
-        private Task<BatchResponse> ExecuteBatch(List<BatchStep> batchSteps, IExecutionPolicy policy)
-        {
-            return Request.With(ExecutionConfiguration)
-                .Post(policy.BaseEndpoint)
-                .WithJsonContent(SerializeAsJson(batchSteps))
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
-                .ParseAs<BatchResponse>()
-                .ExecuteAsync();
-        }
-
-        public virtual Task<RelationshipReference> CreateRelationshipAsync<TSourceNode, TRelationship>(
-            NodeReference<TSourceNode> sourceNodeReference,
-            TRelationship relationship)
-            where TRelationship :
-                Relationship,
-                IRelationshipAllowingSourceNode<TSourceNode>
-        {
-            if (sourceNodeReference == null)
-                throw new ArgumentNullException("sourceNodeReference");
-
-            if (relationship.Direction == RelationshipDirection.Incoming)
-                throw new NotSupportedException("Incoming relationships are not yet supported by this method.");
-
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            return CreateRelationshipAsync(
-                sourceNodeReference,
-                relationship.OtherNode,
-                relationship.RelationshipTypeKey,
-                relationship.Data,
-                policy);
-        }
-
-        private async Task<RelationshipReference> CreateRelationshipAsync(NodeReference sourceNode, NodeReference targetNode,
-            string relationshipTypeKey, object data, IExecutionPolicy policy)
-        {
-            var relationship = new RelationshipTemplate
-            {
-                To = policy.BaseEndpoint.AddPath(targetNode, policy).ToString(),
-                Data = data,
-                Type = relationshipTypeKey
-            };
-
-            var sourceNodeEndpoint = policy.BaseEndpoint
-                .AddPath(sourceNode, policy)
-                .AddPath("relationships");
-
-            return (await Request.With(ExecutionConfiguration)
-                .Post(sourceNodeEndpoint)
-                .WithJsonContent(SerializeAsJson(relationship))
-                .WithExpectedStatusCodes(HttpStatusCode.Created, HttpStatusCode.NotFound)
-                .ParseAs<RelationshipApiResponse<object>>()
-                .FailOnCondition(responseMessage => responseMessage.StatusCode == HttpStatusCode.NotFound)
-                .WithError(responseMessage => new Exception(string.Format(
-                    "One of the nodes referenced in the relationship could not be found. Referenced nodes were {0} and {1}.",
-                    sourceNode.Id,
-                    targetNode.Id))
-                )
-                .ExecuteAsync().ConfigureAwait(false))
-                //.ReadAsJson<RelationshipApiResponse<object>>(JsonConverters,JsonContractResolver)
-                .ToRelationshipReference(this);
-        }
-
         CustomJsonSerializer BuildSerializer()
         {
             return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
         }
 
         public ISerializer Serializer => new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
-
-        public async Task DeleteRelationshipAsync(RelationshipReference reference)
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            await Request.With(ExecutionConfiguration)
-                .Delete(policy.BaseEndpoint.AddPath(reference, policy))
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent, HttpStatusCode.NotFound)
-                .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
-                .WithError(response => new Exception(string.Format(
-                    "Unable to delete the relationship. The response status was: {0} {1}",
-                    (int)response.StatusCode,
-                    response.ReasonPhrase)))
-                .ExecuteAsync().ConfigureAwait(false);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = "Delete Relationship " + reference.Id,
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-        }
-
-        public virtual Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            return Request.With(ExecutionConfiguration)
-                .Get(policy.BaseEndpoint.AddPath(reference, policy))
-                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
-                .ParseAs<NodeApiResponse<TNode>>()
-                .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
-                .WithDefault()
-                .ExecuteAsync(nodeMessage => nodeMessage?.ToNode(this));
-        }
-
-        public virtual Task<Node<TNode>> GetAsync<TNode>(NodeReference<TNode> reference)
-        {
-            return GetAsync<TNode>((NodeReference)reference);
-        }
-
-        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference<TData> reference)
-            where TData : class, new()
-        {
-            return GetAsync<TData>((RelationshipReference)reference);
-        }
-
-        public virtual Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            return Request.With(ExecutionConfiguration)
-                .Get(policy.BaseEndpoint.AddPath(reference, policy))
-                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
-                .ParseAs<RelationshipApiResponse<TData>>()
-                .FailOnCondition(response => response.StatusCode == HttpStatusCode.NotFound)
-                .WithDefault()
-                .ExecuteAsync(
-                    responseTask =>
-                        responseTask?.ToRelationshipInstance(this));
-        }
-
-        public async Task UpdateAsync<TNode>(NodeReference<TNode> nodeReference, TNode replacementData,
-            IEnumerable<IndexEntry> indexEntries = null)
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var allIndexEntries = indexEntries == null
-                ? new IndexEntry[0]
-                : indexEntries.ToArray();
-
-            await Request.With(ExecutionConfiguration)
-                .Put(policy.BaseEndpoint.AddPath(nodeReference, policy).AddPath("properties"))
-                .WithJsonContent(SerializeAsJson(replacementData))
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent)
-                .ExecuteAsync().ConfigureAwait(false);
-
-            if (allIndexEntries.Any())
-                await ReIndexAsync(nodeReference, allIndexEntries).ConfigureAwait(false);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-        }
-
-        public async Task<Node<TNode>> UpdateAsync<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback,
-            Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null,
-            Action<IEnumerable<FieldChange>> changeCallback = null)
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var node = await GetAsync(nodeReference).ConfigureAwait(false);
-
-            var indexEntries = new IndexEntry[] { };
-
-            if (indexEntriesCallback != null)
-            {
-                indexEntries = indexEntriesCallback(node.Data).ToArray();
-            }
-
-            var serializer = Serializer;
-
-            var originalValuesString = changeCallback == null ? null : serializer.Serialize(node.Data);
-
-            updateCallback(node.Data);
-
-            if (changeCallback != null)
-            {
-                var originalValuesDictionary =
-                    new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<Dictionary<string, string>>(
-                        originalValuesString);
-                var newValuesString = serializer.Serialize(node.Data);
-                var newValuesDictionary =
-                    new CustomJsonDeserializer(JsonConverters, resolver: JsonContractResolver).Deserialize<Dictionary<string, string>>(newValuesString);
-                var differences = Utilities.GetDifferencesBetweenDictionaries(originalValuesDictionary,
-                    newValuesDictionary);
-                changeCallback(differences);
-            }
-
-            await Request.With(ExecutionConfiguration)
-                .Put(policy.BaseEndpoint.AddPath(nodeReference, policy).AddPath("properties"))
-                .WithJsonContent(serializer.Serialize(node.Data))
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent)
-                .ExecuteAsync().ConfigureAwait(false);
-
-            if (indexEntriesCallback != null)
-            {
-                await ReIndexAsync(node.Reference, indexEntries).ConfigureAwait(false);
-            }
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TNode).Name, nodeReference.Id),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-
-            return node;
-        }
-
-        public async Task UpdateAsync<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference,
-            Action<TRelationshipData> updateCallback)
-            where TRelationshipData : class, new()
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var propertiesEndpoint = policy.BaseEndpoint.AddPath(relationshipReference, policy).AddPath("properties");
-            var currentData = await Request.With(ExecutionConfiguration)
-                .Get(propertiesEndpoint)
-                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NoContent)
-                .ParseAs<TRelationshipData>()
-                .ExecuteAsync().ConfigureAwait(false);
-
-            var payload = currentData ?? new TRelationshipData();
-            updateCallback(payload);
-
-            await Request.With(ExecutionConfiguration)
-                .Put(propertiesEndpoint)
-                .WithJsonContent(SerializeAsJson(payload))
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent)
-                .ExecuteAsync().ConfigureAwait(false);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = string.Format("Update<{0}> {1}", typeof(TRelationshipData).Name, relationshipReference.Id),
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-        }
-
-        public virtual async Task DeleteAsync(NodeReference reference, DeleteMode mode)
-        {
-            CheckRoot();
-            var policy = policyFactory.GetPolicy(PolicyType.Rest);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            if (mode == DeleteMode.NodeAndRelationships)
-            {
-                await DeleteAllRelationships(reference, policy).ConfigureAwait(false);
-            }
-
-            await Request.With(ExecutionConfiguration)
-                .Delete(policy.BaseEndpoint.AddPath(reference, policy))
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent, HttpStatusCode.Conflict)
-                .FailOnCondition(response => response.StatusCode == HttpStatusCode.Conflict)
-                .WithError(response => new Exception(string.Format(
-                    "Unable to delete the node. The node may still have relationships. The response status was: {0} {1}",
-                    (int)response.StatusCode,
-                    response.ReasonPhrase)))
-                .ExecuteAsync().ConfigureAwait(false);
-
-            stopwatch.Stop();
-            OnOperationCompleted(new OperationCompletedEventArgs
-            {
-                QueryText = "Delete " + reference.Id,
-                ResourcesReturned = 0,
-                TimeTaken = stopwatch.Elapsed
-            });
-        }
-
-        private async Task DeleteAllRelationships(NodeReference reference, IExecutionPolicy policy)
-        {
-            //TODO: Make this a dynamic endpoint resolution
-            var relationshipEndpoint = policy.BaseEndpoint
-                .AddPath(reference, policy)
-                .AddPath("relationships")
-                .AddPath("all");
-            var result = await Request.With(ExecutionConfiguration)
-                .Get(relationshipEndpoint)
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
-                .ParseAs<List<RelationshipApiResponse<object>>>()
-                .ExecuteAsync().ConfigureAwait(false);
-
-            var relationshipResources = result.Select(r => r.Self);
-            foreach (var relationshipResource in relationshipResources)
-            {
-                await Request.With(ExecutionConfiguration)
-                    .Delete(new Uri(relationshipResource))
-                    .WithExpectedStatusCodes(HttpStatusCode.NoContent, HttpStatusCode.NotFound)
-                    .ExecuteAsync().ConfigureAwait(false);
-            }
-        }
 
         private static string GetLastPathSegment(string uri)
         {
@@ -663,10 +264,9 @@ namespace Neo4jClient
                 .LastOrDefault();
         }
 
-        public ICypherFluentQuery Cypher
-        {
-            get { return new CypherFluentQuery(this); }
-        }
+        public ICypherFluentQuery Cypher => new CypherFluentQuery(this);
+
+        private const string DefaultDatabase = "neo4j";
 
         public Version ServerVersion
         {
@@ -692,56 +292,6 @@ namespace Neo4jClient
             {
                 CheckRoot();
                 return BuildUri(RootApiResponse.Transaction);
-            }
-        }
-
-        public Uri BatchEndpoint
-        {
-            get
-            {
-                CheckRoot();
-                return BuildUri(RootApiResponse.Batch);
-            }
-        }
-
-        public Uri CypherEndpoint
-        {
-            get
-            {
-                CheckRoot();
-                return BuildUri(RootApiResponse.Cypher);
-            }
-        }
-
-        public Uri RelationshipIndexEndpoint
-        {
-            get
-            {
-                CheckRoot();
-                return BuildUri(RootApiResponse.RelationshipIndex);
-            }
-        }
-
-        public Uri NodeIndexEndpoint
-        {
-            get
-            {
-                CheckRoot();
-                return BuildUri(RootApiResponse.NodeIndex);
-            }
-        }
-
-        public Uri GremlinEndpoint
-        {
-            get
-            {
-                CheckRoot();
-                if (RootApiResponse.Extensions.GremlinPlugin == null ||
-                    string.IsNullOrEmpty(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript))
-                {
-                    return null;
-                }
-                return BuildUri(RootApiResponse.Extensions.GremlinPlugin.ExecuteScript);
             }
         }
 
@@ -839,7 +389,7 @@ namespace Neo4jClient
             }
 
             return await Request.With(ExecutionConfiguration, customHeaders, maxExecutionTime)
-                .Post(policy.BaseEndpoint)
+                .Post(policy.BaseEndpoint(query?.Database))
                 .WithJsonContent(policy.SerializeRequest(query))
                 .WithExpectedStatusCodes(HttpStatusCode.OK)
                 .ExecuteAsync(response => new CypherPartialResult
@@ -919,54 +469,6 @@ namespace Neo4jClient
             context.Complete(query);
         }
 
-        private IExecutionPolicy GetPolicyForIndex(IndexFor indexFor)
-        {
-            switch (indexFor)
-            {
-                case IndexFor.Node:
-                    return policyFactory.GetPolicy(PolicyType.NodeIndex);
-                case IndexFor.Relationship:
-                    return policyFactory.GetPolicy(PolicyType.RelationshipIndex);
-                default:
-                    throw new NotSupportedException(string.Format("GetIndexes does not support indexfor {0}", indexFor));
-            }
-        }
-
-        private Uri GetUriForIndexType(IndexFor indexFor)
-        {
-            var policy = GetPolicyForIndex(indexFor);
-            CheckTransactionEnvironmentWithPolicy(policy);
-            return policy.BaseEndpoint;
-        }
-
-        public async Task<Dictionary<string, IndexMetaData>> GetIndexesAsync(IndexFor indexFor)
-        {
-            CheckRoot();
-
-            var result = await Request.With(ExecutionConfiguration)
-                .Get(GetUriForIndexType(indexFor))
-                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NoContent)
-                .ParseAs<Dictionary<string, IndexMetaData>>()
-                .FailOnCondition(response => response.StatusCode == HttpStatusCode.NoContent)
-                .WithDefault()
-                .ExecuteAsync().ConfigureAwait(false);
-
-            return result ?? new Dictionary<string, IndexMetaData>();
-        }
-
-        public async Task<bool> CheckIndexExistsAsync(string indexName, IndexFor indexFor)
-        {
-            CheckRoot();
-
-            var baseEndpoint = GetUriForIndexType(indexFor);
-            var response = await Request.With(ExecutionConfiguration)
-                .Get(baseEndpoint.AddPath(indexName))
-                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.NotFound)
-                .ExecuteAsync().ConfigureAwait(false);
-
-            return response.StatusCode == HttpStatusCode.OK;
-        }
-
         private void CheckRoot()
         {
             if (RootApiResponse == null)
@@ -974,215 +476,6 @@ namespace Neo4jClient
                     "The graph client is not connected to the server. Call the Connect method first.");
         }
 
-        public Task CreateIndexAsync(string indexName, IndexConfiguration config, IndexFor indexFor)
-        {
-            CheckRoot();
-
-            var baseEndpoint = GetUriForIndexType(indexFor);
-            var createIndexApiRequest = new
-            {
-                name = indexName,
-                config
-            };
-
-            return Request.With(ExecutionConfiguration)
-                .Post(baseEndpoint)
-                .WithJsonContent(SerializeAsJson(createIndexApiRequest))
-                .WithExpectedStatusCodes(HttpStatusCode.Created)
-                .ExecuteAsync();
-        }
-
-        public Task ReIndexAsync(NodeReference node, IEnumerable<IndexEntry> indexEntries)
-        {
-            var restPolicy = policyFactory.GetPolicy(PolicyType.Rest);
-            var entityUri = restPolicy.BaseEndpoint.AddPath(node, restPolicy);
-            var entityId = node.Id;
-            return ReIndex(entityUri.ToString(), entityId, IndexFor.Node, indexEntries);
-        }
-
-        public Task ReIndexAsync(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries)
-        {
-            var restPolicy = policyFactory.GetPolicy(PolicyType.Rest);
-            var entityUri = restPolicy.BaseEndpoint.AddPath(relationship, restPolicy);
-            var entityId = relationship.Id;
-            return ReIndex(entityUri.ToString(), entityId, IndexFor.Relationship, indexEntries);
-        }
-
-        private async Task ReIndex(string entityUri, long entityId, IndexFor indexFor, IEnumerable<IndexEntry> indexEntries,
-            IExecutionPolicy policy)
-        {
-            if (indexEntries == null)
-                throw new ArgumentNullException("indexEntries");
-
-            CheckRoot();
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            var updates = indexEntries
-                .SelectMany(
-                    i => i.KeyValues,
-                    (i, kv) => new { IndexName = i.Name, kv.Key, kv.Value })
-                .Where(update => update.Value != null)
-                .ToList();
-
-            foreach (var indexName in updates.Select(u => u.IndexName).Distinct())
-                await DeleteIndexEntries(indexName, entityId, GetUriForIndexType(indexFor)).ConfigureAwait(false);
-
-            foreach (var update in updates)
-                await AddIndexEntry(update.IndexName, update.Key, update.Value, entityUri, indexFor).ConfigureAwait(false);
-        }
-
-        public Task ReIndex(string entityUri, long entityId, IndexFor indexFor, IEnumerable<IndexEntry> indexEntries)
-        {
-            return ReIndex(entityUri, entityId, indexFor, indexEntries, GetPolicyForIndex(indexFor));
-        }
-
-        public Task DeleteIndexAsync(string indexName, IndexFor indexFor)
-        {
-            CheckRoot();
-            var policy = GetPolicyForIndex(indexFor);
-            CheckTransactionEnvironmentWithPolicy(policy);
-
-            return Request.With(ExecutionConfiguration)
-                .Delete(policy.BaseEndpoint.AddPath(indexName))
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent)
-                .ExecuteAsync();
-        }
-
-        public Task DeleteIndexEntriesAsync(string indexName, NodeReference nodeReference)
-        {
-            return DeleteIndexEntries(indexName, nodeReference.Id, GetUriForIndexType(IndexFor.Node));
-        }
-
-        public Task DeleteIndexEntriesAsync(string indexName, RelationshipReference relationshipReference)
-        {
-            return DeleteIndexEntries(indexName, relationshipReference.Id, GetUriForIndexType(IndexFor.Relationship));
-        }
-
-        private Task DeleteIndexEntries(string indexName, long id, Uri indexUri)
-        {
-            var indexAddress = indexUri
-                .AddPath(Uri.EscapeDataString(indexName))
-                .AddPath(Uri.EscapeDataString(id.ToString(CultureInfo.InvariantCulture)));
-
-            return Request.With(ExecutionConfiguration)
-                .Delete(indexAddress)
-                .WithExpectedStatusCodes(HttpStatusCode.NoContent)
-                .ExecuteAsync(
-                    string.Format("Deleting entries from index {0} for node {1}", indexName, id)
-                );
-        }
-
-        private Task AddIndexEntry(string indexName, string indexKey, object indexValue, string address,
-            IndexFor indexFor)
-        {
-            var encodedIndexValue = EncodeIndexValue(indexValue);
-            if (string.IsNullOrWhiteSpace(encodedIndexValue))
-#if NET45 
-                return Task.FromResult(0);
-#else
-                return Task.CompletedTask;
-#endif
-
-            var indexAddress = BuildIndexAddress(indexName, indexFor);
-
-            var indexEntry = new
-            {
-                key = indexKey,
-                value = encodedIndexValue,
-                uri = address
-            };
-
-            return Request.With(ExecutionConfiguration)
-                .Post(indexAddress)
-                .WithJsonContent(SerializeAsJson(indexEntry))
-                .WithExpectedStatusCodes(HttpStatusCode.Created)
-                .ExecuteAsync(string.Format("Adding '{0}'='{1}' to index {2} for {3}", indexKey, indexValue, indexName,
-                    address));
-        }
-
-        private string BuildRelativeIndexAddress(string indexName, IndexFor indexFor)
-        {
-            var baseUri = indexFor == IndexFor.Node
-                ? new UriBuilder() { Path = RootApiResponse.NodeIndex }
-                : new UriBuilder() { Path = RootApiResponse.RelationshipIndex };
-            return baseUri.Uri.AddPath(Uri.EscapeDataString(indexName)).LocalPath;
-        }
-
-        private Uri BuildIndexAddress(string indexName, IndexFor indexFor)
-        {
-            return GetUriForIndexType(indexFor).AddPath(Uri.EscapeDataString(indexName));
-        }
-
-        private static string EncodeIndexValue(object value)
-        {
-            string indexValue;
-            if (value is DateTimeOffset)
-            {
-                indexValue = ((DateTimeOffset)value).UtcTicks.ToString(CultureInfo.InvariantCulture);
-            }
-            else if (value is DateTime)
-            {
-                indexValue = ((DateTime)value).Ticks.ToString(CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                indexValue = value.ToString();
-            }
-
-            if (string.IsNullOrWhiteSpace(indexValue) ||
-                !indexValue.Any(char.IsLetterOrDigit))
-                return string.Empty;
-
-            return indexValue;
-        }
-
-        //ToDo Check status of https://github.com/neo4j/community/issues/249 for limiting query result sets
-        [Obsolete(
-            "There are encoding issues with this method. You should use the newer Cypher approach instead. See https://bitbucket.org/Readify/neo4jclient/issue/54/spaces-in-search-text-while-searching-for for an explanation of the problem, and https://bitbucket.org/Readify/neo4jclient/wiki/cypher for documentation about doing index queries with Cypher."
-            )]
-        public async Task<IEnumerable<Node<TNode>>> QueryIndexAsync<TNode>(string indexName, IndexFor indexFor, string query)
-        {
-            CheckRoot();
-            var indexEndpoint = GetUriForIndexType(indexFor)
-                .AddPath(indexName)
-                .AddQuery("query=" + Uri.EscapeDataString(query));
-
-            return (await Request.With(ExecutionConfiguration)
-                .Get(indexEndpoint)
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
-                .ParseAs<List<NodeApiResponse<TNode>>>()
-                .ExecuteAsync().ConfigureAwait(false))
-                .Select(nodeResponse => nodeResponse.ToNode(this));
-        }
-
-        public Task<IEnumerable<Node<TNode>>> LookupIndexAsync<TNode>(string exactIndexName, IndexFor indexFor, string indexKey,
-            long id)
-        {
-            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString(CultureInfo.InvariantCulture));
-        }
-
-        public Task<IEnumerable<Node<TNode>>> LookupIndexAsync<TNode>(string exactIndexName, IndexFor indexFor, string indexKey,
-            int id)
-        {
-            return BuildLookupIndex<TNode>(exactIndexName, indexFor, indexKey, id.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private async Task<IEnumerable<Node<TNode>>> BuildLookupIndex<TNode>(string exactIndexName, IndexFor indexFor,
-            string indexKey, string id)
-        {
-            CheckRoot();
-            var indexResource = GetUriForIndexType(indexFor)
-                .AddPath(exactIndexName)
-                .AddPath(indexKey)
-                .AddPath(id.ToString());
-
-            return (await Request.With(ExecutionConfiguration)
-                .Get(indexResource)
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
-                .ParseAs<List<NodeApiResponse<TNode>>>()
-                .ExecuteAsync().ConfigureAwait(false))
-                .Select(query => query.ToNode(this));
-        }
 
         public event OperationCompletedEventHandler OperationCompleted;
 
@@ -1221,6 +514,12 @@ namespace Neo4jClient
         }
 
         public DefaultContractResolver JsonContractResolver { get; set; }
+        public Uri GetTransactionEndpoint(string database)
+        {
+            CheckRoot();
+            var uri = BuildUri(RootApiResponse.Transaction, database, RootApiResponse.Version.Major >= 4, "commit");
+            return uri;
+        }
 
         public ITransactionManager<HttpResponseMessage> TransactionManager => transactionManager;
 

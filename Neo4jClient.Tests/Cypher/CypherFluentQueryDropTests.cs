@@ -39,7 +39,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Return<Node<Object>>("andres")
                 .Query;
 
-            Assert.Equal("START andres=node({p0})" + Environment.NewLine + "DELETE andres.age" + Environment.NewLine + "RETURN andres", query.QueryText);
+            Assert.Equal("START andres=node($p0)" + Environment.NewLine + "DELETE andres.age" + Environment.NewLine + "RETURN andres", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
 
@@ -52,7 +52,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Delete("n")
                 .Query;
 
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "DELETE n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "DELETE n", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
 
@@ -74,7 +74,7 @@ namespace Neo4jClient.Tests.Cypher
 
             // Assert
             Assert.NotNull(executedQuery);
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
             Assert.Equal(3L, executedQuery.QueryParameters["p0"]);
         }
 
@@ -89,7 +89,7 @@ namespace Neo4jClient.Tests.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node({p0})" + Environment.NewLine + "WHERE (...)" + Environment.NewLine + "DELETE n", query.QueryText);
+            Assert.Equal("START n=node($p0)" + Environment.NewLine + "WHERE (...)" + Environment.NewLine + "DELETE n", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
     }

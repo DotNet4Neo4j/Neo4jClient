@@ -11,6 +11,9 @@ namespace Neo4jClient.Cypher
             SupportsNullComparisonsWithIsOperator = cypherCapabilities.SupportsNullComparisonsWithIsOperator;
             SupportsPropertySuffixesForControllingNullComparisons = cypherCapabilities.SupportsPropertySuffixesForControllingNullComparisons;
             AutoRollsBackOnError = cypherCapabilities.AutoRollsBackOnError;
+            SupportsStoredProcedures = cypherCapabilities.SupportsStoredProcedures;
+            SupportsHasFunction = cypherCapabilities.SupportsHasFunction;
+            SupportsMultipleTenancy = cypherCapabilities.SupportsMultipleTenancy;
         }
 
         public static readonly CypherCapabilities Cypher19 = new CypherCapabilities
@@ -29,13 +32,12 @@ namespace Neo4jClient.Cypher
         public static readonly CypherCapabilities Cypher22 = new CypherCapabilities(Cypher20){SupportsPlanner = true};
         public static readonly CypherCapabilities Cypher226 = new CypherCapabilities(Cypher22) { AutoRollsBackOnError = true };
         public static readonly CypherCapabilities Cypher23 = new CypherCapabilities(Cypher226) {SupportsStartsWith = true};
-        public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23)
-        {
-            SupportsStoredProcedures = true,
-            SupportsHasFunction = false
-        };
+        public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23) { SupportsStoredProcedures = true, SupportsHasFunction = false };
+        public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher30) { SupportsMultipleTenancy = true };
+        
         public static readonly CypherCapabilities Default = Cypher20;
-
+        
+        public bool SupportsMultipleTenancy { get; set; }
         public bool SupportsPlanner { get; set; }
         public bool SupportsPropertySuffixesForControllingNullComparisons { get; set; }
         public bool SupportsNullComparisonsWithIsOperator { get; set; }
@@ -52,5 +54,7 @@ namespace Neo4jClient.Cypher
         /// Cypher 3.0 no longer has the HAS() function, as it has been now superseded by EXISTS()
         /// </summary>
         public bool SupportsHasFunction { get; set; }
+
+        
     }
 }
