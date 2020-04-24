@@ -128,7 +128,7 @@ namespace Neo4jClient.Tests.GraphClientTests
         {
             using (var testHarness = new RestTestHarness
             {
-                {MockRequest.Get(""), MockResponse.NeoRoot()}
+                {MockRequest.Get(""), MockResponse.NeoRoot20()}
             })
             {
                 var httpClient = testHarness.GenerateHttpClient("http://foo/db/data");

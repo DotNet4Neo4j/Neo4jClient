@@ -29,6 +29,13 @@ namespace Neo4jClient.Tests
 
         public static MockRequest PostObjectAsJson(string uri, object body)
         {
+            var test = new MockRequest
+            {
+                Resource = uri,
+                Method = HttpMethod.Post,
+                Body = new CustomJsonSerializer { JsonConverters = GraphClient.DefaultJsonConverters }.Serialize(body)
+            };
+            
             return new MockRequest
             {
                 Resource = uri,

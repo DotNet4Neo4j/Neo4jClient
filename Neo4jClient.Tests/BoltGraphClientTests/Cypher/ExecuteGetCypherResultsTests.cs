@@ -1361,7 +1361,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //            {
         //                {
         //                    MockRequest.Get(""),
-        //                    MockResponse.NeoRoot()
+        //                    MockResponse.NeoRoot20()
         //                },
         //                {
         //                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
@@ -1419,7 +1419,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         //            {
         //                {
         //                    MockRequest.Get(""),
-        //                    MockResponse.NeoRoot()
+        //                    MockResponse.NeoRoot20()
         //                },
         //                {
         //                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
