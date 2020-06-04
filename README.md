@@ -39,7 +39,7 @@ It's worth noting - due to a lot of the changes that are taking place - at the m
 ### Dependency Changes
 
 * [Json.NET](https://www.nuget.org/packages/Newtonsoft.Json/) - `10.0.3` -> `12.0.3`
-* [Neo4j.Driver.Signed](https://www.nuget.org/packages/Neo4j.Driver.Signed/4.0.0-beta01) - `1.7.2` -> `4.0.0`
+* [Neo4j.Driver.Signed](https://www.nuget.org/packages/Neo4j.Driver.Signed/4.0.0-beta01) - `1.7.2` -> `4.0.1`
 
 ---
 
