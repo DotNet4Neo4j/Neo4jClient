@@ -205,20 +205,31 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
                 bgc.AddressResolver.Should().BeNull();
             }
 
-            [Fact]
-            public void UsesAddressResolverWhenPassingInMultipleUris()
+            [Theory]
+            [InlineData("neo4j")]
+            [InlineData("neo4j+s")]
+            [InlineData("neo4j+ssc")]
+            public void UsesAddressResolverWhenPassingInMultipleUris(string scheme)
             {
-                var bgc = new BoltGraphClient($"neo4j://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"});
+                var bgc = new BoltGraphClient($"{scheme}://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"});
                 var resolved = bgc.AddressResolver.Resolve(null);
                 resolved.Should().HaveCount(2);
             }
 
-
-            [Fact]
-            public void ValidForBoltPlusRoutingUris()
+            [Theory]
+            [InlineData("bolt", true)]
+            [InlineData("bolt+s", true)]
+            [InlineData("bolt+ssc", true)]
+            [InlineData("neo4j", true)]
+            [InlineData("neo4j+s", true)]
+            [InlineData("neo4j+ssc", true)]
+            [InlineData("http", false)]
+            [InlineData("ftp", false)]
+            public void ValidityForVariousUriSchemes(string scheme, bool expectedValid)
             {
-                var ex = Record.Exception(() => new BoltGraphClient($"neo4j://virtual.foo.com", new[] {"x.foo.com", "y.foo.com"}));
-                ex.Should().BeNull();
+                var ex = Record.Exception(() => new BoltGraphClient($"{scheme}://virtual.foo.com"));
+                if (expectedValid) ex.Should().BeNull();
+                else ex.Should().NotBeNull();
             }
 
             [Fact]
@@ -234,6 +245,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
 
             [Theory]
             [InlineData("bolt")]
+            [InlineData("bolt+s")]
+            [InlineData("bolt+ssc")]
             [InlineData("https")]
             [InlineData("http")]
             [InlineData("ftp")]
@@ -246,6 +259,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
 
             [Theory]
             [InlineData("bolt")]
+            [InlineData("bolt+s")]
+            [InlineData("bolt+ssc")]
             [InlineData("https")]
             [InlineData("http")]
             [InlineData("ftp")]
