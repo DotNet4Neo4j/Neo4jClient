@@ -68,12 +68,12 @@ namespace Neo4jClient
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
             {
-                if (uri.Scheme.ToLowerInvariant() != "neo4j")
+                if (!new [] {"neo4j", "neo4j+s", "neo4j+ssc"}.Contains(uri.Scheme.ToLowerInvariant()))
                     throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' scheme, not '{uri.Scheme}'.");
 
                 addressResolver = new AddressResolver(uri, localUris);
             }
-            else if (uri.Scheme.ToLowerInvariant() != "bolt" && uri.Scheme.ToLowerInvariant() != "neo4j")
+            else if (!new [] {"neo4j", "neo4j+s", "neo4j+ssc", "bolt", "bolt+s", "bolt+ssc"}.Contains(uri.Scheme.ToLowerInvariant()))
             {
                 throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' or 'neo4j://' scheme, not '{uri.Scheme}'.");
             }
