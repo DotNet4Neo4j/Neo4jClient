@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("leaf")
                 .Query;
 
-            Assert.Equal("START root=node({p0})\r\nCREATE UNIQUE root-[:X]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
+            Assert.Equal("START root=node($p0)\r\nCREATE UNIQUE root-[:X]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
             Assert.Equal(2l, query.QueryParameters["p0"]);
         }
 
@@ -45,7 +45,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("leaf")
                 .Query;
 
-            Assert.Equal("START root=node({p0})\r\nMATCH root-[:X]-foo\r\nCREATE UNIQUE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
+            Assert.Equal("START root=node($p0)\r\nMATCH root-[:X]-foo\r\nCREATE UNIQUE foo-[:Y]-(leaf {name:'D'} )\r\nRETURN leaf", query.QueryText);
             Assert.Equal(2l, query.QueryParameters["p0"]);
         }
     }

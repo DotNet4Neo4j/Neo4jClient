@@ -46,7 +46,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         public void ShouldSendCommandAndNotCareAboutResults()
         {
             // Arrange
-            const string queryText = @"START d=node({p0}), e=node({p1}) CREATE UNIQUE d-[:foo]->e";
+            const string queryText = @"START d=node($p0), e=node($p1) CREATE UNIQUE d-[:foo]->e";
             var parameters = new Dictionary<string, object>
             {
                 {"p0", 215},

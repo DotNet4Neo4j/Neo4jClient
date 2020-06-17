@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = (NodeReference) 1
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(1L, cypher.QueryParameters["p0"]);
         }
@@ -33,7 +33,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new Node<object>(new object(), 123, null)
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(123L, cypher.QueryParameters["p0"]);
         }
@@ -46,7 +46,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new[] {123, 456}.Select(id => new Node<object>(new object(), id, null))
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(new[] {123L, 456L}, cypher.QueryParameters["p0"]);
         }
@@ -59,7 +59,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new RootNode(123)
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(123L, cypher.QueryParameters["p0"]);
         }
@@ -74,7 +74,7 @@ namespace Neo4jClient.Test.Cypher
                 n2 = (NodeReference)2
             });
 
-            Assert.Equal("n1=node({p0}), n2=node({p1})", cypher.QueryText);
+            Assert.Equal("n1=node($p0), n2=node($p1)", cypher.QueryText);
             Assert.Equal(2, cypher.QueryParameters.Count);
             Assert.Equal(1L, cypher.QueryParameters["p0"]);
             Assert.Equal(2L, cypher.QueryParameters["p1"]);
@@ -89,7 +89,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new NodeReference[] { 1, 2 }
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(new[] {1L, 2L}, cypher.QueryParameters["p0"]);
         }
@@ -103,7 +103,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new[] { 1, 2 }.Select(id => (NodeReference)id)
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(new[] { 1L, 2L }, cypher.QueryParameters["p0"]);
         }
@@ -117,7 +117,7 @@ namespace Neo4jClient.Test.Cypher
                 n1 = new[] { 1, 2 }.Select(id => (NodeReference<object>)id)
             });
 
-            Assert.Equal("n1=node({p0})", cypher.QueryText);
+            Assert.Equal("n1=node($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(new[] { 1L, 2L }, cypher.QueryParameters["p0"]);
         }
@@ -130,7 +130,7 @@ namespace Neo4jClient.Test.Cypher
                 r1 = (RelationshipReference)1
             });
 
-            Assert.Equal("r1=relationship({p0})", cypher.QueryText);
+            Assert.Equal("r1=relationship($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(1L, cypher.QueryParameters["p0"]);
         }
@@ -143,7 +143,7 @@ namespace Neo4jClient.Test.Cypher
                 r1 = new RelationshipReference[] { 1, 2 }
             });
 
-            Assert.Equal("r1=relationship({p0})", cypher.QueryText);
+            Assert.Equal("r1=relationship($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(new[] {1L, 2L}, cypher.QueryParameters["p0"]);
         }
@@ -156,7 +156,7 @@ namespace Neo4jClient.Test.Cypher
                 r1 = new[] { 1, 2 }.Select(id => (RelationshipReference)id)
             });
 
-            Assert.Equal("r1=relationship({p0})", cypher.QueryText);
+            Assert.Equal("r1=relationship($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal(new[] { 1L, 2L }, cypher.QueryParameters["p0"]);
         }
@@ -195,7 +195,7 @@ namespace Neo4jClient.Test.Cypher
                 n = Node.ByIndexLookup("someIndex", "name", "A")
             });
 
-            Assert.Equal("n=node:`someIndex`(name = {p0})", cypher.QueryText);
+            Assert.Equal("n=node:`someIndex`(name = $p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal("A", cypher.QueryParameters["p0"]);
         }
@@ -209,7 +209,7 @@ namespace Neo4jClient.Test.Cypher
                 n = Node.ByIndexQuery("someIndex", "name:A")
             });
 
-            Assert.Equal("n=node:`someIndex`({p0})", cypher.QueryText);
+            Assert.Equal("n=node:`someIndex`($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal("name:A", cypher.QueryParameters["p0"]);
         }
@@ -223,7 +223,7 @@ namespace Neo4jClient.Test.Cypher
                 r = Relationship.ByIndexLookup("someIndex", "name", "A")
             });
 
-            Assert.Equal("r=relationship:`someIndex`(name = {p0})", cypher.QueryText);
+            Assert.Equal("r=relationship:`someIndex`(name = $p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal("A", cypher.QueryParameters["p0"]);
         }
@@ -236,7 +236,7 @@ namespace Neo4jClient.Test.Cypher
                 r = Relationship.ByIndexQuery("someIndex", "name:A")
             });
 
-            Assert.Equal("r=relationship:`someIndex`({p0})", cypher.QueryText);
+            Assert.Equal("r=relationship:`someIndex`($p0)", cypher.QueryText);
             Assert.Equal(1, cypher.QueryParameters.Count);
             Assert.Equal("name:A", cypher.QueryParameters["p0"]);
         }
@@ -263,13 +263,13 @@ namespace Neo4jClient.Test.Cypher
 
             const string expected =
                 "n1=custom, " +
-                "n2=node({p0}), " +
-                "n3=node:`indexName`(property = {p1}), " +
-                "n4=node:`indexName`({p2}), " +
-                "r1=relationship({p3}), " +
-                "moreRels=relationship({p4}), " +
-                "r2=relationship:`indexName`(property = {p5}), " +
-                "r3=relationship:`indexName`({p6}), " +
+                "n2=node($p0), " +
+                "n3=node:`indexName`(property = $p1), " +
+                "n4=node:`indexName`($p2), " +
+                "r1=relationship($p3), " +
+                "moreRels=relationship($p4), " +
+                "r2=relationship:`indexName`(property = $p5), " +
+                "r3=relationship:`indexName`($p6), " +
                 "all=node(*)";
 
             Assert.Equal(expected, cypher.QueryText);
@@ -356,7 +356,7 @@ namespace Neo4jClient.Test.Cypher
             {
                 var name = "p" + parameters.Count;
                 parameters.Add(name, value);
-                return string.Format("{{{0}}}", name);
+                return $"${name}";
             };
 
             var cypherText = StartBitFormatter.FormatAsCypherText(startBits, createParameter);

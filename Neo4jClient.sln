@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neo4jClient.Full", "Neo4jClient.Full\Neo4jClient.Full.csproj", "{343B9889-6DDF-4474-A1EC-05508A652E5A}"
 EndProject
@@ -35,7 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core, NetStandard Framework
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{50240473-4B2D-4623-8CE9-7DFF91140574}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Neo4jClient.FSharp.Tests", "Neo4jClient.FSharp.Tests\Neo4jClient.FSharp.Tests.fsproj", "{94869E02-1F43-4891-BD6C-0143A273802D}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Neo4jClient.FSharp.Tests", "Neo4jClient.FSharp.Tests\Neo4jClient.FSharp.Tests.fsproj", "{94869E02-1F43-4891-BD6C-0143A273802D}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -48,6 +48,7 @@ Global
 		Neo4jClient.Shared\Neo4jClient.Shared.projitems*{99599429-a450-4afb-8ae4-3a114f317d49}*SharedItemsImports = 4
 		Neo4jClient.Shared\Neo4jClient.Shared.projitems*{c5b928ca-3e8e-4181-bacd-48ced40cefde}*SharedItemsImports = 13
 		Neo4jClient.Shared\Neo4jClient.Shared.projitems*{e568b54b-f463-4346-818e-9ec8348c6470}*SharedItemsImports = 4
+		Neo4jClient.Tests.Shared\Neo4jClient.Tests.Shared.projitems*{f627d73a-cc89-48e8-b603-89035feeab2b}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

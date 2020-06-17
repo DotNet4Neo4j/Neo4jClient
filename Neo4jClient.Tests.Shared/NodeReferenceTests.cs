@@ -161,7 +161,7 @@ namespace Neo4jClient.Test
             var graphClient = Substitute.For<IRawGraphClient>();
             var reference = new NodeReference(123, graphClient);
             var query = reference.StartCypher("foo").Query;
-            Assert.Equal("START foo=node({p0})", query.QueryText);
+            Assert.Equal("START foo=node($p0)", query.QueryText);
             Assert.Equal(123L, query.QueryParameters["p0"]);
         }
     }

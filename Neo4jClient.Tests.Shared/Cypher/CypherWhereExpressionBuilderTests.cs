@@ -52,7 +52,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.Bar = {p0})", result);
+            Assert.Equal("(foo.Bar = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -64,7 +64,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.Bar = {p0})", result);
+            Assert.Equal("(foo.Bar = $p0)", result);
             Assert.Equal(456, parameters["p0"]);
         }
 
@@ -79,7 +79,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.Bar = {p0})", result);
+            Assert.Equal("(foo.Bar = $p0)", result);
             Assert.Equal(123L, parameters["p0"]);
         }
 
@@ -91,7 +91,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! = {p0})", result);
+            Assert.Equal("(foo.NullableBar! = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -103,7 +103,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar? <> {p0})", result);
+            Assert.Equal("(foo.NullableBar? <> $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -116,7 +116,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! > {p0})", result);
+            Assert.Equal("(foo.NullableBar! > $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -129,7 +129,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! >= {p0})", result);
+            Assert.Equal("(foo.NullableBar! >= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -142,7 +142,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! < {p0})", result);
+            Assert.Equal("(foo.NullableBar! < $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -155,7 +155,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! <= {p0})", result);
+            Assert.Equal("(foo.NullableBar! <= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -281,7 +281,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! = {p0})", result);
+            Assert.Equal("(foo.NullableBar! = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -295,7 +295,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar? <> {p0})", result);
+            Assert.Equal("(foo.NullableBar? <> $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -309,7 +309,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! > {p0})", result);
+            Assert.Equal("(foo.NullableBar! > $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -323,7 +323,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! >= {p0})", result);
+            Assert.Equal("(foo.NullableBar! >= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -337,7 +337,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! < {p0})", result);
+            Assert.Equal("(foo.NullableBar! < $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -351,7 +351,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher19);
 
-            Assert.Equal("(foo.NullableBar! <= {p0})", result);
+            Assert.Equal("(foo.NullableBar! <= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -364,7 +364,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar = {p0})", result);
+            Assert.Equal("(foo.NullableBar = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -377,7 +377,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar <> {p0})", result);
+            Assert.Equal("(foo.NullableBar <> $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -390,7 +390,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar > {p0})", result);
+            Assert.Equal("(foo.NullableBar > $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -403,7 +403,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar >= {p0})", result);
+            Assert.Equal("(foo.NullableBar >= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -416,7 +416,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar < {p0})", result);
+            Assert.Equal("(foo.NullableBar < $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -429,7 +429,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar <= {p0})", result);
+            Assert.Equal("(foo.NullableBar <= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -491,7 +491,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar = {p0})", result);
+            Assert.Equal("(foo.NullableBar = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -505,7 +505,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar <> {p0})", result);
+            Assert.Equal("(foo.NullableBar <> $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -519,7 +519,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar > {p0})", result);
+            Assert.Equal("(foo.NullableBar > $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -533,7 +533,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar >= {p0})", result);
+            Assert.Equal("(foo.NullableBar >= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -547,7 +547,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar < {p0})", result);
+            Assert.Equal("(foo.NullableBar < $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -561,7 +561,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.NullableBar <= {p0})", result);
+            Assert.Equal("(foo.NullableBar <= $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -666,7 +666,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.Bar = {p0})", result);
+            Assert.Equal("(foo.Bar = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -680,7 +680,7 @@ namespace Neo4jClient.Test.Cypher
 
             var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v));
 
-            Assert.Equal("(foo.Bar = {p0})", result);
+            Assert.Equal("(foo.Bar = $p0)", result);
             Assert.Equal(123, parameters["p0"]);
         }
 
@@ -688,7 +688,7 @@ namespace Neo4jClient.Test.Cypher
         {
             var paramName = string.Format("p{0}", parameters.Count);
             parameters.Add(paramName, paramValue);
-            return "{" + paramName + "}";
+            return $"${paramName}";
         }
     }
 }

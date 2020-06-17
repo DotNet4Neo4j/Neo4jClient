@@ -53,7 +53,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         public void ShouldDeserializePathsResultAsSetBased()
         {
             // Arrange
-            const string queryText = @"START d=node({p0}), e=node({p1})
+            const string queryText = @"START d=node($p0), e=node($p1)
                                         MATCH p = allShortestPaths( d-[*..15]-e )
                                         RETURN p";
 
@@ -113,7 +113,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             // Arrange
             const string queryText = @"
-                START x = node({p0})
+                START x = node($p0)
                 MATCH x-[r]->n
                 RETURN type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
                 LIMIT 3";
@@ -326,7 +326,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             // Arrange
             const string queryText = @"
-                START x = node({p0})
+                START x = node($p0)
                 MATCH x-[r]->n
                 RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
                 LIMIT 3";
@@ -451,7 +451,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             // Arrange
             const string queryText = @"
-                START x = node({p0})
+                START x = node($p0)
                 MATCH x-[r]->n
                 RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
                 LIMIT 3";
@@ -573,7 +573,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             // Arrange
             const string queryText = @"
-                START x = node({p0})
+                START x = node($p0)
                 MATCH x-[r]->n
                 RETURN x AS Fooness, type(r) AS RelationshipType, n.Name? AS Name, n.UniqueId? AS UniqueId
                 LIMIT 3";
@@ -729,7 +729,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         {
             const int expectedMaxExecutionTime = 100;
 
-            const string queryText = @"START d=node({p0}), e=node({p1})
+            const string queryText = @"START d=node($p0), e=node($p1)
                                         MATCH p = allShortestPaths( d-[*..15]-e )
                                         RETURN p";
 
@@ -788,7 +788,7 @@ namespace Neo4jClient.Test.GraphClientTests.Cypher
         [Fact]
         public void DoesntSendMaxExecutionTime_WhenNotAddedToQuery()
         {
-            const string queryText = @"START d=node({p0}), e=node({p1})
+            const string queryText = @"START d=node($p0), e=node($p1)
                                         MATCH p = allShortestPaths( d-[*..15]-e )
                                         RETURN p";
 

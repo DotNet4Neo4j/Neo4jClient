@@ -24,7 +24,7 @@ namespace Neo4jClient.Test.Cypher
                 .Return<object>("x")
                 .Query;
 
-            Assert.Equal("START n=node({p0})\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
+            Assert.Equal("START n=node($p0)\r\nMATCH (n)--(x)\r\nRETURN x", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
 
@@ -67,11 +67,11 @@ namespace Neo4jClient.Test.Cypher
         public void MultipleMatchClausesWithPairedWhereClauses()
         {
             // MATCH (n)
-            // WHERE n.Foo = {p0}
+            // WHERE n.Foo = $p0
             // OPTIONAL MATCH (n)--(x)
-            // WHERE x.Bar = {p1}
+            // WHERE x.Bar = $p1
             // OPTIONAL MATCH (x)--(a)
-            // WHERE a.Baz = {p2}
+            // WHERE a.Baz = $p2
             // RETURN n, x
 
             var client = Substitute.For<IRawGraphClient>();
@@ -84,7 +84,7 @@ namespace Neo4jClient.Test.Cypher
                 .Where((FooBarBaz a) => a.Baz == "ghi")
                 .Query;
 
-            const string expected = "MATCH (n)\r\nWHERE (n.Foo = {p0})\r\nOPTIONAL MATCH (n)--(x)\r\nWHERE (x.Bar = {p1})\r\nOPTIONAL MATCH (x)--(a)\r\nWHERE (a.Baz = {p2})";
+            const string expected = "MATCH (n)\r\nWHERE (n.Foo = $p0)\r\nOPTIONAL MATCH (n)--(x)\r\nWHERE (x.Bar = $p1)\r\nOPTIONAL MATCH (x)--(a)\r\nWHERE (a.Baz = $p2)";
 
             Assert.Equal(expected, query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count());

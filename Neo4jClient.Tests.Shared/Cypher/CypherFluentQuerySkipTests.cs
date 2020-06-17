@@ -22,7 +22,7 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node({p0})\r\nRETURN n\r\nSKIP {p1}", query.QueryText);
+            Assert.Equal("START n=node($p0)\r\nRETURN n\r\nSKIP $p1", query.QueryText);
             Assert.Equal(2, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(2, query.QueryParameters["p1"]);
@@ -55,7 +55,7 @@ namespace Neo4jClient.Test.Cypher
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node({p0})\r\nRETURN n", query.QueryText);
+            Assert.Equal("START n=node($p0)\r\nRETURN n", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
@@ -74,7 +74,7 @@ namespace Neo4jClient.Test.Cypher
 
 
             // Assert
-            Assert.Equal("START n=node({p0})\r\nWITH foo\r\nSKIP {p1}", query.QueryText);
+            Assert.Equal("START n=node($p0)\r\nWITH foo\r\nSKIP $p1", query.QueryText);
             Assert.Equal(2, query.QueryParameters.Count);
             Assert.Equal(3L, query.QueryParameters["p0"]);
             Assert.Equal(2, query.QueryParameters["p1"]);

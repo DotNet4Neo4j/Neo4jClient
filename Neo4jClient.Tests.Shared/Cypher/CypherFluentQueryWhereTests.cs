@@ -53,7 +53,7 @@ namespace Neo4jClient.Test.Cypher
             var arr = new[] { 1, 2, 3, 4 };
             var query = new CypherFluentQuery(client).Where((Foo foo) => foo.Bar.NotIn(arr)).Query;
 
-            Assert.Equal("WHERE NOT (foo.Bar IN {p0})", query.QueryText);
+            Assert.Equal("WHERE NOT (foo.Bar IN $p0)", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(arr, query.QueryParameters["p0"]);
         }
@@ -66,7 +66,7 @@ namespace Neo4jClient.Test.Cypher
             var arr = new[] {1, 2, 3, 4};
             var query = new CypherFluentQuery(client).Where((Foo foo) => foo.Bar.In(arr)).Query;
 
-            Assert.Equal("WHERE (foo.Bar IN {p0})", query.QueryText);
+            Assert.Equal("WHERE (foo.Bar IN $p0)", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(arr, query.QueryParameters["p0"]);
         }
@@ -79,7 +79,7 @@ namespace Neo4jClient.Test.Cypher
             const string startsWith = "Bar";
             var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.StartsWith(startsWith)).Query;
 
-            Assert.Equal("WHERE (foo.bar STARTS WITH {p0})", query.QueryText);
+            Assert.Equal("WHERE (foo.bar STARTS WITH $p0)", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(startsWith, query.QueryParameters["p0"]);
         }
@@ -92,7 +92,7 @@ namespace Neo4jClient.Test.Cypher
             const string endsWith = "Bar";
             var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.EndsWith(endsWith)).Query;
 
-            Assert.Equal("WHERE (foo.bar ENDS WITH {p0})", query.QueryText);
+            Assert.Equal("WHERE (foo.bar ENDS WITH $p0)", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(endsWith, query.QueryParameters["p0"]);
         }
@@ -105,7 +105,7 @@ namespace Neo4jClient.Test.Cypher
             const string contains = "Bar";
             var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar.Contains(contains)).Query;
 
-            Assert.Equal("WHERE (foo.bar CONTAINS {p0})", query.QueryText);
+            Assert.Equal("WHERE (foo.bar CONTAINS $p0)", query.QueryText);
             Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(contains, query.QueryParameters["p0"]);
         }
@@ -125,7 +125,7 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client).Where((FooWithJsonProperties foo) => foo.Bar == "Bar").Query;
 
-            Assert.Equal("WHERE (foo.bar = {p0})", query.QueryText);
+            Assert.Equal("WHERE (foo.bar = $p0)", query.QueryText);
         }
 		
 		[Fact]
@@ -134,7 +134,7 @@ namespace Neo4jClient.Test.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client).Where((FooWithCamelCaseNamingStrategy foo) => foo.Bar == "Bar").Query;
 
-            Assert.Equal("WHERE (foo.bar = {p0})", query.QueryText);
+            Assert.Equal("WHERE (foo.bar = $p0)", query.QueryText);
         }
 
         [Fact]
@@ -170,7 +170,7 @@ namespace Neo4jClient.Test.Cypher
                 .AndWhere((Foo c) => c.Bar == 789)
                 .Query;
 
-            Assert.Equal("WHERE ((a.Bar = {p0}) OR (b.Bar = {p1}))\r\nAND (c.Bar = {p2})", query.QueryText);
+            Assert.Equal("WHERE ((a.Bar = $p0) OR (b.Bar = $p1))\r\nAND (c.Bar = $p2)", query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count);
         }
 
@@ -210,7 +210,7 @@ namespace Neo4jClient.Test.Cypher
                 .AndWhere((FooCamel c) => c.B == 789)
                 .Query;
 
-            Assert.Equal("WHERE ((a.longBar = {p0}) OR (b.bar = {p1}))\r\nAND (c.b = {p2})", query.QueryText);
+            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))\r\nAND (c.b = $p2)", query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count);
         }
     }

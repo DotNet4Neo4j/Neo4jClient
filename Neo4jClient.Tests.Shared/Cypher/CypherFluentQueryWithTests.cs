@@ -20,7 +20,7 @@ namespace Neo4jClient.Test.Cypher
                 .With("foo")
                 .Query;
 
-            Assert.Equal("START n=node({p0})\r\nWITH foo", query.QueryText);
+            Assert.Equal("START n=node($p0)\r\nWITH foo", query.QueryText);
             Assert.Equal(3L, query.QueryParameters["p0"]);
         }
 
