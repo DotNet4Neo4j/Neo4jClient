@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -487,11 +488,11 @@ namespace Neo4jClient
                 {
                     var session = Driver.AsyncSession(x =>
                     {
-                        x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read);
+                        x.WithDatabase(query.Database).WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read);
                         if (query.Bookmarks != null) x.WithBookmarks(query.Bookmarks.ToArray());
                     });
 
-                    var result = query.IsWrite
+                    var result = query.IsWrite 
                         ? await session.WriteTransactionAsync(async s =>
                         {
                             var cursor = await s.RunAsync(query, this).ConfigureAwait(false);
@@ -510,8 +511,7 @@ namespace Neo4jClient
             }
             catch (AggregateException aggregateException)
             {
-                Exception unwrappedException;
-                context.Complete(query, lastBookmark, aggregateException.TryUnwrap(out unwrappedException) ? unwrappedException : aggregateException);
+                context.Complete(query, lastBookmark, aggregateException.TryUnwrap(out var unwrappedException) ? unwrappedException : aggregateException);
                 throw;
             }
             catch (Exception e)
@@ -531,11 +531,10 @@ namespace Neo4jClient
             if (typeof(TResult).IsAnonymous())
             {
                 foreach (var record in result)
-                    results.AddRange(deserializer.Deserialize(record.ParseAnonymous(this)));
+                    results.AddRange(deserializer.Deserialize(record.ParseAnonymous(this), false));
             }
             else
             {
-
                 StatementResultHelper.JsonSettings = new JsonSerializerSettings
                 {
                     Converters = JsonConverters,

@@ -188,11 +188,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<RecordWithList>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<RecordWithList>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -206,11 +206,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<string>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<string>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Set);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -236,11 +236,11 @@ namespace Neo4jClient.Tests
                 var expectedContent = "{ \"columns\":[\"x\"], \"data\":[[ [{{ \"Info\":{\"A\":\"a\",\"B\":\"b\"} }}] ]] }";
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<string>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<string>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Set);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
 //            [Fact]
@@ -261,11 +261,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<DerivedClass>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<DerivedClass>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -280,11 +280,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<DerivedClass>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<DerivedClass>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -309,11 +309,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<DerivedClass>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<DerivedClass>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -326,11 +326,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<string>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<string>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Set);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -343,11 +343,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<int>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<int>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Set);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
 
             [Fact]
@@ -361,11 +361,11 @@ namespace Neo4jClient.Tests
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<DerivedClass>>();
                 mockDeserializer
-                    .Setup(d => d.Deserialize(It.IsAny<string>()))
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
                     .Returns(new List<DerivedClass>());
 
                 record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
-                mockDeserializer.Verify(d => d.Deserialize(expectedContent), Times.Once);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
             }
         }
 

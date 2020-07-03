@@ -416,11 +416,11 @@ namespace Neo4jClient
                     response.DeserializationContext.DeserializationContext.JsonContractResolver =
                         query.JsonContractResolver;
                     results =
-                        deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext).ToList();
+                        deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext, true).ToList();
                 }
                 else
                 {
-                    results = deserializer.Deserialize(await response.ResponseObject.Content.ReadAsStringAsync().ConfigureAwait(false)).ToList();
+                    results = deserializer.Deserialize(await response.ResponseObject.Content.ReadAsStringAsync().ConfigureAwait(false), true).ToList();
                 }
             }
             catch (AggregateException aggregateException)
@@ -493,7 +493,7 @@ namespace Neo4jClient
                 var exceptionResponse = JsonConvert.DeserializeObject<ExceptionResponse>(createResponse.Body);
 
                 if (exceptionResponse == null || string.IsNullOrEmpty(exceptionResponse.Message) || string.IsNullOrEmpty(exceptionResponse.Exception))
-                    throw new Exception(string.Format("Response from Neo4J: {0}", createResponse.Body));
+                    throw new Exception($"Response from Neo4J: {createResponse.Body}");
 
                 throw new NeoException(exceptionResponse);
             }
