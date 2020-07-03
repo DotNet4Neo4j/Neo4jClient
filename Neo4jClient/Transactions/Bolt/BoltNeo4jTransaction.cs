@@ -18,7 +18,11 @@ namespace Neo4jClient.Transactions.Bolt
         {
             Bookmarks = bookmarks?.ToList();
             var accessMode = isWrite ? AccessMode.Write : AccessMode.Read;
-            Session = driver.AsyncSession(x => x.WithDefaultAccessMode(accessMode).WithBookmarks(Bookmark.From(Bookmarks.ToArray())));
+            Session = driver.AsyncSession(x =>
+            {
+                x.WithDefaultAccessMode(accessMode);
+                if (bookmarks != null) x.WithBookmarks(Bookmark.From(Bookmarks.ToArray()));
+            });
 
             var tx = Session.BeginTransactionAsync();
             tx.Wait();

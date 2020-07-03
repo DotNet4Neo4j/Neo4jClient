@@ -485,13 +485,25 @@ namespace Neo4jClient
                 }
                 else
                 {
-                    var session = Driver.AsyncSession(x => x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read).WithBookmarks(query.Bookmarks.ToArray()));
+                    var session = Driver.AsyncSession(x =>
+                    {
+                        x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read);
+                        if (query.Bookmarks != null) x.WithBookmarks(query.Bookmarks.ToArray());
+                    });
 
                     var result = query.IsWrite
-                        ? await session.WriteTransactionAsync(s => s.RunAsync(query, this)).ConfigureAwait(false)
-                        : await session.ReadTransactionAsync(s => s.RunAsync(query, this)).ConfigureAwait(false);
+                        ? await session.WriteTransactionAsync(async s =>
+                        {
+                            var cursor = await s.RunAsync(query, this).ConfigureAwait(false);
+                            return await cursor.ToListAsync().ConfigureAwait(false);
+                        }).ConfigureAwait(false)
+                        : await session.ReadTransactionAsync(async s =>
+                        {
+                            var cursor = await s.RunAsync(query, this).ConfigureAwait(false);
+                            return await cursor.ToListAsync().ConfigureAwait(false);
+                        }).ConfigureAwait(false);
 
-                    results = ParseResults<TResult>(await result.ToListAsync().ConfigureAwait(false), query);
+                    results = ParseResults<TResult>(result, query);
                     lastBookmark = session.LastBookmark;
                     await session.CloseAsync();
                 }
@@ -563,7 +575,11 @@ namespace Neo4jClient
                 });
             }
 
-            var session = Driver.AsyncSession(x => x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read).WithBookmarks().WithBookmarks(query.Bookmarks.ToArray()) );
+            var session = Driver.AsyncSession(x =>
+            {
+                x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read);
+                if (query.Bookmarks != null) x.WithBookmarks(query.Bookmarks.ToArray());
+            });
             {
                 if (query.IsWrite)
                     await session.WriteTransactionAsync(async s => await s.RunAsync(query, this)).ConfigureAwait(false);

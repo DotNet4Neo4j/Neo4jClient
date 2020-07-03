@@ -69,8 +69,12 @@ namespace Neo4jClient.Tests
 
         public void SetupCypherRequestResponse(string request, IDictionary<string, object> cypherQueryQueryParameters, IResultCursor response)
         {
+            var mockTransaction = new Mock<IAsyncTransaction>();
             MockSession.Setup(s => s.RunAsync(request, It.IsAny<IDictionary<string, object>>())).Returns(Task.FromResult(response));
-            MockSession.Setup(s => s.WriteTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task<IResultCursor>>>())).Returns(Task.FromResult(response));
+            mockTransaction.Setup(s => s.RunAsync(request, It.IsAny<IDictionary<string, object>>())).Returns(Task.FromResult(response));
+            MockSession.Setup(s => s.WriteTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task<List<IRecord>>>>()))
+                .Returns<Func<IAsyncTransaction, Task<List<IRecord>>>>(
+                    async param => await param(mockTransaction.Object));
         }
 
         public async Task<IRawGraphClient> CreateAndConnectBoltGraphClient()
