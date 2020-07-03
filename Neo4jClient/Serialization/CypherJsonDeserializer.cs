@@ -51,7 +51,7 @@ namespace Neo4jClient.Serialization
             }
         }
 
-        public IEnumerable<TResult> Deserialize(string content)
+        public IEnumerable<TResult> Deserialize(string content, bool isHttp)
         {
             try
             {
@@ -72,8 +72,8 @@ namespace Neo4jClient.Serialization
                 // not much value to deferred execution here and we'd like to know
                 // about any errors now
                 return inTransaction
-                    ? FullDeserializationFromTransactionResponse(reader, context).ToArray()
-                    : DeserializeFromRoot(content, reader, context).ToArray();
+                    ? FullDeserializationFromTransactionResponse(reader, context, isHttp).ToArray()
+                    : DeserializeFromRoot(content, reader, context, isHttp).ToArray();
             }
             catch (Exception ex)
             {
@@ -109,7 +109,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             }
         }
 
-        IEnumerable<TResult> DeserializeInternal(string content)
+        private IEnumerable<TResult> DeserializeInternal(string content, bool isHttp)
         {
             var context = new DeserializationContext
             {
@@ -161,27 +161,25 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 
             switch (resultMode)
             {
-                case CypherResultMode.Set:
-                    return ParseInSingleColumnMode(context, root, columnNames, jsonTypeMappings.ToArray());
+                case CypherResultMode.Set: return ParseInSingleColumnMode(context, root, columnNames, jsonTypeMappings.ToArray(), isHttp);
                 case CypherResultMode.Projection:
                     jsonTypeMappings.Add(new TypeMapping
                     {
-                        ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                            nestingLevel == 0 && type.GetTypeInfo().IsClass,
-                        DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
-                            typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
-                        MutationCallback = n =>
-                            n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
+                        ShouldTriggerForPropertyType = (nestingLevel, type) => nestingLevel == 0 && type.GetTypeInfo().IsClass,
+                        DetermineTypeToParseJsonIntoBasedOnPropertyType = t => typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
+                        MutationCallback = n => n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
                     });
                     return ParseInProjectionMode(context, root, columnNames, jsonTypeMappings.ToArray());
                 default:
-                    throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
+                    throw new NotSupportedException($"Unrecognised result mode of {resultMode}.");
             }
         }
 
-        IEnumerable<TResult> DeserializeResultSet(JToken resultRoot, DeserializationContext context)
+        private IEnumerable<TResult> DeserializeResultSet(JToken resultRoot, DeserializationContext context, bool isHttp)
         {
-            var columnsArray = (JArray)resultRoot["columns"];
+            var columnsArray = isHttp ? (JArray)resultRoot.SelectToken("$.results[0].columns") : (JArray)resultRoot["columns"];
+            if(columnsArray == null) //This is a hack prior to shifting the Bolt deserialization entirely away from this.
+                columnsArray = !isHttp ? (JArray)resultRoot.SelectToken("$.results[0].columns") : (JArray)resultRoot["columns"];
             var columnNames = columnsArray
                 .Children()
                 .Select(c => c.AsString())
@@ -218,7 +216,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             switch (resultMode)
             {
                 case CypherResultMode.Set:
-                    return ParseInSingleColumnMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInSingleColumnMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray(), isHttp);
                 case CypherResultMode.Projection:
                     // if we are in transaction and we have an object we dont need a mutation
                     if (!inTransaction && !inBolt)
@@ -235,17 +233,15 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     }
                     return ParseInProjectionMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
                 default:
-                    throw new NotSupportedException(string.Format("Unrecognised result mode of {0}.", resultMode));
+                    throw new NotSupportedException($"Unrecognised result mode of {resultMode}.");
             }
         }
 
         private string GetStringPropertyFromObject(JObject obj, string propertyName)
         {
-            JToken propValue;
-            if (obj.TryGetValue(propertyName, out propValue))
-            {
+            if (obj.TryGetValue(propertyName, out var propValue))
                 return (string)(propValue as JValue);
-            }
+
             return null;
         }
 
@@ -341,7 +337,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
             return results.FirstOrDefault();
         }
 
-        public IEnumerable<TResult> DeserializeFromTransactionPartialContext(PartialDeserializationContext context)
+        public IEnumerable<TResult> DeserializeFromTransactionPartialContext(PartialDeserializationContext context, bool isHttp)
         {
             if (context.RootResult == null)
             {
@@ -350,10 +346,10 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 This means no query was emitted, so a method that doesn't care about getting results should have been called."
                     );
             }
-            return DeserializeResultSet(context.RootResult, context.DeserializationContext);
+            return DeserializeResultSet(context.RootResult, context.DeserializationContext, isHttp);
         }
 
-        private IEnumerable<TResult> FullDeserializationFromTransactionResponse(JsonTextReader reader, DeserializationContext context)
+        private IEnumerable<TResult> FullDeserializationFromTransactionResponse(JsonTextReader reader, DeserializationContext context, bool isHttp)
         {
             var root = JToken.ReadFrom(reader).Root as JObject;
 
@@ -368,21 +364,21 @@ This means no query was emitted, so a method that doesn't care about getting res
 This means no query was emitted, so a method that doesn't care about getting results should have been called."
                     );
             }
-            return DeserializeResultSet(resultSet, context);
+            return DeserializeResultSet(resultSet, context, isHttp);
         }
 
-        IEnumerable<TResult> DeserializeFromRoot(string content, JsonTextReader reader, DeserializationContext context)
+        IEnumerable<TResult> DeserializeFromRoot(string content, JsonTextReader reader, DeserializationContext context, bool isHttp)
         {
             var root = JToken.ReadFrom(reader).Root;
             if (!(root is JObject))
             {
                 throw new InvalidOperationException("Root expected to be a JSON object.");
             }
-            return DeserializeResultSet(root, context);
+            return DeserializeResultSet(root, context, isHttp);
         }
 
         // ReSharper disable UnusedParameter.Local
-        IEnumerable<TResult> ParseInSingleColumnMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+        private IEnumerable<TResult> ParseInSingleColumnMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings, bool isHttp)
         // ReSharper restore UnusedParameter.Local
         {
             if (columnNames.Count() != 1)
@@ -395,41 +391,37 @@ This means no query was emitted, so a method that doesn't care about getting res
             var mapping = jsonTypeMappings.SingleOrDefault(m => m.ShouldTriggerForPropertyType(0, resultType));
             var newType = mapping == null ? resultType : mapping.DetermineTypeToParseJsonIntoBasedOnPropertyType(resultType);
 
-            var dataArray = (JArray)root["data"];
+            var dataArray = isHttp ? (JArray)root.SelectToken("$.results[0].data") : (JArray)root["data"];
+            if(dataArray == null) //Hack prior to swapping out deserialization completely.
+                dataArray = !isHttp ? (JArray)root.SelectToken("$.results[0].data") : (JArray)root["data"];
             var rows = dataArray.Children();
 
-            var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
+            //var x = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
+            var dataPropertyNameInTransaction = "row";
             var results = rows.Select(row =>
                     {
-                        if (inTransaction)
+                        if (inTransaction || isHttp)
+                            //All HTTP messages are now in txs -- This is a temporary measure.
                         {
                             var rowObject = row as JObject;
                             if (rowObject == null)
-                            {
-                                throw new InvalidOperationException(
-                                    "Expected the row to be a JSON object, but it wasn't.");
-                            }
+                                throw new InvalidOperationException("Expected the row to be a JSON object, but it wasn't.");
 
-                            JToken rowProperty;
-                            if (!rowObject.TryGetValue(dataPropertyNameInTransaction, out rowProperty))
-                            {
+                            if (!rowObject.TryGetValue(dataPropertyNameInTransaction, out var rowProperty))
                                 throw new InvalidOperationException("There is no row property in the JSON object.");
-                            }
 
                             row = rowProperty;
-
                         }
 
                         if (!(row is JArray))
                         {
                             // no transaction mode and the row is not an array
-                            throw new InvalidOperationException(
-                                "Expected the row to be a JSON array of values, but it wasn't.");
+                            throw new InvalidOperationException("Expected the row to be a JSON array of values, but it wasn't.");
                         }
 
                         var rowAsArray = (JArray) row;
                         if (rowAsArray.Count > 1)
-                            throw new InvalidOperationException(string.Format("Expected the row to only have a single array value, but it had {0}.", rowAsArray.Count));
+                            throw new InvalidOperationException($"Expected the row to only have a single array value, but it had {rowAsArray.Count}.");
 
                         return rowAsArray;
                     }
@@ -498,11 +490,8 @@ This means no query was emitted, so a method that doesn't care about getting res
                 {
                     // wasn't able to build TResult via constructor
                     var columnsWhichDontHaveSettablePropertiesCommaSeparated = string.Join(", ", columnsWhichDontHaveSettableProperties);
-                    throw new ArgumentException(string.Format(
-                        "The query response contains columns {0} however {1} does not contain publically settable properties to receive this data.",
-                        columnsWhichDontHaveSettablePropertiesCommaSeparated,
-                        typeof(TResult).FullName),
-                        "columnNames");
+                    throw new ArgumentException($"The query response contains columns {columnsWhichDontHaveSettablePropertiesCommaSeparated} however {typeof(TResult).FullName} does not contain publicly settable properties to receive this data.",
+                        nameof(columnNames));
                 }
             }
             else
@@ -513,7 +502,9 @@ This means no query was emitted, so a method that doesn't care about getting res
             var dataArray = (JArray)root["data"];
             var rows = dataArray.Children();
 
-            var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
+            //var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
+            var dataPropertyNameInTransaction = "row";
+
             return inTransaction ? rows.Select(row => row[dataPropertyNameInTransaction]).Select(getRow) : rows.Select(getRow);
         }
 

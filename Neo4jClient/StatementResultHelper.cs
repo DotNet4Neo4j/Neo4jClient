@@ -237,7 +237,7 @@ namespace Neo4jClient
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
 
-            return deserializer.Deserialize(json);
+            return deserializer.Deserialize(json, false);
         }
 
         public static T Parse<T>(this IRecord record, IGraphClient graphClient)
