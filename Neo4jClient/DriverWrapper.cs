@@ -58,12 +58,19 @@ namespace Neo4jClient
 
         public IAsyncSession Session(AccessMode defaultMode, IEnumerable<string> bookmarks)
         {
-            return driver.AsyncSession(x => x.WithDefaultAccessMode(defaultMode).WithBookmarks(Bookmark.From(bookmarks.ToArray())));
+            return driver.AsyncSession(x =>
+            {
+                x.WithDefaultAccessMode(defaultMode);
+                if (bookmarks != null) x.WithBookmarks(Bookmark.From(bookmarks.ToArray()));
+            });
         }
 
         public IAsyncSession Session(IEnumerable<string> bookmarks)
         {
-            return driver.AsyncSession(x => x.WithBookmarks(Bookmark.From(bookmarks.ToArray())));
+            return driver.AsyncSession(x =>
+            {
+                if (bookmarks != null) x.WithBookmarks(Bookmark.From(bookmarks.ToArray()));
+            });
         }
         
         public IAsyncSession AsyncSession()
