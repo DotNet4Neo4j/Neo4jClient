@@ -24,7 +24,6 @@ namespace Neo4jClient.Cypher
         readonly CypherResultMode resultMode;
         readonly CypherResultFormat resultFormat;
         readonly IContractResolver jsonContractResolver;
-        readonly int? maxExecutionTime;
         private readonly NameValueCollection customHeaders;
         
         public CypherQuery(
@@ -56,12 +55,12 @@ namespace Neo4jClient.Cypher
             this.resultMode = resultMode;
             this.resultFormat = resultFormat;
             jsonContractResolver = contractResolver ?? GraphClient.DefaultJsonContractResolver;
-            this.maxExecutionTime = maxExecutionTime;
+            this.MaxExecutionTime = maxExecutionTime;
             this.customHeaders = customHeaders;
             IsWrite = isWrite;
             Bookmarks = bookmarks;
             Identifier = identifier;
-            Database = database;
+            Database = string.IsNullOrWhiteSpace(database) ? "neo4j" : database;
         }
 
         public bool IsWrite { get; }
@@ -82,7 +81,7 @@ namespace Neo4jClient.Cypher
 
         public string Database { get; }
 
-        public int? MaxExecutionTime => maxExecutionTime;
+        public int? MaxExecutionTime { get; }
 
         /// <summary>
         /// Custom headers to add to REST calls to Neo4j server.
