@@ -110,6 +110,7 @@ namespace Neo4jClient
                                     ExecutionConfiguration.Username,
                                     ExecutionConfiguration.Password,
                                     ExecutionConfiguration.Realm,
+                                    ExecutionConfiguration.EncryptionLevel,
                                     ExecutionConfiguration).ConfigureAwait(false);
 
                 RootApiResponse = configuration.ApiConfig;

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using Neo4j.Driver;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Execution;
 using Neo4jClient.Mappers;
@@ -14,6 +15,7 @@ namespace Neo4jClient
 
         internal Uri RootUri { get; private set; }
 
+        internal EncryptionLevel? EncryptionLevel { get; }
         internal string Username { get; private set; }
         internal string Password { get; private set; }
         internal string Realm { get; private set; }
@@ -23,12 +25,12 @@ namespace Neo4jClient
             ApiConfig = apiConfig;
         }
 
-        public static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username = null, string password = null, string realm = null)
+        public static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
         {
-            return await GetConfigurationAsync(rootUri, username, password, realm, null).ConfigureAwait(false);
+            return await GetConfigurationAsync(rootUri, username, password, realm, null, null).ConfigureAwait(false);
         }
 
-        internal static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username, string password, string realm, ExecutionConfiguration executionConfiguration)
+        internal static async Task<NeoServerConfiguration> GetConfigurationAsync(Uri rootUri, string username, string password, string realm, EncryptionLevel? encryptionLevel, ExecutionConfiguration executionConfiguration)
         {
             if (executionConfiguration == null)
             {
@@ -37,13 +39,13 @@ namespace Neo4jClient
                 executionConfiguration = new ExecutionConfiguration
                 {
                     HttpClient = httpClient,
-                    UserAgent =
-                        string.Format("Neo4jClient/{0}", typeof(NeoServerConfiguration).GetTypeInfo().Assembly.GetName().Version),
+                    UserAgent = $"Neo4jClient/{typeof(NeoServerConfiguration).GetTypeInfo().Assembly.GetName().Version}",
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters,
                     Username = username,
                     Password = password,
-                    Realm = realm
+                    Realm = realm,
+                    EncryptionLevel = encryptionLevel
                 };
             }
 

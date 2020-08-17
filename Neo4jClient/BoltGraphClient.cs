@@ -49,7 +49,8 @@ namespace Neo4jClient
         private readonly IServerAddressResolver addressResolver;
         private readonly string username;
         private readonly Uri uri;
-        
+        private readonly EncryptionLevel? encryptionLevel;
+
         /// <summary>
         ///     Creates a new instance of the <see cref="BoltGraphClient" />.
         /// </summary>
@@ -64,7 +65,7 @@ namespace Neo4jClient
         /// <param name="username">The username to connect to Neo4j with.</param>
         /// <param name="password">The password to connect to Neo4j with.</param>
         /// <param name="realm">The realm to connect to Neo4j with.</param>
-        public BoltGraphClient(Uri uri, IEnumerable<Uri> uris, string username = null, string password = null, string realm = null)
+        public BoltGraphClient(Uri uri, IEnumerable<Uri> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
         {
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
@@ -83,6 +84,7 @@ namespace Neo4jClient
             this.username = username;
             this.password = password;
             this.realm = realm;
+            this.encryptionLevel = encryptionLevel;
             PolicyFactory = new ExecutionPolicyFactory(this);
 
             JsonConverters = new List<JsonConverter>();
@@ -102,24 +104,24 @@ namespace Neo4jClient
             transactionManager = new BoltTransactionManager(this);
         }
 
-        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null)
-            : this(uri, null, username, password, realm)
+        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
+            : this(uri, null, username, password, realm, encryptionLevel)
         { }
 
-        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null)
-            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm)
+        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
+            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel)
         { }
 
-        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null)
-        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm)
+        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
+        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel)
         {}
 
-        public BoltGraphClient(string uri, string username = null, string password= null, string realm = null)
-            : this(new Uri(uri), username, password, realm)
+        public BoltGraphClient(string uri, string username = null, string password= null, string realm = null, EncryptionLevel? encryptionLevel = null)
+            : this(new Uri(uri), username, password, realm, encryptionLevel)
         { }
 
         public BoltGraphClient(IDriver driver)
-            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null)
+            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null, null)
         {
             Driver = driver;
         }
@@ -427,8 +429,8 @@ namespace Neo4jClient
             if (Driver == null)
             {
                 var driver = configuration == null
-                    ? new DriverWrapper(uri, addressResolver, username, password, realm)
-                    : new DriverWrapper(uri, addressResolver, configuration.Username, configuration.Password, configuration.Realm);
+                    ? new DriverWrapper(uri, addressResolver, username, password, realm, encryptionLevel)
+                    : new DriverWrapper(uri, addressResolver, configuration.Username, configuration.Password, configuration.Realm, configuration.EncryptionLevel);
                 Driver = driver;
             }
 
