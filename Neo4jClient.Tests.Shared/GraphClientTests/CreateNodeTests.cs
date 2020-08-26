@@ -42,7 +42,7 @@ namespace Neo4jClient.Test.GraphClientTests
         {
             var graphClient = new GraphClient(new Uri("http://foo/db/data"), null);
             var ex = Assert.Throws<ArgumentException>(() => graphClient.Create((Node<TestNode>)null));
-            ex.Message.Should().Be("You're trying to pass in a Node<TestNode> instance. Just pass the TestNode instance instead. (Parameter 'node')");
+            ex.Message.Should().Contain("You're trying to pass in a Node<TestNode> instance. Just pass the TestNode instance instead.");
         }
 
         [Fact]
