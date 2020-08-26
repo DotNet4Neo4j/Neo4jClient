@@ -65,7 +65,7 @@ namespace Neo4jClient.Test.Cypher
                 () => query.WithParam("foo", 456)
             );
             Assert.Equal("key", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query.\r\nParameter name: key", ex.Message);
+            Assert.Equal("A parameter with the given key is already defined in the query. (Parameter 'key')", ex.Message);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace Neo4jClient.Test.Cypher
                 () => query.WithParam("p0", 456)
             );
             Assert.Equal("key", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query.\r\nParameter name: key", ex.Message);
+            Assert.Equal("A parameter with the given key is already defined in the query. (Parameter 'key')", ex.Message);
         }
 
         public class ComplexObjForWithParamTest
