@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
+using Neo4jClient.Execution;
 using Neo4jClient.Transactions;
 
 namespace Neo4jClient
@@ -12,16 +15,17 @@ namespace Neo4jClient
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
-//            ServicePointManager.Expect100Continue = true;
-//            ServicePointManager.UseNagleAlgorithm = false;
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.UseNagleAlgorithm = false;
         }
 
         public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
-//            ServicePointManager.Expect100Continue = expect100Continue;
-//            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
+            ServicePointManager.Expect100Continue = expect100Continue;
+            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
+
 
         public virtual async Task ConnectAsync(NeoServerConfiguration configuration = null)
         {
@@ -57,7 +61,7 @@ namespace Neo4jClient
 
                 if (!string.IsNullOrWhiteSpace(RootApiResponse.Transaction))
                 {
-                    //  transactionManager = new TransactionManager(this);
+                    transactionManager = new TransactionManager(this);
                 }
 
                 rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
