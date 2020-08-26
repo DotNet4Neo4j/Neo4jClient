@@ -167,18 +167,21 @@ namespace Neo4jClient.Transactions
         // the following was adapted from Npgsql sources:
         private static System.Runtime.Remoting.Lifetime.ClientSponsor sponsor;
         private static ITransactionResourceManager resourceManager;
-        private static ITransactionResourceManager GetResourceManager()
+        private static ITransactionResourceManager ResourceManager
         {
-            if (resourceManager == null)
+            get
             {
-                sponsor = new System.Runtime.Remoting.Lifetime.ClientSponsor();
-                AppDomain rmDomain = AppDomain.CreateDomain("Neo4jTransactionResourceManager", AppDomain.CurrentDomain.Evidence, AppDomain.CurrentDomain.SetupInformation);
-                resourceManager = (ITransactionResourceManager) rmDomain.CreateInstanceAndUnwrap(
-                    typeof(Neo4jTransactionResourceManager).Assembly.FullName,
-                    typeof(Neo4jTransactionResourceManager).FullName);
-                sponsor.Register((MarshalByRefObject)resourceManager);
+                if (resourceManager == null)
+                {
+                    sponsor = new System.Runtime.Remoting.Lifetime.ClientSponsor();
+                    AppDomain rmDomain = AppDomain.CreateDomain("Neo4jTransactionResourceManager", AppDomain.CurrentDomain.Evidence, AppDomain.CurrentDomain.SetupInformation);
+                    resourceManager = (ITransactionResourceManager)rmDomain.CreateInstanceAndUnwrap(
+                        typeof(Neo4jTransactionResourceManager).Assembly.FullName,
+                        typeof(Neo4jTransactionResourceManager).FullName);
+                    sponsor.Register((MarshalByRefObject)resourceManager);
+                }
+                return resourceManager;
             }
-            return resourceManager;
         }
 #endif
     }
