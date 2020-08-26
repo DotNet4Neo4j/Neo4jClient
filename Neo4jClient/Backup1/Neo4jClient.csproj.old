@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{E568B54B-F463-4346-818E-9EC8348C6470}</ProjectGuid>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFramework>net50</TargetFramework>
+    <AssemblyTitle>Neo4jClient.Pcl</AssemblyTitle>
+    <Product>Neo4jClient.Pcl</Product>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Copyright>Copyright ©  2016</Copyright>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_3</DefineConstants>
+    <DocumentationFile>bin\$(Configuration)\Neo4jClient.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineConstants>TRACE;NET46</DefineConstants>
+    <DocumentationFile>bin\$(Configuration)\Neo4jClient.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Full - Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Portable - Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>full</DebugType>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <Import Project="..\Neo4jClient.Shared\Neo4jClient.Shared.projitems" Label="Shared" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
+    <PackageReference Include="Microsoft.NETCore.Portable.Compatibility" Version="1.0.1" />
+    <PackageReference Include="Neo4j.Driver.Signed" Version="1.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="BoltNeo4jTransaction.cs" />
+    <Compile Remove="ClosedTransactionException.cs" />
+    <Compile Remove="Neo4jRestTransaction.cs" />
+    <Compile Remove="Neo4jTransactionProxy.cs" />
+    <Compile Remove="Neo4jTransactionResourceManager.cs" />
+    <Compile Remove="SuppressTransactionProxy.cs" />
+    <Compile Remove="ThreadContextHelpers.cs" />
+    <Compile Remove="TransactionConnectionContext.cs" />
+    <Compile Remove="TransactionContext.cs" />
+    <Compile Remove="TransactionExecutionEnvironment.cs" />
+    <Compile Remove="TransactionManager.cs" />
+    <Compile Remove="TransactionScopeProxy.cs" />
+    <Compile Remove="TransactionSinglePhaseNotification.cs" />
+  </ItemGroup>
+</Project>
