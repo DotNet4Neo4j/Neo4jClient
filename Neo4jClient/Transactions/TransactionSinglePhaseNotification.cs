@@ -11,7 +11,6 @@ namespace Neo4jClient.Transactions
     {
         private Neo4jRestTransaction transaction;
         private readonly ITransactionalGraphClient client;
-        private static ITransactionResourceManager resourceManager;
         private readonly ISet<Transaction> enlistedInTransactions = new HashSet<Transaction>();
         private int transactionId;
 
@@ -161,6 +160,26 @@ namespace Neo4jClient.Transactions
             enlistedInTransactions.Remove(Transaction.Current);
         }
 
+#if NETSTANDARD2_1
+        // Remoting not supported on .NET Standard. Just instantiate directly.
         private static ITransactionResourceManager ResourceManager { get; } = new Neo4jTransactionResourceManager();
+#else
+        // the following was adapted from Npgsql sources:
+        private static System.Runtime.Remoting.Lifetime.ClientSponsor sponsor;
+        private static ITransactionResourceManager resourceManager;
+        private static ITransactionResourceManager GetResourceManager()
+        {
+            if (resourceManager == null)
+            {
+                sponsor = new System.Runtime.Remoting.Lifetime.ClientSponsor();
+                AppDomain rmDomain = AppDomain.CreateDomain("Neo4jTransactionResourceManager", AppDomain.CurrentDomain.Evidence, AppDomain.CurrentDomain.SetupInformation);
+                resourceManager = (ITransactionResourceManager) rmDomain.CreateInstanceAndUnwrap(
+                    typeof(Neo4jTransactionResourceManager).Assembly.FullName,
+                    typeof(Neo4jTransactionResourceManager).FullName);
+                sponsor.Register((MarshalByRefObject)resourceManager);
+            }
+            return resourceManager;
+        }
+#endif
     }
 }

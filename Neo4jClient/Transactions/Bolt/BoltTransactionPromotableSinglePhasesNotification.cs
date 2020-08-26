@@ -161,6 +161,29 @@ namespace Neo4jClient.Transactions
         }
         //Need to set this for bolt transactions as well.
         private Guid transactionId;
+#if NETSTANDARD2_1
+        // Remoting not supported on .NET Standard. Just instantiate directly.
         private static ITransactionResourceManagerBolt ResourceManager { get; } = new BoltTransactionResourceManager();
+#else
+        // the following was adapted from Npgsql sources (then from TransactionSinglePhaseNotification):
+        private static System.Runtime.Remoting.Lifetime.ClientSponsor sponsor;
+        private static ITransactionResourceManagerBolt transactionResourceManager;
+        private static ITransactionResourceManagerBolt ResourceManager
+        {
+            get
+            {
+                if (transactionResourceManager == null)
+                {
+                    sponsor = new System.Runtime.Remoting.Lifetime.ClientSponsor();
+                    AppDomain rmDomain = AppDomain.CreateDomain(nameof(BoltTransactionResourceManager), AppDomain.CurrentDomain.Evidence, AppDomain.CurrentDomain.SetupInformation);
+                    transactionResourceManager = (ITransactionResourceManagerBolt)rmDomain.CreateInstanceAndUnwrap(
+                        typeof(BoltTransactionResourceManager).Assembly.FullName,
+                        typeof(BoltTransactionResourceManager).FullName);
+                    sponsor.Register((MarshalByRefObject)transactionResourceManager);
+                }
+                return transactionResourceManager;
+            }
+        }
+#endif
     }
 }
