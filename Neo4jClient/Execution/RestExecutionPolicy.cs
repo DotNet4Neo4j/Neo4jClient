@@ -5,22 +5,22 @@ using System.Text;
 
 namespace Neo4jClient.Execution
 {
+    //TODO : Remove this
     internal class RestExecutionPolicy : GraphClientBasedExecutionPolicy
     {
+
+
         public RestExecutionPolicy(IGraphClient client) : base(client)
         {
         }
 
-        public override TransactionExecutionPolicy TransactionExecutionPolicy
-        {
-            get { return TransactionExecutionPolicy.Denied; }
-        }
+        public override TransactionExecutionPolicy TransactionExecutionPolicy => TransactionExecutionPolicy.Denied;
 
         public override void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext)
         {
         }
 
-        public override Uri BaseEndpoint(string database = null)
+        public override Uri BaseEndpoint(string database = null, bool autoCommit = false)
         {
             return Replace(Client.RootEndpoint, database); 
         }
@@ -44,6 +44,8 @@ namespace Neo4jClient.Execution
 
             throw new NotImplementedException("Unknown startReference parameter for REST policy");
         }
+
+        public override string Database { get; set; }
 
         private Uri AddPath(Uri startUri, NodeReference node)
         {

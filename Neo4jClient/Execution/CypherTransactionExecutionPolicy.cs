@@ -7,9 +7,6 @@
         {
         }
 
-        public override TransactionExecutionPolicy TransactionExecutionPolicy
-        {
-            get { return TransactionExecutionPolicy.Required; }
-        }
+        public override TransactionExecutionPolicy TransactionExecutionPolicy => TransactionExecutionPolicy.Required;
     }
 }

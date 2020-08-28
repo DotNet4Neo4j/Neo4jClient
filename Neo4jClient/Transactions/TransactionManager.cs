@@ -10,6 +10,8 @@ using Neo4jClient.Execution;
 
 namespace Neo4jClient.Transactions
 {
+    using Neo4j.Driver;
+
     /// <summary>
     /// Handles all the queries related to transactions that could be needed in a ITransactionalGraphClient
     /// </summary>
@@ -28,22 +30,12 @@ namespace Neo4jClient.Transactions
             = new AsyncLocal<IScopedTransactions<TransactionScopeProxy>>();
         internal static IScopedTransactions<TransactionScopeProxy> ScopedTransactions
         {
-            get
-            {
-                if (scopedTransactions.Value == null)
-                {
-                    scopedTransactions.Value = ThreadContextHelper.CreateScopedTransactions();
-                }
-
-                return scopedTransactions.Value;
-            }
+            get => scopedTransactions.Value ?? (scopedTransactions.Value = ThreadContextHelper.CreateScopedTransactions());
             set => scopedTransactions.Value = value;
         }
 #endif
 
-            
-        // holds the transaction contexts for transactions from the System.Transactions framework
-        private readonly IDictionary<string, TransactionContext> dtcContexts; 
+           
         private readonly ITransactionalGraphClient client;
 
         public TransactionManager(ITransactionalGraphClient client)
@@ -52,11 +44,6 @@ namespace Neo4jClient.Transactions
             // specifies that we are about to use variables that depend on OS threads
             Thread.BeginThreadAffinity();
             ScopedTransactions = ThreadContextHelper.CreateScopedTransactions();
-
-            // this object enables the interacion with System.Transactions and MSDTC, at first by
-            // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
-            // then it notifies the library how to do it.
-            dtcContexts = new Dictionary<string, TransactionContext>();
         }
 
         private TransactionContext GetContext(NameValueCollection customHeaders = null)
@@ -81,32 +68,38 @@ namespace Neo4jClient.Transactions
                 }
 
                 // if we are in an ambient System.Transactions transaction then we are in a transaction!
+                //BUG: ??? Using System.Transactions here...?!?
                 return Transaction.Current != null;
             }
         }
 
         public TransactionScopeProxy CurrentInternalTransaction => ScopedTransactions.TryPeek();
 
-        public ITransaction CurrentNonDtcTransaction => CurrentInternalTransaction;
+        public ITransaction CurrentTransaction => CurrentInternalTransaction;
+        public Bookmark LastBookmark => CurrentTransaction.LastBookmark;
 
-        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
+        public ITransaction BeginTransaction(TransactionScopeOption option, IEnumerable<string> bookmarks, string database)
         {
-            return BeginTransaction(scopeOption);
+            return BeginTransaction(option, database);
         }
+
+        // public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
+        // {
+        //     return BeginTransaction(scopeOption, client.DefaultDatabase);
+        // }
 
         /// <summary>
         /// Implements the internal part for ITransactionalGraphClient.BeginTransaction
         /// </summary>
         /// <param name="scopeOption">How should the transaction scope be created.
-        /// <see cref="Neo4jClient.Transactions.ITransactionalGraphClient.BeginTransaction(Neo4jClient.Transactions.TransactionScopeOption)" />
-        ///  for more information.</param>
+        /// <see cref="ITransactionalGraphClient.BeginTransaction(TransactionScopeOption)"/> for more information.</param>
         /// <returns></returns>
-        public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, string database)
         {
             if (scopeOption == TransactionScopeOption.Suppress)
             {
                 // TransactionScopeOption.Suppress doesn't fail with older versions of Neo4j
-                return BeginSupressTransaction();
+                return BeginSuppressTransaction();
             }
 
             if (client.ServerVersion < new Version(2, 0))
@@ -124,15 +117,15 @@ namespace Neo4jClient.Transactions
             }
 
             // then scopeOption == TransactionScopeOption.RequiresNew or we dont have a current transaction
-            return BeginNewTransaction();
+            return BeginNewTransaction(database);
         }
 
-        private TransactionContext GenerateTransaction()
+        private TransactionContext GenerateTransaction(string database)
         {
-            return new TransactionContext(new Neo4jRestTransaction(client));
+            return new TransactionContext(new Neo4jRestTransaction(client, database));
         }
 
-        private TransactionContext GenerateTransaction(TransactionContext reference)
+        private static TransactionContext GenerateTransaction(TransactionContext reference)
         {
             return new TransactionContext(reference.NeoTransaction);
         }
@@ -142,9 +135,9 @@ namespace Neo4jClient.Transactions
             ScopedTransactions.Push(transaction);
         }
 
-        private ITransaction BeginNewTransaction()
+        private ITransaction BeginNewTransaction(string database)
         {
-            var transaction = new Neo4jTransactionProxy(client, GenerateTransaction(), true);
+            var transaction = new Neo4jTransactionProxy(client, GenerateTransaction(database), true);
             PushScopeTransaction(transaction);
             return transaction;
         }
@@ -172,14 +165,15 @@ namespace Neo4jClient.Transactions
             return joinedTransaction;
         }
 
-        private ITransaction BeginSupressTransaction()
+        private ITransaction BeginSuppressTransaction()
         {
             var suppressTransaction = new SuppressTransactionProxy(client);
             PushScopeTransaction(suppressTransaction);
             return suppressTransaction;
         }
 
- 
+
+        
 
         public void EndTransaction()
         {
@@ -195,8 +189,10 @@ namespace Neo4jClient.Transactions
             // we don't care about updating the object.
             var txContext = GetContext(query.CustomHeaders);
             txContext.CustomHeaders = query.CustomHeaders;
+            policy.Database = txContext.NeoTransaction.Database;
             // the main difference with a normal Request.With() call is that the request is associated with the
             // TX context.
+            
             return txContext.EnqueueTask(commandDescription, graphClient, policy, query);
         }
 

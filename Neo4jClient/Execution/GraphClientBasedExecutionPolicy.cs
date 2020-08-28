@@ -27,17 +27,19 @@ namespace Neo4jClient.Execution
             return Client.Serializer.Serialize(toSerialize);
         }
 
-        public abstract Uri BaseEndpoint(string database = null);
+        public abstract string Database { get; set; }
+
+        public abstract Uri BaseEndpoint(string database = null, bool autoCommit = false);
         
         public virtual Uri AddPath(Uri startUri, object startReference)
         {
             return startUri;
         }
 
-        protected static Uri Replace(Uri toReplace, string replaceWith)
+        protected Uri Replace(Uri toReplace, string replaceWith)
         {
             //TODO: Less CopyPasta
-            return new Uri(toReplace.AbsoluteUri.Replace("{databaseName}", replaceWith ?? "neo4j"));
+            return new Uri(toReplace.AbsoluteUri.Replace("{databaseName}", replaceWith ?? Client.DefaultDatabase));
         }
     }
 }

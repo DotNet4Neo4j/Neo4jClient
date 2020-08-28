@@ -37,7 +37,7 @@ namespace Neo4jClient.Tests.Transactions
                     await tx.CommitAsync();
                 }
 
-                driver.Received(2).AsyncSession(Arg.Any<Action<SessionConfigBuilder>>()); //one for 'Begin Tx', one for Execute.
+                driver.Received(1).AsyncSession(Arg.Any<Action<SessionConfigBuilder>>()); //one for 'Begin Tx', one for Execute.
                 await session.Received(1).BeginTransactionAsync();
                 await transaction.Received(1).CommitAsync();
             }
@@ -57,7 +57,7 @@ namespace Neo4jClient.Tests.Transactions
                         await tx.CommitAsync();
                     }
 
-                    harness.MockDriver.Verify(md => md.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Exactly(2));
+                    harness.MockDriver.Verify(md => md.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>()), Times.Exactly(1));
                 }
             }
 

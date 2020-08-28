@@ -16,7 +16,14 @@ namespace Neo4jClient.Serialization
         static readonly Regex DateRegex = new Regex(@"/Date\([-]?\d+([+-]\d+)?\)/");
         static readonly Regex DateTypeNameRegex = new Regex(@"(?<=(?<quote>['""])/)Date(?=\(.*?\)/\k<quote>)");
 
-        public static string ReplaceAllDateInstacesWithNeoDates(string content)
+        public static string RemoveResultsFromJson(string content)
+        {
+            var root = JToken.Parse(content);
+            var output = root.SelectTokens("$.results[0]").Select(j => j.ToString(Formatting.None)).FirstOrDefault();
+            return output;
+        }
+
+        public static string ReplaceAllDateInstancesWithNeoDates(string content)
         {
             // Replace all /Date(1234+0200)/ instances with /NeoDate(1234+0200)/
             return DateTypeNameRegex.Replace(content, "NeoDate");
@@ -24,8 +31,7 @@ namespace Neo4jClient.Serialization
 
         public static DateTimeOffset? ParseDateTimeOffset(JToken value)
         {
-            var jValue = value as JValue;
-            if (jValue != null)
+            if (value is JValue jValue)
             {
                 if (jValue.Value == null)
                     return null;
@@ -43,12 +49,11 @@ namespace Neo4jClient.Serialization
 
             if (!DateRegex.IsMatch(rawValue))
             {
-                DateTimeOffset parsed;
-                if (!DateTimeOffset.TryParse(rawValue, out parsed))
+                if (!DateTimeOffset.TryParse(rawValue, out _))
                     return null;
             }
 
-            var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
+            var text = $"{{\"a\":\"{rawValue}\"}}";
             var reader = new JsonTextReader(new StringReader(text)) {DateParseHandling = DateParseHandling.DateTimeOffset};
             reader.Read(); // JsonToken.StartObject
             reader.Read(); // JsonToken.PropertyName
@@ -66,14 +71,13 @@ namespace Neo4jClient.Serialization
 
             if (!DateRegex.IsMatch(rawValue))
             {
-                DateTime parsed;
-                if (!DateTime.TryParse(rawValue, out parsed))
+                if (!DateTime.TryParse(rawValue, out var parsed))
                     return null;
 
                 return rawValue.EndsWith("Z", StringComparison.OrdinalIgnoreCase) ? parsed.ToUniversalTime() : parsed;
             }
 
-            var text = string.Format("{{\"a\":\"{0}\"}}", rawValue);
+            var text = $"{{\"a\":\"{rawValue}\"}}";
             var reader = new JsonTextReader(new StringReader(text));
             reader.Read(); // JsonToken.StartObject
             reader.Read(); // JsonToken.PropertyName
@@ -87,8 +91,7 @@ namespace Neo4jClient.Serialization
 
             var propertyType = propertyInfo.PropertyType;
             var typeInfo = propertyType.GetTypeInfo();
-            object jsonConversionResult;
-            if (TryJsonConverters(context, propertyType, value, out jsonConversionResult))
+            if (TryJsonConverters(context, propertyType, value, out var jsonConversionResult))
                 return jsonConversionResult;
             
             Type genericTypeDef = null;
@@ -142,9 +145,7 @@ namespace Neo4jClient.Serialization
             if (propertyType == typeof(DateTimeOffset))
             {
                 var dateTimeOffset = ParseDateTimeOffset(value);
-                if (dateTimeOffset.HasValue)
-                    return dateTimeOffset.Value;
-                return null;
+                return dateTimeOffset;
             }
 
             if (propertyType == typeof(Decimal))
@@ -185,7 +186,7 @@ namespace Neo4jClient.Serialization
                 // only supports Dict<string, T>()
                 if (keyType != typeof (string))
                 {
-                    throw new NotSupportedException("Value coersion only supports dictionaries with a key of type System.String");
+                    throw new NotSupportedException("Value coercion only supports dictionaries with a key of type System.String");
                 }
 
                 var dict = BuildDictionary(context, propertyType, value.Children(), typeMappings, nestingLevel + 1);
@@ -298,7 +299,7 @@ namespace Neo4jClient.Serialization
                 catch (MissingMethodException ex)
                 {
                     throw new DeserializationException(
-                        string.Format("We expected a default public constructor on {0} so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.", type.Name),
+                        $"We expected a default public constructor on {type.Name} so that we could create instances of it to deserialize data into, however this constructor does not exist or is inaccessible.",
                         ex);
                 }
                 Map(context, instance, element, typeMappings, nestingLevel);
@@ -309,8 +310,7 @@ namespace Neo4jClient.Serialization
         static bool TryJsonConverters(DeserializationContext context, Type type, JToken element, out object instance)
         {
             instance = null;
-            if (context.JsonConverters == null) return false;
-            var converter = context.JsonConverters.FirstOrDefault(c => c.CanConvert(type));
+            var converter = context.JsonConverters?.FirstOrDefault(c => c.CanConvert(type));
             if (converter == null) return false;
             using (var reader = element.CreateReader())
             {

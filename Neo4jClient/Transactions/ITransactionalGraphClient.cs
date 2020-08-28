@@ -183,7 +183,9 @@ namespace Neo4jClient.Transactions
         /// </list>
         /// </param>
         /// <param name="bookmarks">The bookmarks to use for this transaction.</param>
-        ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmark);
+        /// <param name="database">The database to use</param>
+        ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks, string database = null);
+
 
         /// <summary>
         /// The current transaction object.
@@ -203,10 +205,10 @@ namespace Neo4jClient.Transactions
         /// Closes the scope of a transaction. The <c>ITransaction</c> will behave as if it was being disposed.
         /// </summary>
         void EndTransaction();
-
-        /// <summary>
-        /// The Neo4j transaction initial transaction endpoint
-        /// </summary>
-        Uri TransactionEndpoint { get; }
+        //
+        // /// <summary>
+        // /// The Neo4j transaction initial transaction endpoint
+        // /// </summary>
+        // Uri TransactionEndpoint { get; }
     }
 }

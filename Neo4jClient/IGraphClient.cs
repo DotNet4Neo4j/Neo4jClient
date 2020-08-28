@@ -5,6 +5,7 @@ using Neo4jClient.ApiModels;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
 using Neo4jClient.Serialization;
+using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -13,16 +14,21 @@ namespace Neo4jClient
     public interface IGraphClient : ICypherGraphClient
     {
         event OperationCompletedEventHandler OperationCompleted;
+        
+        /// <summary>
+        /// Sets the default database to use. You can still override with the <see cref="ICypherFluentQuery.WithDatabase"/> method on a per query basis.
+        /// </summary>
+        /// <remarks>The default if this is not set, is <c>"neo4j"</c></remarks>
+        string DefaultDatabase { get; set; }
 
+        // ReSharper disable once InconsistentNaming
         CypherCapabilities CypherCapabilities { get; }
-
-        Version ServerVersion { get; }
 
         Uri RootEndpoint { get; }
 
-        Uri TransactionEndpoint { get; }
+        Version ServerVersion { get; }
 
-        //Uri BoltEndpoint { get; }
+        Uri TransactionEndpoint { get; }
 
         ISerializer Serializer { get; }
 
@@ -32,10 +38,9 @@ namespace Neo4jClient
 
         Task ConnectAsync(NeoServerConfiguration configuration = null);
 
-      
-
         List<JsonConverter> JsonConverters { get; }
         DefaultContractResolver JsonContractResolver { get; set; }
-        Uri GetTransactionEndpoint(string database);
+        Uri GetTransactionEndpoint(string database, bool autoCommit);
+        ITransactionalGraphClient Tx { get; }
     }
 }
