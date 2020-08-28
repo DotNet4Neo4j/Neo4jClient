@@ -31,13 +31,12 @@ namespace Neo4jClient.Tests.GraphClientTests
                 var executeConfiguration = new ExecutionConfiguration
                 {
                     HttpClient = httpClient,
-                    UserAgent =
-                        string.Format("Neo4jClient/{0}", typeof(NeoServerConfiguration).Assembly.GetName().Version),
+                    UserAgent = $"Neo4jClient/{typeof(NeoServerConfiguration).Assembly.GetName().Version}",
                     UseJsonStreaming = true,
                     JsonConverters = GraphClient.DefaultJsonConverters
                 };
 
-                await Assert.ThrowsAsync<InvalidOperationException>(async () => await NeoServerConfiguration.GetConfigurationAsync(new Uri(testHarness.BaseUri), null, null, null, executeConfiguration));
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => await NeoServerConfiguration.GetConfigurationAsync(new Uri(testHarness.BaseUri), null, null, null, null, executeConfiguration));
             }
         }
 
@@ -65,7 +64,7 @@ namespace Neo4jClient.Tests.GraphClientTests
                     JsonConverters = GraphClient.DefaultJsonConverters
                 };
 
-                var configuration = await NeoServerConfiguration.GetConfigurationAsync(new Uri(testHarness.BaseUri), null, null,null, executeConfiguration);
+                var configuration = await NeoServerConfiguration.GetConfigurationAsync(new Uri(testHarness.BaseUri), null, null,null,null, executeConfiguration);
 
                 var factory = new GraphClientFactory(configuration);
 

@@ -27,9 +27,7 @@ namespace Neo4jClient.Transactions
         T TryPeek();
     }
 
-    internal class ThreadContextWrapper<T>
-        : IScopedTransactions<T>
-        where T : class
+    internal class ThreadContextWrapper<T> : IScopedTransactions<T> where T : class
     {
         private readonly Stack<T> _stack;
 

@@ -9,7 +9,7 @@
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <Description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</Description>
         <PackageTags>neo4j, nosql, cypher, bolt, graph</PackageTags>
-        <Version>4.0.1</Version>
+        <Version>4.0.4</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -20,11 +20,11 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-      <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
+      <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-      <PackageReference Include="Neo4j.Driver.Signed" Version="4.0.1" />
+      <PackageReference Include="Neo4j.Driver.Signed" Version="4.1.1" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-      <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
+      <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
       <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
     </ItemGroup>
 

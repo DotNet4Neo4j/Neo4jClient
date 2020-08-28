@@ -8,6 +8,8 @@ using Neo4jClient.Serialization;
 
 namespace Neo4jClient.Transactions
 {
+    using Neo4j.Driver;
+
     /// <summary>
     /// Implements the Neo4j HTTP transaction for multiple HTTP requests
     /// </summary>
@@ -19,6 +21,7 @@ namespace Neo4jClient.Transactions
 
         public Uri Endpoint { get; set; }
         public NameValueCollection CustomHeaders { get; set; }
+        public Bookmark LastBookmark => throw new InvalidOperationException("This is not possible with the GraphClient. You would need the BoltGraphClient.");
 
         internal int Id
         {
@@ -39,20 +42,15 @@ namespace Neo4jClient.Transactions
             }
         }
 
-        internal static Neo4jRestTransaction FromIdAndClient(int transactionId, ITransactionalGraphClient client)
-        {
-            return new Neo4jRestTransaction(client)
-            {
-                Endpoint = client.TransactionEndpoint.AddPath(transactionId.ToString())
-            };
-        }
-
-        public Neo4jRestTransaction(ITransactionalGraphClient graphClient)
+        public Neo4jRestTransaction(ITransactionalGraphClient graphClient, string database)
         {
             Endpoint = null;
             IsOpen = true;
             client = graphClient;
+            Database = database;
         }
+
+        public string Database { get; set; }
 
         protected void CleanupAfterClosedTransaction()
         {
@@ -107,12 +105,13 @@ namespace Neo4jClient.Transactions
         {
             CheckForOpenTransaction();
             // we have to check for an empty endpoint because we dont have one until our first request
+            
             if (Endpoint == null)
             {
                 CleanupAfterClosedTransaction();
                 return;
             }
-
+            
             //This change is due to: https://github.com/Readify/Neo4jClient/issues/127 and https://github.com/neo4j/neo4j/issues/5806 - 
             HttpStatusCode[] expectedStatusCodes = {HttpStatusCode.OK};
             if (client.CypherCapabilities.AutoRollsBackOnError && client.ExecutionConfiguration.HasErrors)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Neo4j.Driver;
 using Newtonsoft.Json;
 
 namespace Neo4jClient.Execution
@@ -20,5 +21,6 @@ namespace Neo4jClient.Execution
         public bool HasErrors { get; set; }
         public Guid ResourceManagerId { get; set; }
         public string Realm { get; set; }
+        public EncryptionLevel? EncryptionLevel { get; set; }
     }
 }

@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 
 namespace Neo4jClient.Transactions.Bolt
 {
+    using Neo4j.Driver;
+
     /// <summary>
     /// Represents a TransactionContext scope within an ITransactionalManager. Encapsulates the real TransactionContext, so that in reality
     /// it only exists one single TransactionContext object in a joined scope, but multiple TransactionScopeProxies that can be pushed, or
@@ -48,6 +50,8 @@ namespace Neo4jClient.Transactions.Bolt
             }
         }
 
+        public abstract string Database { get; set; }
+
         public Task CommitAsync()
         {
             markCommitted = true;
@@ -60,5 +64,6 @@ namespace Neo4jClient.Transactions.Bolt
         public abstract Task RollbackAsync();
         public abstract Task KeepAliveAsync();
         public abstract bool IsOpen { get; }
+        public abstract Bookmark LastBookmark { get; }
     }
 }

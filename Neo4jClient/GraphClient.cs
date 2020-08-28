@@ -24,7 +24,7 @@ namespace Neo4jClient
 {
     public class GraphClient : IRawGraphClient, IInternalTransactionalGraphClient<HttpResponseMessage>, IDisposable
     {
-
+        public ITransactionalGraphClient Tx => this;
 
         internal const string GremlinPluginUnavailable =
             "You're attempting to execute a Gremlin query, however the server instance you are connected to does not have the Gremlin plugin loaded. If you've recently upgraded to Neo4j 2.0, you'll need to be aware that Gremlin no longer ships as part of the normal Neo4j distribution.  Please move to equivalent (but much more powerful and readable!) Cypher.";
@@ -47,39 +47,14 @@ namespace Neo4jClient
 
         internal readonly Uri RootUri;
         internal RootApiResponse RootApiResponse;
-        private RootNode rootNode;
+        
 
-        private CypherCapabilities cypherCapabilities = CypherCapabilities.Default;
-
-
+        
         public bool UseJsonStreamingIfAvailable { get; set; }
 
-        //        public GraphClient(Uri rootUri, string username = null, string password = null)
-        //            : this(rootUri, new HttpClientWrapper(username, password))
-        //        {
-        //            ServicePointManager.Expect100Continue = true;
-        //            ServicePointManager.UseNagleAlgorithm = false;
-        //        }
-        //
-        //        public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm, string username = null, string password = null)
-        //            : this(rootUri, new HttpClientWrapper(username, password))
-        //        {
-        //            ServicePointManager.Expect100Continue = expect100Continue;
-        //            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
-        //        }
-        
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
-//            ServicePointManager.Expect100Continue = true;
-//            ServicePointManager.UseNagleAlgorithm = false;
-        }
-
-        public GraphClient(Uri rootUri, bool expect100Continue, bool useNagleAlgorithm, string username = null, string password = null)
-            : this(rootUri, new HttpClientWrapper(username, password))
-        {
-//            ServicePointManager.Expect100Continue = expect100Continue;
-//            ServicePointManager.UseNagleAlgorithm = useNagleAlgorithm;
         }
 
         public virtual async Task ConnectAsync(NeoServerConfiguration configuration = null)
@@ -110,6 +85,7 @@ namespace Neo4jClient
                                     ExecutionConfiguration.Username,
                                     ExecutionConfiguration.Password,
                                     ExecutionConfiguration.Realm,
+                                    ExecutionConfiguration.EncryptionLevel,
                                     ExecutionConfiguration).ConfigureAwait(false);
 
                 RootApiResponse = configuration.ApiConfig;
@@ -119,9 +95,6 @@ namespace Neo4jClient
                     transactionManager = new TransactionManager(this);
                 }
 
-                rootNode = string.IsNullOrEmpty(RootApiResponse.ReferenceNode)
-                    ? null
-                    : new RootNode(long.Parse(GetLastPathSegment(RootApiResponse.ReferenceNode)), this);
 
                 // http://blog.neo4j.org/2012/04/streaming-rest-api-interview-with.html
                 ExecutionConfiguration.UseJsonStreaming = ExecutionConfiguration.UseJsonStreaming &&
@@ -129,22 +102,22 @@ namespace Neo4jClient
 
                 var version = RootApiResponse.Version;
                 if (version < new Version(2, 0))
-                    cypherCapabilities = CypherCapabilities.Cypher19;
+                    CypherCapabilities = CypherCapabilities.Cypher19;
 
                 if (version >= new Version(2, 2))
-                    cypherCapabilities = CypherCapabilities.Cypher22;
+                    CypherCapabilities = CypherCapabilities.Cypher22;
 
                 if (version >= new Version(2, 2, 6))
-                    cypherCapabilities = CypherCapabilities.Cypher226;
+                    CypherCapabilities = CypherCapabilities.Cypher226;
 
                 if (version >= new Version(2, 3))
-                    cypherCapabilities = CypherCapabilities.Cypher23;
+                    CypherCapabilities = CypherCapabilities.Cypher23;
 
                 if (version >= new Version(3, 0))
-                    cypherCapabilities = CypherCapabilities.Cypher30;
+                    CypherCapabilities = CypherCapabilities.Cypher30;
 
                 if (version >= new Version(4, 0))
-                    cypherCapabilities = CypherCapabilities.Cypher40;
+                    CypherCapabilities = CypherCapabilities.Cypher40;
             }
             catch (AggregateException ex)
             {
@@ -212,8 +185,8 @@ namespace Neo4jClient
             if (supportsMultipleTenancy && relativeUri.Contains("{databaseName}")) //TODO Const
             {
                 if (string.IsNullOrWhiteSpace(database))
-                    database = "neo4j"; //TODO Const
-
+                    database = DefaultDatabase; //TODO Const
+                
                 relativeUri = relativeUri.Replace("{databaseName}", database);
             }
 
@@ -237,18 +210,7 @@ namespace Neo4jClient
 
         public virtual bool IsConnected => RootApiResponse != null;
 
-        [Obsolete(
-            "The concept of a single root node has being dropped in Neo4j 2.0. Use an alternate strategy for having known reference points in the graph, such as labels."
-            )]
-        public virtual RootNode RootNode
-        {
-            get
-            {
-                CheckRoot();
-                return rootNode;
-            }
-        }
-
+      
         CustomJsonSerializer BuildSerializer()
         {
             return new CustomJsonSerializer { JsonConverters = JsonConverters, JsonContractResolver = JsonContractResolver };
@@ -266,7 +228,8 @@ namespace Neo4jClient
 
         public ICypherFluentQuery Cypher => new CypherFluentQuery(this);
 
-        private const string DefaultDatabase = "neo4j";
+        /// <inheritdoc cref="IGraphClient.DefaultDatabase"/>
+        public string DefaultDatabase { get; set; } = "neo4j";
 
         public Version ServerVersion
         {
@@ -324,20 +287,25 @@ namespace Neo4jClient
 
         public ITransaction BeginTransaction(IEnumerable<string> bookmarks)
         {
-            return BeginTransaction(TransactionScopeOption.Join, bookmarks);
+            return BeginTransaction(TransactionScopeOption.Join, bookmarks, DefaultDatabase);
         }
 
         public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
         {
-            return BeginTransaction(scopeOption, (IEnumerable<string>) null);
+            return BeginTransaction(scopeOption, null, DefaultDatabase);
         }
 
         public ITransaction BeginTransaction(TransactionScopeOption scopeOption, string bookmark)
         {
-            return BeginTransaction(scopeOption, new List<string>{bookmark});
+            return BeginTransaction(scopeOption, new List<string>{bookmark}, DefaultDatabase);
         }
 
-        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmark)
+        {
+            return BeginTransaction(scopeOption, bookmark, DefaultDatabase);
+        }
+
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks, string database)
         {
             CheckRoot();
             if (transactionManager == null)
@@ -345,10 +313,10 @@ namespace Neo4jClient
                 throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
             }
 
-            return transactionManager.BeginTransaction(scopeOption, bookmarks);
+            return transactionManager.BeginTransaction(scopeOption, bookmarks, database);
         }
 
-        public ITransaction Transaction => transactionManager?.CurrentNonDtcTransaction;
+        public ITransaction Transaction => transactionManager?.CurrentTransaction;
 
         public bool InTransaction => transactionManager != null && transactionManager.InTransaction;
 
@@ -361,14 +329,14 @@ namespace Neo4jClient
             transactionManager.EndTransaction();
         }
 
-        public CypherCapabilities CypherCapabilities => cypherCapabilities;
-        
+        public CypherCapabilities CypherCapabilities { get; private set; } = CypherCapabilities.Default;
+
         private async Task<CypherPartialResult> PrepareCypherRequest<TResult>(CypherQuery query, IExecutionPolicy policy)
         {
             if (InTransaction)
             {
                 var response = await transactionManager
-                    .EnqueueCypherRequest(string.Format("The query was: {0}", query.QueryText), this, query)
+                    .EnqueueCypherRequest($"The query was: {query.QueryText}", this, query)
                     .ConfigureAwait(false);
                 
                 var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, true);
@@ -389,9 +357,9 @@ namespace Neo4jClient
             }
 
             return await Request.With(ExecutionConfiguration, customHeaders, maxExecutionTime)
-                .Post(policy.BaseEndpoint(query?.Database))
+                .Post(policy.BaseEndpoint(query?.Database, true))
                 .WithJsonContent(policy.SerializeRequest(query))
-                .WithExpectedStatusCodes(HttpStatusCode.OK)
+                .WithExpectedStatusCodes(HttpStatusCode.OK, HttpStatusCode.Created)
                 .ExecuteAsync(response => new CypherPartialResult
                 {
                     ResponseObject = response
@@ -425,15 +393,7 @@ namespace Neo4jClient
             }
             catch (AggregateException aggregateException)
             {
-                Exception unwrappedException;
-                if (aggregateException.TryUnwrap(out unwrappedException))
-                {
-                    context.Complete(query, unwrappedException);
-                }
-                else
-                {
-                    context.Complete(query, aggregateException);
-                }
+                context.Complete(query, aggregateException.TryUnwrap(out var unwrappedException) ? unwrappedException : aggregateException);
                 throw;
             }
             catch (Exception e)
@@ -462,7 +422,7 @@ namespace Neo4jClient
                     ExecutionConfiguration.HasErrors = true;
                 
                 context.Complete(query, e);
-                throw e;
+                throw;
             }
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
 
@@ -472,39 +432,22 @@ namespace Neo4jClient
         private void CheckRoot()
         {
             if (RootApiResponse == null)
-                throw new InvalidOperationException(
-                    "The graph client is not connected to the server. Call the Connect method first.");
+                throw new InvalidOperationException("The graph client is not connected to the server. Call the Connect method first.");
         }
-
-
+        
         public event OperationCompletedEventHandler OperationCompleted;
 
         protected void OnOperationCompleted(OperationCompletedEventArgs args)
         {
-            var eventInstance = OperationCompleted;
-            if (eventInstance != null)
-                eventInstance(this, args);
-        }
-
-        private void EnsureNodeWasCreated(BatchStepResult createResponse)
-        {
-            if (createResponse.Status == HttpStatusCode.BadRequest && createResponse.Body != null)
-            {
-                var exceptionResponse = JsonConvert.DeserializeObject<ExceptionResponse>(createResponse.Body);
-
-                if (exceptionResponse == null || string.IsNullOrEmpty(exceptionResponse.Message) || string.IsNullOrEmpty(exceptionResponse.Exception))
-                    throw new Exception($"Response from Neo4J: {createResponse.Body}");
-
-                throw new NeoException(exceptionResponse);
-            }
+            OperationCompleted?.Invoke(this, args);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposing) return;
+            if (!disposing) 
+                return;
 
-            if (transactionManager != null)
-                transactionManager.Dispose();
+            transactionManager?.Dispose();
         }
 
         public void Dispose()
@@ -514,10 +457,10 @@ namespace Neo4jClient
         }
 
         public DefaultContractResolver JsonContractResolver { get; set; }
-        public Uri GetTransactionEndpoint(string database)
+        public Uri GetTransactionEndpoint(string database, bool autoCommit = false)
         {
             CheckRoot();
-            var uri = BuildUri(RootApiResponse.Transaction, database, RootApiResponse.Version.Major >= 4, "commit");
+            var uri = BuildUri(RootApiResponse.Transaction, database, RootApiResponse.Version.Major >= 4, autoCommit ? "commit" : "");
             return uri;
         }
 

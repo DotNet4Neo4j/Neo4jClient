@@ -16,10 +16,10 @@ namespace Neo4jClient.Cypher
             var identityIsCollection = identity.StartsWith("[") && identity.EndsWith("]");
 
             if (identity.Contains(",") && !identityIsCollection)
-                throw new ArgumentException(IdentityLooksLikeAMultiColumnStatementExceptionMessage, "identity");
+                throw new ArgumentException(IdentityLooksLikeAMultiColumnStatementExceptionMessage, nameof(identity));
 
-            if (identityIsCollection && !typeof (TResult).GetInterfaces().Any(i => i.Name == "IEnumerable"))
-                throw new ArgumentException(IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, "identity");
+            if (identityIsCollection && typeof(TResult).GetInterfaces().All(i => i.Name != "IEnumerable"))
+                throw new ArgumentException(IdentityLooksLikeACollectionButTheResultIsNotEnumerableMessage, nameof(identity));
 
             var resultType = typeof (TResult);
 
@@ -34,7 +34,7 @@ namespace Neo4jClient.Cypher
                 {
                     w.ResultFormat = CypherResultFormat.Rest;
                 }
-                w.AppendClause("RETURN " + identity);
+                w.AppendClause($"RETURN {identity}");
             });
         }
 
@@ -46,7 +46,7 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery<TResult> ReturnDistinct<TResult>(string identity)
         {
-            return Mutate<TResult>(w => w.AppendClause("RETURN distinct " + identity));
+            return Mutate<TResult>(w => w.AppendClause($"RETURN distinct {identity}"));
         }
 
         ICypherFluentQuery<TResult> Return<TResult>(LambdaExpression expression)

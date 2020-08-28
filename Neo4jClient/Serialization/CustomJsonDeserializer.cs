@@ -35,7 +35,7 @@ namespace Neo4jClient.Serialization
                     JsonContractResolver = jsonResolver
                 };
 
-            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+            content = CommonDeserializerMethods.ReplaceAllDateInstancesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
             {

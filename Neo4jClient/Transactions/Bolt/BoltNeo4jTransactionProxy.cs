@@ -2,6 +2,8 @@
 
 namespace Neo4jClient.Transactions.Bolt
 {
+    using Neo4j.Driver;
+
     /// <summary>
     ///     Implements the TransactionScopeProxy interfaces for INeo4jTransaction
     /// </summary>
@@ -13,23 +15,20 @@ namespace Neo4jClient.Transactions.Bolt
             : base(client, transactionContext)
         {
             doCommitInScope = newScope;
-
         }
 
         public override bool Committable => true;
 
-        public override bool IsOpen => (TransactionContext != null) && TransactionContext.IsOpen;
+        public override bool IsOpen => TransactionContext != null && TransactionContext.IsOpen;
+        public override Bookmark LastBookmark => TransactionContext?.BoltTransaction?.LastBookmark;
 
-        protected override Task DoCommitAsync()
+        protected override async Task DoCommitAsync()
         {
             if (doCommitInScope)
-                return TransactionContext.CommitAsync();
-#if NET45
-            return Task.FromResult(0);
-#else
-            return Task.CompletedTask;
-#endif
+                await TransactionContext.CommitAsync().ConfigureAwait(false);
         }
+
+        public override string Database { get; set; }
 
         protected override bool ShouldDisposeTransaction()
         {

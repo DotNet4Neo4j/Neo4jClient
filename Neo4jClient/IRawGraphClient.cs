@@ -14,5 +14,6 @@ namespace Neo4jClient
     {
         Task<IEnumerable<TResult>> ExecuteGetCypherResultsAsync<TResult>(CypherQuery query);
         Task ExecuteCypherAsync(CypherQuery query);
+        bool InTransaction { get; }
     }
 }

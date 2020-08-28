@@ -18,6 +18,9 @@ namespace Neo4jClient.Cypher
         /// <inheritdoc />
         public ICypherFluentQuery WithBookmarks(params string[] bookmarks)
         {
+            if (bookmarks == null)
+                return this;
+
             QueryWriter.Bookmarks.AddRange(bookmarks.Where(b => !string.IsNullOrWhiteSpace(b)).Select(b => Bookmark.From(b)));
             return this;
         }

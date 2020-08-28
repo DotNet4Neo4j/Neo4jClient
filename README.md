@@ -15,6 +15,11 @@ The official Neo4jClient build and nuget package is automated via [AppVeyor](htt
 
 It's worth noting - due to a lot of the changes that are taking place - at the moment this will be super unstable - bugs will be introduced, features added/removed/changed etc.
 
+
+## Known Issues
+
+* At the moment - none - but you'll let me know!?
+
 ### Plans
 
 * Finally transactions in Core
@@ -42,7 +47,7 @@ It's worth noting - due to a lot of the changes that are taking place - at the m
 ### Dependency Changes
 
 * [Json.NET](https://www.nuget.org/packages/Newtonsoft.Json/) - `10.0.3` -> `12.0.3`
-* [Neo4j.Driver.Signed](https://www.nuget.org/packages/Neo4j.Driver.Signed/4.0.0-beta01) - `1.7.2` -> `4.0.1`
+* [Neo4j.Driver.Signed](https://www.nuget.org/packages/Neo4j.Driver.Signed/4.1.1) - `1.7.2` -> `4.1.1`
 
 ---
 
