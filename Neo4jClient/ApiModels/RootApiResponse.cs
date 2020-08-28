@@ -55,9 +55,6 @@ namespace Neo4jClient.ApiModels
         [JsonProperty("extensions_info")]
         public string ExtensionsInfo { get; set; }
 
-        [JsonProperty("extensions")]
-        public ExtensionsApiResponse Extensions { get; set; }
-
         [JsonProperty("neo4j_version")]
         public string Neo4jVersion { get; set; }
 
@@ -116,12 +113,6 @@ namespace Neo4jClient.ApiModels
             Transaction = (string.IsNullOrWhiteSpace(Transaction)) ? null : Transaction.Substring(baseUriLengthToTrim);
             //Cypher = (string.IsNullOrWhiteSpace(Cypher)) ? string.Empty : Cypher.Substring(baseUriLengthToTrim);
             Cluster = (string.IsNullOrWhiteSpace(Cluster)) ? null : Cluster.Substring(baseUriLengthToTrim);
-
-            if (Extensions?.GremlinPlugin != null)
-            {
-                Extensions.GremlinPlugin.ExecuteScript =
-                    Extensions.GremlinPlugin.ExecuteScript.Substring(baseUriLengthToTrim);
-            }
         }
     }
 }

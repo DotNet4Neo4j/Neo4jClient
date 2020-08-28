@@ -6,9 +6,6 @@ using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using Neo4jClient.Transactions;
 
-//using Neo4jClient.Transactions;
-
-
 namespace Neo4jClient.Execution
 {
     /// <summary>
@@ -19,35 +16,23 @@ namespace Neo4jClient.Execution
         public CypherExecutionPolicy(IGraphClient client) : base(client)
         {
         }
-        
+
         private INeo4jTransaction GetTransactionInScope()
         {
             // first try to get the Non DTC transaction and if it doesn't succeed then try it with the DTC
-            var transactionalClient = Client as IInternalTransactionalGraphClient<HttpResponseMessage>;
-            if (transactionalClient == null)
-            {
+            if (!(Client is IInternalTransactionalGraphClient<HttpResponseMessage> transactionalClient))
                 return null;
-            }
 
-            var proxiedTransaction = transactionalClient.Transaction as TransactionScopeProxy;
-            if (proxiedTransaction != null)
-            {
-                return proxiedTransaction.TransactionContext;;
-            }
+            if (transactionalClient.Transaction is TransactionScopeProxy proxiedTransaction)
+                return proxiedTransaction.TransactionContext;
 
             return null;
         }
 
-        /*
-         * What I need to do here, is:
-         * IF v4 or > THEN we need to put the database name in the commit call
-         * ELSE just use default - BUT - maybe that can just use the Default
-         */
-
-        public override Uri BaseEndpoint(string database = null)
+        public override Uri BaseEndpoint(string database = null, bool autoCommit = false)
         {
-           if (!InTransaction && Client.TransactionEndpoint != null)
-                return Client.GetTransactionEndpoint(database);
+            if (!InTransaction && Client.TransactionEndpoint != null)
+                return Client.GetTransactionEndpoint(database, autoCommit);
 
             var proxiedTransaction = GetTransactionInScope();
             var transactionalClient = (ITransactionalGraphClient) Client;
@@ -56,67 +41,47 @@ namespace Neo4jClient.Execution
                 return Replace(transactionalClient.TransactionEndpoint, database);
             }
 
-            var startingReference = proxiedTransaction.Endpoint ?? transactionalClient.TransactionEndpoint;
+            var startingReference = proxiedTransaction.Endpoint ?? Client.GetTransactionEndpoint(database, autoCommit);
             return startingReference;
         }
 
 
 
-        public override TransactionExecutionPolicy TransactionExecutionPolicy => Execution.TransactionExecutionPolicy.Allowed;
+        public override TransactionExecutionPolicy TransactionExecutionPolicy => TransactionExecutionPolicy.Allowed;
 
         public override string SerializeRequest(object toSerialize)
         {
-            var query = toSerialize as CypherQuery;
-            if (query == null)
-            {
-                throw new InvalidOperationException(
-                    "Unsupported operation: Attempting to serialize something that was not a query.");
-            }
+            if (!(toSerialize is CypherQuery query))
+                throw new InvalidOperationException("Unsupported operation: Attempting to serialize something that was not a query.");
 
-            // if (InTransaction)
-            // {
-                return Client
-                    .Serializer
-                    .Serialize(new CypherStatementList
-                    {
-                        new CypherTransactionStatement(query, query.ResultFormat == CypherResultFormat.Rest)
-                    });
-            // }
-            // return Client.Serializer.Serialize(new CypherApiQuery(query));
+            return Client
+                .Serializer
+                .Serialize(new CypherStatementList
+                {
+                    new CypherTransactionStatement(query, query.ResultFormat == CypherResultFormat.Rest)
+                });
         }
+
+        public override string Database { get; set; }
 
         public override void AfterExecution(IDictionary<string, object> executionMetadata, object executionContext)
         {
             if (Client == null || executionMetadata == null || executionMetadata.Count == 0)
-            {
                 return;
-            }
 
             // determine if we need to update the transaction end point
-            var transaction = executionContext as INeo4jTransaction;
-            if (transaction == null || transaction.Endpoint != null)
-            {
+            if (!(executionContext is INeo4jTransaction transaction) || transaction.Endpoint != null)
                 return;
-            }
 
-            object locationValue;
-            if (!executionMetadata.TryGetValue("Location", out locationValue))
-            {
+            if (!executionMetadata.TryGetValue("Location", out var locationValue))
                 return;
-            }
 
-            var locationHeader = locationValue as IEnumerable<string>;
-            if (locationHeader == null)
-            {
+            if (!(locationValue is IEnumerable<string> locationHeader))
                 return;
-            }
 
             var generatedEndpoint = locationHeader.FirstOrDefault();
             if (!string.IsNullOrEmpty(generatedEndpoint))
-            {
                 transaction.Endpoint = new Uri(generatedEndpoint);
-            }
         }
-
     }
 }

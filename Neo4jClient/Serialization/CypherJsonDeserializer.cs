@@ -61,7 +61,9 @@ namespace Neo4jClient.Serialization
                     JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
                     JsonContractResolver = client.JsonContractResolver
                 };
-                content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+
+                if(isHttp) content = CommonDeserializerMethods.RemoveResultsFromJson(content);
+                content = CommonDeserializerMethods.ReplaceAllDateInstancesWithNeoDates(content);
 
                 var reader = new JsonTextReader(new StringReader(content))
                 {
@@ -117,7 +119,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray(),
                 JsonContractResolver = client.JsonContractResolver
             };
-            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+            content = CommonDeserializerMethods.ReplaceAllDateInstancesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
             {
@@ -169,7 +171,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                         DetermineTypeToParseJsonIntoBasedOnPropertyType = t => typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
                         MutationCallback = n => n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
                     });
-                    return ParseInProjectionMode(context, root, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInProjectionMode(context, root, columnNames, jsonTypeMappings.ToArray(), isHttp);
                 default:
                     throw new NotSupportedException($"Unrecognised result mode of {resultMode}.");
             }
@@ -221,17 +223,17 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                     // if we are in transaction and we have an object we dont need a mutation
                     if (!inTransaction && !inBolt)
                     {
-                        jsonTypeMappings.Add(new TypeMapping
-                        {
-                            ShouldTriggerForPropertyType = (nestingLevel, type) =>
-                                nestingLevel == 0 && type.GetTypeInfo().IsClass,
-                            DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
-                                typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
-                            MutationCallback = n =>
-                                n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
-                        });
+                        // jsonTypeMappings.Add(new TypeMapping
+                        // {
+                        //     ShouldTriggerForPropertyType = (nestingLevel, type) =>
+                        //         nestingLevel == 0 && type.GetTypeInfo().IsClass,
+                        //     DetermineTypeToParseJsonIntoBasedOnPropertyType = t =>
+                        //         typeof(NodeOrRelationshipApiResponse<>).MakeGenericType(new[] { t }),
+                        //     MutationCallback = n =>
+                        //         n.GetType().GetProperty("Data").GetGetMethod().Invoke(n, new object[0])
+                        // });
                     }
-                    return ParseInProjectionMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray());
+                    return ParseInProjectionMode(context, resultRoot, columnNames, jsonTypeMappings.ToArray(), isHttp);
                 default:
                     throw new NotSupportedException($"Unrecognised result mode of {resultMode}.");
             }
@@ -284,7 +286,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
                 Culture = culture,
                 JsonConverters = Enumerable.Reverse(client.JsonConverters ?? new List<JsonConverter>(0)).ToArray()
             };
-            content = CommonDeserializerMethods.ReplaceAllDateInstacesWithNeoDates(content);
+            content = CommonDeserializerMethods.ReplaceAllDateInstancesWithNeoDates(content);
 
             var reader = new JsonTextReader(new StringReader(content))
             {
@@ -452,7 +454,7 @@ This means no query was emitted, so a method that doesn't care about getting res
             return results;
         }
 
-        IEnumerable<TResult> ParseInProjectionMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings)
+        IEnumerable<TResult> ParseInProjectionMode(DeserializationContext context, JToken root, string[] columnNames, TypeMapping[] jsonTypeMappings, bool isHttp)
         {
             var properties = typeof(TResult).GetProperties();
             var propertiesDictionary = properties
@@ -499,13 +501,17 @@ This means no query was emitted, so a method that doesn't care about getting res
                 getRow = token => ReadProjectionRowUsingProperties(context, token, propertiesDictionary, columnNames, jsonTypeMappings);
             }
 
-            var dataArray = (JArray)root["data"];
+            // var dataArray = (JArray)root["data"];
+            var dataArray = isHttp ? (JArray)root.SelectToken("$.results[0].data") : (JArray)root["data"];
+            if (dataArray == null) //Hack prior to swapping out deserialization completely.
+                dataArray = !isHttp ? (JArray)root.SelectToken("$.results[0].data") : (JArray)root["data"];
+
             var rows = dataArray.Children();
 
             //var dataPropertyNameInTransaction = resultFormat == CypherResultFormat.Rest ? "rest" : "row";
             var dataPropertyNameInTransaction = "row";
 
-            return inTransaction ? rows.Select(row => row[dataPropertyNameInTransaction]).Select(getRow) : rows.Select(getRow);
+            return inTransaction || isHttp ? rows.Select(row => row[dataPropertyNameInTransaction]).Select(getRow) : rows.Select(getRow);
         }
 
         TResult ReadProjectionRowUsingCtor(

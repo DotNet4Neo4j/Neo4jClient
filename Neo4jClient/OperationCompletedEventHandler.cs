@@ -9,6 +9,7 @@ namespace Neo4jClient
 
     public class OperationCompletedEventArgs : EventArgs
     {
+        public string Database { get; set; }
         public string Identifier { get; set; }
         public Bookmark LastBookmark { get; set; }
         public string QueryText { get; set; }

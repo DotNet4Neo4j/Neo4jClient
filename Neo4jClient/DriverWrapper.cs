@@ -12,30 +12,39 @@ namespace Neo4jClient
         public string Username { get;  }
         public string Password { get; }
         public string Realm { get; }
+        public EncryptionLevel? EncryptionLevel { get; }
 
         public DriverWrapper(IDriver driver)
         {
             this.driver = driver;
         }
 
-        public DriverWrapper(string uri, IServerAddressResolver addressResolver, string username, string pass, string realm)
-            :this(new Uri(uri), addressResolver, username, pass, realm)
+        public DriverWrapper(string uri, IServerAddressResolver addressResolver, string username, string pass, string realm, EncryptionLevel? encryptionLevel)
+            :this(new Uri(uri), addressResolver, username, pass, realm, encryptionLevel)
         {
         }
 
-        public DriverWrapper(Uri uri, IServerAddressResolver addressResolver, string username, string pass, string realm)
+        public DriverWrapper(Uri uri, IServerAddressResolver addressResolver, string username, string pass, string realm, EncryptionLevel? encryptionLevel)
         {
             Uri = uri;
             Username = username;
             Password = pass;
             Realm = realm;
+            EncryptionLevel = encryptionLevel;
 
             var authToken = GetAuthToken(username, pass, realm);
-            this.driver = addressResolver == null
-                ? GraphDatabase.Driver(uri, authToken) 
-                : GraphDatabase.Driver(uri, authToken, builder => builder.WithResolver(addressResolver));
+            if (addressResolver != null)
+            {
+                driver = encryptionLevel == null 
+                    ? GraphDatabase.Driver(uri, authToken, builder => builder.WithResolver(addressResolver)) 
+                    : GraphDatabase.Driver(uri, authToken, builder => builder.WithResolver(addressResolver).WithEncryptionLevel(encryptionLevel.Value));
+            }
+            else
+            {
+                driver = GraphDatabase.Driver(uri, authToken);
+            }
         }
-        
+
         public IAsyncSession Session()
         {
             return driver.AsyncSession();

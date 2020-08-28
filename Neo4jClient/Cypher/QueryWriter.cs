@@ -16,13 +16,13 @@ namespace Neo4jClient.Cypher
         private CypherResultFormat resultFormat;
         private readonly List<Bookmark> bookmarks = new List<Bookmark>();
     
-        public QueryWriter()
+        public QueryWriter(string databaseName = null)
         {
             queryTextBuilder = new StringBuilder();
             queryParameters = new Dictionary<string, object>();
             resultMode = CypherResultMode.Set;
             resultFormat = CypherResultFormat.DependsOnEnvironment;
-            DatabaseName = "neo4j";
+            DatabaseName = databaseName;
         }
 
         QueryWriter(
@@ -59,6 +59,8 @@ namespace Neo4jClient.Cypher
 
         public NameValueCollection CustomHeaders { get; set; }
         public string Identifier { get; set; }
+
+        //TODO: Do I want this here? Largely I don't care about QW
         public string DatabaseName { get; set; }
 
         public QueryWriter Clone()
@@ -70,7 +72,8 @@ namespace Neo4jClient.Cypher
             return new QueryWriter(clonedQueryTextBuilder, clonedParameters, resultMode, resultFormat, clonedBookmarks, Identifier)
             {
                 MaxExecutionTime = MaxExecutionTime,
-                CustomHeaders = CustomHeaders
+                CustomHeaders = CustomHeaders,
+                DatabaseName = DatabaseName
             };
         }
 
@@ -86,7 +89,7 @@ namespace Neo4jClient.Cypher
                 resultMode,
                 resultFormat,
                 DatabaseName,
-				contractResolver,
+                contractResolver,
                 MaxExecutionTime,
                 CustomHeaders,
                 isWrite,

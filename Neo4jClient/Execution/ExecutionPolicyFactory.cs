@@ -28,8 +28,8 @@ namespace Neo4jClient.Execution
                     return new CypherExecutionPolicy(_client);
                 // case PolicyType.Batch:
                 //     return new BatchExecutionPolicy(_client);
-                case PolicyType.Rest:
-                    return new RestExecutionPolicy(_client);
+                // case PolicyType.Rest:
+                //     return new RestExecutionPolicy(_client);
                 case PolicyType.Transaction:
                     return new CypherTransactionExecutionPolicy(_client);
                 // case PolicyType.NodeIndex:

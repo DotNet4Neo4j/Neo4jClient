@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace Neo4jClient.Transactions
 {
+    using Neo4j.Driver;
+
     /// <summary>
     /// Represents a Neo4j transaction shared between multiple HTTP requests
     /// </summary>
@@ -13,6 +15,11 @@ namespace Neo4jClient.Transactions
     /// </remarks>
     public interface ITransaction : IDisposable
     {
+        /// <summary>
+        /// In 4 + databases, which database this transaction is against.
+        /// </summary>
+        string Database { get;  }
+
         /// <summary>
         /// Commits our open transaction.
         /// </summary>
@@ -35,9 +42,14 @@ namespace Neo4jClient.Transactions
         bool IsOpen { get; }
 
         /// <summary>
-        /// Customheader collection This will be the same for the entire transaction.
-        /// So the commit will use the same customheader(s) as the cypher customheader
+        /// Custom header collection This will be the same for the entire transaction.
+        /// So the commit will use the same custom header(s) as the cypher custom header
         /// </summary>
         NameValueCollection CustomHeaders { get; set; }
+
+        /// <summary>
+        /// The last bookmark provided by the database to allow for causal consistency.
+        /// </summary>
+        Bookmark LastBookmark { get; }
     }
 }

@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace Neo4jClient.Transactions
 {
+    using Neo4j.Driver;
+
     /// <summary>
     /// Represents a TransactionContext scope within an ITransactionalManager. Encapsulates the real TransactionContext, so that in reality
     /// it only exists one single TransactionContext object in a joined scope, but multiple TransactionScopeProxies that can be pushed, or
@@ -28,11 +30,12 @@ namespace Neo4jClient.Transactions
 
         public Uri Endpoint
         {
-            get { return transactionContext.Endpoint; }
-            set { transactionContext.Endpoint = value; }
+            get => transactionContext.Endpoint;
+            set => transactionContext.Endpoint = value;
         }
 
         public NameValueCollection CustomHeaders { get; set; }
+        public Bookmark LastBookmark => throw new InvalidOperationException("This is not possible with the GraphClient. You would need the BoltGraphClient.");
 
         public virtual void Dispose()
         {
@@ -54,6 +57,8 @@ namespace Neo4jClient.Transactions
                 transactionContext = null;
             }
         }
+
+        public string Database { get; set; }
 
         public Task CommitAsync()
         {

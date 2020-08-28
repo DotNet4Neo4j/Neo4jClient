@@ -50,18 +50,7 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal(new[] {123L, 456L}, cypher.QueryParameters["p0"]);
         }
 
-        [Fact]
-        public void RootNodeReference()
-        {
-            var cypher = ToCypher(new
-            {
-                n1 = new RootNode(123)
-            });
-
-            Assert.Equal("n1=node($p0)", cypher.QueryText);
-            Assert.Equal(1, cypher.QueryParameters.Count);
-            Assert.Equal(123L, cypher.QueryParameters["p0"]);
-        }
+     
 
         [Fact]
         //[Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-node-by-id")]

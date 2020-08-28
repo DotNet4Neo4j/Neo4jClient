@@ -8,6 +8,8 @@ using Neo4jClient.Transactions.Bolt;
 
 namespace Neo4jClient.Transactions
 {
+    using Neo4j.Driver;
+
     internal abstract class TransactionContextBase<TClient, TResponse> : ITransaction
     {
         /// <summary>
@@ -15,7 +17,7 @@ namespace Neo4jClient.Transactions
         /// </summary>
         private Task previousTask;
 
-        public TransactionContextBase(ITransaction transaction)
+        protected TransactionContextBase(ITransaction transaction)
         {
             Transaction = transaction;
         }
@@ -26,10 +28,10 @@ namespace Neo4jClient.Transactions
         public ITransaction Transaction { get; }
 
         public NameValueCollection CustomHeaders { get; set; }
+        public Bookmark LastBookmark => Transaction.LastBookmark;
         public bool IsOpen => Transaction.IsOpen;
 
-        protected abstract Task<TResponse> RunQuery(TClient client, CypherQuery query, IExecutionPolicy policy,
-            string commandDescription);
+        protected abstract Task<TResponse> RunQuery(TClient client, CypherQuery query, IExecutionPolicy policy, string commandDescription);
 
         public async Task<TResponse> EnqueueTask(string commandDescription, TClient graphClient, IExecutionPolicy policy, CypherQuery query)
         {
@@ -56,6 +58,12 @@ namespace Neo4jClient.Transactions
         public void Dispose()
         {
             Transaction.Dispose();
+        }
+
+        public string Database
+        {
+            get => Transaction.Database;
+            // set => Transaction.Database = value;
         }
 
         public async Task CommitAsync()
