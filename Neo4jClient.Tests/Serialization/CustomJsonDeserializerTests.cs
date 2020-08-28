@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using FluentAssertions;
-using Neo4jClient.ApiModels.Gremlin;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -257,26 +256,6 @@ namespace Neo4jClient.Tests.Serialization
             public class TimeSpanModel
             {
                 public TimeSpan Foo { get; set; }
-            }
-
-            [Fact]
-            public void DeserializeShouldConvertTableCapResponseToGremlinTableCapResponse()
-            {
-                // Arrange
-                var deserializer = new CustomJsonDeserializer(GraphClient.DefaultJsonConverters);
-                const string content = @"{
-                              ""columns"" : [ ""ColumnA"" ],
-                              ""data"" : [ [ ""DataA"" ], [ ""DataB"" ] ]
-                            }";
-
-                // Act
-                var result = deserializer.Deserialize<GremlinTableCapResponse>(content);
-                var data = result.Data.SelectMany(d => d).ToArray();
-
-                // Assert
-                Assert.True(result.Columns.Any(c => c == "ColumnA"));
-                Assert.True(data.Any(d => d == "DataA"));
-                Assert.True(data.Any(d => d == "DataB"));
             }
 
             public class EnumModel

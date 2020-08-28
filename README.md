@@ -15,6 +15,30 @@ The official Neo4jClient build and nuget package is automated via [AppVeyor](htt
 
 It's worth noting - due to a lot of the changes that are taking place - at the moment this will be super unstable - bugs will be introduced, features added/removed/changed etc.
 
+
+## Known Issues
+The most recent release (2020-08-27) has issues with deserializing projections from the HTTP `GraphClient`, in particular in the form:
+
+```
+    var results = client.Cypher
+        .Match("(m:Movie)")
+        .Return(m => new { Movie = m.As<Movie>()})
+        .ResultsAsync;
+```
+
+The workaround is to wrap that code in a `Transaction`:
+
+```
+    using(var tx = client.Tx.BeginTransaction())
+    {
+        var results = await client.Cypher
+            .Match("(m:Movie)")
+            .Return(m => new { Movie = m.As<Movie>()})
+            .ResultsAsync;
+    }
+```
+
+
 ### Plans
 
 * Finally transactions in Core
@@ -42,7 +66,7 @@ It's worth noting - due to a lot of the changes that are taking place - at the m
 ### Dependency Changes
 
 * [Json.NET](https://www.nuget.org/packages/Newtonsoft.Json/) - `10.0.3` -> `12.0.3`
-* [Neo4j.Driver.Signed](https://www.nuget.org/packages/Neo4j.Driver.Signed/4.0.0-beta01) - `1.7.2` -> `4.0.1`
+* [Neo4j.Driver.Signed](https://www.nuget.org/packages/Neo4j.Driver.Signed/4.0.0-beta01) - `1.7.2` -> `4.2.0`
 
 ---
 

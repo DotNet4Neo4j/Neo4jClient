@@ -466,37 +466,7 @@ namespace Neo4jClient.Tests.Transactions
             }
         }
 
-        [Fact]
-        public async Task ShouldNotBeAbleToCommitTwice()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            await transaction.CommitAsync();
-            await Assert.ThrowsAsync<ClosedTransactionException>(async () => await transaction.CommitAsync());
-        }
-
-        [Fact]
-        public async Task ShouldNotBeAbleToRollbackTwice()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            await transaction.RollbackAsync();
-            await Assert.ThrowsAsync<ClosedTransactionException>(async () => await transaction.RollbackAsync());
-        }
-
-        [Fact]
-        public async Task ShouldNotBeAbleToCommitAfterRollback()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            await transaction.RollbackAsync();
-            await Assert.ThrowsAsync<ClosedTransactionException>(async () => await transaction.CommitAsync());
-        }
-
-        [Fact]
-        public async Task ShouldNotBeAbleToRollbackAfterCommit()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            await transaction.CommitAsync();
-            await Assert.ThrowsAsync<ClosedTransactionException>(async () => await transaction.RollbackAsync());
-        }
+    
 
         [Fact]
         public async Task TwoThreadsShouldNotHaveTheSameTransactionObject()

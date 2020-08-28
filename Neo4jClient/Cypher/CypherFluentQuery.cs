@@ -22,10 +22,18 @@ namespace Neo4jClient.Cypher
         protected readonly bool CamelCaseProperties;
         internal bool IsWrite { get; private set; }
 
-        public string Database { get; set; }
+        public string Database
+        {
+            get => QueryWriter.DatabaseName;
+            set => QueryWriter.DatabaseName = value;
+        }
 
         public ICypherFluentQuery WithDatabase(string databaseName)
         {
+            if(Client.InTransaction)
+                throw new InvalidOperationException("This query is in a Transaction, you can't set the database for individual queries within a Transaction.");
+
+            databaseName = databaseName?.ToLowerInvariant();
             Database = databaseName;
             QueryWriter.DatabaseName = databaseName;
             return this;
@@ -50,7 +58,7 @@ namespace Neo4jClient.Cypher
         }
 
         public CypherFluentQuery(IGraphClient client, bool isWrite = true)
-            : this(client, new QueryWriter(), isWrite)
+            : this(client, new QueryWriter(client.DefaultDatabase), isWrite)
         {
             IsWrite = isWrite;
         }
@@ -211,18 +219,18 @@ namespace Neo4jClient.Cypher
             }
 
             return Mutate(w =>
-                w.AppendClause("USING INDEX " + index));
+                w.AppendClause($"USING INDEX {index}"));
         }
 
         public ICypherFluentQuery OptionalMatch(string pattern)
         {
             return Mutate(w =>
-                w.AppendClause("OPTIONAL MATCH " + pattern));
+                w.AppendClause($"OPTIONAL MATCH {pattern}"));
         }
 
         public ICypherFluentQuery Merge(string mergeText)
         {
-            return Mutate(w => w.AppendClause("MERGE " + mergeText));
+            return Mutate(w => w.AppendClause($"MERGE {mergeText}"));
         }
 
         public ICypherFluentQuery OnCreate()
@@ -262,12 +270,12 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery CreateUnique(string createUniqueText)
         {
-            return Mutate(w => w.AppendClause("CREATE UNIQUE " + createUniqueText));
+            return Mutate(w => w.AppendClause($"CREATE UNIQUE {createUniqueText}"));
         }
 
         public ICypherFluentQuery Create(string createText)
         {
-            return Mutate(w => w.AppendClause("CREATE " + createText));
+            return Mutate(w => w.AppendClause($"CREATE {createText}"));
         }
 
         [Obsolete("Use Create(string) with explicitly named params instead. For example, instead of Create(\"(c:Customer {0})\", customer), use Create(\"(c:Customer {customer})\").WithParams(new { customer }).")]
@@ -516,6 +524,8 @@ namespace Neo4jClient.Cypher
             QueryWriter.CustomHeaders = headers;
             return this;
         }
+
+
 
         public static string ApplyCamelCase(bool isCamelCase, string propertyName)
         {

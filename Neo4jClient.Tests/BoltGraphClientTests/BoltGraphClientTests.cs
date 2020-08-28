@@ -176,25 +176,25 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         //     ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
         // }
 
-        [Fact]
-        public async Task GetAsync_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = await Record.ExceptionAsync(async () => await bgc.GetAsync<string>(new NodeReference(1)));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
-
-        [Fact]
-        public async Task GetAsync_RelationReference_ThrowsInvalidOperationException()
-        {
-            var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
-            var ex = await Record.ExceptionAsync(async () => await bgc.GetAsync<TestNode>(new RelationshipReference<TestNode>(1)));
-            ex.Should().NotBeNull();
-            ex.Should().BeOfType<InvalidOperationException>();
-            ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
-        }
+        // [Fact]
+        // public async Task GetAsync_ThrowsInvalidOperationException()
+        // {
+        //     var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
+        //     var ex = await Record.ExceptionAsync(async () => await bgc.GetAsync<string>(new NodeReference(1)));
+        //     ex.Should().NotBeNull();
+        //     ex.Should().BeOfType<InvalidOperationException>();
+        //     ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
+        // }
+        //
+        // [Fact]
+        // public async Task GetAsync_RelationReference_ThrowsInvalidOperationException()
+        // {
+        //     var bgc = new BoltGraphClient(DriverTestHelper.MockDriverWithConnectionSet().Object);
+        //     var ex = await Record.ExceptionAsync(async () => await bgc.GetAsync<TestNode>(new RelationshipReference<TestNode>(1)));
+        //     ex.Should().NotBeNull();
+        //     ex.Should().BeOfType<InvalidOperationException>();
+        //     ex.Message.Should().Be(BoltGraphClient.NotValidForBolt);
+        // }
 
         public class Constructor : IClassFixture<CultureInfoSetupFixture>
         {

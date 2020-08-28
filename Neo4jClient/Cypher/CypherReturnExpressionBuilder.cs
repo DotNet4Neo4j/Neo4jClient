@@ -349,8 +349,21 @@ namespace Neo4jClient.Cypher
                 if (isNullable) optionalIndicator = "?";
             }
 
-            return new ExpressionBuild(string.Format("{0}.{1}{2} AS {3}", targetObject.Name, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, memberInfo.Name), optionalIndicator, targetMember.Name));
+            return new ExpressionBuild($"{targetObject.Name}.{ParseMemberName(memberInfo, camelCaseProperties)}{optionalIndicator} AS {targetMember.Name}");
         }
+
+        private static string ParseMemberName(MemberInfo memberInfo, bool camelCaseProperties)
+        {
+            var att = memberInfo.GetCustomAttribute<JsonPropertyAttribute>();
+
+            if (att != null && !string.IsNullOrWhiteSpace(att.PropertyName))
+            {
+                return att.PropertyName;
+            }
+
+            return CypherFluentQuery.ApplyCamelCase(camelCaseProperties, memberInfo.Name);
+        }
+
 
         static ExpressionBuild BuildStatement(
             MethodCallExpression expression,

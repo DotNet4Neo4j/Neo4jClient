@@ -7,10 +7,10 @@ using System.Transactions;
 using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Execution;
+using Neo4jClient.Extensions;
 
 namespace Neo4jClient.Transactions.Bolt
 {
-
     /// <summary>
     /// Handles all the queries related to transactions that could be needed in a ITransactionalGraphClient
     /// </summary>
@@ -30,21 +30,11 @@ namespace Neo4jClient.Transactions.Bolt
 
         internal static IScopedTransactions<BoltTransactionScopeProxy> ScopedTransactions
         {
-            get
-            {
-                if (scopedTransactions.Value == null)
-                {
-                    scopedTransactions.Value = ThreadContextHelper.CreateBoltScopedTransactions();
-                }
-
-                return scopedTransactions.Value;
-            }
+            get => scopedTransactions.Value ?? (scopedTransactions.Value = ThreadContextHelper.CreateBoltScopedTransactions());
             set => scopedTransactions.Value = value;
         }
 #endif
 
-        // holds the transaction contexts for transactions from the System.Transactions framework
-        private readonly IDictionary<string, BoltTransactionContext> dtcContexts;
         private readonly ITransactionalGraphClient client;
 
         public BoltTransactionManager(ITransactionalGraphClient client)
@@ -53,11 +43,6 @@ namespace Neo4jClient.Transactions.Bolt
             // specifies that we are about to use variables that depend on OS threads
             Thread.BeginThreadAffinity();
             ScopedTransactions = ThreadContextHelper.CreateBoltScopedTransactions();
-
-            // this object enables the interacion with System.Transactions and MSDTC, at first by
-            // letting us manage the transaction objects ourselves, and if we require to be promoted to MSDTC,
-            // then it notifies the library how to do it.
-            dtcContexts = new Dictionary<string, BoltTransactionContext>();
         }
 
         private BoltTransactionContext GetContext()
@@ -86,31 +71,20 @@ namespace Neo4jClient.Transactions.Bolt
             }
         }
 
-        public BoltTransactionScopeProxy CurrentInternalTransaction
-        {
-            get
-            {
-                return ScopedTransactions.TryPeek();
-            }
-        }
+        public BoltTransactionScopeProxy CurrentInternalTransaction => ScopedTransactions.TryPeek();
 
-        public ITransaction CurrentNonDtcTransaction => CurrentInternalTransaction;
+        public ITransaction CurrentTransaction => CurrentInternalTransaction;
 
-        /// <summary>
-        /// Implements the internal part for ITransactionalGraphClient.BeginTransaction
-        /// </summary>
-        /// <param name="scopeOption">How should the transaction scope be created.
-        /// <see cref="Neo4jClient.Transactions.ITransactionalGraphClient.BeginTransaction(Neo4jClient.Transactions.TransactionScopeOption)" />
-        ///  for more information.</param>
-        /// <param name="bookmarks">Bookmarks for use with this transaction.</param>
-        /// <returns></returns>
-        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
+        public Bookmark LastBookmark => CurrentTransaction.LastBookmark;
+
+        /// <inheritdoc cref="ITransactionManager{T}.BeginTransaction"/>
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks, string database)
         {
             if (scopeOption == TransactionScopeOption.Suppress)
             {
                 // TransactionScopeOption.Suppress doesn't fail with older versions of Neo4j
                 //TODO: Check this
-                return BeginSupressTransaction();
+                return BeginSuppressTransaction();
             }
 
             if (client.ServerVersion < new Version(3, 0))
@@ -129,19 +103,16 @@ namespace Neo4jClient.Transactions.Bolt
             }
 
             // then scopeOption == TransactionScopeOption.RequiresNew or we dont have a current transaction
-            return BeginNewTransaction(bookmarks);
+            return BeginNewTransaction(bookmarks, database);
         }
 
-        private BoltTransactionContext GenerateTransaction(IEnumerable<string> bookmarks)
+        private BoltTransactionContext GenerateTransaction(IEnumerable<string> bookmarks, string database)
         {
-            var session = ((BoltGraphClient) client).Driver.AsyncSession(x =>
-            {
-                if (bookmarks != null) x.WithBookmarks(Bookmark.From(bookmarks.ToArray()));
-            });
+            var session = ((BoltGraphClient) client).Driver.AsyncSession(client.ServerVersion, database, true, bookmarks);
             var transactionTask = session.BeginTransactionAsync();
             transactionTask.Wait();
             var transaction = transactionTask.Result;
-            return new BoltTransactionContext(new BoltNeo4jTransaction(session, transaction));
+            return new BoltTransactionContext(new BoltNeo4jTransaction(session, transaction, database));
         }
 
         private BoltTransactionContext GenerateTransaction(BoltTransactionContext reference)
@@ -154,9 +125,9 @@ namespace Neo4jClient.Transactions.Bolt
             ScopedTransactions.Push(transaction);
         }
 
-        private ITransaction BeginNewTransaction(IEnumerable<string> bookmarks)
+        private ITransaction BeginNewTransaction(IEnumerable<string> bookmarks, string database)
         {
-            var transaction = new BoltNeo4jTransactionProxy(client, GenerateTransaction(bookmarks), true);
+            var transaction = new BoltNeo4jTransactionProxy(client, GenerateTransaction(bookmarks, database), true);
             PushScopeTransaction(transaction);
             return transaction;
         }
@@ -184,7 +155,7 @@ namespace Neo4jClient.Transactions.Bolt
             return joinedTransaction;
         }
 
-        private ITransaction BeginSupressTransaction()
+        private ITransaction BeginSuppressTransaction()
         {
             var suppressTransaction = new BoltSuppressTransactionProxy(client);
             PushScopeTransaction(suppressTransaction);

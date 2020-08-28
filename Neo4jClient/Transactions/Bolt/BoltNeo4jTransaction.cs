@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Neo4j.Driver;
+using Neo4jClient.Extensions;
 
 namespace Neo4jClient.Transactions.Bolt
 {
@@ -14,15 +15,12 @@ namespace Neo4jClient.Transactions.Bolt
         internal IList<string> Bookmarks { get; set; }
         public Guid Id { get; private set; }
 
-        public BoltNeo4jTransaction(IDriver driver, IEnumerable<string> bookmarks, bool isWrite = true)
+        //TODO: Who uses this constructor??
+        public BoltNeo4jTransaction(Version version, IDriver driver, IEnumerable<string> bookmarks, string database, bool isWrite = true)
         {
+            Database = database;
             Bookmarks = bookmarks?.ToList();
-            var accessMode = isWrite ? AccessMode.Write : AccessMode.Read;
-            Session = driver.AsyncSession(x =>
-            {
-                x.WithDefaultAccessMode(accessMode);
-                if (bookmarks != null) x.WithBookmarks(Bookmark.From(Bookmarks.ToArray()));
-            });
+            Session = driver.AsyncSession(version, database, isWrite, Bookmarks);
 
             var tx = Session.BeginTransactionAsync();
             tx.Wait();
@@ -31,8 +29,9 @@ namespace Neo4jClient.Transactions.Bolt
             Id = Guid.NewGuid();
         }
 
-        public BoltNeo4jTransaction(IAsyncSession session, IAsyncTransaction transaction)
+        public BoltNeo4jTransaction(IAsyncSession session, IAsyncTransaction transaction, string database)
         {
+            Database = database;
             DriverTransaction = transaction;
             Session = session;
             IsOpen = true;
@@ -45,10 +44,8 @@ namespace Neo4jClient.Transactions.Bolt
         {
             if (!isDisposing)
                 return;
-
-            IsOpen = false;
-            // DriverTransaction?
-            // Session?.Dispose();
+            
+            RollbackAsync().Wait();
         }
 
         /// <inheritdoc />
@@ -62,49 +59,32 @@ namespace Neo4jClient.Transactions.Bolt
 
         #region Implementation of ITransaction
 
-        /// <inheritdoc />
-        public Task CommitAsync()
-        {
-            var task = DriverTransaction?.CommitAsync();
-            if (task != null)
-            {
-                return task;
-            }
+        public string Database { get; set; }
 
-#if NET45
-            return Task.FromResult(0);
-#else
-            return Task.CompletedTask;
-#endif
+        /// <inheritdoc />
+        public async Task CommitAsync()
+        {
+            if (IsOpen && DriverTransaction != null)
+                await DriverTransaction.CommitAsync();
+
+
+            IsOpen = false;
         }
 
         /// <inheritdoc />
-        public Task RollbackAsync()
+        public async Task RollbackAsync()
         {
-            var task = DriverTransaction?.RollbackAsync();
-            if (task != null)
-            {
-                return task;
-            }
+            if (IsOpen && DriverTransaction != null)
+                await DriverTransaction.RollbackAsync();
 
-#if NET45
-            return Task.FromResult(0);
-#else
-            return Task.CompletedTask;
-#endif
+            IsOpen = false;
         }
 
         //TODO: Not needed
         /// <inheritdoc />
-        public Task KeepAliveAsync()
-        {
-            /*Not needed for Bolt.*/
-#if NET45
-            return Task.FromResult(0);
-#else
-            return Task.CompletedTask;
-#endif
-        }
+        #pragma warning disable 1998
+        public async Task KeepAliveAsync() { }
+        #pragma warning restore 1998
 
         /// <inheritdoc />
         public bool IsOpen { get; private set; }
@@ -113,17 +93,14 @@ namespace Neo4jClient.Transactions.Bolt
         /// <inheritdoc />
         public NameValueCollection CustomHeaders { get; set; }
 
-        #endregion
-
-        
         /// <summary>
-        /// Cancels a transaction without closing it in the server
+        /// Gets the bookmark received following the last successfully completed Transaction.
+        /// If no bookmark was received or if this transaction was rolled back, the bookmark value will not be changed. 
         /// </summary>
-        internal void Cancel()
-        {
-            IsOpen = false;
-        }
+        public Bookmark LastBookmark => Session?.LastBookmark;
 
+        #endregion
+        
         public static void DoCommit(ITransactionExecutionEnvironmentBolt transactionExecutionEnvironment)
         {
             transactionExecutionEnvironment.DriverTransaction.CommitAsync().Wait();
@@ -136,9 +113,9 @@ namespace Neo4jClient.Transactions.Bolt
             // transactionExecutionEnvironment.DriverTransaction.Dispose();
         }
 
-        public static BoltNeo4jTransaction FromIdAndClient(Guid transactionId, IDriver driver)
-        {
-            return new BoltNeo4jTransaction(driver, null){Id = transactionId};
-        }
+        // public static BoltNeo4jTransaction FromIdAndClient(Guid transactionId, IDriver driver)
+        // {
+        //     return new BoltNeo4jTransaction(driver, null, Database){Id = transactionId};
+        // }
     }
 }

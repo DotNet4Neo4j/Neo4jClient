@@ -23,11 +23,15 @@ using ITransaction = Neo4jClient.Transactions.ITransaction;
 
 namespace Neo4jClient
 {
+    using Neo4jClient.Extensions;
+
     /// <summary>
     ///     The <see cref="BoltGraphClient" /> is the client for connecting to the Bolt protocol of Neo4j.
     /// </summary>
     public class BoltGraphClient : IBoltGraphClient, IRawGraphClient, ITransactionalGraphClient
     {
+        public ITransactionalGraphClient Tx => this;
+
         internal const string NotValidForBolt = "This is not available using the BoltGraphClient.";
 
         internal static readonly JsonConverter[] DefaultJsonConverters =
@@ -70,6 +74,7 @@ namespace Neo4jClient
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
             {
+                //TODO - const/etc these
                 if (!new [] {"neo4j", "neo4j+s", "neo4j+ssc"}.Contains(uri.Scheme.ToLowerInvariant()))
                     throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' scheme, not '{uri.Scheme}'.");
 
@@ -151,6 +156,7 @@ namespace Neo4jClient
 
         internal class ExecutionContext
         {
+            public string Database { get; set; }
             private readonly Stopwatch stopwatch;
             private BoltGraphClient owner;
 
@@ -239,191 +245,8 @@ namespace Neo4jClient
 
         #region Implementation of IGraphClient
 
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public RootNode RootNode
-        {
-            get { throw new InvalidOperationException(NotValidForBolt); }
-        }
 
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<NodeReference<TNode>> CreateAsync<TNode>(TNode node, IEnumerable<IRelationshipAllowingParticipantNode<TNode>> relationships, IEnumerable<IndexEntry> indexEntries)
-            where TNode : class
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<Node<TNode>> GetAsync<TNode>(NodeReference reference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<Node<TNode>> GetAsync<TNode>(NodeReference<TNode> reference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference<TData> reference) where TData : class, new()
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<RelationshipInstance<TData>> GetAsync<TData>(RelationshipReference reference) where TData : class, new()
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task UpdateAsync<TNode>(NodeReference<TNode> nodeReference, TNode replacementData, IEnumerable<IndexEntry> indexEntries = null)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<Node<TNode>> UpdateAsync<TNode>(NodeReference<TNode> nodeReference, Action<TNode> updateCallback, Func<TNode, IEnumerable<IndexEntry>> indexEntriesCallback = null, Action<IEnumerable<FieldChange>> changeCallback = null)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task UpdateAsync<TRelationshipData>(RelationshipReference<TRelationshipData> relationshipReference, Action<TRelationshipData> updateCallback) where TRelationshipData : class, new()
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task DeleteAsync(NodeReference reference, DeleteMode mode)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<RelationshipReference> CreateRelationshipAsync<TSourceNode, TRelationship>(NodeReference<TSourceNode> sourceNodeReference, TRelationship relationship) where TRelationship : Relationship, IRelationshipAllowingSourceNode<TSourceNode>
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task DeleteRelationshipAsync(RelationshipReference reference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<Dictionary<string, IndexMetaData>> GetIndexesAsync(IndexFor indexFor)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<bool> CheckIndexExistsAsync(string indexName, IndexFor indexFor)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task CreateIndexAsync(string indexName, IndexConfiguration config, IndexFor indexFor)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task ReIndexAsync(NodeReference node, IEnumerable<IndexEntry> indexEntries)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task ReIndexAsync(RelationshipReference relationship, IEnumerable<IndexEntry> indexEntries)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task DeleteIndexAsync(string indexName, IndexFor indexFor)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task DeleteIndexEntriesAsync(string indexName, NodeReference relationshipReference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task DeleteIndexEntriesAsync(string indexName, RelationshipReference relationshipReference)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<IEnumerable<Node<TNode>>> QueryIndexAsync<TNode>(string indexName, IndexFor indexFor, string query)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<IEnumerable<Node<TNode>>> LookupIndexAsync<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, long id)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Task<IEnumerable<Node<TNode>>> LookupIndexAsync<TNode>(string exactIndexName, IndexFor indexFor, string indexKey, int id)
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public void ShutdownServer()
-        {
-            throw new InvalidOperationException(NotValidForBolt);
-        }
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Uri NodeIndexEndpoint
-        {
-            get { throw new InvalidOperationException(NotValidForBolt); }
-        }
-
-
-        /// <inheritdoc />
-        [Obsolete(NotValidForBolt)]
-        public Uri RelationshipIndexEndpoint
-        {
-            get { throw new InvalidOperationException(NotValidForBolt); }
-        }
-
-        /// <inheritdoc />
+        /// <inheritdoc cref="IGraphClient.ConnectAsync"/>
         public async Task ConnectAsync(NeoServerConfiguration configuration = null)
         {
             if (Driver == null)
@@ -461,7 +284,7 @@ namespace Neo4jClient
         /// <inheritdoc />
         public DefaultContractResolver JsonContractResolver { get; set; }
 
-        public Uri GetTransactionEndpoint(string database)
+        public Uri GetTransactionEndpoint(string database, bool autoCommit = false)
         {
             throw new InvalidOperationException(NotValidForBolt);
         }
@@ -483,16 +306,13 @@ namespace Neo4jClient
             {
                 if (InTransaction)
                 {
+                    context.Database = Transaction.Database;
                     var result = await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
                     results = ParseResults<TResult>(await result.StatementResult.ToListAsync().ConfigureAwait(false), query);
                 }
                 else
                 {
-                    var session = Driver.AsyncSession(x =>
-                    {
-                        x.WithDatabase(query.Database).WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read);
-                        if (query.Bookmarks != null) x.WithBookmarks(query.Bookmarks.ToArray());
-                    });
+                    var session = Driver.AsyncSession(ServerVersion, query.Database, query.IsWrite, query.Bookmarks);
 
                     var result = query.IsWrite 
                         ? await session.WriteTransactionAsync(async s =>
@@ -559,34 +379,30 @@ namespace Neo4jClient
             return results;
         }
 
+
         /// <inheritdoc />
-       async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
+        async Task IRawGraphClient.ExecuteCypherAsync(CypherQuery query)
         {
-           var tx = ExecutionContext.Begin(this);
+            var executionContext = ExecutionContext.Begin(this);
 
             if (Driver == null)
                 throw new InvalidOperationException("Can't execute cypher unless you have connected to the server.");
 
             if (InTransaction)
             {
-                await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
-                OperationCompleted?.Invoke(this, new OperationCompletedEventArgs
-                {
-                    QueryText = $"BOLT:{query.QueryText}"
-                });
+                executionContext.Database = Transaction.Database;
+                var response = await transactionManager.EnqueueCypherRequest($"The query was: {query.QueryText}", this, query).ConfigureAwait(false);
+                OnOperationCompleted(new OperationCompletedEventArgs {QueryText = $"BOLT:{query.QueryText}", LastBookmark = transactionManager.LastBookmark});
             }
-
-            var session = Driver.AsyncSession(x =>
+            else
             {
-                x.WithDefaultAccessMode(query.IsWrite ? AccessMode.Write : AccessMode.Read);
-                if (query.Bookmarks != null) x.WithBookmarks(query.Bookmarks.ToArray());
-            });
-            {
+                var session = Driver.AsyncSession(ServerVersion, query.Database, query.IsWrite, query.Bookmarks);
                 if (query.IsWrite)
                     await session.WriteTransactionAsync(async s => await s.RunAsync(query, this)).ConfigureAwait(false);
                 else
                     await session.ReadTransactionAsync(async s => await s.RunAsync(query, this)).ConfigureAwait(false);
-                tx.Complete(query, session.LastBookmark);
+                executionContext.Complete(query, session.LastBookmark);
+
             }
         }
 
@@ -609,32 +425,35 @@ namespace Neo4jClient
         /// <inheritdoc />
         public ITransaction BeginTransaction(IEnumerable<string> bookmarks)
         {
-            return BeginTransaction(TransactionScopeOption.Join, bookmarks);
+            return BeginTransaction(TransactionScopeOption.Join, bookmarks, DefaultDatabase);
         }
 
         /// <inheritdoc />
         public ITransaction BeginTransaction(TransactionScopeOption scopeOption)
         {
-            return BeginTransaction(scopeOption, (IEnumerable<string>) null);
+            return BeginTransaction(scopeOption, null, DefaultDatabase);
         }
 
         /// <inheritdoc />
         public ITransaction BeginTransaction(TransactionScopeOption scopeOption, string bookmark)
         {
-            return BeginTransaction(scopeOption, new List<string>{bookmark});
+            return BeginTransaction(scopeOption, new List<string>{bookmark}, DefaultDatabase);
         }
 
-        /// <inheritdoc />
-        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks)
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmark)
         {
-            if (transactionManager == null)
-                throw new NotSupportedException("HTTP Transactions are only supported on Neo4j 2.0 and newer.");
+            return BeginTransaction(scopeOption,  bookmark, DefaultDatabase);
+        }
 
-            return transactionManager.BeginTransaction(scopeOption, bookmarks);
+
+        /// <inheritdoc />
+        public ITransaction BeginTransaction(TransactionScopeOption scopeOption, IEnumerable<string> bookmarks, string database)
+        {
+            return transactionManager.BeginTransaction(scopeOption, bookmarks, database);
         }
 
         /// <inheritdoc />
-        public ITransaction Transaction => transactionManager?.CurrentNonDtcTransaction;
+        public ITransaction Transaction => transactionManager?.CurrentTransaction;
 
         /// <inheritdoc />
         public bool InTransaction => transactionManager != null && transactionManager.InTransaction;
@@ -642,26 +461,23 @@ namespace Neo4jClient
         /// <inheritdoc />
         public void EndTransaction()
         {
-            if (transactionManager == null)
-                throw new NotSupportedException("Transactions are only supported on Neo4j 2.0 and newer.");
-
             transactionManager.EndTransaction();
         }
 
         /// <inheritdoc />
-        public Uri TransactionEndpoint
-        {
-            get { throw new InvalidOperationException(NotValidForBolt); }
-        }
+        public Uri TransactionEndpoint => throw new InvalidOperationException(NotValidForBolt);
 
-#endregion
+        #endregion
 
         #region Implementation of IBoltGraphClient
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IGraphClient.OperationCompleted"/>
         public event OperationCompletedEventHandler OperationCompleted;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IGraphClient.DefaultDatabase"/>
+        public string DefaultDatabase { get; set; } = "neo4j";
+
+        /// <inheritdoc cref="IGraphClient.CypherCapabilities"/>
         public CypherCapabilities CypherCapabilities { get; private set; }
 
         /// <inheritdoc />

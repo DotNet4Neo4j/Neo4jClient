@@ -25,10 +25,10 @@ namespace Neo4jClient.Transactions
         {
         }
 
-        protected override Task<HttpResponseMessage> RunQuery(IGraphClient client, CypherQuery query,
-            IExecutionPolicy policy, string commandDescription)
+        protected override Task<HttpResponseMessage> RunQuery(IGraphClient client, CypherQuery query, IExecutionPolicy policy, string commandDescription)
         {
-            var txBaseEndpoint = policy.BaseEndpoint(query.Database);
+            
+            var txBaseEndpoint = policy.BaseEndpoint((policy.InTransaction) ? policy.Database : query.Database, !policy.InTransaction);
             var serializedQuery = policy.SerializeRequest(query);
             CustomHeaders = query.CustomHeaders;
             return Request.With(client.ExecutionConfiguration, query.CustomHeaders, query.MaxExecutionTime)
