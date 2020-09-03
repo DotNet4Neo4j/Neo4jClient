@@ -373,6 +373,55 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
             public IEnumerable<ObjectWithId> Next { get; set; }
         }
 
+        //see: https://github.com/DotNet4Neo4j/Neo4jClient/issues/368
+        [Fact]
+        public async Task ShouldBeAbleToCastToObject_WhenUsingReturnAs()
+        {
+            const string queryText = "MATCH (n:Node) RETURN n{.Username} AS User";
+
+            var queryParams = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional, "neo4j");
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                const string username = "jeff";
+                var userNodeMock = new Mock<INode>();
+                userNodeMock
+                    .Setup(n => n.Id)
+                    .Returns(1);
+                userNodeMock
+                    .Setup(n => n.Properties)
+                    .Returns(new Dictionary<string, object> { { "Username", username } });
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["n"])
+                    .Returns(userNodeMock.Object);
+
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "n" });
+
+                var testStatementResult = new TestStatementResult(new[] { "n" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<UserContainer>(cypherQuery)).ToArray();
+
+                //Assert
+                var deserializedObject = results.First();
+                deserializedObject.User.Should().NotBeNull();
+                deserializedObject.User.Username.Should().Be(username);
+            }
+
+        }
+
+        private class User { public string Username { get; set; }}
+
+        private class UserContainer  { public User User { get; set; } }
+
+
         [Fact]
         public async Task CreateWithArrayParametersShouldSerializeAndDeserializeOnReturn()
         {
