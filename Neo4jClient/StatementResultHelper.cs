@@ -212,7 +212,7 @@ namespace Neo4jClient
                 }
 
                 var property = typeT.GetProperties().FirstOrDefault(p => p.Name == key);
-                var isClass = property != null && !property.PropertyType.IsAnonymous() && !property.PropertyType.IsPrimitive() && !property.PropertyType.IsArray;
+                var isClass = property != null && property.PropertyType.IsClass;
 
                 data.Add(o.ToJsonString(convertMode == CypherResultMode.Set, record.Keys.Count > 1, false, isClass));
             }
