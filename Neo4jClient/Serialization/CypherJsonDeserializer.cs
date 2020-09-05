@@ -101,7 +101,7 @@ Include this raw JSON, with any sensitive values replaced with non-sensitive equ
 {1}";
                 var message = string.Format(messageTemplate, typeof(TResult).FullName, content);
 
-                // If it's a specifc scenario that we're blowing up about, put this front and centre in the message
+                // If it's a specific scenario that we're blowing up about, put this front and centre in the message
                 if (ex is DeserializationException deserializationException)
                 {
                     message = $"{deserializationException.Message}{Environment.NewLine}{Environment.NewLine}----{Environment.NewLine}{Environment.NewLine}{message}";
