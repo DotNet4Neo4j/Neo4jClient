@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4j.Driver.V1;
@@ -369,6 +370,73 @@ namespace Neo4jClient.Test.BoltGraphClientTests.Cypher
         {
             public ObjectWithId Start { get; set; }
             public IEnumerable<ObjectWithId> Next { get; set; }
+        }
+
+        //see: https://github.com/DotNet4Neo4j/Neo4jClient/issues/368
+        [Fact]
+        public async Task ShouldBeAbleToCastToObject_WhenUsingReturnAs()
+        {
+            const string queryText = "MATCH (user)-[:hasPost]->(post:Post) WHERE(user.Username = 'user1') RETURN user{.Username} AS User, post AS Post";
+
+            var queryParams = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional);
+
+            using (var testHarness = new BoltTestHarness())
+            {
+                const string username = "User1";
+                const string postName = "Post1";
+
+                var user = new Dictionary<string, object> { { "Username", username } };
+                var postNodeMock = new Mock<INode>();
+                postNodeMock.Setup(n => n.Id).Returns(1);
+                postNodeMock.Setup(n => n.Properties)
+                    .Returns(new Dictionary<string, object> { { "Content", postName } });
+
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["User"])
+                    .Returns(user);
+
+                recordMock
+                    .Setup(r => r["Post"])
+                    .Returns(postNodeMock.Object);
+
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] { "User", "Post" });
+
+                recordMock.Setup(r => r.Values)
+                    .Returns(new Dictionary<string, object> { { "User", user }, { "Post", postNodeMock.Object } });
+
+                var testStatementResult = new TestStatementResult(new[] { "User", "Post" }, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<PostAndUser>(cypherQuery)).ToArray();
+                //
+                //Assert
+                var deserializedObject = results.First();
+                deserializedObject.User.Should().NotBeNull();
+                deserializedObject.User.Username.Should().Be(username);
+            }
+
+        }
+        private class User
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+        }
+
+        private class Post
+        {
+            public string Content { get; set; }
+        }
+
+        private class PostAndUser
+        {
+            public User User { get; set; }
+            public Post Post { get; set; }
         }
 
         [Fact]

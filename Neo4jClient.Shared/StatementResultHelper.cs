@@ -64,7 +64,7 @@ namespace Neo4jClient
             return $"{{\"data\":{{ {string.Join(",", props)} }}}}";
         }
 
-        internal static string ToJsonString(this object o, bool inSet, bool isNested, bool isNestedInList)
+        internal static string ToJsonString(this object o, bool inSet, bool isNested, bool isNestedInList, bool isClass = false)
         {
             if (o == null)
                 return null;
@@ -79,6 +79,22 @@ namespace Neo4jClient
 
             if (isNested)
             {
+                if (isClass)
+                {
+                    if (o is IDictionary || oType == typeof(IDictionary<string, object>) || oType == typeof(Dictionary<string, object>))
+                    {
+                        var dict = (IDictionary<string, object>)o;
+                        var output = new List<string>();
+                        foreach (var keyValuePair in dict)
+                        {
+                            var s = $"\"{keyValuePair.Key}\":{keyValuePair.ToJsonString(inSet, true, false) ?? "null"}";
+                            output.Add(s);
+                        }
+
+                        return $"{{\"data\":{{ {string.Join(",", output)} }}}}";
+                    }
+                }
+
                 if (o is IDictionary || oType == typeof(IDictionary<string, object>) || oType == typeof(Dictionary<string, object>))
                 {
                     var dict = (IDictionary<string, object>) o;
@@ -195,7 +211,10 @@ namespace Neo4jClient
                     continue;
                 }
 
-                data.Add(o.ToJsonString(convertMode == CypherResultMode.Set, record.Keys.Count > 1, false));
+                var property = typeT.GetProperties().FirstOrDefault(p => p.Name == key);
+                var isClass = property != null && !property.PropertyType.IsAnonymous() && !property.PropertyType.IsPrimitive() && !property.PropertyType.IsArray;
+
+                data.Add(o.ToJsonString(convertMode == CypherResultMode.Set, record.Keys.Count > 1, false, isClass));
             }
 
             var format = "{{ {0}, \"data\":[[ {1} ]] }}";
@@ -224,13 +243,13 @@ namespace Neo4jClient
         public static T Parse<T>(this IRecord record, IGraphClient graphClient)
         {
             if (record.Keys.Count != 1)
-                return ParseMutlipleKeys<T>(record, graphClient);
+                return ParseMultipleKeys<T>(record, graphClient);
 
             var identifier = record.Keys.Single();
             return record.Parse<T>(identifier, graphClient);
         }
 
-        private static T ParseMutlipleKeys<T>(IRecord record, IGraphClient graphClient)
+        private static T ParseMultipleKeys<T>(IRecord record, IGraphClient graphClient)
         {
             var t = ConstructNew<T>();
             //Collection or Node --- anything else???
