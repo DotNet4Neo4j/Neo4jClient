@@ -381,7 +381,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
             var queryParams = new Dictionary<string, object>();
 
-            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional);
+            var cypherQuery = new CypherQuery(queryText, queryParams, CypherResultMode.Projection, CypherResultFormat.Transactional, "neo4j");
 
             using (var testHarness = new BoltTestHarness())
             {
@@ -413,7 +413,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 var testStatementResult = new TestStatementResult(new[] { "User", "Post" }, recordMock.Object);
                 testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
 
-                var graphClient = testHarness.CreateAndConnectBoltGraphClient();
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
                 var results = (await graphClient.ExecuteGetCypherResultsAsync<PostAndUser>(cypherQuery)).ToArray();
                 //
                 //Assert
