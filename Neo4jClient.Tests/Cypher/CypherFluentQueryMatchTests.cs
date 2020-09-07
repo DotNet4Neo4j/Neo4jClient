@@ -6,7 +6,6 @@ using Xunit;
 
 namespace Neo4jClient.Tests.Cypher
 {
-    
     public class CypherFluentQueryMatchTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
