@@ -205,10 +205,16 @@ namespace Neo4jClient.Cypher
             });
         }
 
+        /// <inheritdoc cref="ICypherFluentQuery.Use"/>
+        public ICypherFluentQuery Use(string database)
+        {
+            return Mutate(w => w.AppendClause($"USE {database}"));
+        }
+
         public ICypherFluentQuery Match(params string[] matchText)
         {
             return Mutate(w =>
-                w.AppendClause("MATCH " + string.Join(", ", matchText)));
+                w.AppendClause($"MATCH {string.Join(", ", matchText)}"));
         }
 
         public ICypherFluentQuery UsingIndex(string index)

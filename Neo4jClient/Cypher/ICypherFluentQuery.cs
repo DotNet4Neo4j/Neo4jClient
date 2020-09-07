@@ -7,6 +7,25 @@ using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
 {
+    /*
+    CREATE INDEX
+    USE
+    USING INDEX
+    USING INDEX SEEK
+    USING JOIN ON
+    USING SCAN
+
+    IS NOT NULL ETC
+    XOR
+
+    DateTime
+
+     */
+
+
+
+
+
     public partial interface ICypherFluentQuery
     {
         CypherQuery Query { get; }
@@ -56,7 +75,7 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Merge(string mergeText);
         ICypherFluentQuery OnCreate();
         ICypherFluentQuery OnMatch();
-
+        
         /// <summary>
         /// [Neo4j 3.0+] Calls a Stored Procedure on the Database.
         /// </summary>
@@ -191,5 +210,14 @@ namespace Neo4jClient.Cypher
         /// <param name="bookmarks">The bookmarks to use.</param>
         /// <returns>A <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
         ICypherFluentQuery WithBookmarks(params string[] bookmarks);
+
+        /// <summary>
+        /// The <c>USE</c> clause determines which graph a query, or query part, is executed against.
+        /// It is supported for queries and schema commands.
+        /// </summary>
+        /// <remarks>Neo4j 4.x+</remarks>
+        /// <param name="graphName">The name of the graph to run the next commands against.</param>
+        /// <returns>A <see cref="ICypherFluentQuery"/> instance to continue querying with.</returns>
+        ICypherFluentQuery Use(string graphName);
     }
 }
