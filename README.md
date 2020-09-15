@@ -20,6 +20,12 @@ It's worth noting - due to a lot of the changes that are taking place - at the m
 
 * At the moment - none - but you'll let me know!?
 
+## Changing from 3.x to 4.x
+
+* The biggest thing to concern yourself with is the URI.
+  * For `BoltGraphClient` - switch from `bolt://` to `neo4j://`
+  * For `GraphClient` - switch from `http://URI:7474/db/data` to `http://URI:7474/`
+
 ### Plans
 
 * Finally transactions in Core

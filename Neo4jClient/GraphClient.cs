@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using Neo4j.Driver;
 using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
@@ -47,9 +48,9 @@ namespace Neo4jClient
 
         internal readonly Uri RootUri;
         internal RootApiResponse RootApiResponse;
-        
+        private string defaultDatabase = "neo4j";
 
-        
+
         public bool UseJsonStreamingIfAvailable { get; set; }
 
         public GraphClient(Uri rootUri, string username = null, string password = null)
@@ -71,12 +72,12 @@ namespace Neo4jClient
                 ResourcesReturned = 0
             };
 
-            Action stopTimerAndNotifyCompleted = () =>
+            void StopTimerAndNotifyCompleted()
             {
                 stopwatch.Stop();
                 operationCompletedArgs.TimeTaken = stopwatch.Elapsed;
                 OnOperationCompleted(operationCompletedArgs);
-            };
+            }
 
             try
             {
@@ -121,11 +122,10 @@ namespace Neo4jClient
             }
             catch (AggregateException ex)
             {
-                Exception unwrappedException;
-                var wasUnwrapped = ex.TryUnwrap(out unwrappedException);
+                var wasUnwrapped = ex.TryUnwrap(out var unwrappedException);
                 operationCompletedArgs.Exception = wasUnwrapped ? unwrappedException : ex;
 
-                stopTimerAndNotifyCompleted();
+                StopTimerAndNotifyCompleted();
 
                 if (wasUnwrapped)
                     throw unwrappedException;
@@ -135,11 +135,11 @@ namespace Neo4jClient
             catch (Exception e)
             {
                 operationCompletedArgs.Exception = e;
-                stopTimerAndNotifyCompleted();
+                StopTimerAndNotifyCompleted();
                 throw;
             }
 
-            stopTimerAndNotifyCompleted();
+            StopTimerAndNotifyCompleted();
         }
 
         public GraphClient(Uri rootUri, IHttpClient httpClient)
@@ -229,7 +229,11 @@ namespace Neo4jClient
         public ICypherFluentQuery Cypher => new CypherFluentQuery(this);
 
         /// <inheritdoc cref="IGraphClient.DefaultDatabase"/>
-        public string DefaultDatabase { get; set; } = "neo4j";
+        public string DefaultDatabase
+        {
+            get => defaultDatabase;
+            set => defaultDatabase = value?.ToLowerInvariant() ?? "neo4j";
+        }
 
         public Version ServerVersion
         {
@@ -425,10 +429,48 @@ namespace Neo4jClient
                 throw;
             }
             context.Policy.AfterExecution(TransactionHttpUtils.GetMetadataFromResponse(response.ResponseObject), null);
+            QueryStats stats = null;
+            if (response.ResponseObject?.Content != null)
+            {
+                var responseString = await response.ResponseObject.Content.ReadAsStringAsync();
+                var errors = JsonConvert.DeserializeObject<ErrorsContainer>(responseString);
+                if(errors.Errors.Any())
+                    throw new ClientException(errors.Errors.First().Code, errors.Errors.First().Message);
 
-            context.Complete(query);
+                if (query.IncludeQueryStats)
+                {
+                    var statsContainer = JsonConvert.DeserializeObject<QueryStatsContainer>(responseString);
+                    if (statsContainer != null)
+                        stats = statsContainer?.Results?.FirstOrDefault()?.Stats;
+                }
+            }
+
+            context.Complete(query, stats);
+        }
+        private class QueryStatsContainer
+        {
+            [JsonProperty("results")]
+            public IList<ResultsContainer> Results { get; set; }
         }
 
+        private class ResultsContainer
+        {
+            [JsonProperty("stats")]
+            public QueryStats Stats { get; set; }
+        }
+
+        private class ErrorsContainer
+        {
+            public IList<Error> Errors { get; set; }
+        }
+
+        private class Error
+        {
+            [JsonProperty("code")]
+            public string Code { get; set; }
+            [JsonProperty("message")]
+            public string Message { get; set; }
+        }
         private void CheckRoot()
         {
             if (RootApiResponse == null)
@@ -497,6 +539,11 @@ namespace Neo4jClient
                 return executionContext;
             }
 
+            public void Complete(CypherQuery query, QueryStats stats)
+            {
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, 0, null, queryStats:stats);
+            }
+
             public void Complete(CypherQuery query)
             {
                 // only parse the events when there's an event handler
@@ -515,7 +562,7 @@ namespace Neo4jClient
                 Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, -1, exception);
             }
 
-            public void Complete(string queryText, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null)
+            private void Complete(string queryText, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null, QueryStats queryStats = null)
             {
                 var args = new OperationCompletedEventArgs
                 {
@@ -524,7 +571,8 @@ namespace Neo4jClient
                     TimeTaken = stopwatch.Elapsed,
                     Exception = exception,
                     CustomHeaders = customHeaders,
-                    MaxExecutionTime = maxExecutionTime
+                    MaxExecutionTime = maxExecutionTime,
+                    QueryStats = queryStats
                 };
 
                 owner.OnOperationCompleted(args);

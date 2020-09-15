@@ -77,7 +77,7 @@ namespace Neo4jClient.Cypher
             };
         }
 
-        public CypherQuery ToCypherQuery(IContractResolver contractResolver = null, bool isWrite = true)
+        public CypherQuery ToCypherQuery(IContractResolver contractResolver = null, bool isWrite = true, bool includeQueryStats = false)
         {
             var queryText = queryTextBuilder
                 .ToString()
@@ -94,7 +94,8 @@ namespace Neo4jClient.Cypher
                 CustomHeaders,
                 isWrite,
                 Bookmarks,
-                Identifier
+                Identifier,
+                includeQueryStats
                 );
         }
 

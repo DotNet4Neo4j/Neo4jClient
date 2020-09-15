@@ -28,7 +28,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = @"RETURN [] AS p";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
                 {
@@ -64,7 +64,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 };
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
                 {
@@ -126,7 +126,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 CypherResultMode.Projection,
                 CypherResultFormat.Rest, "neo4j");
 
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using(var testHarness = new RestTestHarness
                 {
@@ -177,7 +177,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 CypherResultMode.Projection,
                 CypherResultFormat.Rest, "neo4j");
 
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
                 {
@@ -339,7 +339,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 CypherResultMode.Projection,
                 CypherResultFormat.Rest, "neo4j");
 
-             var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+             var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
              using (var testHarness = new RestTestHarness
                  {
@@ -464,7 +464,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 CypherResultMode.Projection,
                 CypherResultFormat.Rest, "neo4j");
 
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
                 {
@@ -586,7 +586,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 CypherResultMode.Projection,
                 CypherResultFormat.Rest, "neo4j");
 
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
                 {
@@ -682,7 +682,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             // Arrange
             const string queryText = @"broken query";
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, CypherResultFormat.Rest, "neo4j");
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
                 {
@@ -741,7 +741,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
 
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set,CypherResultFormat.Transactional, "neo4j", maxExecutionTime: expectedMaxExecutionTime);
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
             {
@@ -799,7 +799,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 };
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness
             {

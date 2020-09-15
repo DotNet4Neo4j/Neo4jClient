@@ -316,7 +316,7 @@ namespace Neo4jClient.Tests.Transactions
             const string resultColumn = @"{'columns':['Total'], 'data':[{'row':[1]}]}";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, "neo4j");
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
             var commitRequest = MockRequest.PostJson("/transaction/1/commit", @"{'statements': []}");
             using (var testHarness = new RestTestHarness
             {
@@ -385,7 +385,7 @@ namespace Neo4jClient.Tests.Transactions
             {
                 queries[i] = new CypherQuery(string.Format(queryTextBase, i), new Dictionary<string, object>(),
                     CypherResultMode.Projection, "neo4j");
-                apiQueries[i] = new CypherStatementList {new CypherTransactionStatement(queries[i], false)};
+                apiQueries[i] = new CypherStatementList {new CypherTransactionStatement(queries[i])};
                 responses[i] = MockResponse.Json(200,
                     @"{'results':[" + string.Format(resultColumnBase, i) + @"], 'errors':[] }");
                 if (i > 0)
@@ -453,7 +453,7 @@ namespace Neo4jClient.Tests.Transactions
             const string resultColumn = @"{'columns':['Total'], 'data':[{'row':[1]}]}";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, "neo4j");
-            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, false) };
+            var cypherApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
 
             using (var testHarness = new RestTestHarness(false)
             {
