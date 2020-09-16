@@ -39,7 +39,7 @@ namespace Neo4jClient
             new EnumValueConverter()
         };
 
-        public static readonly DefaultContractResolver DefaultJsonContractResolver = new DefaultContractResolver();
+        public static readonly DefaultContractResolver DefaultJsonContractResolver = new Neo4jContractResolver();
 
         private ITransactionManager<HttpResponseMessage> transactionManager;
         private readonly IExecutionPolicyFactory policyFactory;

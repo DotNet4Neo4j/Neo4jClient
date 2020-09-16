@@ -54,7 +54,46 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             {
             }
         }
-        
+
+        public class ClassWithSomeNeo4jIgnoreAttributes
+        {
+            public string Text { get; set; }
+            [Neo4jIgnore]
+            public string TextIgnore { get; set; }
+            public int TestInt { get; set; }
+            [Neo4jIgnore]
+            public int TestNeo4jIntIgnore { get; set; }
+            [JsonIgnore]
+            public int TestJsonIntIgnore { get; set; }
+        }
+
+        [Fact]
+        //[Description("test bolt part of https://github.com/Readify/Neo4jClient/issues/336  https://github.com/Readify/Neo4jClient/pull/337 - see UserSuppliedSerializationTests for https part")]
+        public async Task JsonSerializerShouldNotSerializeNeo4jIgnoreAttribute()
+        {
+            var mockSession = new Mock<IAsyncSession>();
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+
+            var mockDriver = new Mock<IDriver>();
+            mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
+
+            var bgc = new BoltGraphClient(mockDriver.Object);
+            await bgc.ConnectAsync();
+
+            var cwa = new ClassWithSomeNeo4jIgnoreAttributes { Text = "foo", TextIgnore = "fooignore", TestInt = 42, TestNeo4jIntIgnore = 42, TestJsonIntIgnore = 42 };
+
+            var cfq = bgc.Cypher.Create("(c)").WithParam("testParam", cwa);
+
+            var expectedParameters = new Dictionary<string, object>
+            {
+            {"testParam", new Dictionary<string, object> {{"Text", "foo"}, { "TestInt", 42} }
+            }};
+
+            var query = cfq.Query;
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
+        }
+
+
         [Fact]
         public async Task SerializesDateTimesProperly()
         {
