@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Neo4j.Driver;
+using Neo4jClient.ApiModels;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using NSubstitute;
@@ -19,6 +20,59 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
     
     public class ExecuteCypherTests : IClassFixture<CultureInfoSetupFixture>
     {
+        [Fact]
+        public async Task ShouldReturnQueryStatsIfRequested()
+        {
+        var response = MockResponse.Json(200, @"{
+            'results' : [ {
+                'columns' : [ 'id(n)' ],
+                'data' : [ {
+                    'row' : [ 4 ],
+                    'meta' : [ null ]
+                } ],
+                'stats' : {
+                    'contains_updates' : true,
+                    'nodes_created' : 1,
+                    'nodes_deleted' : 0,
+                    'properties_set' : 0,
+                    'relationships_created' : 0,
+                    'relationship_deleted' : 0,
+                    'labels_added' : 0,
+                    'labels_removed' : 0,
+                    'indexes_added' : 0,
+                    'indexes_removed' : 0,
+                    'constraints_added' : 0,
+                    'constraints_removed' : 0,
+                    'contains_system_updates' : false,
+                    'system_updates' : 0
+                }
+            } ],
+            'errors' : [ ]
+        }
+        ");
+        const string queryText = @"MATCH (n) RETURN id(n)";
+
+            var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j", includeQueryStats:true);
+            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery) };
+
+            using (var testHarness = new RestTestHarness
+            {
+                {MockRequest.PostObjectAsJson("/transaction/commit", transactionApiQuery), response}
+            })
+            {
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
+                QueryStats stats = null;
+                graphClient.OperationCompleted += (o, e) =>
+                {
+                    stats = e.QueryStats;
+                };
+                await graphClient.ExecuteCypherAsync(cypherQuery);
+
+                stats.Should().NotBeNull();
+                stats.NodesCreated.Should().Be(1);
+            }
+        }
+
         /// <summary>
         ///     When executing cypher queries when no parameters are needed, the REST interface doesn't care if we don't send parameters.
         /// </summary>

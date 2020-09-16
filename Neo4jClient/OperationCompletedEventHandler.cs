@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using Neo4j.Driver;
-using Neo4jClient.ApiModels;
+using Neo4jClient.ApiModels.Cypher;
 
 namespace Neo4jClient
 {
@@ -19,11 +19,11 @@ namespace Neo4jClient
         public Exception Exception { get; set; }
         public bool HasException => Exception != null;
         public int? MaxExecutionTime { get; set; }
-        public NameValueCollection CustomHeaders { get; set; } 
+        public NameValueCollection CustomHeaders { get; set; }
         public IEnumerable<Bookmark> BookmarksUsed { get; set; }
         public QueryStats QueryStats { get; set; }
-        
-        /// <summary>This is only set with the <see cref="BoltGraphClient"/>.</summary>
+
+        /// <summary>This is only set with the <see cref="BoltGraphClient" />.</summary>
         public Config ConfigUsed { get; set; }
 
         public override string ToString()

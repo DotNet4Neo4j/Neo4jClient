@@ -78,7 +78,7 @@ namespace Neo4jClient.Cypher
             Client = client as IRawGraphClient ?? throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(client));
             QueryWriter = queryWriter;
             CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
-            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter, isWrite);
+            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter, isWrite, includeQueryStats);
             IsWrite = isWrite;
             IncludeQueryStats = includeQueryStats;
         }
@@ -94,7 +94,7 @@ namespace Neo4jClient.Cypher
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite);
+            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite, IncludeQueryStats);
         }
 
         private ICypherFluentQuery Mutate(Action<QueryWriter> callback)
@@ -108,7 +108,7 @@ namespace Neo4jClient.Cypher
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite);
+            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite, IncludeQueryStats);
         }
 
         public ICypherFluentQuery WithParam(string key, object value)

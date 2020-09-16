@@ -346,8 +346,7 @@ namespace Neo4jClient
                 var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, true);
                 return new CypherPartialResult
                 {
-                    DeserializationContext =
-                        deserializer.CheckForErrorsInTransactionResponse(await response.Content.ReadAsStringAsync().ConfigureAwait(false)),
+                    DeserializationContext = deserializer.CheckForErrorsInTransactionResponse(await response.Content.ReadAsStringAsync().ConfigureAwait(false)),
                     ResponseObject = response
                 };
             }
@@ -374,25 +373,31 @@ namespace Neo4jClient
         {
             var context = ExecutionContext.Begin(this);
             List<TResult> results;
+            QueryStats stats = null;
             try
             {
-                // the transaction handling is handled by a thread-local variable (ThreadStatic) so we need
-                // to know if we are in a transaction right now because our deserializer will run in another thread
                 bool inTransaction = InTransaction;
 
                 var response = await PrepareCypherRequest<TResult>(query, context.Policy).ConfigureAwait(false);
-                var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat,
-                    inTransaction);
+                var deserializer = new CypherJsonDeserializer<TResult>(this, query.ResultMode, query.ResultFormat, inTransaction);
                 if (inTransaction)
                 {
-                    response.DeserializationContext.DeserializationContext.JsonContractResolver =
-                        query.JsonContractResolver;
-                    results =
-                        deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext, true).ToList();
+                    response.DeserializationContext.DeserializationContext.JsonContractResolver = query.JsonContractResolver;
+                    results = deserializer.DeserializeFromTransactionPartialContext(response.DeserializationContext, true).ToList();
+      
                 }
                 else
                 {
+                    
                     results = deserializer.Deserialize(await response.ResponseObject.Content.ReadAsStringAsync().ConfigureAwait(false), true).ToList();
+                    
+                }
+                if (query.IncludeQueryStats)
+                {
+                    var responseString = await response.ResponseObject.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var statsContainer = JsonConvert.DeserializeObject<QueryStatsContainer>(await response.ResponseObject.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    if (statsContainer != null)
+                        stats = statsContainer?.Results?.FirstOrDefault()?.Stats;
                 }
             }
             catch (AggregateException aggregateException)
@@ -405,9 +410,8 @@ namespace Neo4jClient
                 context.Complete(query, e);
                 throw;
             }
-
-            context.Complete(query, results.Count());
-
+            
+            context.Complete(query, results.Count, stats);
             return results;
         }
 
@@ -550,10 +554,10 @@ namespace Neo4jClient
                 Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, 0, null);
             }
 
-            public void Complete(CypherQuery query, int resultsCount)
+            public void Complete(CypherQuery query, int resultsCount, QueryStats stats = null)
             {
                 // only parse the events when there's an event handler
-                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, resultsCount, null, query.CustomHeaders);
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, resultsCount, null, query.CustomHeaders, queryStats:stats);
             }
 
             public void Complete(CypherQuery query, Exception exception)

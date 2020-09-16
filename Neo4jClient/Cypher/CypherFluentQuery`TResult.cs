@@ -9,8 +9,8 @@ namespace Neo4jClient.Cypher
         CypherFluentQuery,
         IOrderedCypherFluentQuery<TResult>
     {
-        public CypherFluentQuery(IGraphClient client, QueryWriter writer, bool isWrite = true)
-            : base(client, writer, isWrite)
+        public CypherFluentQuery(IGraphClient client, QueryWriter writer, bool isWrite = true, bool includeQueryStats = false)
+            : base(client, writer, isWrite, includeQueryStats)
         {}
 
         public new ICypherFluentQuery<TResult> Unwind(string collectionName, string columnName)
