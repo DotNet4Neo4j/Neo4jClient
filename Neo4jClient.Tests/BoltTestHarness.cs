@@ -57,16 +57,6 @@ namespace Neo4jClient.Tests
         {
         }
 
-        //
-        // public static readonly Func<SessionConfigBuilder> SessionConfigBuilderCreator = 
-        //     Expression.Lambda<Func<SessionConfigBuilder>>(Expression.New(typeof(SessionConfigBuilder).GetConstructor(Type.EmptyTypes))).Compile();
-        //
-        // public static SessionConfigBuilder GetConfigBuilder()
-        // {
-        //     SessionConfigBuilder builder = (SessionConfigBuilder) Activator.CreateInstance(typeof(SessionConfigBuilder));
-        //     return builder;
-        // }
-
         public void SetupCypherRequestResponse(string request, IDictionary<string, object> cypherQueryQueryParameters, IResultCursor response)
         {
             MockSession.Setup(s => s.RunAsync(request, It.IsAny<IDictionary<string, object>>())).Returns(Task.FromResult(response));
@@ -78,8 +68,14 @@ namespace Neo4jClient.Tests
 
             MockSession.Setup(s => s.ReadTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task<List<IRecord>>>>()))
                 .Returns<Func<IAsyncTransaction, Task<List<IRecord>>>>(async param => await param(mockTransaction.Object));
-        }
 
+            MockSession
+                .Setup(s => s.BeginTransactionAsync(It.IsAny<Action<TransactionConfigBuilder>>()))
+                .Returns(Task.FromResult(mockTransaction.Object));
+            MockSession
+                .Setup(s => s.BeginTransactionAsync())
+                .Returns(Task.FromResult(mockTransaction.Object));
+        }
         public async Task<IRawGraphClient> CreateAndConnectBoltGraphClient()
         {
             var bgc = new BoltGraphClient(MockDriver.Object);

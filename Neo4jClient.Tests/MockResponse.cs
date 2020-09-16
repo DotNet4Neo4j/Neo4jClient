@@ -78,7 +78,10 @@ namespace Neo4jClient.Tests
 
         public static MockResponse NeoRoot(int v1, int v2, int v3)
         {
-            var version = string.Format("{0}.{1}.{2}", v1, v2, v3);
+            if (v1 >= 4)
+                return NeoRoot40(v1, v2, v3);
+
+            var version = $"{v1}.{v2}.{v3}";
             return Json(HttpStatusCode.OK, string.Format(@"{{
                 'cypher' : 'http://foo/db/data/cypher',
                 'batch' : 'http://foo/db/data/batch',
@@ -90,6 +93,19 @@ namespace Neo4jClient.Tests
                 'transaction': 'http://foo/db/data/transaction',
                 'extensions_info' : 'http://foo/db/data/ext',
                 'extensions' : {{}}
+            }}", version));
+        }
+
+        public static MockResponse NeoRoot40(int v1, int v2, int v3)
+        {
+            var version = $"{v1}.{v2}.{v3}";
+            return Json(HttpStatusCode.OK, string.Format(@"{{
+               'bolt_direct': 'bolt://foo:7687',
+               'bolt_routing': 'neo4j://foo:7687',
+               'cluster': 'http://foo:7474/db/{{databaseName}}/cluster',
+               'transaction': 'http://foo:7474/db/{{databaseName}}/tx',
+               'neo4j_version' : '{0}',
+               'neo4j_edition': 'enterprise'
             }}", version));
         }
 

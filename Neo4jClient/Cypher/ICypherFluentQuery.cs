@@ -32,7 +32,10 @@ namespace Neo4jClient.Cypher
         Task ExecuteWithoutResultsAsync();
 
         ICypherFluentQueryAdvanced Advanced { get; }
-
+        /// <summary>
+        /// When the result is returned, the <see cref="IGraphClient.OperationCompleted"/> event will contain the <see cref="QueryStats"/> if requested.
+        /// </summary>
+        ICypherFluentQuery WithQueryStats { get; }
         ICypherFluentQuery WithParam(string key, object value);
         ICypherFluentQuery WithParams(IDictionary<string,object> parameters);
         ICypherFluentQuery WithParams(object parameters);
@@ -97,7 +100,19 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Yield(string yieldText);
 
         ICypherFluentQuery CreateUnique(string createUniqueText);
+
+        /// <summary>
+        /// Creates a <c>UNIQUE CONSTRAINT</c> in the database.
+        /// </summary>
+        /// <remarks>Executes <c>CREATE CONSTRAINT ON (<paramref name="identity">identity</paramref>) ASSERT <paramref name="property">property</paramref> IS UNIQUE</c></remarks>
+        /// <param name="identity">The identity to use to create the constraint, you must include the Label, example: <c>"u:User"</c></param>
+        /// <param name="property">The property to index, this should use the <paramref name="identity"/> defined, example: <c>"u.id"</c></param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
         ICypherFluentQuery CreateUniqueConstraint(string identity, string property);
+
+
+        //ICypherFluentQuery CreateUniqueConstraint(string nameOfConstraint, string label, string identifier, string property);
+
         ICypherFluentQuery DropUniqueConstraint(string identity, string property);
         ICypherFluentQuery Create(string createText);
         [Obsolete("Use Create(string) with explicitly named params instead. For example, instead of Create(\"(c:Customer {0})\", customer), use Create(\"(c:Customer {customer})\").WithParams(new { customer }).")]

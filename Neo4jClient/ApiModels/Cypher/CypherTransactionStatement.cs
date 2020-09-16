@@ -12,12 +12,13 @@ namespace Neo4jClient.ApiModels.Cypher
     {
         private readonly string[] formatContents; 
 
-        public CypherTransactionStatement(CypherQuery query, bool restFormat)
+        public CypherTransactionStatement(CypherQuery query)
         {
             Statement = query.QueryText;
             Parameters = query.QueryParameters ?? new Dictionary<string, object>();
-            // formatContents = restFormat ? new[] {"REST"} : new string[] {}; //TODO: What is this for?!?!
             formatContents = new string[] {};
+            if (query.IncludeQueryStats)
+                IncludeStats = query.IncludeQueryStats;
         }
 
         [JsonProperty("statement")]
@@ -28,5 +29,8 @@ namespace Neo4jClient.ApiModels.Cypher
 
         [JsonProperty("parameters")]
         public IDictionary<string, object> Parameters { get; }
+
+        [JsonProperty("includeStats", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? IncludeStats { get; }
     }
 }

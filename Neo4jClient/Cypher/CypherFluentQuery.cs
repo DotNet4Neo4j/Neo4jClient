@@ -20,6 +20,7 @@ namespace Neo4jClient.Cypher
         internal readonly IRawGraphClient Client;
         protected readonly QueryWriter QueryWriter;
         protected readonly bool CamelCaseProperties;
+        protected bool IncludeQueryStats { get; private set; }
         internal bool IsWrite { get; private set; }
 
         public string Database
@@ -48,6 +49,15 @@ namespace Neo4jClient.Cypher
             }
         }
 
+        public ICypherFluentQuery WithQueryStats
+        {
+            get
+            {
+                IncludeQueryStats = true;
+                return this;
+            }
+        }
+
         public ICypherFluentQuery Write
         {
             get
@@ -57,47 +67,48 @@ namespace Neo4jClient.Cypher
             }
         }
 
-        public CypherFluentQuery(IGraphClient client, bool isWrite = true)
-            : this(client, new QueryWriter(client.DefaultDatabase), isWrite)
+        public CypherFluentQuery(IGraphClient client, bool isWrite = true, bool includeQueryStats = false)
+            : this(client, new QueryWriter(client.DefaultDatabase), isWrite, includeQueryStats)
         {
             IsWrite = isWrite;
         }
 
-        internal CypherFluentQuery(IGraphClient client, QueryWriter queryWriter, bool isWrite = true)
+        internal CypherFluentQuery(IGraphClient client, QueryWriter queryWriter, bool isWrite = true, bool includeQueryStats = false)
         {
             Client = client as IRawGraphClient ?? throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(client));
             QueryWriter = queryWriter;
             CamelCaseProperties = Client.JsonContractResolver is CamelCasePropertyNamesContractResolver;
-            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter, isWrite);
+            Advanced = new CypherFluentQueryAdvanced(Client, QueryWriter, isWrite, includeQueryStats);
             IsWrite = isWrite;
+            IncludeQueryStats = includeQueryStats;
         }
 
-        IOrderedCypherFluentQuery MutateOrdered(Action<QueryWriter> callback)
+        private IOrderedCypherFluentQuery MutateOrdered(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery(Client, newWriter, IsWrite);
+            return new CypherFluentQuery(Client, newWriter, IsWrite, IncludeQueryStats);
         }
 
         protected IOrderedCypherFluentQuery<TResult> MutateOrdered<TResult>(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite);
+            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite, IncludeQueryStats);
         }
 
-        ICypherFluentQuery Mutate(Action<QueryWriter> callback)
+        private ICypherFluentQuery Mutate(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery(Client, newWriter, IsWrite);
+            return new CypherFluentQuery(Client, newWriter, IsWrite, IncludeQueryStats);
         }
 
         protected ICypherFluentQuery<TResult> Mutate<TResult>(Action<QueryWriter> callback)
         {
             var newWriter = QueryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite);
+            return new CypherFluentQuery<TResult>(Client, newWriter, IsWrite, IncludeQueryStats);
         }
 
         public ICypherFluentQuery WithParam(string key, object value)
@@ -468,7 +479,7 @@ namespace Neo4jClient.Cypher
                 w.AppendToClause($", {string.Join(" DESC, ", properties)} DESC"));
         }
 
-        public CypherQuery Query => QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver, IsWrite);
+        public CypherQuery Query => QueryWriter.ToCypherQuery(Client.JsonContractResolver ?? GraphClient.DefaultJsonContractResolver, IsWrite, IncludeQueryStats);
 
         public Task ExecuteWithoutResultsAsync()
         {
@@ -476,6 +487,7 @@ namespace Neo4jClient.Cypher
         }
 
         public ICypherFluentQueryAdvanced Advanced { get; }
+        
 
         IGraphClient IAttachedReference.Client => Client;
 

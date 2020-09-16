@@ -22,7 +22,7 @@ namespace Neo4jClient.ApiModels.Cypher
         public CypherStatementList(IEnumerable<CypherQuery> queries)
         {
             _statements = queries
-                .Select(query => new CypherTransactionStatement(query, query.ResultFormat == CypherResultFormat.Rest))
+                .Select(query => new CypherTransactionStatement(query))
                 .ToList();
         }
 

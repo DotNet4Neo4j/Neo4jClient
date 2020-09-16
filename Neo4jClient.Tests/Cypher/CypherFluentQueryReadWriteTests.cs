@@ -1,4 +1,6 @@
-﻿using Neo4jClient.Cypher;
+﻿using System;
+using FluentAssertions;
+using Neo4jClient.Cypher;
 using NSubstitute;
 using Xunit;
 

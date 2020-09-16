@@ -7,12 +7,14 @@ namespace Neo4jClient.Cypher
         private readonly IGraphClient client;
         private readonly QueryWriter queryWriter;
         private readonly bool isWrite;
+        private readonly bool includeQueryStats;
 
-        public CypherFluentQueryAdvanced(IGraphClient client, QueryWriter queryWriter, bool isWrite = true) 
+        public CypherFluentQueryAdvanced(IGraphClient client, QueryWriter queryWriter, bool isWrite, bool includeQueryStats) 
         {
             this.client = client;
             this.queryWriter = queryWriter;
             this.isWrite = isWrite;
+            this.includeQueryStats = includeQueryStats;
         }
 
         public ICypherFluentQuery<TResult> Return<TResult>(ReturnExpression returnExpression)
@@ -21,7 +23,7 @@ namespace Neo4jClient.Cypher
             {
                 w.ResultMode = returnExpression.ResultMode;
                 w.ResultFormat = returnExpression.ResultFormat;
-                w.AppendClause("RETURN " + returnExpression.Text);
+                w.AppendClause($"RETURN {returnExpression.Text}");
             });
         }
 
@@ -31,7 +33,7 @@ namespace Neo4jClient.Cypher
             {
                 w.ResultMode = returnExpression.ResultMode;
                 w.ResultFormat = returnExpression.ResultFormat;
-                w.AppendClause("RETURN distinct " + returnExpression.Text);
+                w.AppendClause($"RETURN distinct {returnExpression.Text}");
             });
         }
 
@@ -40,7 +42,7 @@ namespace Neo4jClient.Cypher
             if (!(client is IRawGraphClient))
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(graphClient));
 
-            return new CypherFluentQuery<TResult>(graphClient, queryWriter, isWrite);
+            return new CypherFluentQuery<TResult>(graphClient, queryWriter, isWrite, includeQueryStats);
         }
 
         public ICypherFluentQuery SetClient(IGraphClient graphClient)
@@ -48,14 +50,14 @@ namespace Neo4jClient.Cypher
             if (!(client is IRawGraphClient))
                 throw new ArgumentException("The supplied graph client also needs to implement IRawGraphClient", nameof(graphClient));
             
-            return new CypherFluentQuery(graphClient, queryWriter, isWrite);
+            return new CypherFluentQuery(graphClient, queryWriter, isWrite, includeQueryStats);
         }
 
         protected ICypherFluentQuery<TResult> Mutate<TResult>(Action<QueryWriter> callback)
         {
             var newWriter = queryWriter.Clone();
             callback(newWriter);
-            return new CypherFluentQuery<TResult>(client, newWriter, isWrite);
+            return new CypherFluentQuery<TResult>(client, newWriter, isWrite, includeQueryStats);
         }
     }
 }

@@ -6,33 +6,40 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using FluentAssertions;
+using Neo4j.Driver;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
 using NSubstitute;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Neo4jClient.Tests.GraphClientTests.Cypher
 {
-    
     public class ExecuteCypherTests : IClassFixture<CultureInfoSetupFixture>
     {
+        internal static MockResponse EmptyErrorResponse = MockResponse.Json(200,
+            @"{'results':[], 'errors':[{
+                'code': 'Error 1',
+                'message': 'Unable to do Cypher'
+               }] }");
+
         /// <summary>
-        ///     When executing cypher queries when no parameters are needed, the REST interface doesn't care if we don't send parameters.
+        ///     When executing cypher queries when no parameters are needed, the REST interface doesn't care if we don't send
+        ///     parameters.
         /// </summary>
         [Fact]
         public async Task SendingNullParametersShouldNotRaiseExceptionWhenExecutingCypher()
         {
             const string queryText = @"MATCH (d) RETURN d";
-            
+
             var cypherQuery = new CypherQuery(queryText, null, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction/commit", transactionApiQuery),
-                    MockResponse.Http((int)HttpStatusCode.OK)
+                    MockResponse.Http((int) HttpStatusCode.OK)
                 }
             })
             {
@@ -55,13 +62,13 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             };
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction/commit", transactionApiQuery),
-                    MockResponse.Http((int)HttpStatusCode.OK)
+                    MockResponse.Http((int) HttpStatusCode.OK)
                 }
             })
             {
@@ -80,19 +87,19 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             var parameters = new Dictionary<string, object>();
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
                 {
                     MockRequest.PostObjectAsJson("/transaction/commit", transactionApiQuery),
-                    MockResponse.Http((int)HttpStatusCode.OK)
+                    MockResponse.Http((int) HttpStatusCode.OK)
                 }
             })
             {
                 var graphClient = await testHarness.CreateAndConnectGraphClient();
 
-                bool raisedEvent = false;
+                var raisedEvent = false;
 
                 graphClient.OperationCompleted += (sender, e) => { raisedEvent = true; };
 
@@ -104,10 +111,34 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             }
         }
 
-      
+        [Fact]
+        public async Task ThrowsClientException_WhenGettingErrorResponse()
+        {
+            const string queryText = @"return 1";
+            var parameters = new Dictionary<string, object>();
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
+
+            using (var testHarness = new RestTestHarness
+            {
+                {
+                    MockRequest.PostObjectAsJson("/transaction/commit", transactionApiQuery),
+                    EmptyErrorResponse
+                }
+            })
+            {
+                var graphClient = await testHarness.CreateAndConnectGraphClient();
+
+                //Act
+                var ex = await Assert.ThrowsAsync<ClientException>(async () => await graphClient.ExecuteCypherAsync(cypherQuery));
+                ex.Code.Should().Be("Error 1");
+                ex.Message.Should().Be("Unable to do Cypher");
+            }
+        }
 
         /// <summary>
-        /// #106
+        ///     #106
         /// </summary>
         [Fact]
         public async Task WhenExecuteGetCypherResultsFails_ShouldRaiseCompletedWithException()
@@ -117,7 +148,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             var parameters = new Dictionary<string, object>();
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
@@ -134,11 +165,8 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 graphClient.OperationCompleted += (sender, e) => { eventArgs = e; };
 
                 //Act
-                await Assert.ThrowsAsync<MockResponseThrowsException>(async () =>
-                {
-                    await graphClient.ExecuteGetCypherResultsAsync<ExecuteGetCypherResultsTests.SimpleResultDto>(cypherQuery);
-                });
-                
+                await Assert.ThrowsAsync<MockResponseThrowsException>(async () => { await graphClient.ExecuteGetCypherResultsAsync<ExecuteGetCypherResultsTests.SimpleResultDto>(cypherQuery); });
+
                 Assert.NotNull(eventArgs);
                 Assert.True(eventArgs.HasException);
                 Assert.Equal(typeof(MockResponseThrowsException), eventArgs.Exception.GetType());
@@ -147,7 +175,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         /// <summary>
-        /// #106
+        ///     #106
         /// </summary>
         [Fact]
         public async Task WhenExecuteCypherFails_ShouldRaiseCompletedWithException()
@@ -157,7 +185,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             var parameters = new Dictionary<string, object>();
 
             var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, "neo4j");
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
@@ -184,7 +212,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
         }
 
         /// <summary>
-        /// #75
+        ///     #75
         /// </summary>
         [Fact]
         public async Task SendsCommandWithCorrectTimeout()
@@ -193,7 +221,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const int expectedMaxExecutionTime = 100;
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, "neo4j", maxExecutionTime: expectedMaxExecutionTime);
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
@@ -212,17 +240,17 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
+                await ((IRawGraphClient) graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
-                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var requestMessage = (HttpRequestMessage) call.GetArguments()[0];
                 var maxExecutionTimeHeader = requestMessage.Headers.Single(h => h.Key == "max-execution-time");
                 Assert.Equal(expectedMaxExecutionTime.ToString(CultureInfo.InvariantCulture), maxExecutionTimeHeader.Value.Single());
             }
         }
 
         /// <summary>
-        /// #75
+        ///     #75
         /// </summary>
         [Fact]
         public async Task DoesntSetMaxExecutionTime_WhenNotSet()
@@ -230,7 +258,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = "MATCH n SET n.Value = 'value'";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, "neo4j");
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
@@ -249,16 +277,16 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
+                await ((IRawGraphClient) graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
-                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var requestMessage = (HttpRequestMessage) call.GetArguments()[0];
                 Assert.False(requestMessage.Headers.Any(h => h.Key == "max-execution-time"));
             }
         }
 
         /// <summary>
-        /// #141
+        ///     #141
         /// </summary>
         [Fact]
         public async Task SendsCommandWithCustomHeaders()
@@ -271,7 +299,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             customHeaders.Add(headerName, headerValue);
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment, "neo4j", maxExecutionTime: expectedMaxExecutionTime, customHeaders: customHeaders);
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
             {
@@ -290,10 +318,10 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
+                await ((IRawGraphClient) graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
-                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var requestMessage = (HttpRequestMessage) call.GetArguments()[0];
                 var maxExecutionTimeHeader = requestMessage.Headers.Single(h => h.Key == "max-execution-time");
                 Assert.Equal(expectedMaxExecutionTime.ToString(CultureInfo.InvariantCulture), maxExecutionTimeHeader.Value.Single());
                 var customHeader = requestMessage.Headers.Single(h => h.Key == headerName);
@@ -304,7 +332,7 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
 
 
         /// <summary>
-        /// #141
+        ///     #141
         /// </summary>
         [Fact]
         public async Task DoesntSetHeaders_WhenNotSet()
@@ -312,8 +340,8 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
             const string queryText = "MATCH n SET n.Value = 'value'";
 
             var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Set, "neo4j");
-            
-            var transactionApiQuery = new CypherStatementList { new CypherTransactionStatement(cypherQuery, cypherQuery.ResultFormat == CypherResultFormat.Rest) };
+
+            var transactionApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
 
             using (var testHarness = new RestTestHarness
@@ -333,14 +361,12 @@ namespace Neo4jClient.Tests.GraphClientTests.Cypher
                 await graphClient.ConnectAsync();
 
                 httpClient.ClearReceivedCalls();
-                await ((IRawGraphClient)graphClient).ExecuteCypherAsync(cypherQuery);
+                await ((IRawGraphClient) graphClient).ExecuteCypherAsync(cypherQuery);
 
                 var call = httpClient.ReceivedCalls().Single();
-                var requestMessage = (HttpRequestMessage)call.GetArguments()[0];
+                var requestMessage = (HttpRequestMessage) call.GetArguments()[0];
                 Assert.False(requestMessage.Headers.Any(h => h.Key == "max-execution-time"));
             }
         }
-
-
     }
 }

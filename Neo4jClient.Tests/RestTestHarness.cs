@@ -29,16 +29,23 @@ namespace Neo4jClient.Tests
         readonly List<MockRequest> requestsThatShouldNotBeProcessed = new List<MockRequest>();
         readonly IList<MockRequest> processedRequests = new List<MockRequest>();
         readonly IList<string> unservicedRequests = new List<string>();
-        public readonly string BaseUri = "http://foo/db/data";
+        public string BaseUri { get; }
         private readonly bool assertConstraintsAreMet;
 
-        public RestTestHarness() : this(true)
+        public RestTestHarness() 
+            : this(true)
         {
         }
 
-        public RestTestHarness(bool assertConstraintsAreMet)
+        public RestTestHarness(bool assertConstraintsAreMet) 
+            : this(assertConstraintsAreMet, "http://foo/db/data")
+        {
+        }
+
+        public RestTestHarness(bool assertConstraintsAreMet, string baseUri)
         {
             this.assertConstraintsAreMet = assertConstraintsAreMet;
+            BaseUri = baseUri;
         }
 
         public void Add(MockRequest request, MockResponse response)
@@ -95,9 +102,9 @@ namespace Neo4jClient.Tests
             return graphClient;
         }
 
-        public async Task<ITransactionalGraphClient> CreateAndConnectTransactionalGraphClient()
+        public async Task<ITransactionalGraphClient> CreateAndConnectTransactionalGraphClient(Neo4jVersion version = Neo4jVersion.Neo20)
         {
-            var graphClient = CreateGraphClient(Neo4jVersion.Neo20);
+            var graphClient = CreateGraphClient(version);
             await graphClient.ConnectAsync();
             return graphClient;
         }
@@ -178,7 +185,7 @@ namespace Neo4jClient.Tests
 
             if (!results.Any())
             {
-                var message = string.Format("No corresponding request-response pair was defined in the test harness for: {0} {1}", request.Method, requestUri.AbsoluteUri);
+                var message = $"No corresponding request-response pair was defined in the test harness for: {request.Method} {requestUri.AbsoluteUri}";
                 if (!string.IsNullOrEmpty(requestBody))
                 {
                     message += "\r\n\r\n" + requestBody;
@@ -187,11 +194,9 @@ namespace Neo4jClient.Tests
                 throw new InvalidOperationException(message);
             }
 
-            var result = results.Single();
+            var (key, response) = results.Single();
 
-            processedRequests.Add(result.Key);
-
-            var response = result.Value;
+            processedRequests.Add(key);
 
             var httpResponse = new HttpResponseMessage
             {

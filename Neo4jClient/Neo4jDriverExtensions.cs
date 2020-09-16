@@ -100,7 +100,7 @@ namespace Neo4jClient
         private static object SerializeObject(Type type, object value, IList<JsonConverter> converters, IGraphClient gc)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute))))
+                .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute)) || pi.IsDefined(typeof(Neo4jIgnoreAttribute))))
                 .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc, pi.CustomAttributes));
         }
         
