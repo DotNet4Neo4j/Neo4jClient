@@ -58,7 +58,7 @@ namespace Neo4jClient.Execution
                 .Serializer
                 .Serialize(new CypherStatementList
                 {
-                    new CypherTransactionStatement(query, query.ResultFormat == CypherResultFormat.Rest)
+                    new CypherTransactionStatement(query)
                 });
         }
 

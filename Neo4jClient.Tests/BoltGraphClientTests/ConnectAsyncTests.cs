@@ -64,7 +64,10 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
 
         public Task<IResultSummary> ConsumeAsync()
         {
-            throw new NotImplementedException();
+            var countersMock = new Mock<ICounters>(MockBehavior.Loose);
+            var mock = new Mock<IResultSummary>();
+            mock.Setup(x => x.Counters).Returns(countersMock.Object);
+            return Task.FromResult(mock.Object);
         }
 
         public Task<bool> FetchAsync()
@@ -80,6 +83,8 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public IReadOnlyList<string> Keys { get; }
         public IRecord Current => records[pos];
     }
+
+    
 
     public class ConnectAsyncTests : IClassFixture<CultureInfoSetupFixture>
     {

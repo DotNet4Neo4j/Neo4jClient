@@ -68,7 +68,7 @@ namespace Neo4jClient.Transactions
 
         public async Task CommitAsync()
         {
-            await PreventAddingAndWait().ConfigureAwait(false);
+            // await PreventAddingAndWait().ConfigureAwait(false);
             
             if (CustomHeaders != null)
             {
@@ -78,17 +78,17 @@ namespace Neo4jClient.Transactions
             await Transaction.CommitAsync().ConfigureAwait(false);
         }
 
-        private async Task PreventAddingAndWait()
-        {
-            var cancelled = new TaskCompletionSource<BoltResponse>();
-            cancelled.SetCanceled();
-            var task = Interlocked.Exchange(ref previousTask, cancelled.Task); // cancel any newly created tasks
-            if (task != null) await task.ConfigureAwait(false);
-        }
+        // private async Task PreventAddingAndWait()
+        // {
+        //     var cancelled = new TaskCompletionSource<BoltResponse>();
+        //     cancelled.SetCanceled();
+        //     var task = Interlocked.Exchange(ref previousTask, cancelled.Task); // cancel any newly created tasks
+        //     if (task != null) await task.ConfigureAwait(false);
+        // }
 
         public async Task RollbackAsync()
         {
-            await PreventAddingAndWait().ConfigureAwait(false);
+            //await PreventAddingAndWait().ConfigureAwait(false);
             await Transaction.RollbackAsync().ConfigureAwait(false);
         }
 

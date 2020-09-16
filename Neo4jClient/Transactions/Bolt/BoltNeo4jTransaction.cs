@@ -45,7 +45,8 @@ namespace Neo4jClient.Transactions.Bolt
             if (!isDisposing)
                 return;
             
-            RollbackAsync().Wait();
+            if(IsOpen)
+                RollbackAsync().Wait();
         }
 
         /// <inheritdoc />
@@ -64,17 +65,27 @@ namespace Neo4jClient.Transactions.Bolt
         /// <inheritdoc />
         public async Task CommitAsync()
         {
-            if (IsOpen && DriverTransaction != null)
+            CheckOpenStatus();
+
+            if (DriverTransaction != null)
                 await DriverTransaction.CommitAsync();
 
 
             IsOpen = false;
         }
 
+        private void CheckOpenStatus()
+        {
+            if(!IsOpen)
+                throw new ClosedTransactionException(null);
+        }
+
         /// <inheritdoc />
         public async Task RollbackAsync()
         {
-            if (IsOpen && DriverTransaction != null)
+            CheckOpenStatus();
+
+            if (DriverTransaction != null)
                 await DriverTransaction.RollbackAsync();
 
             IsOpen = false;

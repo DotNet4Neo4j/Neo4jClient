@@ -42,7 +42,8 @@ namespace Neo4jClient.Cypher
             NameValueCollection customHeaders = null,
             bool isWrite = true,
             IEnumerable<Bookmark> bookmarks = null,
-            string identifier = null
+            string identifier = null,
+            bool includeQueryStats = false
             )
         {
             this.queryText = queryText;
@@ -53,12 +54,14 @@ namespace Neo4jClient.Cypher
             this.MaxExecutionTime = maxExecutionTime;
             this.CustomHeaders = customHeaders;
             IsWrite = isWrite;
+            IncludeQueryStats = includeQueryStats;
             Bookmarks = bookmarks;
             Identifier = identifier;
             Database = database;
         }
 
         public bool IsWrite { get; }
+        public bool IncludeQueryStats { get; }
 
         public string Identifier { get; set; }
 
