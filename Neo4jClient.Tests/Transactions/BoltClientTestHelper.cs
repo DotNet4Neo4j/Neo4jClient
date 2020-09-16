@@ -68,43 +68,5 @@ namespace Neo4jClient.Tests.Transactions
             session.ClearReceivedCalls();
             graphClient = client;
         }
-
-
-        public static void GetDriverAndSessionUseRealDriverForSession(IDriver realDriver, out IDriver driver, out IAsyncSession session, out IAsyncTransaction transaction)
-        {
-            var mockNode = Substitute.For<INode>();
-            mockNode["Name"].Returns("Value");
-            mockNode.Labels.Returns(new List<string> { "Node" });
-            mockNode.Properties.Returns(new Dictionary<string, object> { { "Name", "Value" } });
-
-            var mockRecord = Substitute.For<IRecord>();
-            mockRecord.Keys.Returns(new List<string> { "Node" });
-            mockRecord["Node"].Returns(mockNode);
-            mockRecord.Values["Node"].Returns(mockNode);
-
-            var mockStatementResult = new TestStatementResult(new List<IRecord>(new[] { mockRecord }));
-
-            var mockTransaction = Substitute.For<IAsyncTransaction>();
-            mockTransaction.RunAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(mockStatementResult);
-
-            var task = Task.FromResult(mockTransaction);
-            task.Result.Should().NotBe(null);
-
-            var mockSession = Substitute.For<IAsyncSession>();
-            var dbmsReturn = GetDbmsComponentsResponse();
-            mockSession.RunAsync("CALL dbms.components()").Returns(dbmsReturn);
-            mockSession.BeginTransactionAsync().Returns(Task.FromResult(mockTransaction));
-            mockSession.BeginTransactionAsync(Arg.Any<Action<TransactionConfigBuilder>>()).Returns(Task.FromResult(mockTransaction));
-
-            var mockDriver = Substitute.For<IDriver>();
-            mockDriver.AsyncSession().Returns(mockSession);
-            mockDriver.AsyncSession(Arg.Any<Action<SessionConfigBuilder>>()).Returns(x => realDriver.AsyncSession(x.Arg<Action<SessionConfigBuilder>>()));
-
-
-            driver = mockDriver;
-            session = mockSession;
-            transaction = mockTransaction;
-        }
-
     }
 }
