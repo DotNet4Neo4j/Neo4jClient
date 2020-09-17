@@ -893,7 +893,8 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Match("n")
-                .Create("n-[r:REL]->(a {0})-[r:REL]->(b {1})", data1, data2)
+                .Create("n-[r:REL]->(a $p0)-[r:REL]->(b $p1)")
+                .WithParams(new {p0=data1, p1=data2 })
                 .Return<CreateNodeTests.TestNode>("a")
                 .Query;
             Assert.Equal("MATCH n" + Environment.NewLine + "CREATE n-[r:REL]->(a $p0)-[r:REL]->(b $p1)" + Environment.NewLine + "RETURN a", query.QueryText);

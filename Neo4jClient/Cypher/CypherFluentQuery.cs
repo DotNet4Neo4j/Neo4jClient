@@ -220,33 +220,6 @@ namespace Neo4jClient.Cypher
             return Mutate(w => w.AppendClause($"CREATE {createText}"));
         }
 
-        [Obsolete("Use Create(string) with explicitly named params instead. For example, instead of Create(\"(c:Customer {0})\", customer), use Create(\"(c:Customer {customer})\").WithParams(new { customer }).")]
-        public ICypherFluentQuery Create(string createText, params object[] objects)
-        {
-            objects
-                .ToList()
-                .ForEach(o =>
-                {
-                    if (o == null)
-                        throw new ArgumentException("Array includes a null entry", nameof(objects));
-
-                    var objectType = o.GetType();
-                    if (objectType.GetTypeInfo().IsGenericType &&
-                        objectType.GetGenericTypeDefinition() == typeof(Node<>))
-                    {
-                        throw new ArgumentException(string.Format(
-                            "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
-                            objectType.GetGenericArguments()[0].Name),
-                            nameof(objects));
-                    }
-
-                    var validationContext = new ValidationContext(o, null, null);
-                    Validator.ValidateObject(o, validationContext);
-                });
-
-            return Mutate(w => w.AppendClause("CREATE " + createText, objects));
-        }
-
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)
             where TNode : class
         {
