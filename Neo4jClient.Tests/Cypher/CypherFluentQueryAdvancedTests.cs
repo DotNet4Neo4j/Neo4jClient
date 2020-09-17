@@ -25,14 +25,14 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var results = cypher
-                .Start("a", (NodeReference) 1)
+                .Match("a")
                 .Advanced.Return<ReturnPropertyQueryResult>(new ReturnExpression
                 {
                     ResultFormat = CypherResultFormat.DependsOnEnvironment,
                     ResultMode = CypherResultMode.Projection,
                     Text = "a.Age AS SomethingTotallyDifferent"
                 });
-            Assert.Equal($"START a=node(1){Environment.NewLine}RETURN a.Age AS SomethingTotallyDifferent", results.Query.DebugQueryText);
+            Assert.Equal($"MATCH a{Environment.NewLine}RETURN a.Age AS SomethingTotallyDifferent", results.Query.DebugQueryText);
             Assert.IsAssignableFrom<IEnumerable<ReturnPropertyQueryResult>>(await results.ResultsAsync);
         }
 

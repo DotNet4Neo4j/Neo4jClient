@@ -12,19 +12,18 @@ namespace Neo4jClient.Tests.Cypher
         public void MatchRelatedNodes()
         {
             // http://docs.neo4j.org/chunked/1.6/query-match.html#match-related-nodes
-            // START n=node(3)
+            // MATCH n
             // MATCH (n)--(x)
             // RETURN x
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Match("(n)--(x)")
                 .Return<object>("x")
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "MATCH (n)--(x)" + Environment.NewLine + "RETURN x", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "MATCH (n)--(x)" + Environment.NewLine + "RETURN x", query.QueryText);
         }
 
         [Fact]

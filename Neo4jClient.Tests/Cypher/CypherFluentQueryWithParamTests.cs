@@ -15,14 +15,13 @@ namespace Neo4jClient.Tests.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .WithParam("foo", 123)
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)", query.QueryText);
-            Assert.Equal(2, query.QueryParameters.Count);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n", query.QueryText);
+            Assert.Equal(1, query.QueryParameters.Count);
             Assert.Equal(123, query.QueryParameters["foo"]);
         }
 
@@ -36,14 +35,13 @@ namespace Neo4jClient.Tests.Cypher
             // Act
             const string bar = "string value";
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .WithParams(new {foo = 123, bar})
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)", query.QueryText);
-            Assert.Equal(3, query.QueryParameters.Count);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n", query.QueryText);
+            Assert.Equal(2, query.QueryParameters.Count);
             Assert.Equal(123, query.QueryParameters["foo"]);
             Assert.Equal("string value", query.QueryParameters["bar"]);
         }
@@ -54,7 +52,7 @@ namespace Neo4jClient.Tests.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .WithParam("foo", 123);
 
             // Assert
@@ -71,7 +69,8 @@ namespace Neo4jClient.Tests.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3);
+                .Match("n")
+                .Where((FooWithJsonProperties n) => n.Bar == "test");
 
             // Assert
             var ex = Assert.Throws<ArgumentException>(
@@ -98,20 +97,20 @@ namespace Neo4jClient.Tests.Cypher
             
             // Act
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 3)
+                .Match("n")
                 .CreateUnique($"n-[:X]-(leaf {param})")
                 .WithParam("obj", CreateComplexObjForWithParamTest())
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node(3)" +
+            Assert.Equal("MATCH n" +
                             Environment.NewLine + "CREATE UNIQUE n-[:X]-(leaf {" +
                             Environment.NewLine + "  \"Id\": 123," +
                             Environment.NewLine + "  \"Name\": \"Bar\"," +
                             Environment.NewLine + "  \"Currency\": 12.143," +
                             Environment.NewLine + "  \"CamelCaseProperty\": \"Foo\"" +
                             Environment.NewLine + "})", query.DebugQueryText);
-            Assert.Equal(2, query.QueryParameters.Count);
+            Assert.Equal(1, query.QueryParameters.Count);
         }
 
         private ComplexObjForWithParamTest CreateComplexObjForWithParamTest()
@@ -135,20 +134,20 @@ namespace Neo4jClient.Tests.Cypher
 
             // Act
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .CreateUnique($"n-[:X]-(leaf {param})")
                 .WithParam("obj", CreateComplexObjForWithParamTest())
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node(3)" +
+            Assert.Equal("MATCH n" +
                             Environment.NewLine + "CREATE UNIQUE n-[:X]-(leaf {" +
                             Environment.NewLine + "  \"id\": 123," +
                             Environment.NewLine + "  \"name\": \"Bar\"," +
                             Environment.NewLine + "  \"currency\": 12.143," +
                             Environment.NewLine + "  \"camelCaseProperty\": \"Foo\"" +
                             Environment.NewLine + "})", query.DebugQueryText);
-            Assert.Equal(2, query.QueryParameters.Count);
+            Assert.Equal(1, query.QueryParameters.Count);
         }
     }
 }

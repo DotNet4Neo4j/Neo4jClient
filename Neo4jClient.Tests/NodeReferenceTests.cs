@@ -112,15 +112,5 @@ namespace Neo4jClient.Tests
             Assert.Equal("You're trying to initialize NodeReference<Node<System.TimeZone>> which is too many levels of nesting. You should just be using NodeReference<System.TimeZone> instead. (You use a Node, or a NodeReference, but not both together.)", ex.Message);
 // ReSharper restore ObjectCreationAsStatement
         }
-
-        [Fact]
-        public void CypherShouldStartQueryFromCurrentNodeReference()
-        {
-            var graphClient = Substitute.For<IRawGraphClient>();
-            var reference = new NodeReference(123, graphClient);
-            var query = reference.StartCypher("foo").Query;
-            Assert.Equal("START foo=node($p0)", query.QueryText);
-            Assert.Equal(123L, query.QueryParameters["p0"]);
-        }
     }
 }
