@@ -150,19 +150,6 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
-        //[Description("http://docs.neo4j.org/chunked/2.0.0-M01/query-start.html#start-all-nodes")]
-        public void AllNodes()
-        {
-            var cypher = ToCypher(new
-            {
-                n = All.Nodes
-            });
-
-            Assert.Equal("n=node(*)", cypher.QueryText);
-            Assert.Equal(0, cypher.QueryParameters.Count);
-        }
-
-        [Fact]
         public void CustomString()
         {
             var cypher = ToCypher(new
@@ -246,7 +233,7 @@ namespace Neo4jClient.Tests.Cypher
                 moreRels = new[] { relRef, relRef2 },
                 r2 = Relationship.ByIndexLookup("indexName", "property", "value"),
                 r3 = Relationship.ByIndexQuery("indexName", "query"),
-                all = All.Nodes
+                
             });
 
             const string expected =
@@ -257,10 +244,9 @@ namespace Neo4jClient.Tests.Cypher
                 "r1=relationship($p3), " +
                 "moreRels=relationship($p4), " +
                 "r2=relationship:`indexName`(property = $p5), " +
-                "r3=relationship:`indexName`($p6), " +
-                "all=node(*)";
+                "r3=relationship:`indexName`($p6)";
 
-            Assert.Equal(expected, cypher.QueryText);
+                Assert.Equal(expected, cypher.QueryText);
             Assert.Equal(7, cypher.QueryParameters.Count);
             Assert.Equal(2L, cypher.QueryParameters["p0"]);
             Assert.Equal("value", cypher.QueryParameters["p1"]);

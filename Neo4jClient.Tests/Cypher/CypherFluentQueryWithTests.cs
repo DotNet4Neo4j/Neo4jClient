@@ -15,12 +15,11 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .With("foo")
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "WITH foo", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "WITH foo", query.QueryText);
         }
 
         [Fact]

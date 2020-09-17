@@ -28,19 +28,18 @@ namespace Neo4jClient.Tests.Cypher
         public void DeleteProperty()
         {
             // http://docs.neo4j.org/chunked/1.8.M06/query-delete.html#delete-remove-a-property
-            //START andres = node(3)
+            //MATCH andres = node(3)
             //DELETE andres.age
             //RETURN andres
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("andres", (NodeReference)3)
+                .Match("andres")
                 .Delete("andres.age")
                 .Return<Node<Object>>("andres")
                 .Query;
 
-            Assert.Equal("START andres=node($p0)" + Environment.NewLine + "DELETE andres.age" + Environment.NewLine + "RETURN andres", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH andres" + Environment.NewLine + "DELETE andres.age" + Environment.NewLine + "RETURN andres", query.QueryText);
         }
 
         [Fact]
@@ -48,12 +47,11 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Delete("n")
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "DELETE n", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "DELETE n", query.QueryText);
         }
 
         [Fact]
@@ -68,14 +66,13 @@ namespace Neo4jClient.Tests.Cypher
 
             // Act
             await new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Delete("n")
                 .ExecuteWithoutResultsAsync();
 
             // Assert
             Assert.NotNull(executedQuery);
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
-            Assert.Equal(3L, executedQuery.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
         }
 
         [Fact]
@@ -83,14 +80,13 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Where("(...)")
                 .Delete("n")
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "WHERE (...)" + Environment.NewLine + "DELETE n", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "WHERE (...)" + Environment.NewLine + "DELETE n", query.QueryText);
         }
     }
 }

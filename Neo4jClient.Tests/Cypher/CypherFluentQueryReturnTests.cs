@@ -28,12 +28,11 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .ReturnDistinct<object>("n")
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN distinct n", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN distinct n", query.QueryText);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
@@ -42,14 +41,13 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .ReturnDistinct<object>("n")
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "LIMIT $p1", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
-            Assert.Equal(5, query.QueryParameters["p1"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "LIMIT $p0", query.QueryText);
+            Assert.Equal(5, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
@@ -58,15 +56,14 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .ReturnDistinct<object>("n")
                 .OrderBy("n.Foo")
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT $p1", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
-            Assert.Equal(5, query.QueryParameters["p1"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN distinct n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT $p0", query.QueryText);
+            Assert.Equal(5, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
@@ -75,12 +72,11 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Return<object>("n")
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
@@ -100,14 +96,13 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Return<object>("n")
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n" + Environment.NewLine + "LIMIT $p1", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
-            Assert.Equal(5, query.QueryParameters["p1"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN n" + Environment.NewLine + "LIMIT $p0", query.QueryText);
+            Assert.Equal(5, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
@@ -116,15 +111,14 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Return<object>("n")
                 .OrderBy("n.Foo")
                 .Limit(5)
                 .Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT $p1", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
-            Assert.Equal(5, query.QueryParameters["p1"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN n" + Environment.NewLine + "ORDER BY n.Foo" + Environment.NewLine + "LIMIT $p0", query.QueryText);
+            Assert.Equal(5, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.DependsOnEnvironment, query.ResultFormat);
         }
 
@@ -134,21 +128,15 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new
-                {
-                    me = (NodeReference)123,
-                    viewer = (NodeReference)456
-                })
+                .Match( "me, viewer")
                 .Match("me-[:FRIEND]-common-[:FRIEND]-viewer")
                 .Return<Node<object>>("common")
                 .Limit(5)
                 .OrderBy("common.FirstName")
                 .Query;
 
-            Assert.Equal(string.Format("START me=node($p0), viewer=node($p1){0}MATCH me-[:FRIEND]-common-[:FRIEND]-viewer{0}RETURN common{0}LIMIT $p2{0}ORDER BY common.FirstName", Environment.NewLine), query.QueryText);
-            Assert.Equal(123L, query.QueryParameters["p0"]);
-            Assert.Equal(456L, query.QueryParameters["p1"]);
-            Assert.Equal(5, query.QueryParameters["p2"]);
+            Assert.Equal(string.Format("MATCH me, viewer{0}MATCH me-[:FRIEND]-common-[:FRIEND]-viewer{0}RETURN common{0}LIMIT $p0{0}ORDER BY common.FirstName", Environment.NewLine), query.QueryText);
+            Assert.Equal(5, query.QueryParameters["p0"]);
             Assert.Equal(CypherResultFormat.Rest, query.ResultFormat);
         }
 
@@ -396,225 +384,6 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
-        /*
-        [Fact]
-        public async Task ShouldSupportAnonymousReturnTypesEndToEnd()
-        {
-            string queryText = "START root=node($p0)" + Environment.NewLine + "MATCH root-->other" + Environment.NewLine + "RETURN other AS Foo";
-            var parameters = new Dictionary<string, object>
-            {
-                {"p0", 123}
-            };
-
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection, CypherResultFormat.Rest, "neo4j");
-            var cypherApiQuery = new CypherApiQuery(cypherQuery);
-
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
-                    MockResponse.Json(HttpStatusCode.OK, @"{
-  'columns' : [ 'Foo' ],
-  'data' : [ [ {
-    'outgoing_relationships' : 'http://localhost:8000/db/data/node/748/relationships/out',
-    'data' : {
-      'Name' : 'Antimony',
-      'UniqueId' : 38
-    },
-    'all_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/all/{-list|&|types}',
-    'traverse' : 'http://localhost:8000/db/data/node/748/traverse/{returnType}',
-    'self' : 'http://localhost:8000/db/data/node/748',
-    'property' : 'http://localhost:8000/db/data/node/748/properties/{key}',
-    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/out/{-list|&|types}',
-    'properties' : 'http://localhost:8000/db/data/node/748/properties',
-    'incoming_relationships' : 'http://localhost:8000/db/data/node/748/relationships/in',
-    'extensions' : {
-    },
-    'create_relationship' : 'http://localhost:8000/db/data/node/748/relationships',
-    'paged_traverse' : 'http://localhost:8000/db/data/node/748/paged/traverse/{returnType}{?pageSize,leaseTime}',
-    'all_relationships' : 'http://localhost:8000/db/data/node/748/relationships/all',
-    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/in/{-list|&|types}'
-  } ], [ {
-    'outgoing_relationships' : 'http://localhost:8000/db/data/node/610/relationships/out',
-    'data' : {
-      'Name' : 'Bauxite',
-      'UniqueId' : 24
-    },
-    'all_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/all/{-list|&|types}',
-    'traverse' : 'http://localhost:8000/db/data/node/610/traverse/{returnType}',
-    'self' : 'http://localhost:8000/db/data/node/610',
-    'property' : 'http://localhost:8000/db/data/node/610/properties/{key}',
-    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/out/{-list|&|types}',
-    'properties' : 'http://localhost:8000/db/data/node/610/properties',
-    'incoming_relationships' : 'http://localhost:8000/db/data/node/610/relationships/in',
-    'extensions' : {
-    },
-    'create_relationship' : 'http://localhost:8000/db/data/node/610/relationships',
-    'paged_traverse' : 'http://localhost:8000/db/data/node/610/paged/traverse/{returnType}{?pageSize,leaseTime}',
-    'all_relationships' : 'http://localhost:8000/db/data/node/610/relationships/all',
-    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/in/{-list|&|types}'
-  } ], [ {
-    'outgoing_relationships' : 'http://localhost:8000/db/data/node/749/relationships/out',
-    'data' : {
-      'Name' : 'Bismuth',
-      'UniqueId' : 37
-    },
-    'all_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/all/{-list|&|types}',
-    'traverse' : 'http://localhost:8000/db/data/node/749/traverse/{returnType}',
-    'self' : 'http://localhost:8000/db/data/node/749',
-    'property' : 'http://localhost:8000/db/data/node/749/properties/{key}',
-    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/out/{-list|&|types}',
-    'properties' : 'http://localhost:8000/db/data/node/749/properties',
-    'incoming_relationships' : 'http://localhost:8000/db/data/node/749/relationships/in',
-    'extensions' : {
-    },
-    'create_relationship' : 'http://localhost:8000/db/data/node/749/relationships',
-    'paged_traverse' : 'http://localhost:8000/db/data/node/749/paged/traverse/{returnType}{?pageSize,leaseTime}',
-    'all_relationships' : 'http://localhost:8000/db/data/node/749/relationships/all',
-    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/in/{-list|&|types}'
-  } ] ]
-}")
-                }
-            })
-            {
-                var graphClient = await testHarness.CreateAndConnectGraphClient();
-
-                var results = (await graphClient
-                    .Cypher
-                    .Start("root", graphClient.RootNode)
-                    .Match("root-->other")
-                    .Return(other => new
-                    {
-                        Foo = other.As<Commodity>()
-                    })
-                    .ResultsAsync)
-                    .ToList();
-
-                Assert.Equal(3L, results.Count());
-
-                var result = results[0];
-                Assert.Equal("Antimony", result.Foo.Name);
-                Assert.Equal(38, result.Foo.UniqueId);
-
-                result = results[1];
-                Assert.Equal("Bauxite", result.Foo.Name);
-                Assert.Equal(24, result.Foo.UniqueId);
-
-                result = results[2];
-                Assert.Equal("Bismuth", result.Foo.Name);
-                Assert.Equal(37, result.Foo.UniqueId);
-            }
-        }
-
-        [Fact]
-        public async Task ShouldSupportAnonymousReturnTypesEndToEndCamel()
-        {
-            string queryText = "START root=node($p0)" + Environment.NewLine + "MATCH root-->other" + Environment.NewLine + "RETURN other AS Foo";
-            var parameters = new Dictionary<string, object>
-            {
-                {"p0", 123}
-            };
-
-            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Projection, "neo4j");
-            var cypherApiQuery = new CypherApiQuery(cypherQuery);
-
-            using (var testHarness = new RestTestHarness
-            {
-                {
-                    MockRequest.PostObjectAsJson("/cypher", cypherApiQuery),
-                    MockResponse.Json(HttpStatusCode.OK, @"{
-  'columns' : [ 'Foo' ],
-  'data' : [ [ {
-    'outgoing_relationships' : 'http://localhost:8000/db/data/node/748/relationships/out',
-    'data' : {
-      'name' : 'Antimony',
-      'uniqueId' : 38
-    },
-    'all_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/all/{-list|&|types}',
-    'traverse' : 'http://localhost:8000/db/data/node/748/traverse/{returnType}',
-    'self' : 'http://localhost:8000/db/data/node/748',
-    'property' : 'http://localhost:8000/db/data/node/748/properties/{key}',
-    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/out/{-list|&|types}',
-    'properties' : 'http://localhost:8000/db/data/node/748/properties',
-    'incoming_relationships' : 'http://localhost:8000/db/data/node/748/relationships/in',
-    'extensions' : {
-    },
-    'create_relationship' : 'http://localhost:8000/db/data/node/748/relationships',
-    'paged_traverse' : 'http://localhost:8000/db/data/node/748/paged/traverse/{returnType}{?pageSize,leaseTime}',
-    'all_relationships' : 'http://localhost:8000/db/data/node/748/relationships/all',
-    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/748/relationships/in/{-list|&|types}'
-  } ], [ {
-    'outgoing_relationships' : 'http://localhost:8000/db/data/node/610/relationships/out',
-    'data' : {
-      'name' : 'Bauxite',
-      'uniqueId' : 24
-    },
-    'all_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/all/{-list|&|types}',
-    'traverse' : 'http://localhost:8000/db/data/node/610/traverse/{returnType}',
-    'self' : 'http://localhost:8000/db/data/node/610',
-    'property' : 'http://localhost:8000/db/data/node/610/properties/{key}',
-    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/out/{-list|&|types}',
-    'properties' : 'http://localhost:8000/db/data/node/610/properties',
-    'incoming_relationships' : 'http://localhost:8000/db/data/node/610/relationships/in',
-    'extensions' : {
-    },
-    'create_relationship' : 'http://localhost:8000/db/data/node/610/relationships',
-    'paged_traverse' : 'http://localhost:8000/db/data/node/610/paged/traverse/{returnType}{?pageSize,leaseTime}',
-    'all_relationships' : 'http://localhost:8000/db/data/node/610/relationships/all',
-    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/610/relationships/in/{-list|&|types}'
-  } ], [ {
-    'outgoing_relationships' : 'http://localhost:8000/db/data/node/749/relationships/out',
-    'data' : {
-      'name' : 'Bismuth',
-      'uniqueId' : 37
-    },
-    'all_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/all/{-list|&|types}',
-    'traverse' : 'http://localhost:8000/db/data/node/749/traverse/{returnType}',
-    'self' : 'http://localhost:8000/db/data/node/749',
-    'property' : 'http://localhost:8000/db/data/node/749/properties/{key}',
-    'outgoing_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/out/{-list|&|types}',
-    'properties' : 'http://localhost:8000/db/data/node/749/properties',
-    'incoming_relationships' : 'http://localhost:8000/db/data/node/749/relationships/in',
-    'extensions' : {
-    },
-    'create_relationship' : 'http://localhost:8000/db/data/node/749/relationships',
-    'paged_traverse' : 'http://localhost:8000/db/data/node/749/paged/traverse/{returnType}{?pageSize,leaseTime}',
-    'all_relationships' : 'http://localhost:8000/db/data/node/749/relationships/all',
-    'incoming_typed_relationships' : 'http://localhost:8000/db/data/node/749/relationships/in/{-list|&|types}'
-  } ] ]
-}")
-                }
-            })
-            {
-                var graphClient = await testHarness.CreateAndConnectGraphClient();
-                graphClient.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
-                var results = (await graphClient
-                    .Cypher
-                    .Start("root", graphClient.RootNode)
-                    .Match("root-->other")
-                    .Return(other => new
-                    {
-                        Foo = other.As<Commodity>()
-                    })
-                    .ResultsAsync)
-                    .ToList();
-
-                Assert.Equal(3L, results.Count());
-
-                var result = results[0];
-                Assert.Equal("Antimony", result.Foo.Name);
-                Assert.Equal(38, result.Foo.UniqueId);
-
-                result = results[1];
-                Assert.Equal("Bauxite", result.Foo.Name);
-                Assert.Equal(24, result.Foo.UniqueId);
-
-                result = results[2];
-                Assert.Equal("Bismuth", result.Foo.Name);
-                Assert.Equal(37, result.Foo.UniqueId);
-            }
-        }
-        */
 
         [Fact]
         public void BinaryExpressionIsNotNull()

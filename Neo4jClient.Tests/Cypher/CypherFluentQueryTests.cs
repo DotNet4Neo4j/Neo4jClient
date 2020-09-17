@@ -5,8 +5,6 @@ using Neo4jClient.Tests.GraphClientTests;
 using NSubstitute;
 using Xunit;
 
-//using Neo4jClient.Test.GraphClientTests;
-
 namespace Neo4jClient.Tests.Cypher
 {
     
@@ -24,14 +22,13 @@ namespace Neo4jClient.Tests.Cypher
 
             // Act
             await new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 5)
+                .Match("n")
                 .Delete("n")
                 .ExecuteWithoutResultsAsync();
 
             // Assert
             Assert.NotNull(executedQuery);
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
-            Assert.Equal(5L, executedQuery.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
         }
 
         [Fact]
@@ -46,15 +43,14 @@ namespace Neo4jClient.Tests.Cypher
 
             // Act
             var task = new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 5)
+                .Match("n")
                 .Delete("n")
                 .ExecuteWithoutResultsAsync();
             task.Wait();
 
             // Assert
             Assert.NotNull(executedQuery);
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
-            Assert.Equal(5L, executedQuery.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "DELETE n", executedQuery.QueryText);
         }
 
         [Fact]
@@ -62,103 +58,17 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)1)
+                .Match("n")
                 .Return<object>("n");
 
             var query1 = query.Query;
             query = query.OrderBy("n.Foo");
             var query2 = query.Query;
 
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n", query1.QueryText);
-            Assert.Equal(1L, query1.QueryParameters["p0"]);
-
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n" + Environment.NewLine + "ORDER BY n.Foo", query2.QueryText);
-            Assert.Equal(1L, query2.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN n", query1.QueryText);
+            Assert.Equal("MATCH n" + Environment.NewLine + "RETURN n" + Environment.NewLine + "ORDER BY n.Foo", query2.QueryText);
         }
-
-
-        [Fact]
-        public void AddingStartBitsToDifferentQueriesShouldntCorruptEachOther()
-        {
-            var client = Substitute.For<IRawGraphClient>();
-            var cypher = new CypherFluentQuery(client);
-
-            var query1 = cypher
-                .Start("a", (NodeReference)1)
-                .Query;
-
-            var query2 = cypher
-                .Start("b", (NodeReference)2)
-                .Query;
-
-            Assert.Equal("START a=node($p0)", query1.QueryText);
-            Assert.Equal(1L, query1.QueryParameters.Count);
-            Assert.Equal(1L, query1.QueryParameters["p0"]);
-
-            Assert.Equal("START b=node($p0)", query2.QueryText);
-            Assert.Equal(1L, query2.QueryParameters.Count);
-            Assert.Equal(2L, query2.QueryParameters["p0"]);
-        }
-
-        [Fact]
-        public void StartAndReturnNodeById()
-        {
-            // http://docs.neo4j.org/chunked/1.6/query-start.html#start-node-by-id
-            // START n=node(1)
-            // RETURN n
-
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)1)
-                .Return<object>("n")
-                .Query;
-
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "RETURN n", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
-        }
-
-        [Fact]
-        public void MultipleStartPoints()
-        {
-            // http://docs.neo4j.org/chunked/1.6/query-start.html#start-multiple-start-points
-            // START a=node(1), b=node(2)
-            // RETURN a,b
-
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Start(new
-                {
-                    a = (NodeReference)1,
-                    b = (NodeReference)2
-                })
-                .Query;
-
-            Assert.Equal("START a=node($p0), b=node($p1)", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
-            Assert.Equal(2L, query.QueryParameters["p1"]);
-        }
-
-        [Fact]
-        [Obsolete]
-        public void MultipleStartPointsObsolete()
-        {
-            // http://docs.neo4j.org/chunked/1.6/query-start.html#start-multiple-start-points
-            // START a=node(1), b=node(2)
-            // RETURN a,b
-
-            var client = Substitute.For<IRawGraphClient>();
-            var query = new CypherFluentQuery(client)
-                .Start(
-                    new CypherStartBit("a", (NodeReference)1),
-                    new CypherStartBit("b", (NodeReference)2)
-                )
-                .Query;
-
-            Assert.Equal("START a=node($p0), b=node($p1)", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
-            Assert.Equal(2L, query.QueryParameters["p1"]);
-        }
-
+        
         [Fact]
         public void ReturnFirstPart()
         {
@@ -336,20 +246,18 @@ namespace Neo4jClient.Tests.Cypher
         public void ReturnColumnAlias()
         {
             // http://docs.neo4j.org/chunked/1.6/query-return.html#return-column-alias
-            // START a=node(1)
             // RETURN a.Age AS SomethingTotallyDifferent
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Return(a => new ReturnPropertyQueryResult
                 {
                     SomethingTotallyDifferent = a.As<FooData>().Age
                 })
                 .Query;
 
-            Assert.Equal("START a=node($p0)" + Environment.NewLine + "RETURN a.Age AS SomethingTotallyDifferent", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH a" + Environment.NewLine + "RETURN a.Age AS SomethingTotallyDifferent", query.QueryText);
         }
 
         [Fact]
@@ -362,13 +270,12 @@ namespace Neo4jClient.Tests.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .ReturnDistinct<object>("b")
                 .Query;
 
-            Assert.Equal("START a=node($p0)" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN distinct b", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH a" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN distinct b", query.QueryText);
         }
 
         [Fact]
@@ -381,7 +288,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .ReturnDistinct(b => new FooData
                 {
@@ -389,8 +296,7 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            Assert.Equal("START a=node($p0)" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN distinct b.Age AS Age", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH a" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN distinct b.Age AS Age", query.QueryText);
         }
 
         [Fact]
@@ -398,7 +304,7 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .Return(b => new
                 {
@@ -407,10 +313,9 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b.Age AS SomeAge, b.Name AS SomeName", Environment.NewLine);
+            string expected = string.Format("MATCH a{0}MATCH (a)-->(b){0}RETURN b.Age AS SomeAge, b.Name AS SomeName", Environment.NewLine);
 
-            Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal(expected.TrimStart('\r', '\n'), query.QueryText);
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
@@ -419,7 +324,7 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .Return(b => new
                 {
@@ -428,10 +333,9 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b.Age AS Age, b.Name AS Name", Environment.NewLine);
+            string expected = string.Format("MATCH a{0}MATCH (a)-->(b){0}RETURN b.Age AS Age, b.Name AS Name", Environment.NewLine);
 
-            Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal(expected.TrimStart('\r', '\n'), query.QueryText);
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
@@ -440,7 +344,7 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)-->(c)")
                 .Return((b, c) => new
                 {
@@ -449,10 +353,9 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = "START a=node($p0)" + Environment.NewLine + "MATCH (a)-->(b)-->(c)" + Environment.NewLine + "RETURN b.Age AS Age, c.Name AS Name";
+            string expected = "MATCH a" + Environment.NewLine + "MATCH (a)-->(b)-->(c)" + Environment.NewLine + "RETURN b.Age AS Age, c.Name AS Name";
 
-            Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal(expected.TrimStart('\r', '\n'), query.QueryText);
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
@@ -461,7 +364,7 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .Return((b, c) => new
                 {
@@ -469,10 +372,9 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = "START a=node($p0)" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN b AS NodeB";
+            string expected = "MATCH a" + Environment.NewLine + "MATCH (a)-->(b)" + Environment.NewLine + "RETURN b AS NodeB";
 
-            Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal(expected.TrimStart('\r', '\n'), query.QueryText);
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
@@ -481,7 +383,7 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .Return((b, c) => new
                 {
@@ -489,10 +391,9 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
+            string expected = string.Format("MATCH a{0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
 
-            Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal(expected.TrimStart('\r', '\n'), query.QueryText);
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
@@ -501,7 +402,7 @@ namespace Neo4jClient.Tests.Cypher
         {
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Match("(a)-->(b)")
                 .Return((b, c) => new ReturnEntireNodeDataAndReferenceIntoProjectionTypeResult
                 {
@@ -509,10 +410,9 @@ namespace Neo4jClient.Tests.Cypher
                 })
                 .Query;
 
-            string expected = string.Format("START a=node($p0){0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
+            string expected = string.Format("MATCH a{0}MATCH (a)-->(b){0}RETURN b AS NodeB", Environment.NewLine);
 
-            Assert.Equal(expected.TrimStart(new[] { '\r', '\n' }), query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
+            Assert.Equal(expected.TrimStart('\r', '\n'), query.QueryText);
             Assert.Equal(CypherResultMode.Projection, query.ResultMode);
         }
 
@@ -956,17 +856,12 @@ namespace Neo4jClient.Tests.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new {
-                    a = (NodeReference)1,
-                    b = (NodeReference)2
-                })
+                .Match("a,b")
                 .Create("a-[r:REL]->b")
                 .Return<object>("r")
                 .Query;
 
-            Assert.Equal("START a=node($p0), b=node($p1)" + Environment.NewLine + "CREATE a-[r:REL]->b" + Environment.NewLine + "RETURN r", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
-            Assert.Equal(2L, query.QueryParameters["p1"]);
+            Assert.Equal("MATCH a,b" + Environment.NewLine + "CREATE a-[r:REL]->b" + Environment.NewLine + "RETURN r", query.QueryText);
         }
 
         [Fact]
@@ -997,13 +892,14 @@ namespace Neo4jClient.Tests.Cypher
             var data2 = new CreateNodeTests.TestNode { Foo = "foo2", Bar = "bar2", Baz = "baz2" };
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)1)
-                .Create("n-[r:REL]->(a {0})-[r:REL]->(b {1})", data1, data2)
+                .Match("n")
+                .Create("n-[r:REL]->(a $p0)-[r:REL]->(b $p1)")
+                .WithParams(new {p0=data1, p1=data2 })
                 .Return<CreateNodeTests.TestNode>("a")
                 .Query;
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "CREATE n-[r:REL]->(a $p1)-[r:REL]->(b $p2)" + Environment.NewLine + "RETURN a", query.QueryText);
-            Assert.Equal(data1, query.QueryParameters["p1"]);
-            Assert.Equal(data2, query.QueryParameters["p2"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "CREATE n-[r:REL]->(a $p0)-[r:REL]->(b $p1)" + Environment.NewLine + "RETURN a", query.QueryText);
+            Assert.Equal(data1, query.QueryParameters["p0"]);
+            Assert.Equal(data2, query.QueryParameters["p1"]);
         }
 
         [Fact]
@@ -1016,17 +912,12 @@ namespace Neo4jClient.Tests.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new {
-                    a = (NodeReference)1,
-                    b = (NodeReference)2
-                })
+                .Match("a,b")
                 .Create("a-[r:REL {name : a.name + '<->' + b.name }]->b")
                 .Return<object>("r")
                 .Query;
 
-            Assert.Equal("START a=node($p0), b=node($p1)" + Environment.NewLine + "CREATE a-[r:REL {name : a.name + '<->' + b.name }]->b" + Environment.NewLine + "RETURN r", query.QueryText);
-            Assert.Equal(1L, query.QueryParameters["p0"]);
-            Assert.Equal(2L, query.QueryParameters["p1"]);
+            Assert.Equal("MATCH a,b" + Environment.NewLine + "CREATE a-[r:REL {name : a.name + '<->' + b.name }]->b" + Environment.NewLine + "RETURN r", query.QueryText);
         }
 
         [Fact]
@@ -1039,14 +930,13 @@ namespace Neo4jClient.Tests.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("a", (NodeReference)3)
+                .Match("a")
                 .Match(
                     "(a)-[:KNOWS]->(b)-[:KNOWS]->(c)",
                     "(a)-[:BLOCKS]-(d)-[:KNOWS]-(c)")
                 .Query;
 
-            Assert.Equal("START a=node($p0)" + Environment.NewLine + "MATCH (a)-[:KNOWS]->(b)-[:KNOWS]->(c), (a)-[:BLOCKS]-(d)-[:KNOWS]-(c)", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH a" + Environment.NewLine + "MATCH (a)-[:KNOWS]->(b)-[:KNOWS]->(c), (a)-[:BLOCKS]-(d)-[:KNOWS]-(c)", query.QueryText);
         }
 
         [Fact]
@@ -1067,7 +957,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start(new { me = Node.ByIndexLookup("node_auto_index", "name", "Bob") })
+                .Match("me")
                 .Match("me-[r?:STATUS]-secondlatestupdate")
                 .Delete("r")
                 .With("me, secondlatestupdate")
@@ -1081,8 +971,7 @@ namespace Neo4jClient.Tests.Cypher
 // ReSharper restore InconsistentNaming
                 .Query;
 
-            Assert.Equal(string.Format("START me=node:`node_auto_index`(name = $p0){0}MATCH me-[r?:STATUS]-secondlatestupdate{0}DELETE r{0}WITH me, secondlatestupdate{0}CREATE me-[:STATUS]->(latest_update {{update}}){0}WITH latest_update,secondlatestupdate{0}CREATE latest_update-[:NEXT]-secondlatestupdate{0}WHERE secondlatestupdate <> null{0}RETURN latest_update.text AS new_status", Environment.NewLine), query.QueryText);
-            Assert.Equal("Bob", query.QueryParameters["p0"]);
+            Assert.Equal(string.Format("MATCH me{0}MATCH me-[r?:STATUS]-secondlatestupdate{0}DELETE r{0}WITH me, secondlatestupdate{0}CREATE me-[:STATUS]->(latest_update {{update}}){0}WITH latest_update,secondlatestupdate{0}CREATE latest_update-[:NEXT]-secondlatestupdate{0}WHERE secondlatestupdate <> null{0}RETURN latest_update.text AS new_status", Environment.NewLine), query.QueryText);
             Assert.Equal(update, query.QueryParameters["update"]);
         }
 

@@ -1,4 +1,4 @@
-## What is Neo4jClient?
+﻿## What is Neo4jClient?
 
 A .NET client for [Neo4j](https://neo4j.com). Supports basic CRUD operations, Cypher and Gremlin queries via fluent interfaces, and some indexing operations.
 
@@ -25,29 +25,31 @@ It's worth noting - due to a lot of the changes that are taking place - at the m
 * The biggest thing to concern yourself with is the URI.
   * For `BoltGraphClient` - switch from `bolt://` to `neo4j://`
   * For `GraphClient` - switch from `http://URI:7474/db/data` to `http://URI:7474/`
+ * Next up is `Async` - There is no non-async end point - this means you need to `Wait()` calls if you are non-async.
 
 ### Plans
 
-* Finally transactions in Core
-* Fully Async
-* Support Bolt 2.0 (for Neo4j 4.x)
+* ✅ Finally transactions in Core 
+* ✅ Fully Async
+* ✅ Support Bolt 2.0 (for Neo4j 4.x)
 
 ### Things being considered
 
-* Removal of Gremlin support
+* ✅ Removal of Gremlin support
   * No-one uses it anymore, and it's not supported by Neo4j anymore.
-* Removal of `Root` property 
+* ✅ Removal of `Root` property 
   * This has been out of favour since Neo4j `2.0` and been marked as `Obsolete` since then.
-* Removal of _all_ the `Obsolete` code.
+* ✅ Removal of _all_ the `Obsolete` code.
   * It's been obsolete for a loooong time now :)
-* Having a _Signed_ version of the Client.
+* ❌ Having a _Signed_ version of the Client.
   * This largely comes down to how _easy_ it is do this - any advice would be super - I'm using AppVeyor to CI and deploy to nuget, so let me know what I need to do!
+  * I have been unable to find any way to do this for free, so it will remain unsigned.
 
 ### Breaking Changes
 
-* Transactions will no longer use the `TransactionScope` class which means that [MSDTC](https://en.wikipedia.org/wiki/Microsoft_Distributed_Transaction_Coordinator) will no longer work.
+* ✅ Transactions will no longer use the `TransactionScope` class which means that [MSDTC](https://en.wikipedia.org/wiki/Microsoft_Distributed_Transaction_Coordinator) will no longer work.
   * This has been an issue since the dawn of Core/NetStandard - `TransactionScope` may be in NetStandard now - but the other classes the Transaction code was relying on wasn't. 
-* The `GraphClient` and `BoltGraphClient` will no longer support Neo4j 3.4 or lower.
+* ✅ The `GraphClient` and `BoltGraphClient` will no longer support Neo4j 3.4 or lower.
   * Largely this is because the `Neo4j.Driver` that does the `Bolt` side of things only targets 3.5+, and keeping all the backwards compatibility means a lot of work, for little gain.
 
 ### Dependency Changes

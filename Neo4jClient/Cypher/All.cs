@@ -20,11 +20,5 @@ namespace Neo4jClient.Cypher
         {
             throw new InvalidOperationException("This method can't be executed directly: it has no .NET implementation. You need to use it as part of a Cypher return expression, like .Return(() => new { Count = All.Count() });");
         }
-
-        /// <summary>
-        /// Equivalent to <code>node(*)</code>, for use in <code>START</code> clauses
-        /// such as <code>Start(new { n = All.Nodes })</code>
-        /// </summary>
-        public const string Nodes = "node(*)";
     }
 }

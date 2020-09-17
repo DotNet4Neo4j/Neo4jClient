@@ -25,7 +25,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var results = await cypher
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Return(a => new ReturnPropertyQueryResult
                 {
                     SomethingTotallyDifferent = a.As<FooNode>().Age,
@@ -51,7 +51,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var results = await cypher
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Return(a => new FooNode
                 {
                     TheType = a.As<FooNode>().TheType,
@@ -73,7 +73,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var results = await cypher
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Return<Node<FooNode>>("a")
                 .ResultsAsync;
 
@@ -92,7 +92,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var results = await cypher
-                .Start("a", (RelationshipReference)1)
+                .Match("a")
                 .Return<RelationshipInstance<FooNode>>("a")
                 .ResultsAsync;
 
@@ -111,7 +111,7 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var results = await cypher
-                .Start("a", (RelationshipReference)1)
+                .Match("a")
                 .Return<RelationshipInstance>("a")
                 .ResultsAsync;
 
@@ -129,20 +129,19 @@ namespace Neo4jClient.Tests.Cypher
 
             var cypher = new CypherFluentQuery(client);
             var query1 = cypher
-                .Start("a", (NodeReference)1)
+                .Match("a")
                 .Return<object>("a.Name")
                 .Query;
 
-            Assert.Equal(1, query1.QueryParameters.Count());
-            Assert.Equal(1L, query1.QueryParameters["p0"]);
+            Assert.Equal(0, query1.QueryParameters.Count());
+
 
             var query2 = cypher
-                .Start("b", (NodeReference)2)
-                .Return<object>("a.Name")
+                .Match("b")
+                .Return<object>("b.Name")
                 .Query;
 
-            Assert.Equal(1, query2.QueryParameters.Count());
-            Assert.Equal(2L, query2.QueryParameters["p0"]);
+            Assert.Equal(0, query2.QueryParameters.Count());
         }
 
         public enum MyType {Type1, Type2}

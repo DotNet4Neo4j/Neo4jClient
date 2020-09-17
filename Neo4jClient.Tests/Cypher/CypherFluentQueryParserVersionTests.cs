@@ -13,14 +13,11 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .ParserVersion("2.1.experimental")
-                .Start(new
-                {
-                    n = All.Nodes,
-                })
+                .Match("n")
                 .Return<object>("n")
                 .Query;
 
-            Assert.Equal("CYPHER 2.1.experimental" + Environment.NewLine + "START n=node(*)" + Environment.NewLine + "RETURN n", query.QueryText);
+            Assert.Equal("CYPHER 2.1.experimental" + Environment.NewLine + "MATCH n" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(0, query.QueryParameters.Count);   
         }
 
@@ -30,14 +27,11 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .ParserVersion(new Version(1, 9))
-                .Start(new
-                {
-                    n = All.Nodes,
-                })
+                .Match("n")
                 .Return<object>("n")
                 .Query;
 
-            Assert.Equal("CYPHER 1.9" + Environment.NewLine + "START n=node(*)" + Environment.NewLine + "RETURN n", query.QueryText);
+            Assert.Equal("CYPHER 1.9" + Environment.NewLine + "MATCH n" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(0, query.QueryParameters.Count);
         }
 
@@ -47,14 +41,11 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .ParserVersion(1, 9)
-                .Start(new
-                {
-                    n = All.Nodes,
-                })
+                .Match("n")
                 .Return<object>("n")
                 .Query;
 
-            Assert.Equal("CYPHER 1.9" + Environment.NewLine + "START n=node(*)" + Environment.NewLine + "RETURN n", query.QueryText);
+            Assert.Equal("CYPHER 1.9" + Environment.NewLine + "MATCH n" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(0, query.QueryParameters.Count);
         }
 
@@ -64,14 +55,11 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .ParserVersion(1, 8)
-                .Start(new
-                {
-                    n = All.Nodes,
-                })
+                .Match("n")
                 .Return<object>("n")
                 .Query;
 
-            Assert.Equal("CYPHER LEGACY" + Environment.NewLine + "START n=node(*)" + Environment.NewLine + "RETURN n", query.QueryText);
+            Assert.Equal("CYPHER LEGACY" + Environment.NewLine + "MATCH n" + Environment.NewLine + "RETURN n", query.QueryText);
             Assert.Equal(0, query.QueryParameters.Count);            
         }
     }

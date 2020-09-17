@@ -1,56 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using Neo4jClient.Cypher;
 
 namespace Neo4jClient
 {
     public class Node<TNode> : IHasNodeReference, IAttachedReference
     {
-        readonly TNode data;
-        readonly NodeReference<TNode> reference;
-
         public Node(TNode data, NodeReference<TNode> reference)
         {
             if (reference == null)
                 throw new ArgumentNullException("reference");
 
-            this.data = data;
-            this.reference = reference;
+            this.Data = data;
+            this.Reference = reference;
         }
 
         public Node(TNode data, long id, IGraphClient client)
         {
-            this.data = data;
-            reference = new NodeReference<TNode>(id, client);
+            this.Data = data;
+            Reference = new NodeReference<TNode>(id, client);
         }
 
-        public NodeReference<TNode> Reference
-        {
-            get { return reference; }
-        }
+        public NodeReference<TNode> Reference { get; }
 
-        NodeReference IHasNodeReference.Reference
-        {
-            get { return reference; }
-        }
+        public TNode Data { get; }
 
-        public TNode Data
-        {
-            get { return data; }
-        }
 
-        public ICypherFluentQuery StartCypher(string identity)
-        {
-            var client = ((IAttachedReference) this).Client;
-            var query = new CypherFluentQuery(client)
-                .Start(identity, Reference);
-            return query;
-        }
+        IGraphClient IAttachedReference.Client => ((IAttachedReference) Reference).Client;
 
-        IGraphClient IAttachedReference.Client
-        {
-            get { return ((IAttachedReference)reference).Client; }
-        }
+        NodeReference IHasNodeReference.Reference => Reference;
 
         public static bool operator ==(Node<TNode> lhs, Node<TNode> rhs)
         {
