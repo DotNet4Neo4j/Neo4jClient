@@ -4,28 +4,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Neo4j.Driver;
 
 namespace Neo4jClient.Cypher
 {
-    /*
-    CREATE INDEX
-    USE
-    USING INDEX
-    USING INDEX SEEK
-    USING JOIN ON
-    USING SCAN
-
-    IS NOT NULL ETC
-    XOR
-
-    DateTime
-
-     */
-
-
-
-
-
     public partial interface ICypherFluentQuery
     {
         CypherQuery Query { get; }
@@ -45,6 +27,13 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery ParserVersion(int major, int minor);
 
         ICypherFluentQuery MaxExecutionTime(int milliseconds);
+        
+        // /// <summary>
+        // /// Calls 'SHOW' on the database
+        // /// </summary>
+        // /// <param name="command">The command to execute after SHOW - for example 'DATABASES'</param>
+        // /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        // ICypherFluentQuery Show(string command);
 
         /// <summary>
         /// Custom headers to add to REST calls to Neo4j server.

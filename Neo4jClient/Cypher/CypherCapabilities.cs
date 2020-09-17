@@ -33,11 +33,15 @@ namespace Neo4jClient.Cypher
         public static readonly CypherCapabilities Cypher226 = new CypherCapabilities(Cypher22) { AutoRollsBackOnError = true };
         public static readonly CypherCapabilities Cypher23 = new CypherCapabilities(Cypher226) {SupportsStartsWith = true};
         public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23) { SupportsStoredProcedures = true, SupportsHasFunction = false };
-        public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher30) { SupportsMultipleTenancy = true };
+        public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher30) { SupportsMultipleTenancy = true, SupportsShow = true };
         
         public static readonly CypherCapabilities Default = Cypher20;
         
+        /// <summary>
+        /// Neo4j 4.0 provides support for multiple tenancy, which means commands like CREATE DATABASE etc
+        /// </summary>
         public bool SupportsMultipleTenancy { get; set; }
+        public bool SupportsShow { get; set; }
         public bool SupportsPlanner { get; set; }
         public bool SupportsPropertySuffixesForControllingNullComparisons { get; set; }
         public bool SupportsNullComparisonsWithIsOperator { get; set; }
