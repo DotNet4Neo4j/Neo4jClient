@@ -29,8 +29,23 @@ namespace Neo4jClient.Cypher
             set => QueryWriter.DatabaseName = value;
         }
 
+        /// <inheritdoc cref="ICypherFluentQuery.Show"/>
+        public ICypherFluentQuery Show(string command)
+        {
+            if(string.IsNullOrWhiteSpace(command))
+                throw new ArgumentException("You have to supply a command to SHOW", nameof(command));
+
+            if(!Client.CypherCapabilities.SupportsShow)
+                throw new InvalidOperationException("SHOW commands are not supported in Neo4j versions older than 4.0");
+
+            return Mutate(w => w.AppendClause($"SHOW {command}"));
+        }
+
         public ICypherFluentQuery WithDatabase(string databaseName)
         {
+            if(!Client.CypherCapabilities.SupportsMultipleTenancy)
+                throw new InvalidOperationException("Multi-tenancy is only available on Neo4j Servers > 4.0");
+
             if(Client.InTransaction)
                 throw new InvalidOperationException("This query is in a Transaction, you can't set the database for individual queries within a Transaction.");
 

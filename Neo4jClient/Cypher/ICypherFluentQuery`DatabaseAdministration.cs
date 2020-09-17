@@ -1,4 +1,6 @@
+using System;
 using Neo4j.Driver;
+using Neo4jClient.ApiModels;
 
 namespace Neo4jClient.Cypher
 {
@@ -14,6 +16,8 @@ namespace Neo4jClient.Cypher
         ///     (default) will throw an exception if the database already exists..
         /// </param>
         /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery CreateDatabase(string databaseName, bool ifNotExists = false);
 
         /// <summary>
@@ -22,6 +26,8 @@ namespace Neo4jClient.Cypher
         /// <remarks>It will DELETE the existing database if it exists.</remarks>
         /// <param name="databaseName">The name of the database instance to create.</param>
         /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery CreateOrReplaceDatabase(string databaseName);
 
         /// <summary>
@@ -37,6 +43,8 @@ namespace Neo4jClient.Cypher
         ///     Thrown if the database doesn't exist. Use <see cref="DropDatabaseIfExists" /> to
         ///     avoid the exception.
         /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery DropDatabase(string databaseName, bool dumpData = false);
 
         /// <summary>
@@ -48,6 +56,8 @@ namespace Neo4jClient.Cypher
         ///     server. <c>false</c> (default) will mean the data is destroyed.
         /// </param>
         /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery DropDatabaseIfExists(string databaseName, bool dumpData = false);
 
         /// <summary>
@@ -55,6 +65,8 @@ namespace Neo4jClient.Cypher
         /// </summary>
         /// <param name="databaseName">The name of the database to start.</param>
         /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery StartDatabase(string databaseName);
 
         /// <summary>
@@ -62,6 +74,9 @@ namespace Neo4jClient.Cypher
         /// </summary>
         /// <param name="databaseName">The name of the database to stop.</param>
         /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery StopDatabase(string databaseName);
     }
+
 }

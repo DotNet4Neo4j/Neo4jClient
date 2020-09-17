@@ -27,6 +27,13 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery ParserVersion(int major, int minor);
 
         ICypherFluentQuery MaxExecutionTime(int milliseconds);
+        
+        // /// <summary>
+        // /// Calls 'SHOW' on the database
+        // /// </summary>
+        // /// <param name="command">The command to execute after SHOW - for example 'DATABASES'</param>
+        // /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        // ICypherFluentQuery Show(string command);
 
         /// <summary>
         /// Custom headers to add to REST calls to Neo4j server.

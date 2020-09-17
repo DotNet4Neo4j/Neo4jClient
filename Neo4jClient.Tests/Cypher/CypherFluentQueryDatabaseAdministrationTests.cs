@@ -13,7 +13,7 @@ namespace Neo4jClient.Tests.Cypher
             get
             {
                 var client = Substitute.For<IRawGraphClient>();
-                client.CypherCapabilities.Returns(new CypherCapabilities { SupportsMultipleTenancy = true });
+                client.CypherCapabilities.Returns(new CypherCapabilities { SupportsMultipleTenancy = true, SupportsShow = true});
                 return client;
             }
         }
@@ -353,6 +353,42 @@ namespace Neo4jClient.Tests.Cypher
                 var ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(MockClient).StopDatabase(databaseName));
                 ex.Should().NotBeNull();
             }
+        }
+
+        public class ShowMethod : IClassFixture<CultureInfoSetupFixture>
+        {
+            [Fact]
+            public void GeneratesTheCorrectCypher()
+            {
+                var query = new CypherFluentQuery(MockClient)
+                    .Show("DATABASES")
+                    .Query;
+
+                query.QueryText.Should().Be($"SHOW DATABASES");
+            }
+
+            [Fact]
+            public void ThrowsInvalidOperationException_IfNotOnASupportedVersion()
+            {
+                var client = Substitute.For<IRawGraphClient>();
+                client.CypherCapabilities.Returns(new CypherCapabilities { SupportsMultipleTenancy = false });
+
+                var ex = Assert.Throws<InvalidOperationException>(() => new CypherFluentQuery(client).Show("DATABASES"));
+                ex.Should().NotBeNull();
+                ex.Message.Should().Be("SHOW commands are not supported in Neo4j versions older than 4.0");
+            }
+
+            [Theory]
+            [InlineData("")]
+            [InlineData(" ")]
+            [InlineData("  ")]
+            [InlineData(null)]
+            public void ThrowsArgumentException_IfDatabaseNameIsInvalid(string command)
+            {
+                var ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(MockClient).Show(command));
+                ex.Should().NotBeNull();
+            }
+
         }
     }
 }
