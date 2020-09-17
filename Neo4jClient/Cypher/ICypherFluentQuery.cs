@@ -4,28 +4,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Neo4j.Driver;
 
 namespace Neo4jClient.Cypher
 {
-    /*
-    CREATE INDEX
-    USE
-    USING INDEX
-    USING INDEX SEEK
-    USING JOIN ON
-    USING SCAN
-
-    IS NOT NULL ETC
-    XOR
-
-    DateTime
-
-     */
-
-
-
-
-
     public partial interface ICypherFluentQuery
     {
         CypherQuery Query { get; }
