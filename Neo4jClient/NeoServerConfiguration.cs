@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Neo4j.Driver;
 using Neo4jClient.ApiModels;
 using Neo4jClient.Execution;
-using Neo4jClient.Mappers;
 
 namespace Neo4jClient
 {

@@ -18,13 +18,12 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             client.ServerVersion.Returns(new Version(1, 8));
             var query = new CypherFluentQuery(client)
-                .Start("root", (NodeReference)2)
+                .Match("root")
                 .CreateUnique("root-[:X]-(leaf {name:'D'} )")
                 .Return<object>("leaf")
                 .Query;
 
-            Assert.Equal($"START root=node($p0){Environment.NewLine}CREATE UNIQUE root-[:X]-(leaf {{name:'D'}} ){Environment.NewLine}RETURN leaf", query.QueryText);
-            Assert.Equal(2l, query.QueryParameters["p0"]);
+            Assert.Equal($"MATCH root{Environment.NewLine}CREATE UNIQUE root-[:X]-(leaf {{name:'D'}} ){Environment.NewLine}RETURN leaf", query.QueryText);
         }
 
         [Fact]
@@ -38,14 +37,12 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             client.ServerVersion.Returns(new Version(1, 8));
             var query = new CypherFluentQuery(client)
-                .Start("root", (NodeReference)2)
                 .Match("root-[:X]-foo")
                 .CreateUnique("foo-[:Y]-(leaf {name:'D'} )")
                 .Return<object>("leaf")
                 .Query;
 
-            Assert.Equal($"START root=node($p0){Environment.NewLine}MATCH root-[:X]-foo{Environment.NewLine}CREATE UNIQUE foo-[:Y]-(leaf {{name:'D'}} ){Environment.NewLine}RETURN leaf", query.QueryText);
-            Assert.Equal(2l, query.QueryParameters["p0"]);
+            Assert.Equal($"MATCH root-[:X]-foo{Environment.NewLine}CREATE UNIQUE foo-[:Y]-(leaf {{name:'D'}} ){Environment.NewLine}RETURN leaf", query.QueryText);
         }
     }
 }

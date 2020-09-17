@@ -141,81 +141,6 @@ namespace Neo4jClient.Cypher
             return WithParams(keyValuePairs);
         }
 
-        [Obsolete("Use Start(new { identity = startText }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
-        public ICypherFluentQuery Start(string identity, string startText)
-        {
-            return Mutate(w =>
-                w.AppendClause($"START {identity}={startText}"));
-        }
-
-        public ICypherFluentQuery Start(object startBits)
-        {
-            return Mutate(w =>
-            {
-                var startBitsText = StartBitFormatter.FormatAsCypherText(startBits, w.CreateParameter);
-                var startText = "START " + startBitsText;
-                w.AppendClause(startText);
-            });
-        }
-
-        public ICypherFluentQuery Start(IDictionary<string, object> startBits)
-        {
-            return Mutate(w =>
-            {
-                var startBitsText = StartBitFormatter.FormatAsCypherText(startBits, w.CreateParameter);
-                var startText = "START " + startBitsText;
-                w.AppendClause(startText);
-            });
-        }
-
-        [Obsolete("Use Start(new { foo = nodeRef1, bar = All.Nodes }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
-        public ICypherFluentQuery Start(params ICypherStartBit[] startBits)
-        {
-            return Mutate(w =>
-            {
-                var startBitsText = startBits
-                    .Select(b => b.ToCypherText(w.CreateParameter))
-                    .ToArray();
-                var startText = "START " + string.Join(", ", startBitsText);
-
-                w.AppendClause(startText);
-            });
-        }
-
-        public ICypherFluentQuery Start(string identity, params NodeReference[] nodeReferences)
-        {
-            return Start(new Dictionary<string, object>
-            {
-                { identity, nodeReferences }
-            });
-        }
-
-        public ICypherFluentQuery Start(string identity, params RelationshipReference[] relationshipReferences)
-        {
-            return Start(new Dictionary<string, object>
-            {
-                { identity, relationshipReferences }
-            });
-        }
-
-        [Obsolete("Use Start(new { foo = Node.ByIndexLookup(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
-        public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string key, object value)
-        {
-            return Start(new Dictionary<string, object>
-            {
-                {identity, Node.ByIndexLookup(indexName, key, value)}
-            });
-        }
-
-        [Obsolete("Use Start(new { foo = Node.ByIndexQuery(…) }) instead. See https://bitbucket.org/Readify/neo4jclient/issue/74/support-nicer-cypher-start-notation for more details about this change.")]
-        public ICypherFluentQuery StartWithNodeIndexLookup(string identity, string indexName, string parameter)
-        {
-            return Start(new Dictionary<string, object>
-            {
-                {identity, Node.ByIndexQuery(indexName, parameter)}
-            });
-        }
-
         /// <inheritdoc cref="ICypherFluentQuery.Use"/>
         public ICypherFluentQuery Use(string database)
         {
@@ -293,33 +218,6 @@ namespace Neo4jClient.Cypher
         public ICypherFluentQuery Create(string createText)
         {
             return Mutate(w => w.AppendClause($"CREATE {createText}"));
-        }
-
-        [Obsolete("Use Create(string) with explicitly named params instead. For example, instead of Create(\"(c:Customer {0})\", customer), use Create(\"(c:Customer {customer})\").WithParams(new { customer }).")]
-        public ICypherFluentQuery Create(string createText, params object[] objects)
-        {
-            objects
-                .ToList()
-                .ForEach(o =>
-                {
-                    if (o == null)
-                        throw new ArgumentException("Array includes a null entry", nameof(objects));
-
-                    var objectType = o.GetType();
-                    if (objectType.GetTypeInfo().IsGenericType &&
-                        objectType.GetGenericTypeDefinition() == typeof(Node<>))
-                    {
-                        throw new ArgumentException(string.Format(
-                            "You're trying to pass in a Node<{0}> instance. Just pass the {0} instance instead.",
-                            objectType.GetGenericArguments()[0].Name),
-                            nameof(objects));
-                    }
-
-                    var validationContext = new ValidationContext(o, null, null);
-                    Validator.ValidateObject(o, validationContext);
-                });
-
-            return Mutate(w => w.AppendClause("CREATE " + createText, objects));
         }
 
         public ICypherFluentQuery Create<TNode>(string identity, TNode node)

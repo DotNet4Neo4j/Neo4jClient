@@ -14,14 +14,13 @@ namespace Neo4jClient.Tests.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference)3)
+                .Match("n")
                 .Set("n.age = 30")
                 .Return<Node<Object>>("n")
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "SET n.age = 30" + Environment.NewLine + "RETURN n", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "SET n.age = 30" + Environment.NewLine + "RETURN n", query.QueryText);
         }
 
         [Fact]
@@ -30,13 +29,12 @@ namespace Neo4jClient.Tests.Cypher
             // Arrange
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
-                .Start("n", (NodeReference) 3)
+                .Match("n")
                 .Set("n.name = \"Ted\"")
                 .Query;
 
             // Assert
-            Assert.Equal("START n=node($p0)" + Environment.NewLine + "SET n.name = \"Ted\"", query.QueryText);
-            Assert.Equal(3L, query.QueryParameters["p0"]);
+            Assert.Equal("MATCH n" + Environment.NewLine + "SET n.name = \"Ted\"", query.QueryText);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
@@ -576,6 +577,7 @@ namespace Neo4jClient
                     : new Dictionary<string, object> {{identifier, record[identifier]}};
             }
 
+            [EditorBrowsable(EditorBrowsableState.Never)]
             [Obsolete("This should not be called internally.")]
             object IRecord.this[int index] => throw new NotImplementedException("This should not be called.");
 
