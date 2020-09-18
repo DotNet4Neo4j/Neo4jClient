@@ -1,6 +1,6 @@
 using System;
 
-namespace Neo4jClient.Test.Transactions
+namespace Neo4jClient.Tests.Transactions
 {
     internal static class TransactionRestResponseHelper
     {

@@ -1,10 +1,9 @@
 ﻿using System;
 using Neo4jClient.Execution;
-using Neo4jClient.Test.Fixtures;
 using Neo4jClient.Transactions;
 using Xunit;
 
-namespace Neo4jClient.Test.Transactions
+namespace Neo4jClient.Tests.Transactions
 {
     
     public class TransactionExecutionEnvironmentTests : IClassFixture<CultureInfoSetupFixture>

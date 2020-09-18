@@ -1,12 +1,10 @@
 ﻿using System.Collections.Specialized;
 using Neo4jClient.Cypher;
-using Neo4jClient.Test.Fixtures;
 using NSubstitute;
 using Xunit;
 
-namespace Neo4jClient.Test.Cypher
+namespace Neo4jClient.Tests.Cypher
 {
-    
     public class CypherFluentQueryCustomHeaderTests : IClassFixture<CultureInfoSetupFixture>
     {
         [Fact]
@@ -34,7 +32,7 @@ namespace Neo4jClient.Test.Cypher
             const string headerName = "HeaderName";
             const string headerValue = "TestHeaderValue";
             var client = Substitute.For<IRawGraphClient>();
-            var customHeaders = new NameValueCollection { { headerName, headerValue } };
+            var customHeaders = new NameValueCollection {{headerName, headerValue}};
 
             var query = new CypherFluentQuery(client)
                 .CustomHeaders(customHeaders)
@@ -50,7 +48,7 @@ namespace Neo4jClient.Test.Cypher
         {
             const string headerName = "HeaderName";
             const string headerValue = "TestHeaderValue";
-            var customHeaders = new NameValueCollection { { headerName, headerValue } };
+            var customHeaders = new NameValueCollection {{headerName, headerValue}};
 
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)

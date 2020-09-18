@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
-using Neo4jClient.Test.Fixtures;
 using Neo4jClient.Transactions;
 using Xunit;
 using TransactionManager = Neo4jClient.Transactions.TransactionManager;
 using TransactionScopeOption = Neo4jClient.Transactions.TransactionScopeOption;
 
-namespace Neo4jClient.Test.Transactions
+namespace Neo4jClient.Tests.Transactions
 {
     
     public class TransactionManagementTests : IClassFixture<CultureInfoSetupFixture>
@@ -22,7 +21,7 @@ namespace Neo4jClient.Test.Transactions
         [InlineData(RestTestHarness.Neo4jVersion.Neo226)]
         [InlineData(RestTestHarness.Neo4jVersion.Neo23)]
         //https://github.com/Readify/Neo4jClient/issues/127
-        public void ReturnsThe404_WhenVersionIs_2_2_6_Plus_WhenActuallyTimingOut(RestTestHarness.Neo4jVersion version)
+        public async Task ReturnsThe404_WhenVersionIs_2_2_6_Plus_WhenActuallyTimingOut(RestTestHarness.Neo4jVersion version)
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
                 'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
@@ -39,12 +38,12 @@ namespace Neo4jClient.Test.Transactions
             })
             {
                 var client = testHarness.CreateGraphClient(version);
-                client.Connect();
+                await client.ConnectAsync();
                 try
                 {
                     using (var transaction = client.BeginTransaction())
                     {
-                        client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
+                        await client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResultsAsync();
                     }
                     throw new Exception("Should not reach this code, as there is an expected exception.");
                 }
@@ -59,7 +58,7 @@ namespace Neo4jClient.Test.Transactions
         [Theory]
         [InlineData(RestTestHarness.Neo4jVersion.Neo226)]
         //https://github.com/Readify/Neo4jClient/issues/127
-        public void ReturnsCorrectError_WhenTransactionIsAutomaticallyRolledBack_ViaNeo4j_2_2_6_Plus(RestTestHarness.Neo4jVersion version)
+        public async Task ReturnsCorrectError_WhenTransactionIsAutomaticallyRolledBack_ViaNeo4j_2_2_6_Plus(RestTestHarness.Neo4jVersion version)
         {
             /* In 2.2.6 ClientErrors (Constraint Violations etc) were changed to Automatically rollback. This created a 404 error when *we* tried to rollback on an error, as the transaction no longer existed. */
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
@@ -77,10 +76,10 @@ namespace Neo4jClient.Test.Transactions
             })
             {
                 var client = testHarness.CreateGraphClient(version);
-                client.Connect();
+                await client.ConnectAsync();
                 using (var transaction = client.BeginTransaction())
                 {
-                    Assert.Throws<NeoException>(() => client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults());
+                    await Assert.ThrowsAsync<NeoException>(async () => await client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResultsAsync());
                 }
             }
         }
@@ -90,7 +89,7 @@ namespace Neo4jClient.Test.Transactions
         [InlineData(RestTestHarness.Neo4jVersion.Neo22)]
         [InlineData(RestTestHarness.Neo4jVersion.Neo225)]
         //https://github.com/Readify/Neo4jClient/issues/127
-        public void ReturnsThe404_WhenVersionIsLessThan_2_2_6(RestTestHarness.Neo4jVersion version)
+        public async Task ReturnsThe404_WhenVersionIsLessThan_2_2_6(RestTestHarness.Neo4jVersion version)
         {
             var initTransactionRequest = MockRequest.PostJson("/transaction", @"{
                 'statements': [{'statement': 'MATCH n\r\nRETURN count(n)', 'resultDataContents':[], 'parameters': {}}]}");
@@ -107,12 +106,12 @@ namespace Neo4jClient.Test.Transactions
             })
             {
                 var client = testHarness.CreateGraphClient(version);
-                client.Connect();
+                await client.ConnectAsync();
                 try
                 {
                     using (var transaction = client.BeginTransaction())
                     {
-                        client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResults();
+                        await client.Cypher.Match("n").Return(n => n.Count()).ExecuteWithoutResultsAsync();
                     }
                 }
                 catch (Exception ex)
@@ -123,12 +122,12 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsEmpty()
+        public async Task EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsEmpty()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
-                client.Connect();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
+                await client.ConnectAsync();
 
                 var tm = new TransactionManager(client);
                 TransactionManager.ScopedTransactions = new ThreadContextWrapper<TransactionScopeProxy>();
@@ -139,12 +138,12 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsNull()
+        public async Task EndTransaction_DoesntThrowAnyExceptions_WhenScopedTransactionsIsNull()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
-                client.Connect();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
+                await client.ConnectAsync();
 
                 var tm = new TransactionManager(client);
                 TransactionManager.ScopedTransactions = null;
@@ -154,12 +153,12 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void CurrentInternalTransaction_ReturnsNullWhenEmpty()
+        public async Task CurrentInternalTransaction_ReturnsNullWhenEmpty()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
-                client.Connect();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
+                await client.ConnectAsync();
 
                 var tm = new TransactionManager(client);
                 TransactionManager.ScopedTransactions = new ThreadContextWrapper<TransactionScopeProxy>();
@@ -170,12 +169,12 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void CurrentInternalTransaction_ReturnsNullWhenScopedTransactionsIsNull()
+        public async Task CurrentInternalTransaction_ReturnsNullWhenScopedTransactionsIsNull()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
-                client.Connect();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
+                await client.ConnectAsync();
 
                 var tm = new TransactionManager(client);
                 TransactionManager.ScopedTransactions = null;
@@ -185,30 +184,30 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void BeginTransactionShouldFailWithLower20Versions()
+        public async Task BeginTransactionShouldFailWithLower20Versions()
         {
             using (var testHarness = new RestTestHarness())
             {
                 var client = testHarness.CreateGraphClient(RestTestHarness.Neo4jVersion.Neo19);
-                client.Connect();
+                await client.ConnectAsync();
                 Assert.Throws<NotSupportedException>(() => client.BeginTransaction());
             }
         }
 
         [Fact]
-        public void BeginTransactionShouldFailWithoutConnectingFirst()
+        public async Task BeginTransactionShouldFailWithoutConnectingFirst()
         {
             var client = new GraphClient(new Uri("http://foo/db/data"), null);
             Assert.Throws<InvalidOperationException>(() => client.BeginTransaction());
         }
 
         [Fact]
-        public void ShouldBeAbleToGetTransactionObjectAfterBeginTransaction()
+        public async Task ShouldBeAbleToGetTransactionObjectAfterBeginTransaction()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
-                client.Connect();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
+                await client.ConnectAsync();
                 using (var transaction = client.BeginTransaction())
                 {
                     Assert.Same(transaction, client.Transaction);
@@ -217,11 +216,11 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void IgnoreSystemTransactionsIfInsideInternalTransaction()
+        public async Task IgnoreSystemTransactionsIfInsideInternalTransaction()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var transaction = client.BeginTransaction())
                 {
                     using (var msTransaction = new TransactionScope())
@@ -235,11 +234,11 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void ShouldNotBeAbleToGetTransactionAfterTransactionScope()
+        public async Task ShouldNotBeAbleToGetTransactionAfterTransactionScope()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var transaction = client.BeginTransaction())
                 {
 
@@ -256,11 +255,11 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void ShouldNotBeInATransactionScopeWhileSuppressed()
+        public async Task ShouldNotBeInATransactionScopeWhileSuppressed()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var transaction = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction(TransactionScopeOption.Suppress))
@@ -273,11 +272,11 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void TransactionJoinedShouldBeTheSame()
+        public async Task TransactionJoinedShouldBeTheSame()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var transaction = client.BeginTransaction())
                 {
 
@@ -290,11 +289,11 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void RequiresNewCreateNewTransaction()
+        public async Task RequiresNewCreateNewTransaction()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var transaction = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction(TransactionScopeOption.RequiresNew))
@@ -309,11 +308,11 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void JoinTransactionAfterSuppressCreatesNewTransaction()
+        public async Task JoinTransactionAfterSuppressCreatesNewTransaction()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction(TransactionScopeOption.Suppress))
@@ -334,16 +333,16 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void JoinedTransactionsCommitAfterAllEmitVote()
+        public async Task JoinedTransactionsCommitAfterAllEmitVote()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction())
                     {
-                        tran2.Commit();
+                        await tran2.CommitAsync();
                     }
 
                     Assert.True(tran.IsOpen);
@@ -357,7 +356,7 @@ namespace Neo4jClient.Test.Transactions
                     Assert.True(client.InTransaction);
                     Assert.True(tran.IsOpen);
 
-                    tran.Commit();
+                    await tran.CommitAsync();
                     Assert.False(tran.IsOpen);
                 }
                 Assert.False(client.InTransaction);
@@ -365,16 +364,16 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void RollbackInJoinedTransactionClosesAllJoinedScopes()
+        public async Task RollbackInJoinedTransactionClosesAllJoinedScopes()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction())
                     {
-                        tran2.Rollback();
+                        await tran2.RollbackAsync();
                     }
 
                     Assert.False(tran.IsOpen);
@@ -384,16 +383,16 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void CommitInRequiresNewDoesntAffectParentScope()
+        public async Task CommitInRequiresNewDoesntAffectParentScope()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction(TransactionScopeOption.RequiresNew))
                     {
-                        tran2.Commit();
+                        await tran2.CommitAsync();
                         Assert.False(tran2.IsOpen);
                     }
 
@@ -404,16 +403,16 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void RollbackInRequiresNewDoesntAffectParentScope()
+        public async Task RollbackInRequiresNewDoesntAffectParentScope()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction())
                 {
                     using (var tran2 = client.BeginTransaction(TransactionScopeOption.RequiresNew))
                     {
-                        tran2.Rollback();
+                        await tran2.RollbackAsync();
                         Assert.False(tran2.IsOpen);
                     }
 
@@ -424,14 +423,14 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void CannotJoinAfterClosedTransaction()
+        public async Task CannotJoinAfterClosedTransaction()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction())
                 {
-                    tran.Commit();
+                    await tran.CommitAsync();
 
                     Assert.False(tran.IsOpen);
                     // should fail here
@@ -442,72 +441,42 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void FailsForCommitInSuppressMode()
+        public async Task FailsForCommitInSuppressMode()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction(TransactionScopeOption.Suppress))
                 {
-                    Assert.Throws<InvalidOperationException>(() => tran.Commit());
+                    await Assert.ThrowsAsync<InvalidOperationException>(async () => await tran.CommitAsync());
                 }
             }
         }
 
         [Fact]
-        public void FailsForRollbackInSuppressMode()
+        public async Task FailsForRollbackInSuppressMode()
         {
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 using (var tran = client.BeginTransaction(TransactionScopeOption.Suppress))
                 {
-                    Assert.Throws<InvalidOperationException>(() => tran.Rollback());
+                    await Assert.ThrowsAsync<InvalidOperationException>(async () => await tran.RollbackAsync());
                 }
             }
         }
 
-        [Fact]
-        public void ShouldNotBeAbleToCommitTwice()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            transaction.Commit();
-            Assert.Throws<ClosedTransactionException>(() => transaction.Commit());
-        }
+    
 
         [Fact]
-        public void ShouldNotBeAbleToRollbackTwice()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            transaction.Rollback();
-            Assert.Throws<ClosedTransactionException>(() => transaction.Rollback());
-        }
-
-        [Fact]
-        public void ShouldNotBeAbleToCommitAfterRollback()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            transaction.Rollback();
-            Assert.Throws<ClosedTransactionException>(() => transaction.Commit());
-        }
-
-        [Fact]
-        public void ShouldNotBeAbleToRollbackAfterCommit()
-        {
-            var transaction = new Neo4jRestTransaction(new GraphClient(new Uri("http://foo/db/data")));
-            transaction.Commit();
-            Assert.Throws<ClosedTransactionException>(() => transaction.Rollback());
-        }
-
-        [Fact]
-        public void TwoThreadsShouldNotHaveTheSameTransactionObject()
+        public async Task TwoThreadsShouldNotHaveTheSameTransactionObject()
         {
             // if thread support is not well implemented then the t2's BeginTransaction will fail with NotSupportedException
             ITransaction transactionFromThread1 = null;
             ITransaction transactionFromThread2 = null;
             using (var testHarness = new RestTestHarness())
             {
-                var client = testHarness.CreateAndConnectTransactionalGraphClient();
+                var client = await testHarness.CreateAndConnectTransactionalGraphClient();
                 var firstTransactionSet = new EventWaitHandle(false, EventResetMode.AutoReset);
                 var secondTransactionSet = new EventWaitHandle(false, EventResetMode.AutoReset);
                 var t1 = new Task(() =>
@@ -557,12 +526,12 @@ namespace Neo4jClient.Test.Transactions
         }
 
         [Fact]
-        public void ShouldPromoteBadQueryResponseToNiceException()
+        public async Task ShouldPromoteBadQueryResponseToNiceException()
         {
             // Arrange
             const string queryText = @"broken query";
-            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection);
-            var cypherApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery, false)};
+            var cypherQuery = new CypherQuery(queryText, new Dictionary<string, object>(), CypherResultMode.Projection, "neo4j");
+            var cypherApiQuery = new CypherStatementList {new CypherTransactionStatement(cypherQuery)};
 
             using (var testHarness = new RestTestHarness
                 {
@@ -575,13 +544,13 @@ namespace Neo4jClient.Test.Transactions
                     }
                 })
             {
-                var graphClient = testHarness.CreateAndConnectTransactionalGraphClient();
+                var graphClient = await testHarness.CreateAndConnectTransactionalGraphClient();
                 var rawClient = (IRawGraphClient) graphClient;
 
                 using (graphClient.BeginTransaction())
                 {
 
-                    var ex = Assert.Throws<NeoException>(() => rawClient.ExecuteCypher(cypherQuery));
+                    var ex = await Assert.ThrowsAsync<NeoException>(async () => await rawClient.ExecuteCypherAsync(cypherQuery));
                     Assert.Equal("InvalidSyntax: Invalid input b: expected SingleStatement (line 1, column 1)\nThis is not a valid Cypher Statement.\n ^", ex.Message);
                     Assert.Equal("Invalid input b: expected SingleStatement (line 1, column 1)\nThis is not a valid Cypher Statement.\n ^", ex.NeoMessage);
                     Assert.Equal("InvalidSyntax", ex.NeoExceptionName);

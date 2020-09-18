@@ -1,0 +1,179 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Neo4jClient.Execution
+{
+    internal class ResponseBuilder : IResponseBuilder
+    {
+        protected readonly HttpRequestMessage _request;
+        protected readonly ExecutionConfiguration _executionConfiguration;
+        protected readonly ISet<HttpStatusCode> _expectedStatusCodes;
+        protected readonly IList<ErrorGenerator> _errorGenerators;
+        protected readonly NameValueCollection _customHeaders;
+        protected readonly int? _maxExecutionTime;
+        internal const string MaxExecutionTimeHeaderKey = "max-execution-time";
+
+        public ISet<HttpStatusCode> ExpectedStatusCodes
+        {
+            get { return _expectedStatusCodes; }
+        }
+
+        public IList<ErrorGenerator> ErrorGenerators
+        {
+            get { return _errorGenerators; }
+        }
+
+        public ResponseBuilder(HttpRequestMessage request, ExecutionConfiguration executionConfiguration, NameValueCollection nameValueCollection, int? maxExecutionTime = null)
+            : this(request, new HashSet<HttpStatusCode>(), executionConfiguration, new List<ErrorGenerator>(), nameValueCollection, maxExecutionTime)
+        {
+        }
+
+        public ResponseBuilder(HttpRequestMessage request, ISet<HttpStatusCode> expectedStatusCodes, ExecutionConfiguration executionConfiguration) :
+            this(request, expectedStatusCodes, executionConfiguration, new List<ErrorGenerator>(), null)
+        {
+        }
+
+        public ResponseBuilder(HttpRequestMessage request, ISet<HttpStatusCode> expectedStatusCodes,
+            ExecutionConfiguration executionConfiguration, IList<ErrorGenerator> errorGenerators, NameValueCollection customHeaders, int? maxExecutionTime = null)
+        {
+            _request = request;
+            _expectedStatusCodes = expectedStatusCodes;
+            _executionConfiguration = executionConfiguration;
+            _errorGenerators = errorGenerators;
+            _customHeaders = customHeaders;
+            _maxExecutionTime = maxExecutionTime;
+        }
+
+        protected ISet<HttpStatusCode> UnionStatusCodes(
+            IEnumerable<HttpStatusCode> source1,
+            IEnumerable<HttpStatusCode> source2
+        )
+        {
+            var expectedStatusCodes = new HashSet<HttpStatusCode>(source1);
+            expectedStatusCodes.UnionWith(source2);
+            return expectedStatusCodes;
+        }
+
+        public IResponseBuilder WithExpectedStatusCodes(params HttpStatusCode[] statusCodes)
+        {
+            return new ResponseBuilder(_request, UnionStatusCodes(_expectedStatusCodes, statusCodes),
+                _executionConfiguration, _errorGenerators, _customHeaders, _maxExecutionTime);
+        }
+
+        public IResponseFailBuilder FailOnCondition(Func<HttpResponseMessage, bool> condition)
+        {
+            return new ResponseFailBuilder(_request, _expectedStatusCodes, _executionConfiguration, _errorGenerators,
+                condition, _customHeaders);
+        }
+
+        private async Task<HttpResponseMessage> PrepareAsync()
+        {
+            if (_executionConfiguration.UseJsonStreaming)
+            {
+                _request.Headers.Accept.Clear();
+                _request.Headers.Remove("Accept");
+                _request.Headers.Add("Accept", "application/json;stream=true");
+                _request.Headers.Remove("X-Stream");
+                _request.Headers.Add("X-Stream", "true");
+            }
+
+            _request.Headers.Add("User-Agent", _executionConfiguration.UserAgent);
+
+            if (_maxExecutionTime.HasValue)
+            {
+                _request.Headers.Add(MaxExecutionTimeHeaderKey, _maxExecutionTime.Value.ToString());
+            }
+
+            if (_customHeaders != null && _customHeaders.Count > 0)
+            {
+                foreach (var customHeaderKey in _customHeaders.AllKeys)
+                {
+                    var headerValue = _customHeaders.Get(customHeaderKey);
+                    if (!string.IsNullOrWhiteSpace(headerValue))
+                    {
+                        _request.Headers.Add(customHeaderKey, headerValue);
+                    }
+                }
+            }
+
+            var userInfo = _request.RequestUri.UserInfo;
+            if (!string.IsNullOrEmpty(userInfo))
+            {
+                var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes(userInfo));
+                _request.Headers.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+            }
+
+            return await _executionConfiguration.HttpClient.SendAsync(_request).ConfigureAwait(false);
+        }
+
+        public Task<HttpResponseMessage> ExecuteAsync()
+        {
+            return ExecuteAsync(null, null);
+        }
+
+        public Task<HttpResponseMessage> ExecuteAsync(string commandDescription)
+        {
+            return ExecuteAsync(commandDescription, null);
+        }
+
+
+        public Task<HttpResponseMessage> ExecuteAsync(Func<HttpResponseMessage, HttpResponseMessage> continuationFunction)
+        {
+            return ExecuteAsync(null, continuationFunction);
+        }
+
+        public async Task<HttpResponseMessage> ExecuteAsync(string commandDescription, Func<HttpResponseMessage, HttpResponseMessage> continuationFunction)
+        {
+            var response = await PrepareAsync().ConfigureAwait(false);
+            if (string.IsNullOrEmpty(commandDescription))
+            {
+                await response.EnsureExpectedStatusCode(_expectedStatusCodes.ToArray()).ConfigureAwait(false);
+            }
+            else
+            {
+                await response.EnsureExpectedStatusCode(commandDescription, _expectedStatusCodes.ToArray()).ConfigureAwait(false);
+            }
+
+            // if there is condition for an error, but its generator is null then return null
+            // for generics this will get converted to default(TParse)
+            foreach (var errorGenerator in _errorGenerators)
+            {
+                if (errorGenerator.Condition(response))
+                {
+                    if (errorGenerator.Generator != null)
+                    {
+                        throw errorGenerator.Generator(response);
+                    }
+
+                    return null;
+                }
+            }
+
+            return continuationFunction != null ?
+                continuationFunction(response) :
+                response;
+        }
+
+        public Task<TExpected> ExecuteAsync<TExpected>(Func<HttpResponseMessage, TExpected> continuationFunction)
+        {
+            return ExecuteAsync(null, continuationFunction);
+        }
+
+        public async Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<HttpResponseMessage, TExpected> continuationFunction)
+        {
+            return continuationFunction(await ExecuteAsync(commandDescription, null).ConfigureAwait(false));
+        }
+
+        public IResponseBuilder<TParse> ParseAs<TParse>() where TParse : new()
+        {
+            return new ResponseBuilder<TParse>(_request, _expectedStatusCodes, _executionConfiguration);
+        }
+    }
+}

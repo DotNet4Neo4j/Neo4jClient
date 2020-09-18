@@ -1,0 +1,21 @@
+﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Neo4jClient.Cypher;
+
+namespace Neo4jClient.Execution
+{
+    internal interface IResponseBuilder<TResult> where TResult : new()
+    {
+        IResponseBuilder<TResult> WithExpectedStatusCodes(params HttpStatusCode[] statusCodes);
+        IResponseFailBuilder<TResult> FailOnCondition(Func<HttpResponseMessage, bool> condition);
+        Task<TResult> ExecuteAsync(string commandDescription);
+        Task<TResult> ExecuteAsync(Func<TResult, TResult> continuationFunction);
+        Task<TResult> ExecuteAsync(string commandDescription, Func<TResult, TResult> continuationFunction);
+        Task<TResult> ExecuteAsync();
+
+        Task<TExpected> ExecuteAsync<TExpected>(Func<TResult, TExpected> continuationFunction);
+        Task<TExpected> ExecuteAsync<TExpected>(string commandDescription, Func<TResult, TExpected> continuationFunction);
+    }
+}
