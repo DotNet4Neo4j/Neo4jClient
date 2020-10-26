@@ -174,6 +174,69 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
+        public void WhereIfTrue()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .WhereIf(true, (FooCamel a) => a.LongBar == 123)
+                .Query;
+
+            Assert.Equal("WHERE (a.LongBar = $p0)", query.QueryText);
+            Assert.Equal(1, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void WhereIfFalse()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .WhereIf(false, (FooCamel a) => a.LongBar == 123)
+                .Query;
+
+            Assert.Equal("", query.QueryText);
+            Assert.Equal(0, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void AndWhereIf()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .AndWhereIf(11 == 11, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.LongBar = $p0) OR (b.Bar = $p1))" + Environment.NewLine + "AND (c.B = $p2)", query.QueryText);
+            Assert.Equal(3, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void AndWhereIfFalse()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .AndWhereIf(11 == 12, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.LongBar = $p0) OR (b.Bar = $p1))", query.QueryText);
+            Assert.Equal(2, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void OrWhereIf()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .OrWhereIf(11 == 11, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.LongBar = $p0) OR (b.Bar = $p1))" + Environment.NewLine + "OR (c.B = $p2)", query.QueryText);
+            Assert.Equal(3, query.QueryParameters.Count);
+        }
+
+        [Fact]
         public void ComparePropertiesAcrossEntitiesEqualCamel()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -212,5 +275,88 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))" + Environment.NewLine + "AND (c.b = $p2)", query.QueryText);
             Assert.Equal(3, query.QueryParameters.Count);
         }
+
+        [Fact]
+        public void WhereIfTrueCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .WhereIf(true, (FooCamel a) => a.LongBar == 123)
+                .Query;
+
+            Assert.Equal("WHERE (a.longBar = $p0)", query.QueryText);
+            Assert.Equal(1, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void WhereIfFalseCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .WhereIf(false, (FooCamel a) => a.LongBar == 123)
+                .Query;
+
+            Assert.Equal("", query.QueryText);
+            Assert.Equal(0, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void AndWhereIfCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .AndWhereIf(11 == 11, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))" + Environment.NewLine + "AND (c.b = $p2)", query.QueryText);
+            Assert.Equal(3, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void AndWhereIfFalseCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .AndWhereIf(11 == 12, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))", query.QueryText);
+            Assert.Equal(2, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void OrWhereIfCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .OrWhereIf(11 == 11, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))" + Environment.NewLine + "OR (c.b = $p2)", query.QueryText);
+            Assert.Equal(3, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void OrWhereIfFalseCamel()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            client.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            var query = new CypherFluentQuery(client)
+                .Where((FooCamel a, FooCamel b) => a.LongBar == 123 || b.Bar == 456)
+                .OrWhereIf(11 == 12, (FooCamel c) => c.B == 789)
+                .Query;
+
+            Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))", query.QueryText);
+            Assert.Equal(2, query.QueryParameters.Count);
+        }
+
     }
 }
