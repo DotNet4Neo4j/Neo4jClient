@@ -524,7 +524,7 @@ namespace Neo4jClient.Cypher
                 return true;
 
             jsonConvertersThatTheDeserializerWillUse = jsonConvertersThatTheDeserializerWillUse ?? GraphClient.DefaultJsonConverters;
-            if (jsonConvertersThatTheDeserializerWillUse.Any(c => c.CanConvert(type)))
+            if (jsonConvertersThatTheDeserializerWillUse.Any(c => c.CanConvert(type) && c.CanRead))
                 return true;
 
             var hasDefaultConstructor = type.GetConstructor(Type.EmptyTypes) != null;

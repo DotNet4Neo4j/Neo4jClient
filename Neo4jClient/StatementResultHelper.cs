@@ -284,7 +284,7 @@ namespace Neo4jClient
             };
 
             foreach (var jsonConverter in converters)
-                if (jsonConverter.CanConvert(typeof(T)))
+                if (jsonConverter.CanConvert(typeof(T)) && jsonConverter.CanRead)
                     return JsonConvert.DeserializeObject<T>(record[identifier].As<INode>().ToJsonString(), serializerSettings);
 
 

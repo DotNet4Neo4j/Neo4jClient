@@ -37,7 +37,7 @@ namespace Neo4jClient.Serialization
 
             if (JsonConverters != null)
             {
-                foreach (var converter in JsonConverters.Reverse())
+                foreach (var converter in JsonConverters.Reverse().Where(writer => writer.CanWrite))
                     serializer.Converters.Add(converter);
             }
 
@@ -62,7 +62,7 @@ namespace Neo4jClient.Serialization
 
             if (JsonConverters != null)
             {
-                foreach (var converter in JsonConverters.Reverse())
+                foreach (var converter in JsonConverters.Reverse().Where(writer => writer.CanRead))
                     serializer.Converters.Add(converter);
             }
 
