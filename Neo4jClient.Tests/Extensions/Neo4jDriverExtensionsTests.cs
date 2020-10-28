@@ -319,6 +319,7 @@ namespace Neo4jClient.Tests.Extensions
                 var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
                 actual.Keys.Should().Contain("value");
                 // Upon regression, actual["value"] will be of type JObject
+                actual["value"].Should().NotBeOfType<JObject>();
                 actual["value"].Should().BeOfType<Dictionary<string, object>>();
                 var serializedObj = (Dictionary<string, object>)actual["value"];
 
