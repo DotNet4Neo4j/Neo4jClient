@@ -310,7 +310,7 @@ namespace Neo4jClient.Serialization
         static bool TryJsonConverters(DeserializationContext context, Type type, JToken element, out object instance)
         {
             instance = null;
-            var converter = context.JsonConverters?.FirstOrDefault(c => c.CanConvert(type));
+            var converter = context.JsonConverters?.FirstOrDefault(c => c.CanConvert(type) && c.CanRead);
             if (converter == null) return false;
             using (var reader = element.CreateReader())
             {

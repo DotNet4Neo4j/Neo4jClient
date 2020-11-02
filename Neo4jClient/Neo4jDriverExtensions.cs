@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,7 +67,7 @@ namespace Neo4jClient
             var type = value.GetType();
             var typeInfo = type.GetTypeInfo();
 
-            var converter = converters.FirstOrDefault(c => c.CanConvert(type));
+            var converter = converters.FirstOrDefault(c => c.CanConvert(type) && c.CanWrite);
             if (converter != null)
             {
                 var serializer = new CustomJsonSerializer{JsonConverters = converters, JsonContractResolver = ((IRawGraphClient)gc).JsonContractResolver};

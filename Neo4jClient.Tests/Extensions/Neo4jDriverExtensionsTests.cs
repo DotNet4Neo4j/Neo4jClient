@@ -6,6 +6,7 @@ using FluentAssertions;
 using Moq;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Neo4jClient.Tests.Extensions
@@ -28,6 +29,27 @@ namespace Neo4jClient.Tests.Extensions
     internal class ClassWithDateTimeOffset
     {
         public DateTimeOffset Dt { get; set; }
+    }
+
+    internal class ClassWithString
+    {
+        public string String { get; set; }
+    }
+
+    internal class ClassWithStringReadOnlyConverter : JsonConverter<ClassWithString>
+    {
+        public override bool CanRead => true;
+        public override ClassWithString ReadJson(JsonReader reader, Type objectType, ClassWithString existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            var jo = JObject.Load(reader);
+            return jo.ToObject<ClassWithString>();
+        }
+
+        public override bool CanWrite => false;
+        public override void WriteJson(JsonWriter writer, ClassWithString value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Neo4jDriverExtensionsTests
@@ -274,6 +296,34 @@ namespace Neo4jClient.Tests.Extensions
                 var serializedObj = (Dictionary<string, object>) actual["p"];
 
                 serializedObj["Dt"].Should().Be(dateTime.ToUniversalTime().Ticks);
+            }
+
+            [Fact]
+            // Issue 381 - https://github.com/DotNet4Neo4j/Neo4jClient/issues/381
+            public void UsesCustomJsonSerializersAndRespectsReadOnly()
+            {
+                var obj = new ClassWithString
+                {
+                    String = "This is a String"
+                };
+
+                var mockGc = MockGc;
+                mockGc
+                    .Setup(x => x.JsonConverters)
+                    .Returns(new List<JsonConverter> { new ClassWithStringReadOnlyConverter() });
+
+                var query = new CypherFluentQuery(mockGc.Object)
+                    .Create("(n:Node $value)")
+                    .WithParam("value", obj);
+
+                var actual = query.Query.ToNeo4jDriverParameters(mockGc.Object);
+                actual.Keys.Should().Contain("value");
+                // Upon regression, actual["value"] will be of type JObject
+                actual["value"].Should().NotBeOfType<JObject>();
+                actual["value"].Should().BeOfType<Dictionary<string, object>>();
+                var serializedObj = (Dictionary<string, object>)actual["value"];
+
+                serializedObj["String"].Should().Be(obj.String);
             }
         }
     }
