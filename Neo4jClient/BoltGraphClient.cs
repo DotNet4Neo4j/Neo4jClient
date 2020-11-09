@@ -132,7 +132,10 @@ namespace Neo4jClient
             Driver = driver;
         }
 
-        internal IDriver Driver { get; set; }
+        /// <summary>
+        /// This is the <see cref="IDriver"/> instance used internally for Bolt calls. 
+        /// </summary>
+        public IDriver Driver { get; set; }
         internal IServerAddressResolver AddressResolver => addressResolver;
         private IExecutionPolicyFactory PolicyFactory { get; }
 
