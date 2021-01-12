@@ -290,7 +290,7 @@ namespace Neo4jClient
                     CypherCapabilities = CypherCapabilities.Cypher40;
             }
 
-            await session.CloseAsync();
+            await session.CloseAsync().ConfigureAwait(false);
 
             IsConnected = true;
         }
@@ -324,7 +324,7 @@ namespace Neo4jClient
             async Task<QueryStats> GetQueryStats(IResultCursor resultCursor)
             {
                 if (!query.IncludeQueryStats) return null;
-                var summary = await resultCursor.ConsumeAsync();
+                var summary = await resultCursor.ConsumeAsync().ConfigureAwait(false);
                 stats = new QueryStats(summary.Counters);
 
                 return stats;
@@ -339,7 +339,7 @@ namespace Neo4jClient
                     results = ParseResults<TResult>(await result.StatementResult.ToListAsync().ConfigureAwait(false), query);
                     if (query.IncludeQueryStats)
                     {
-                        var summary = await result.StatementResult.ConsumeAsync();
+                        var summary = await result.StatementResult.ConsumeAsync().ConfigureAwait(false);
                         stats = new QueryStats(summary.Counters);
                     }
                 }
@@ -351,7 +351,7 @@ namespace Neo4jClient
                     {
                         var cursor = await asyncTransaction.RunAsync(query, this).ConfigureAwait(false);
                         var output = await cursor.ToListAsync().ConfigureAwait(false);
-                        stats = await GetQueryStats(cursor);
+                        stats = await GetQueryStats(cursor).ConfigureAwait(false);
                         return output;
                     }
 
@@ -364,7 +364,7 @@ namespace Neo4jClient
                    
 
                     lastBookmark = session.LastBookmark;
-                    await session.CloseAsync();
+                    await session.CloseAsync().ConfigureAwait(false);
                 }
             }
             catch (AggregateException aggregateException)

@@ -68,7 +68,7 @@ namespace Neo4jClient.Transactions.Bolt
             CheckOpenStatus();
 
             if (DriverTransaction != null)
-                await DriverTransaction.CommitAsync();
+                await DriverTransaction.CommitAsync().ConfigureAwait(false);
 
 
             IsOpen = false;
@@ -86,7 +86,7 @@ namespace Neo4jClient.Transactions.Bolt
             CheckOpenStatus();
 
             if (DriverTransaction != null)
-                await DriverTransaction.RollbackAsync();
+                await DriverTransaction.RollbackAsync().ConfigureAwait(false);
 
             IsOpen = false;
         }
