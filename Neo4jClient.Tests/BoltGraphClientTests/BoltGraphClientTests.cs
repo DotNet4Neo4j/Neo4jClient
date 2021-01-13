@@ -7,6 +7,7 @@ using Moq;
 using Neo4j.Driver;
 using Neo4jClient.Tests.Extensions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Xunit;
 
 namespace Neo4jClient.Tests.BoltGraphClientTests
@@ -65,6 +66,30 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             public int TestNeo4jIntIgnore { get; set; }
             [JsonIgnore]
             public int TestJsonIntIgnore { get; set; }
+        }
+
+        [Fact]
+        //Issue from https://github.com/DotNet4Neo4j/Neo4jClient/issues/385
+        public async Task SerializerShouldTakeIntoAccountTheContractResolverProvided()
+        {
+            var mockSession = new Mock<IAsyncSession>();
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+
+            var mockDriver = new Mock<IDriver>();
+            mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
+
+            var bgc = new BoltGraphClient(mockDriver.Object);
+            bgc.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+            await bgc.ConnectAsync();
+
+            var cwa = new ClassWithSomeNeo4jIgnoreAttributes { Text = "foo" };
+            var cfq = bgc.Cypher.Create("(c)").WithParam("testParam", cwa);
+            var expectedParameters = new Dictionary<string, object> {
+                {"testParam", new Dictionary<string, object> {{"text", "foo"}, {"testInt", 0}}
+            }};
+
+            var query = cfq.Query;
+            query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
 
         [Fact]

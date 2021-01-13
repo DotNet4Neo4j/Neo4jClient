@@ -10,6 +10,7 @@ using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
 using Neo4jClient.Transactions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient
 {
@@ -101,9 +102,19 @@ namespace Neo4jClient
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute)) || pi.IsDefined(typeof(Neo4jIgnoreAttribute))))
-                .ToDictionary(pi => pi.Name, pi => Serialize(pi.GetValue(value), converters, gc, pi.CustomAttributes));
+                .ToDictionary(pi => GetPropertyName(pi.Name, gc, type), pi => Serialize(pi.GetValue(value), converters, gc, pi.CustomAttributes));
         }
-        
+
+        private static string GetPropertyName(string argName, IGraphClient gc, Type type)
+        {
+            var jsonObjectContract = gc?.JsonContractResolver?.ResolveContract(type) as JsonObjectContract;
+            var property = jsonObjectContract?.Properties.SingleOrDefault(x => x.UnderlyingName == argName);
+            if (property != null)
+                return property.PropertyName ?? argName;
+
+            return argName;
+        }
+
         private static object SerializeCollection(IEnumerable value, IList<JsonConverter> converters, IGraphClient gc)
         {
             return value.Cast<object>().Select(x => Serialize(x, converters, gc)).ToArray();
@@ -111,8 +122,6 @@ namespace Neo4jClient
 
         private static object SerializePrimitive(Type type, TypeInfo typeInfo, object instance)
         {
-            
-
             if (type == typeof(DateTime))
             {
                 return SerializeDateTime((DateTime) instance);
