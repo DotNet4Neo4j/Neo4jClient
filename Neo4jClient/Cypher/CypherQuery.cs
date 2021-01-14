@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Neo4j.Driver;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json.Serialization;
@@ -102,17 +103,15 @@ namespace Neo4jClient.Cypher
                 }
 
                 var serializer = BuildSerializer();
-                var text = queryParameters
-                    .Keys
-                    .Aggregate(
-                        queryText,
-                        (current, paramName) =>
-                        {
-                            var value = queryParameters[paramName];
-                            value = serializer.Serialize(value);                           
-                            return current.Replace($"${paramName}", value.ToString());
-                        });
 
+                var text = queryText;
+                foreach (var key in queryParameters.Keys)
+                {
+                    var value = queryParameters[key];
+                    value = serializer.Serialize(value);  
+                    text = Regex.Replace(text, $"\\$\\b{key}\\b", value.ToString());
+                }
+                
                 return text;
             }
         }
