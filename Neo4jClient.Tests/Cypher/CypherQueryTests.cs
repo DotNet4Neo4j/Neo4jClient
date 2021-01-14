@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using FluentAssertions;
 using Neo4jClient.Cypher;
 using NSubstitute;
 using Xunit;
@@ -8,6 +10,17 @@ namespace Neo4jClient.Tests.Cypher
     
     public class CypherQueryTests : IClassFixture<CultureInfoSetupFixture>
     {
+
+        [Fact]
+        //Issue 349: https://github.com/DotNet4Neo4j/Neo4jClient/issues/349
+        public void DebugQueryTextShouldWorkWithParametersWithTheSameStart()
+        {
+            var query = new CypherQuery("CREATE (n {a: $value, b: $value1, c: $value2})", new Dictionary<string, object> {{"value", "1"}, {"value1", "2"}, {"value2", "3"}}, CypherResultMode.Set, "neo4j");
+
+            const string expected = "CREATE (n {a: \"1\", b: \"2\", c: \"3\"})";
+            query.DebugQueryText.Should().Be(expected);
+        }
+
         [Fact]
         public void DebugQueryShouldBeSuccessfulWithNullAsParameters()
         {
@@ -95,7 +108,7 @@ namespace Neo4jClient.Tests.Cypher
                     param = (string)null
                 })
                 .Query;
-
+            var text = query.QueryText;
             const string expected = "MATCH null";
             Assert.Equal(expected, query.DebugQueryText);
         }
