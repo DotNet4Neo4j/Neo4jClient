@@ -436,7 +436,7 @@ namespace Neo4jClient
             QueryStats stats = null;
             if (response.ResponseObject?.Content != null)
             {
-                var responseString = await response.ResponseObject.Content.ReadAsStringAsync();
+                var responseString = await response.ResponseObject.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var errors = JsonConvert.DeserializeObject<ErrorsContainer>(responseString);
                 if(errors.Errors.Any())
                     throw new ClientException(errors.Errors.First().Code, errors.Errors.First().Message);

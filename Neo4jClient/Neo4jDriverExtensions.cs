@@ -20,14 +20,14 @@ namespace Neo4jClient
         private const string DefaultTimeSpanFormat = @"d\.hh\:mm\:ss\.fffffff";
 
         
-        public static async Task<IResultCursor> Run(this IAsyncSession session, CypherQuery query, IGraphClient gc)
+        public static Task<IResultCursor> Run(this IAsyncSession session, CypherQuery query, IGraphClient gc)
         {
-            return await session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
+            return session.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
-        public static async Task<IResultCursor> RunAsync(this IAsyncTransaction transaction, CypherQuery query, IGraphClient gc)
+        public static Task<IResultCursor> RunAsync(this IAsyncTransaction transaction, CypherQuery query, IGraphClient gc)
         {
-            return await transaction.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
+            return transaction.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
         // public static IStatementResult Run(this ITransaction transaction, CypherQuery query, IGraphClient gc)
