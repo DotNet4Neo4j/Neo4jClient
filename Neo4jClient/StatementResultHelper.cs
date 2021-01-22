@@ -269,7 +269,7 @@ namespace Neo4jClient
         private static T Parse<T>(this IRecord record, string identifier, IGraphClient graphClient)
         {
             var typeT = typeof(T);
-            if (typeT.IsPrimitive())
+            if (typeT.IsPrimitive() || record[identifier] is TemporalValue)
                 return record.ParsePrimitive<T>(identifier);
 
             if (typeT.GetTypeInfo().ImplementedInterfaces.Any(x => x.Name == nameof(IEnumerable)) && typeT.Name != nameof(ExpandoObject))
