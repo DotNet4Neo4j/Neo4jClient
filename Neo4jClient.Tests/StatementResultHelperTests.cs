@@ -634,6 +634,21 @@ namespace Neo4jClient.Tests
                 result.Should().Contain("\"IntValue\":1");
                 result.Should().Contain("[]");
             }
+
+            [Fact]
+            public void ParsesNeo4jDateTimeCorrectly()
+            {
+                var record = Substitute.For<IRecord>();
+                record.Keys.Returns(new List<string> { "a" });
+
+                var date = new ZonedDateTime(DateTime.UtcNow);
+                record["a"].Returns(date);
+
+                var result = record.ParseAnonymous(GraphClient);
+                result.Should().BeOfType<string>();
+                result.Should().NotBeNullOrWhiteSpace();
+                result.Should().Be($"{{\"columns\":[\"a\"],\"data\":[[\"{date}\"]]}}");
+            }
         }
 
         public class ToJsonStringMethod : IClassFixture<CultureInfoSetupFixture>
