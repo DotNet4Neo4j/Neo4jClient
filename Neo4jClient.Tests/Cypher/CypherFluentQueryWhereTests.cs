@@ -365,6 +365,7 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             Issue395Method(client, new FooNode { Id = 2 });
         }
+
         public interface INode
         {
             int Id {get;set;}

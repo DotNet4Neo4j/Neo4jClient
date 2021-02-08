@@ -5,8 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Neo4jClient.Extensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Neo4jClient.Cypher
 {
@@ -27,7 +25,7 @@ namespace Neo4jClient.Cypher
         private readonly CypherCapabilities capabilities;
         private readonly bool camelCaseProperties;
 
-        public StringBuilder TextOutput { get; private set; }
+        public StringBuilder TextOutput { get; }
 
         public CypherWhereExpressionVisitor(Func<object, string> createParameterCallback, CypherCapabilities capabilities, bool camelCaseProperties)
         {
@@ -275,14 +273,16 @@ namespace Neo4jClient.Cypher
                 node.Expression.NodeType == ExpressionType.MemberAccess &&
                 ((MemberExpression)node.Expression).Expression.NodeType == ExpressionType.Constant;
 
-            if (isConstantExpression ||
-                isConstantExpressionWrappedInMemberAccess)
+            var isConstantConvertExpression = node.Expression.NodeType == ExpressionType.Convert &&
+                                              ((MemberExpression) ((UnaryExpression) node.Expression).Operand).Expression.NodeType == ExpressionType.Constant;
+
+            if (isConstantExpression || isConstantExpressionWrappedInMemberAccess || isConstantConvertExpression)
             {
                 VisitConstantMember(node);
                 return node;
             }
 
-            throw new NotSupportedException(string.Format("Unhandled node type {0} in MemberExpression: {1}", node.NodeType, node));
+            throw new NotSupportedException($"Unhandled node type {node.NodeType} in MemberExpression: {node}");
         }
 
         void VisitStaticMember(MemberExpression node)
@@ -298,9 +298,7 @@ namespace Neo4jClient.Cypher
                 value = pInfo.GetValue(null, null);
             else
             {
-                throw new NotSupportedException(string.Format(
-                        "Unhandled member type in static member expression: {0}",
-                        node));
+                throw new NotSupportedException($"Unhandled member type in static member expression: {node}");
             }
 
             var valueWrappedInParameter = createParameterCallback(value);
@@ -329,7 +327,7 @@ namespace Neo4jClient.Cypher
             }
 
             var nodeMemberName = node.Member.GetNameUsingJsonProperty();
-            lastWrittenMemberName = string.Format("{0}.{1}{2}", identity, CypherFluentQuery.ApplyCamelCase(camelCaseProperties, nodeMemberName), nullIdentifier);
+            lastWrittenMemberName = $"{identity}.{CypherFluentQuery.ApplyCamelCase(camelCaseProperties, nodeMemberName)}{nullIdentifier}";
             TextOutput.Append(lastWrittenMemberName);
         }
 
@@ -352,12 +350,12 @@ namespace Neo4jClient.Cypher
                 else if (capabilities.SupportsHasFunction)
                 {
                     TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
-                    TextOutput.Append(string.Format("has({0})", lastWrittenMemberName));
+                    TextOutput.Append($"has({lastWrittenMemberName})");
                 }
                 else
                 {
                     TextOutput.Remove(TextOutput.ToString().LastIndexOf(lastWrittenMemberName, StringComparison.Ordinal), lastWrittenMemberName.Length);
-                    TextOutput.Append(string.Format("exists({0})", lastWrittenMemberName));
+                    TextOutput.Append($"exists({lastWrittenMemberName})");
                 }
 
                 // no further processing is required
