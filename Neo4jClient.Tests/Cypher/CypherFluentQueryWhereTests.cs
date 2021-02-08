@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentAssertions;
 using Neo4jClient.Cypher;
 using Neo4jClient.Extensions;
 using Newtonsoft.Json;
@@ -83,7 +84,7 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal(startsWith, query.QueryParameters["p0"]);
         }
 
- 		[Fact]
+        [Fact]
         public void CreatesEndsWithQuery()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -126,8 +127,8 @@ namespace Neo4jClient.Tests.Cypher
 
             Assert.Equal("WHERE (foo.bar = $p0)", query.QueryText);
         }
-		
-		[Fact]
+        
+        [Fact]
         public void UsesCamelCaseNamingStrategyOverPropertyName()
         {
             var client = Substitute.For<IRawGraphClient>();
@@ -356,6 +357,32 @@ namespace Neo4jClient.Tests.Cypher
 
             Assert.Equal("WHERE ((a.longBar = $p0) OR (b.bar = $p1))", query.QueryText);
             Assert.Equal(2, query.QueryParameters.Count);
+        }
+
+        [Fact]
+        public void MemberAccessIssue_Issue395()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            Issue395Method(client, new FooNode { Id = 2 });
+        }
+
+        public interface INode
+        {
+            int Id {get;set;}
+        }
+
+        public class FooNode : INode 
+        {	
+            public int Id { get ;set; }
+        }
+        private void Issue395Method<TNode>(IGraphClient client, TNode node)
+            where TNode : INode
+        {
+            var text = new CypherFluentQuery(client)
+                .Where((FooNode n) => n.Id == node.Id)
+                .Query.DebugQueryText;
+
+            text.Should().Be("WHERE (n.Id = 2)");
         }
 
     }
