@@ -77,7 +77,7 @@ namespace Neo4jClient
             {
                 //TODO - const/etc these
                 if (!new [] {"neo4j", "neo4j+s", "neo4j+ssc"}.Contains(uri.Scheme.ToLowerInvariant()))
-                    throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} you need to provide a 'bolt://' scheme, not '{uri.Scheme}'.");
+                    throw new NotSupportedException($"To use the {nameof(BoltGraphClient)} with an Address Resolver you need to use the 'neo4j://' scheme, for the 'uri' parameter, not '{uri.Scheme}'.");
 
                 addressResolver = new AddressResolver(uri, localUris);
             }
