@@ -14,19 +14,18 @@ namespace Neo4jClient.Cypher
         internal ICypherFluentQuery AndWhere(LambdaExpression expression)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("AND {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties))));
+                w.AppendClause($"AND {CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties)}"));
         }
 
         internal ICypherFluentQuery OrWhere(LambdaExpression expression)
         {
             return Mutate(w =>
-                w.AppendClause(string.Format("OR {0}", CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties))));
+                w.AppendClause($"OR {CypherWhereExpressionBuilder.BuildText(expression, w.CreateParameter, Client.CypherCapabilities, CamelCaseProperties)}"));
         }
 
         public ICypherFluentQuery Where(string text)
         {
-            return Mutate(w =>
-                w.AppendClause(string.Format("WHERE {0}", text)));
+            return Mutate(w => w.AppendClause($"WHERE {text}"));
         }
 
         public ICypherFluentQuery Where<T1>(Expression<Func<T1, bool>> expression)

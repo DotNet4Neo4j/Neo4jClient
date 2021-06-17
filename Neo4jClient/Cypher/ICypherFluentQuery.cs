@@ -68,6 +68,16 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Call(string storedProcedureText);
 
         /// <summary>
+        /// [Neo4j 4.0+] Calls a SubQuery on the Database.
+        /// </summary>
+        /// <remarks>This only works on Neo4j 4.0+</remarks>
+        /// <param name="storedProcedureText">The Sub Query to execute.</param>
+        /// <returns>An <see cref="ICypherFluentQuery"/> instance to continue the query with.</returns>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="storedProcedureText"/> argument is empty or null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if an attempt is made to call this against a server version prior to 3.0.</exception>
+        ICypherFluentQuery Call<T>(Func<ICypherFluentQuery<T>> subQuery);
+
+        /// <summary>
         /// [Neo4j 3.0+] Yields the values from the response of a <see cref="Call"/> method
         /// </summary>
         /// <remarks>This only works on Neo4j 3.0+</remarks>

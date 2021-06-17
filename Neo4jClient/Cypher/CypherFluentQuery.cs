@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Neo4jClient.Cypher
@@ -54,6 +55,14 @@ namespace Neo4jClient.Cypher
             QueryWriter.DatabaseName = databaseName;
             return this;
         }
+
+        public ICypherFluentQuery Call<T>(Func<ICypherFluentQuery<T>> subQuery)
+        {
+            var query = subQuery().Query;
+            return Call($"{{ {query.QueryText} }}", query.QueryParameters);
+        }
+
+       
 
         public ICypherFluentQuery Read
         {
@@ -212,6 +221,54 @@ namespace Neo4jClient.Cypher
             return Mutate(w =>
                 w.AppendClause($"CALL {storedProcedureText}"));
         }
+
+        private ICypherFluentQuery Call(string storedProcedureText, IDictionary<string, object> parameters )
+        {
+            if (!Client.CypherCapabilities.SupportsStoredProcedures)
+                throw new InvalidOperationException("CALL not supported in Neo4j versions older than 3.0");
+
+            if(string.IsNullOrWhiteSpace(storedProcedureText))
+                throw new ArgumentException("The stored procedure to call can't be null or whitespace.", nameof(storedProcedureText));
+
+            var newParameters = RebaseParameters(storedProcedureText, parameters, Query.QueryParameters, out var newStoredProcText, Query.QueryParameters.Count);
+
+            return Mutate(w =>
+            {
+                w.AppendClause($"CALL {newStoredProcText}");
+                w.CreateParameters(newParameters);
+            });
+        }
+
+        private static IDictionary<string, object> RebaseParameters( string storedProcedureText, IEnumerable<KeyValuePair<string, object>> parametersIn, IDictionary<string, object> queryQueryParameters, out string newStoredProcText, int rebaseFrom = 0)
+        {
+            const string regexFormat = @"(?<start>^|[\s\(])(?<parameter>\${0})(?<end>$|[\s\)])";
+            var parameters = parametersIn.ToList();
+
+            if (!parameters.Select(x => x.Key).Any(queryQueryParameters.ContainsKey))
+            {
+                newStoredProcText = storedProcedureText;
+                return parameters.ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            int parameterNumber = rebaseFrom;
+            int maxParamNumber = parameters.Count;
+
+            var output = new Dictionary<string, object>();
+            
+            for(int i = maxParamNumber; i >= parameterNumber && i > 0; i--)
+            {
+                var parameter = parameters[i-1];
+                var newP = $"p{i}";
+                var regex = string.Format(regexFormat, parameter.Key);
+                output.Add(newP, parameter.Value);
+                storedProcedureText = Regex.Replace(storedProcedureText, regex, $@"${{start}}${newP}${{end}}");
+            }
+
+            newStoredProcText = storedProcedureText;
+            return output;
+        }
+
+        
 
         public ICypherFluentQuery Yield(string yieldText)
         {
