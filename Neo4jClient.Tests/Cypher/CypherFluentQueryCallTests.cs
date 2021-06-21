@@ -1,58 +1,58 @@
-﻿// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using FluentAssertions;
-// using Neo4jClient.Cypher;
-// using NSubstitute;
-// using Xunit;
-//
-// namespace Neo4jClient.Tests.Cypher
-// {
-//     
-//     public class CypherFluentQueryCallTests : IClassFixture<CultureInfoSetupFixture>
-//     {
-//         private class Foo
-//         {
-//             public int Id { get; set; }
-//         }
-//
-//         private static IRawGraphClient GraphClient_30
-//         {
-//             get
-//             {
-//                 var client = Substitute.For<IRawGraphClient>();
-//                 client.CypherCapabilities.Returns(CypherCapabilities.Cypher30);
-//                 return client;
-//             }
-//         }
-//
-//         [Fact]
-//         public void CallsStoredProcedureGiven()
-//         {
-//             var client = GraphClient_30;
-//             var query = new CypherFluentQuery(client)
-//                 .Call("apoc.sp()")
-//                 .Query;
-//
-//             Assert.Equal("CALL apoc.sp()", query.QueryText);
-//         }
-//
-//         [Fact]
-//         public void ThrowArgumentException_WhenNoStoredProcedureIsGiven()
-//         {
-//             var client = GraphClient_30;
-//             Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).Call(null).Query);
-//         }
-//
-//         [Fact]
-//         public void ThrowsInvalidOperationException_WhenClientVersionIsLessThan_30()
-//         {
-//             var client = GraphClient_30;
-//             client.CypherCapabilities.Returns(CypherCapabilities.Cypher23);
-//
-//             Assert.Throws<InvalidOperationException>(() => new CypherFluentQuery(client).Call("apoc.sp").Query);
-//         }
-//
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using FluentAssertions;
+using Neo4jClient.Cypher;
+using NSubstitute;
+using Xunit;
+
+namespace Neo4jClient.Tests.Cypher
+{
+    
+    public class CypherFluentQueryCallTests : IClassFixture<CultureInfoSetupFixture>
+    {
+        private class Foo
+        {
+            public int Id { get; set; }
+        }
+
+        private static IRawGraphClient GraphClient_30
+        {
+            get
+            {
+                var client = Substitute.For<IRawGraphClient>();
+                client.CypherCapabilities.Returns(CypherCapabilities.Cypher30);
+                return client;
+            }
+        }
+
+        [Fact]
+        public void CallsStoredProcedureGiven()
+        {
+            var client = GraphClient_30;
+            var query = new CypherFluentQuery(client)
+                .Call("apoc.sp()")
+                .Query;
+
+            Assert.Equal("CALL apoc.sp()", query.QueryText);
+        }
+
+        [Fact]
+        public void ThrowArgumentException_WhenNoStoredProcedureIsGiven()
+        {
+            var client = GraphClient_30;
+            Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).Call(null).Query);
+        }
+
+        [Fact]
+        public void ThrowsInvalidOperationException_WhenClientVersionIsLessThan_30()
+        {
+            var client = GraphClient_30;
+            client.CypherCapabilities.Returns(CypherCapabilities.Cypher23);
+
+            Assert.Throws<InvalidOperationException>(() => new CypherFluentQuery(client).Call("apoc.sp").Query);
+        }
+
 //         [Fact]
 //         public void Call_SubQueriesAsLambda()
 //         {
@@ -212,5 +212,5 @@
 //             callQuery.Query.QueryParameters.Should().ContainKeys("p0", "p1", "p2", "p3");
 //         }
 //         private class IdClass {public int Id { get;set; }}
-//     }
-// }
+    }
+}
