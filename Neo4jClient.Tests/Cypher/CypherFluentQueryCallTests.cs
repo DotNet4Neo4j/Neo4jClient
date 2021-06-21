@@ -53,25 +53,25 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Throws<InvalidOperationException>(() => new CypherFluentQuery(client).Call("apoc.sp").Query);
         }
 
-//         [Fact]
-//         public void Call_SubQueriesAsLambda()
-//         {
-//             const string expected = @"CALL { MATCH (n)
-// RETURN count(n) AS c }
-// RETURN c";
-//
-//             var client = GraphClient_30;
-//             
-//             var query = new CypherFluentQuery(client)
-//                 .Match("(n)")
-//                 .Return(n => new {c = n.Count()});
-//             
-//             var callQuery = new CypherFluentQuery(client)
-//                 .Call(() => query)
-//                 .Return(c => c.As<long>());
-//
-//             callQuery.Query.QueryText.Should().Be(expected);
-//         }
+        [Fact]
+        public void Call_SubQueriesAsLambda()
+        {
+            const string expected = @"CALL { MATCH (n)
+RETURN count(n) AS c }
+RETURN c";
+
+            var client = GraphClient_30;
+            
+            var query = new CypherFluentQuery(client)
+                .Match("(n)")
+                .Return(n => new {c = n.Count()});
+            
+            var callQuery = new CypherFluentQuery(client)
+                .Call(() => query)
+                .Return(c => c.As<long>());
+
+            callQuery.Query.QueryText.Should().Be(expected);
+        }
 //
 //         [Fact]
 //         public void Call_SubQueriesAsLambdaWithParameters()
