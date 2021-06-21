@@ -56,9 +56,7 @@ namespace Neo4jClient.Tests.Cypher
         [Fact]
         public void Call_SubQueriesAsLambda()
         {
-            const string expected = @"CALL { MATCH (n)
-RETURN count(n) AS c }
-RETURN c";
+            const string expected = "CALL { MATCH (n)\r\nRETURN count(n) AS c }\r\nRETURN c";
 
             var client = GraphClient_30;
             
