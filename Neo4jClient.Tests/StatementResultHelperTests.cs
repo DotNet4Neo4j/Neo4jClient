@@ -288,7 +288,7 @@ namespace Neo4jClient.Tests
             }
 
             [Fact]
-            public void DeserilizesProjectedListCorrectly()
+            public void DeserializesProjectedListCorrectly()
             {
                 var expectedContent = "{ \"columns\":[\"a\",\"b\"], \"data\":[[ {\"data\":{ \"Value\":\"foo\" }},[{\"nested_b1\":{\"data\":{ \"Value\":\"bar\" }}},{\"nested_b2\":{\"data\":{ \"Value\":\"foobar\" }}}] ]] }";
 
