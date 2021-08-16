@@ -288,7 +288,7 @@ namespace Neo4jClient.Tests
             }
 
             [Fact]
-            public void DeserilizesProjectedListCorrectly()
+            public void DeserializesProjectedListCorrectly()
             {
                 var expectedContent = "{ \"columns\":[\"a\",\"b\"], \"data\":[[ {\"data\":{ \"Value\":\"foo\" }},[{\"nested_b1\":{\"data\":{ \"Value\":\"bar\" }}},{\"nested_b2\":{\"data\":{ \"Value\":\"foobar\" }}}] ]] }";
 
@@ -306,6 +306,32 @@ namespace Neo4jClient.Tests
                 record.Keys.Returns(new List<string> { "a", "b" });
                 record["a"].Returns(nodeA);
                 record["b"].Returns(listB);
+
+                var mockDeserializer = new Mock<ICypherJsonDeserializer<DerivedClass>>();
+                mockDeserializer
+                    .Setup(d => d.Deserialize(It.IsAny<string>(), false))
+                    .Returns(new List<DerivedClass>());
+
+                record.Deserialize(mockDeserializer.Object, CypherResultMode.Projection);
+                mockDeserializer.Verify(d => d.Deserialize(expectedContent, false), Times.Once);
+            }
+
+            [Fact]
+            public void DeserializesProjectedSetCorrectly()
+            {
+                var expectedContent = "{ \"columns\":[\"a\"], \"data\":[[ { \"b\":[{\"c\":[\"d\"]},{\"e\":[\"f\"]}],\"g\":42 } ]] }";
+
+                var relation1 = new TestRelationship(new Dictionary<string, object> { { "c", new List<object> { "d" } } });
+                var relation2 = new TestRelationship(new Dictionary<string, object> { { "e", new List<object> { "f" } } });
+                var nodeA = new Dictionary<string, object>
+                {
+                    {"b", new List<IRelationship> {relation1, relation2}},
+                    {"g", 42}
+                };
+
+                var record = Substitute.For<IRecord>();
+                record.Keys.Returns(new List<string> { "a" });
+                record["a"].Returns(nodeA);
 
                 var mockDeserializer = new Mock<ICypherJsonDeserializer<DerivedClass>>();
                 mockDeserializer

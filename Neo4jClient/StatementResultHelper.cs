@@ -60,7 +60,7 @@ namespace Neo4jClient
                 return $"{{\"data\":{{ {string.Join(",", props)} }}}}";
 
             if (inSet)
-                return $"{{\"data\": {string.Join(",", props)} }}";
+                return $"{string.Join(",", props)}";
 
             return $"{{\"data\":{{ {string.Join(",", props)} }}}}";
         }
