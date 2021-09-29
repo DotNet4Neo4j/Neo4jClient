@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Neo4j.Driver;
 using Neo4jClient.Cypher;
 using Neo4jClient.Serialization;
-using Neo4jClient.Transactions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -100,9 +99,20 @@ namespace Neo4jClient
         
         private static object SerializeObject(Type type, object value, IList<JsonConverter> converters, IGraphClient gc)
         {
-            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute)) || pi.IsDefined(typeof(Neo4jIgnoreAttribute))))
-                .ToDictionary(pi => GetPropertyName(pi.Name, gc, type), pi => Serialize(pi.GetValue(value), converters, gc, pi.CustomAttributes));
+            var serialized = new Dictionary<string, object>();
+            foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(pi => !(pi.GetIndexParameters().Any() || pi.IsDefined(typeof(JsonIgnoreAttribute)) || pi.IsDefined(typeof(Neo4jIgnoreAttribute)))))
+            {
+                var propertyName = GetPropertyName(propertyInfo.Name, gc, type);
+                var propertyValue = propertyInfo.GetValue(value);
+
+                if (propertyValue != null || gc.ExecutionConfiguration.SerializeNullValues)
+                {
+                    serialized.Add(propertyName, Serialize(propertyValue, converters, gc, propertyInfo.CustomAttributes));
+                }
+            }
+            
+            return serialized;
         }
 
         private static string GetPropertyName(string argName, IGraphClient gc, Type type)
@@ -181,7 +191,10 @@ namespace Neo4jClient
                 string key = item.Key;
                 object entry = item.Value;
 
-                serialized[key] = Serialize(entry, converters, gc);
+                if (entry != null || gc.ExecutionConfiguration.SerializeNullValues)
+                {
+                    serialized[key] = Serialize(entry, converters, gc);
+                }
             }
 
             return serialized;

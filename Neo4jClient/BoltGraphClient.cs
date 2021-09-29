@@ -70,7 +70,7 @@ namespace Neo4jClient
         /// <param name="username">The username to connect to Neo4j with.</param>
         /// <param name="password">The password to connect to Neo4j with.</param>
         /// <param name="realm">The realm to connect to Neo4j with.</param>
-        public BoltGraphClient(Uri uri, IEnumerable<Uri> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
+        public BoltGraphClient(Uri uri, IEnumerable<Uri> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool? serializeNullValues = null)
         {
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
@@ -104,30 +104,31 @@ namespace Neo4jClient
                 JsonConverters = JsonConverters,
                 Username = username,
                 Password = password,
-                Realm = realm
+                Realm = realm,
+                SerializeNullValues = serializeNullValues.GetValueOrDefault()
             };
 
             transactionManager = new BoltTransactionManager(this);
         }
 
-        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
-            : this(uri, null, username, password, realm, encryptionLevel)
+        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool? serializeNullValues = null)
+            : this(uri, null, username, password, realm, encryptionLevel, serializeNullValues)
         { }
 
-        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
-            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel)
+        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool? serializeNullValues = null)
+            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel, serializeNullValues)
         { }
 
-        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null)
-        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel)
+        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool? serializeNullValues = null)
+        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel, serializeNullValues)
         {}
 
-        public BoltGraphClient(string uri, string username = null, string password= null, string realm = null, EncryptionLevel? encryptionLevel = null)
-            : this(new Uri(uri), username, password, realm, encryptionLevel)
+        public BoltGraphClient(string uri, string username = null, string password= null, string realm = null, EncryptionLevel? encryptionLevel = null, bool? serializeNullValues = null)
+            : this(new Uri(uri), username, password, realm, encryptionLevel, serializeNullValues)
         { }
 
         public BoltGraphClient(IDriver driver)
-            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null, null)
+            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null, null, null)
         {
             Driver = driver;
         }

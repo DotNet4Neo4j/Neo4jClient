@@ -21,10 +21,10 @@ namespace Neo4jClient.Tests
 
                 var v1 = d1[d1Key];
                 var v2 = d2[d1Key];
-                if (v1.GetType() == typeof(Dictionary<TKey, TValue>))
+                if (v1?.GetType() == typeof(Dictionary<TKey, TValue>))
                     return IsEqualTo((IDictionary<TKey, TValue>)v1, (IDictionary<TKey, TValue>)v2);
 
-                if (!d1[d1Key].Equals(d2[d1Key]))
+                if(!Equals(d1[d1Key], d2[d1Key]))
                     return false;
             }
             return true;
