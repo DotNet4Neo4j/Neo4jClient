@@ -219,6 +219,79 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             var query = cfq.Query;
             query.ToNeo4jDriverParameters(bgc).IsEqualTo(expectedParameters).Should().BeTrue();
         }
+        
+        [Fact]
+        // Issue from https://github.com/DotNet4Neo4j/Neo4jClient/issues/419
+        public async Task SerializesObjectProperlyWithoutNullPropertiesDefaultConfiguration()
+        {
+            var expectedParameters = new Dictionary<string, object>
+            {
+                {"param", new Dictionary<string, object> {{"Param1", 1}}}
+            };
+
+            await SerializesObjectProperlyWitDifferentStrategies(
+                expectedParameters,
+                client => {}
+            );
+        }
+        
+        [Fact]
+        // Issue from https://github.com/DotNet4Neo4j/Neo4jClient/issues/419
+        public async Task SerializesObjectProperlyWithNullProperties()
+        {
+            var expectedParameters = new Dictionary<string, object>
+            {
+                {"param", new Dictionary<string, object> {{"Param1", 1}, {"Param2", null}}}
+            };
+
+            await SerializesObjectProperlyWitDifferentStrategies(
+                expectedParameters,
+                client => client.ExecutionConfiguration.SerializeNullValues = true
+            );
+        }
+        
+        [Fact]
+        // Issue from https://github.com/DotNet4Neo4j/Neo4jClient/issues/419
+        public async Task SerializesObjectProperlyWithoutNullProperties()
+        {
+            var expectedParameters = new Dictionary<string, object>
+            {
+                { "param", new Dictionary<string, object> { { "Param1", 1 } } }
+            };
+            
+            await SerializesObjectProperlyWitDifferentStrategies(
+                expectedParameters,
+                client => client.ExecutionConfiguration.SerializeNullValues = false
+            );
+        }
+
+        private static async Task SerializesObjectProperlyWitDifferentStrategies(IDictionary<string, object> expectedParameters, Action<BoltGraphClient> setupClient)
+        {
+            var mockSession = new Mock<IAsyncSession>();
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()"))
+                .Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+
+            var mockDriver = new Mock<IDriver>();
+            mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
+
+            var bgc = new BoltGraphClient(mockDriver.Object);
+            await bgc.ConnectAsync();
+
+            setupClient(bgc);
+
+            var obj = new
+            {
+                Param1 = 1,
+                Param2 = (object)null
+            };
+
+            var cfq = bgc.Cypher.Create("MATCH (node:FakeNode) SET node += $param").WithParam("param", obj);
+
+            var query = cfq.Query;
+            var t = query.ToNeo4jDriverParameters(bgc);
+            t.IsEqualTo(expectedParameters).Should().BeTrue();
+        }
+
         //
         // [Fact]
         // public void RootNode_ThrowsInvalidOperationException()

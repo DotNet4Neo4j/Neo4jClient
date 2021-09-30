@@ -22,5 +22,6 @@ namespace Neo4jClient.Execution
         public Guid ResourceManagerId { get; set; }
         public string Realm { get; set; }
         public EncryptionLevel? EncryptionLevel { get; set; }
+        public bool SerializeNullValues { get; set; }
     }
 }
