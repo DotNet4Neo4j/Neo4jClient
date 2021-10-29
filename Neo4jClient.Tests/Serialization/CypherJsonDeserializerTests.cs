@@ -1537,5 +1537,22 @@ namespace Neo4jClient.Tests.Serialization
             // Assert
             Assert.Equal(new byte[] { 1, 2, 3, 4 }, result);
         }
+
+        [Fact]
+        public void DeserializerShouldThrowNeoExceptionForSyntaxError()
+        {
+            // Arrange 
+            var client = Substitute.For<IGraphClient>();
+            var deserializer = new CypherJsonDeserializer<byte[]>(client, CypherResultMode.Set, CypherResultFormat.DependsOnEnvironment);
+            var content = @"{
+                          'results': [],
+                          'errors': [ { 
+                            'code': 'Neo.ClientError.Statement.SyntaxError', 
+                            'message': 'Parentheses are required to identify nodes in patterns, i.e. (user) (line 1, column 7 (offset: 6))\r\n\'MATCH user:User\'\r\n       ^'}]
+                          }".Replace("'", "\"");
+
+            // Act & Assert
+            Assert.Throws<NeoException>(() => deserializer.Deserialize(content, true).First());
+        }
     }
 }
