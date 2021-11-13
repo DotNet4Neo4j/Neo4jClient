@@ -31,8 +31,8 @@ namespace Neo4jClient.Serialization
         public static NeoException DeserializeNeo4jError(JToken error) =>
             new NeoException(new ApiModels.ExceptionResponse
             {
-                Exception = error.First.Value<JToken>("code").ToString(),
-                Message = error.First.Value<JToken>("message").ToString(),
+                Exception = error.First?.Value<JToken>("code")?.ToString(),
+                Message = error.First?.Value<JToken>("message")?.ToString(),
             });
 
         public static string ReplaceAllDateInstancesWithNeoDates(string content)
