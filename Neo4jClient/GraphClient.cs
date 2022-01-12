@@ -119,6 +119,8 @@ namespace Neo4jClient
 
                 if (version >= new Version(4, 0))
                     CypherCapabilities = CypherCapabilities.Cypher40;
+                if(ServerVersion >= new Version(4,4))
+                    CypherCapabilities = CypherCapabilities.Cypher44;
             }
             catch (AggregateException ex)
             {

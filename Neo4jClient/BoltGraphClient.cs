@@ -285,10 +285,12 @@ namespace Neo4jClient
                 var version = record["versions"].As<List<object>>();
                 ServerVersion = RootApiResponse.GetVersion(version?.First()?.ToString());
 
-                if (ServerVersion > new Version(3, 0))
+                if (ServerVersion >= new Version(3, 0))
                     CypherCapabilities = CypherCapabilities.Cypher30;
                 if(ServerVersion >= new Version(4,0))
                     CypherCapabilities = CypherCapabilities.Cypher40;
+                if(ServerVersion >= new Version(4,4))
+                    CypherCapabilities = CypherCapabilities.Cypher44;
             }
 
             await session.CloseAsync().ConfigureAwait(false);

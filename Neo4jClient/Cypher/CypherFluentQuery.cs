@@ -62,6 +62,17 @@ namespace Neo4jClient.Cypher
             return Call($"{{ {query.QueryText} }}", query.QueryParameters);
         }
 
+        public ICypherFluentQuery InTransactions(int? rows = null)
+        {
+            if (!Client.CypherCapabilities.SupportsStoredProceduresWithTransactionalBatching)
+                throw new InvalidOperationException("IN TRANSACTIONS not supported in Neo4j versions older than 4.4");
+
+            return Mutate(w =>
+            {
+                w.AppendClause($"IN TRANSACTIONS{(rows.HasValue ? $" OF {rows.Value} ROWS" : string.Empty)}{Environment.NewLine}");
+            });
+        }
+
        
 
         public ICypherFluentQuery Read
