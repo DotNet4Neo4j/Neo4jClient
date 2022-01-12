@@ -19,9 +19,21 @@ namespace Neo4jClient.Serialization
         public static string RemoveResultsFromJson(string content)
         {
             var root = JToken.Parse(content);
+            var errors = root.Value<JToken>("errors");
+            if (errors != null && errors.HasValues)
+            {
+                throw DeserializeNeo4jError(errors);
+            }
             var output = root.SelectTokens("$.results[0]").Select(j => j.ToString(Formatting.None)).FirstOrDefault();
             return output;
         }
+
+        public static NeoException DeserializeNeo4jError(JToken error) =>
+            new NeoException(new ApiModels.ExceptionResponse
+            {
+                Exception = error.First?.Value<JToken>("code")?.ToString(),
+                Message = error.First?.Value<JToken>("message")?.ToString(),
+            });
 
         public static string ReplaceAllDateInstancesWithNeoDates(string content)
         {
