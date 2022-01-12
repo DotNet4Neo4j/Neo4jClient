@@ -78,6 +78,13 @@ namespace Neo4jClient.Cypher
         ICypherFluentQuery Call<T>(Func<ICypherFluentQuery<T>> subQuery);
 
         /// <summary>
+        /// [Neo4j 4.4+] Batches subqueries 
+        /// </summary>
+        /// <param name="rows"></param>
+        /// <returns></returns>
+        ICypherFluentQuery InTransactions(int? rows = null);
+
+        /// <summary>
         /// [Neo4j 3.0+] Yields the values from the response of a <see cref="Call"/> method
         /// </summary>
         /// <remarks>This only works on Neo4j 3.0+</remarks>

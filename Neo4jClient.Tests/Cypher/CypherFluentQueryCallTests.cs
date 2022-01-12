@@ -8,7 +8,55 @@ using Xunit;
 
 namespace Neo4jClient.Tests.Cypher
 {
-    
+    public class CypherFluentQueryInTransactionsTests : IClassFixture<CultureInfoSetupFixture>
+    {
+        private static IRawGraphClient GraphClient_44
+        {
+            get
+            {
+                var client = Substitute.For<IRawGraphClient>();
+                client.CypherCapabilities.Returns(CypherCapabilities.Cypher44);
+                return client;
+            }
+        }
+
+        [Fact]
+        public void AddsInTransactionsWithNoRows_WhenRowsNotSpecified()
+        {
+            var client = GraphClient_44;
+            var query = new CypherFluentQuery(client)
+                .Call("{arlo()}")
+                .InTransactions()
+                .Query;
+
+            Assert.Equal("CALL {arlo()}\r\nIN TRANSACTIONS", query.QueryText);
+        }
+
+        [Fact]
+        public void AddsInTransactionsWithRows_WhenRowsSpecified()
+        {
+            var client = GraphClient_44;
+            var query = new CypherFluentQuery(client)
+                .Call("{arlo()}")
+                .InTransactions(1000)
+                .Query;
+
+            Assert.Equal("CALL {arlo()}\r\nIN TRANSACTIONS OF 1000 ROWS", query.QueryText);
+        }
+
+        [Fact]
+        public void AddsInTransactionsWithNoRows_WhenRowsAreNull()
+        {
+            var client = GraphClient_44;
+            var query = new CypherFluentQuery(client)
+                .Call("{arlo()}")
+                .InTransactions(null)
+                .Query;
+
+            Assert.Equal("CALL {arlo()}\r\nIN TRANSACTIONS", query.QueryText);
+        }
+    }
+
     public class CypherFluentQueryCallTests : IClassFixture<CultureInfoSetupFixture>
     {
         private class Foo
