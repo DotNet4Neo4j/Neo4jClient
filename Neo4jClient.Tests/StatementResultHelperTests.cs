@@ -679,6 +679,11 @@ namespace Neo4jClient.Tests
 
         public class ToJsonStringMethod : IClassFixture<CultureInfoSetupFixture>
         {
+            public ToJsonStringMethod()
+            {
+                StatementResultHelper.JsonSettings.ContractResolver = null;
+            }
+
             private class Foo
             {
                 public string BarStr { get; set; }
@@ -757,6 +762,37 @@ namespace Neo4jClient.Tests
                 result.Replace(" ", "").Should().Be("{\"Foo\":\"foo\",\"Bar\":1}");
             }
 
+            [Fact]
+            public void Poco_DeserializedCorrectlyUsingDifferentContractResolver()
+            {
+                StatementResultHelper.JsonSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                
+                var poco = new Poco {Foo = "some-foo", Bar = 123};
+                var result = poco.ToJsonString(false, false, false);
+
+                result.Replace(" ", "").Should().Be("{\"foo\":\"some-foo\",\"bar\":123}");
+            }
+
+            [Fact]
+            public void NestedPoco_DeserializedCorrectly()
+            {
+                var poco = new Poco {Foo = "foo", Bar = 1};
+                var result = poco.ToJsonString(false, true, false);
+
+                result.Replace(" ", "").Should().Be("{\"Foo\":\"foo\",\"Bar\":1}");
+            }
+
+            [Fact]
+            public void NestedPoco_DeserializedCorrectlyUsingDifferentContractResolver()
+            {
+                StatementResultHelper.JsonSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                
+                var poco = new Poco {Foo = "some-foo", Bar = 123};
+                var result = poco.ToJsonString(false, true, false);
+
+                result.Replace(" ", "").Should().Be("{\"foo\":\"some-foo\",\"bar\":123}");
+            }            
+            
             [Fact]
             public void ListPocoNotNested()
             {
