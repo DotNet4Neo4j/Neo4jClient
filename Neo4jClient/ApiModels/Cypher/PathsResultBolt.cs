@@ -39,13 +39,18 @@ namespace Neo4jClient.ApiModels.Cypher
 
         public class PathsResultBoltRelationship
         {
+            [JsonProperty("Id")]
             public long Id { get; set; }
+            [JsonProperty("Type")]
             public string Type { get; set; }
+            [JsonProperty("StartNodeId")]
             public long StartNodeId { get; set; }
+            [JsonProperty("EndNodeId")]
             public long EndNodeId { get; set; }
 
             public object this[string key] => Properties[key];
 
+            [JsonProperty("Properties")]
             public Dictionary<string, object> Properties { get; set; }
 
             public PathsResultBoltRelationship() { Properties = new Dictionary<string, object>(); }
@@ -90,9 +95,12 @@ namespace Neo4jClient.ApiModels.Cypher
 
         public class PathsResultBoltNode 
         {
+            [JsonProperty("Id")]
             public long Id { get; set; }
+            [JsonProperty("Labels")]
             public List<string> Labels { get; set; }
             public object this[string key] => Properties[key];
+            [JsonProperty("Properties")]
             public Dictionary<string, object> Properties { get; set; }
 
             public PathsResultBoltNode() { Properties = new Dictionary<string, object>(); }

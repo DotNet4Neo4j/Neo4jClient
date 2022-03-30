@@ -8,6 +8,7 @@ using Moq;
 using Neo4j.Driver;
 using Neo4jClient.ApiModels.Cypher;
 using Neo4jClient.Cypher;
+using Newtonsoft.Json.Serialization;
 using Xunit;
 
 namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
@@ -89,7 +90,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
 
         #region Implementation of INode
 
-        public IReadOnlyList<string> Labels { get; }
+        public IReadOnlyList<string> Labels { get; set; }
 
         #endregion
     }
@@ -716,6 +717,60 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
                 results.First().Relationships.Count().Should().Be(1);
                 results.First().End.Id.Should().Be(1);
                 results.First().Start.Id.Should().Be(2);
+            }
+        }
+ 
+        [Fact]
+        public async Task ShouldDeserializePathsResultWhenUsingCamelCaseResolver()
+        {
+            // Arrange
+            const string queryText = @"MATCH (start:Node {Id:$p0}),(end:Node {Id: $p1}), p = shortestPath((start)-[*..5]->(end)) RETURN p";
+
+            var parameters = new Dictionary<string, object>
+            {
+                {"p0", 215},
+                {"p1", 219}
+            };
+
+            var cypherQuery = new CypherQuery(queryText, parameters, CypherResultMode.Set, CypherResultFormat.Rest, "neo4j");
+            
+            using (var testHarness = new BoltTestHarness())
+            {
+                var recordMock = new Mock<IRecord>();
+                recordMock
+                    .Setup(r => r["p"])
+                    .Returns(new TestPath
+                    {
+                        End = new TestNode{Id = 1, Labels = new []{"Node"}}, 
+                        Start = new TestNode{Id=2, Labels = new []{"Node"}}, 
+                        Relationships = new List<IRelationship> {new TestRelationship{Id=3, StartNodeId = 2, EndNodeId = 1, Type = "Foo"}}, 
+                        Nodes = new List<INode> {new TestNode(), new TestNode() }
+                    });
+                recordMock
+                    .Setup(r => r.Keys)
+                    .Returns(new[] {"p"});
+                
+                var testStatementResult = new TestStatementResult(new[] {"p"}, recordMock.Object);
+                testHarness.SetupCypherRequestResponse(cypherQuery.QueryText, cypherQuery.QueryParameters, testStatementResult);
+
+                var graphClient = await testHarness.CreateAndConnectBoltGraphClient();
+                graphClient.JsonContractResolver = new CamelCasePropertyNamesContractResolver();
+                var results = (await graphClient.ExecuteGetCypherResultsAsync<PathsResultBolt>(cypherQuery)).ToArray();
+
+                //Assert
+                Assert.IsAssignableFrom<IEnumerable<PathsResultBolt>>(results);
+                var resultPath = results.First();
+                Assert.Equal(1, resultPath.Length);
+                resultPath.Nodes.Count.Should().Be(2);
+                resultPath.End.Id.Should().Be(1);
+                resultPath.End.Labels.Should().BeEquivalentTo("Node");
+                resultPath.Start.Id.Should().Be(2);
+                resultPath.Start.Labels.Should().BeEquivalentTo("Node");
+                resultPath.Relationships.Count.Should().Be(1);
+                resultPath.Relationships[0].Id.Should().Be(3);
+                resultPath.Relationships[0].StartNodeId.Should().Be(2);
+                resultPath.Relationships[0].EndNodeId.Should().Be(1);
+                resultPath.Relationships[0].Type.Should().Be("Foo");
             }
         }
     }
