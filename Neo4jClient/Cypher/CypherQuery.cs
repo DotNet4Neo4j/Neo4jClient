@@ -103,12 +103,12 @@ namespace Neo4jClient.Cypher
                 }
 
                 var serializer = BuildSerializer();
+                serializer.QuoteName = false;
 
                 var text = queryText;
                 foreach (var key in queryParameters.Keys)
                 {
                     var value = queryParameters[key];
-                    serializer.QuoteName = false;
                     value = serializer.Serialize(value);  
                     text = Regex.Replace(text, $"\\$\\b{key}\\b", value.ToString());
                 }
