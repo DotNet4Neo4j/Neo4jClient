@@ -10,6 +10,31 @@ namespace Neo4jClient.Tests.Cypher
     
     public class CypherQueryTests : IClassFixture<CultureInfoSetupFixture>
     {
+        [Fact]
+        //Issue 436: https://github.com/DotNet4Neo4j/Neo4jClient/issues/436
+        public void DebugQueryTextShouldSerializeObjectPropertyNamesWithoutQuotes()
+        {
+            var client = Substitute.For<IRawGraphClient>();
+            var dummyObject = new { key = "value" };
+
+            var query = new CypherFluentQuery(client)
+                .Merge("(foo:Foo $object)")
+                .WithParam("object", dummyObject)
+                .Query;
+
+            string expected = "MERGE (foo:Foo {" + Environment.NewLine + "  key: \"value\"" + Environment.NewLine + "})";
+            Assert.Equal(expected, query.DebugQueryText);
+
+            var dummyString = "value";
+
+            query = new CypherFluentQuery(client)
+                .Merge("(foo:Foo { key: $value })")
+                .WithParam("value", dummyString)
+                .Query;
+
+            expected = "MERGE (foo:Foo { key: \"value\" })";
+            Assert.Equal(expected, query.DebugQueryText);
+        }
 
         [Fact]
         //Issue 349: https://github.com/DotNet4Neo4j/Neo4jClient/issues/349
@@ -112,5 +137,6 @@ namespace Neo4jClient.Tests.Cypher
             const string expected = "MATCH null";
             Assert.Equal(expected, query.DebugQueryText);
         }
+
     }
 }

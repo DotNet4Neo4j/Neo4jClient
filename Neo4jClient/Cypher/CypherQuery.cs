@@ -108,6 +108,7 @@ namespace Neo4jClient.Cypher
                 foreach (var key in queryParameters.Keys)
                 {
                     var value = queryParameters[key];
+                    serializer.QuoteName = false;
                     value = serializer.Serialize(value);  
                     text = Regex.Replace(text, $"\\$\\b{key}\\b", value.ToString());
                 }
