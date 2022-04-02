@@ -137,6 +137,5 @@ namespace Neo4jClient.Tests.Cypher
             const string expected = "MATCH null";
             Assert.Equal(expected, query.DebugQueryText);
         }
-
     }
 }
