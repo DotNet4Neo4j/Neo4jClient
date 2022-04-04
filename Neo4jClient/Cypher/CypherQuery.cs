@@ -103,6 +103,7 @@ namespace Neo4jClient.Cypher
                 }
 
                 var serializer = BuildSerializer();
+                serializer.QuoteName = false;
 
                 var text = queryText;
                 foreach (var key in queryParameters.Keys)
