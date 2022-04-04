@@ -105,10 +105,10 @@ namespace Neo4jClient.Tests.Cypher
             // Assert
             Assert.Equal("MATCH n" +
                             Environment.NewLine + "CREATE UNIQUE n-[:X]-(leaf {" +
-                            Environment.NewLine + "  \"Id\": 123," +
-                            Environment.NewLine + "  \"Name\": \"Bar\"," +
-                            Environment.NewLine + "  \"Currency\": 12.143," +
-                            Environment.NewLine + "  \"CamelCaseProperty\": \"Foo\"" +
+                            Environment.NewLine + "  Id: 123," +
+                            Environment.NewLine + "  Name: \"Bar\"," +
+                            Environment.NewLine + "  Currency: 12.143," +
+                            Environment.NewLine + "  CamelCaseProperty: \"Foo\"" +
                             Environment.NewLine + "})", query.DebugQueryText);
             Assert.Equal(1, query.QueryParameters.Count);
         }
@@ -142,10 +142,10 @@ namespace Neo4jClient.Tests.Cypher
             // Assert
             Assert.Equal("MATCH n" +
                             Environment.NewLine + "CREATE UNIQUE n-[:X]-(leaf {" +
-                            Environment.NewLine + "  \"id\": 123," +
-                            Environment.NewLine + "  \"name\": \"Bar\"," +
-                            Environment.NewLine + "  \"currency\": 12.143," +
-                            Environment.NewLine + "  \"camelCaseProperty\": \"Foo\"" +
+                            Environment.NewLine + "  id: 123," +
+                            Environment.NewLine + "  name: \"Bar\"," +
+                            Environment.NewLine + "  currency: 12.143," +
+                            Environment.NewLine + "  camelCaseProperty: \"Foo\"" +
                             Environment.NewLine + "})", query.DebugQueryText);
             Assert.Equal(1, query.QueryParameters.Count);
         }
