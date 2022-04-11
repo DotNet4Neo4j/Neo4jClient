@@ -302,6 +302,10 @@ namespace Neo4jClient.Serialization
                     instance = Convert.ChangeType(element.ToString(), type);
                 }
             }
+            else if (type == typeof(object) && element is JValue jValue)
+            {
+                instance = jValue.Value;
+            }
             else
             {
                 try
