@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Neo4jClient.Serialization;
 using Newtonsoft.Json;
@@ -264,6 +265,30 @@ namespace Neo4jClient.Tests.Serialization
 
             // Assert
             Assert.Equal(expectedValue, result);
+        }
+
+        [Fact]
+        //[Description("test part of https://github.com/DotNet4Neo4j/Neo4jClient/issues/439")]
+        public void JsonDeserializeShouldAcceptDictionaryObjectValues()
+        {
+            // Arrange
+            string rawInput = "{'a': 'a', 'b': 42, 'c': true, 'd': 1.2345}";
+
+            var serializer = new CustomJsonDeserializer(new JsonConverter[] { new TypeConverterBasedJsonConverter() });
+
+            // Act
+            var result = serializer.Deserialize<Dictionary<string, object>>(rawInput);
+
+            // Assert
+            Assert.Equal(result.Count, 4);
+            Assert.IsType<string>(result["a"]);
+            Assert.Equal("a", result["a"]);
+            Assert.IsType<long>(result["b"]);
+            Assert.Equal(42l, result["b"]);
+            Assert.IsType<bool>(result["c"]);
+            Assert.Equal(true, result["c"]);
+            Assert.IsType<double>(result["d"]);
+            Assert.Equal(1.2345, result["d"]);
         }
     }
 }
