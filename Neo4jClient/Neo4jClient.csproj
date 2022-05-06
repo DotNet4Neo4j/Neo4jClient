@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0</TargetFrameworks>
         <Company></Company>
-        <Copyright>2020 Readify, Tatham Oddie, Chris Skardon</Copyright>
-        <Authors>Readify, Tatham Oddie, Chris Skardon</Authors>
+        <Copyright>2020 Readify, Tatham Oddie, Charlotte Skardon</Copyright>
+        <Authors>Readify, Tatham Oddie, Charlotte Skardon</Authors>
         <PackageProjectUrl>https://github.com/Readify/Neo4jClient</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <Description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</Description>

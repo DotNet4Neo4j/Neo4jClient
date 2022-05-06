@@ -12,7 +12,7 @@ Read [our wiki docs](https://github.com/DotNet4Neo4j/Neo4jClient/wiki) - **Curre
 The official Neo4jClient build and nuget package is automated via [AppVeyor](http://www.appveyor.com). 
 
 ---
-## Stable 4.x [![Build status](https://ci.appveyor.com/api/projects/status/q96upd53uq0hyepe?svg=true)](https://ci.appveyor.com/project/ChrisSkardon/neo4jclient)
+## Stable 4.x [![Build status](https://ci.appveyor.com/api/projects/status/q96upd53uq0hyepe?svg=true)](https://ci.appveyor.com/project/CharlotteSkardon/neo4jclient)
 
 Version 4.0.0 of Neo4jClient is _now_ the stable version. There have been a lot of changes, additions, removals, so it's likely there will be breaking changes.
 
