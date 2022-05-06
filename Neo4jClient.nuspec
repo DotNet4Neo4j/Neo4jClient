@@ -3,8 +3,8 @@
   <metadata>
     <id>Neo4jClient</id>
     <version>$version$</version>
-    <authors>Readify, Chris Skardon</authors>
-    <owners>Tatham Oddie, Chris Skardon</owners>
+    <authors>Readify, Charlotte Skardon</authors>
+    <owners>Tatham Oddie, Charlotte Skardon</owners>
     <licenseUrl>https://github.com/Readify/Neo4jClient/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/Readify/Neo4jClient</projectUrl>
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
