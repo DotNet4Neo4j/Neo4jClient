@@ -73,6 +73,13 @@ namespace Neo4jClient
                 var serializer = new CustomJsonSerializer{JsonConverters = converters, JsonContractResolver = ((IRawGraphClient)gc).JsonContractResolver};
                 return JsonConvert.DeserializeObject<CustomJsonConverterHelper>(serializer.Serialize(new {value})).Value;
             }
+            
+            // check if it is a date time object and the bolt driver has native date time objects enabled
+            if (((gc as IBoltGraphClient)?.UseDriverDateTypes ?? false) && CanHandleNativeDateTimeType(type))
+            {
+                // the driver will take care of serialization
+                return value;
+            }
 
             if (customAttributes != null && customAttributes.Any(x => x.AttributeType == typeof(Neo4jDateTimeAttribute)))
             {
@@ -95,6 +102,11 @@ namespace Neo4jClient
             }
 
             return SerializePrimitive(type, typeInfo, value);
+        }
+
+        private static bool CanHandleNativeDateTimeType(Type type)
+        {
+            return type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan);
         }
         
         private static object SerializeObject(Type type, object value, IList<JsonConverter> converters, IGraphClient gc)

@@ -21,5 +21,10 @@ namespace Neo4jClient
         bool IsConnected { get; }
 
         Task ConnectAsync(NeoServerConfiguration configuration = null);
+
+        /// <summary>
+        /// Indicates if client should use the native driver date time types, instead of serialized datetime strings.
+        /// </summary>
+        bool UseDriverDateTypes { get; }
     }
 }

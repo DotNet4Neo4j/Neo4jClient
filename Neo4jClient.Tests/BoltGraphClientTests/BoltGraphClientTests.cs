@@ -43,11 +43,15 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
         public class ServerInfo : TestStatementResult
         {
-            public ServerInfo(): base(new List<IRecord> {new TestRecord(new Dictionary<string, object>
+            public ServerInfo(Version version) : base(new List<IRecord> {new TestRecord(new Dictionary<string, object>
             {
                 {"name", "neo4j kernel"},
-                {"versions", new List<object>{"3.2.3"} }
+                {"versions", new List<object>{version.ToString(3)} }
             })})
+            {
+            }
+
+            public ServerInfo() : this(new Version(3, 4, 0))
             {
             }
 
