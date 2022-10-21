@@ -188,40 +188,41 @@ namespace Neo4jClient
                 return executionContext;
             }
 
-            public void Complete(CypherQuery query, Bookmark lastBookmark, QueryStats queryStats)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, Bookmarks lastBookmarks, QueryStats queryStats)
             {
-                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, 0, null, identifier: query.Identifier, bookmarks: query.Bookmarks, stats:queryStats);
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, lastBookmarks, 0, null, identifier: query.Identifier, bookmarks: query.Bookmarks, stats:queryStats);
             }
 
-            public void Complete(CypherQuery query, Bookmark lastBookmark)
-            {
-                // only parse the events when there's an event handler
-                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, 0, null, identifier: query.Identifier, bookmarks: query.Bookmarks);
-            }
-
-            public void Complete(CypherQuery query, Bookmark lastBookmark, int resultsCount)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, Bookmarks lastBookmarks)
             {
                 // only parse the events when there's an event handler
-                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, resultsCount, null, query.CustomHeaders, identifier: query.Identifier, bookmarks: query.Bookmarks);
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, lastBookmarks, 0, null, identifier: query.Identifier, bookmarks: query.Bookmarks);
             }
 
-            public void Complete(CypherQuery query, Bookmark lastBookmark, int resultsCount, QueryStats stats)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, Bookmarks lastBookmarks, int resultsCount)
             {
                 // only parse the events when there's an event handler
-                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, resultsCount, null, query.CustomHeaders, identifier: query.Identifier, bookmarks: query.Bookmarks, stats: stats);
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, lastBookmarks, resultsCount, null, query.CustomHeaders, identifier: query.Identifier, bookmarks: query.Bookmarks);
             }
 
-            public void Complete(CypherQuery query, Bookmark lastBookmark, Exception exception)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, Bookmarks lastBookmarks, int resultsCount, QueryStats stats)
             {
                 // only parse the events when there's an event handler
-                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, -1, exception, identifier:query.Identifier, bookmarks:query.Bookmarks);
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, lastBookmarks, resultsCount, null, query.CustomHeaders, identifier: query.Identifier, bookmarks: query.Bookmarks, stats: stats);
             }
 
-            public void Complete(string queryText, Bookmark lastBookmark, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null, string identifier = null, IEnumerable<Bookmark> bookmarks = null, QueryStats stats = null)
+            public void Complete(CypherQuery query, Bookmark lastBookmark, Bookmarks lastBookmarks, Exception exception)
+            {
+                // only parse the events when there's an event handler
+                Complete(owner.OperationCompleted != null ? query.DebugQueryText : string.Empty, lastBookmark, lastBookmarks, -1, exception, identifier:query.Identifier, bookmarks:query.Bookmarks);
+            }
+
+            public void Complete(string queryText, Bookmark lastBookmark, Bookmarks lastBookmarks, int resultsCount = -1, Exception exception = null, NameValueCollection customHeaders = null, int? maxExecutionTime = null, string identifier = null, IEnumerable<Bookmark> bookmarks = null, QueryStats stats = null)
             {
                 var args = new OperationCompletedEventArgs
                 {
                     LastBookmark = lastBookmark,
+                    LastBookmarks = lastBookmarks,
                     QueryText = queryText,
                     ResourcesReturned = resultsCount,
                     TimeTaken = stopwatch.Elapsed,
@@ -322,6 +323,7 @@ namespace Neo4jClient
             var context = ExecutionContext.Begin(this);
             List<TResult> results;
             Bookmark lastBookmark = null;
+            Bookmarks lastBookmarks = null;
             QueryStats stats = null;
 
             async Task<QueryStats> GetQueryStats(IResultCursor resultCursor)
@@ -350,38 +352,40 @@ namespace Neo4jClient
                 {
                     var session = Driver.AsyncSession(ServerVersion, query.Database, query.IsWrite, query.Bookmarks);
 
-                    async Task<List<IRecord>> Records(IAsyncTransaction asyncTransaction)
+                    async Task<List<IRecord>> Records(IAsyncQueryRunner work)
                     {
-                        var cursor = await asyncTransaction.RunAsync(query, this).ConfigureAwait(false);
+                        var cursor = await work.RunAsync(query, this).ConfigureAwait(false);
                         var output = await cursor.ToListAsync().ConfigureAwait(false);
                         stats = await GetQueryStats(cursor).ConfigureAwait(false);
                         return output;
                     }
 
                     var result = query.IsWrite 
-                        ? await session.WriteTransactionAsync(Records).ConfigureAwait(false)
-                        : await session.ReadTransactionAsync(Records).ConfigureAwait(false);
+                        ? await session.ExecuteWriteAsync(Records).ConfigureAwait(false)
+                        : await session.ExecuteReadAsync(Records).ConfigureAwait(false);
 
                     results = ParseResults<TResult>(result, query);
 
-                   
-
-                    lastBookmark = session.LastBookmark;
-                    await session.CloseAsync().ConfigureAwait(false);
+                    if (session != null)
+                    {
+                        lastBookmark = session.LastBookmark;
+                        lastBookmarks = session.LastBookmarks;
+                        await session.CloseAsync().ConfigureAwait(false);
+                    }
                 }
             }
             catch (AggregateException aggregateException)
             {
-                context.Complete(query, lastBookmark, aggregateException.TryUnwrap(out var unwrappedException) ? unwrappedException : aggregateException);
+                context.Complete(query, lastBookmark, lastBookmarks, aggregateException.TryUnwrap(out var unwrappedException) ? unwrappedException : aggregateException);
                 throw;
             }
             catch (Exception e)
             {
-                context.Complete(query, lastBookmark, e);
+                context.Complete(query, lastBookmark, lastBookmarks, e);
                 throw;
             }
 
-            context.Complete(query, lastBookmark, results.Count, stats);
+            context.Complete(query, lastBookmark, lastBookmarks, results.Count, stats);
             return results;
         }
 
@@ -452,9 +456,9 @@ namespace Neo4jClient
                 if (query.IncludeQueryStats)
                 {
                     var summary = await cursor.ConsumeAsync().ConfigureAwait(false);
-                    executionContext.Complete(query, session.LastBookmark, new QueryStats(summary.Counters));
+                    executionContext.Complete(query, session.LastBookmark, session.LastBookmarks, new QueryStats(summary.Counters));
                 }
-                else executionContext.Complete(query, session.LastBookmark);
+                else executionContext.Complete(query, session.LastBookmark, session.LastBookmarks);
             }
         }
 

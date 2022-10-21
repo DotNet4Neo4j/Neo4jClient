@@ -73,7 +73,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task SerializerShouldTakeIntoAccountTheContractResolverProvided()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
@@ -97,7 +97,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task JsonSerializerShouldNotSerializeNeo4jIgnoreAttribute()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
@@ -123,7 +123,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task SerializesDateTimesProperly()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
             
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
@@ -150,7 +150,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task SerializesDateTimeOffsetsProperly()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
@@ -177,7 +177,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task SerializesGuidsProperly()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
@@ -202,7 +202,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         public async Task SerializesGuidsProperlyWhenAutoGeneratingParams()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();
             mockDriver.Setup(d => d.AsyncSession(It.IsAny<Action<SessionConfigBuilder>>())).Returns(mockSession.Object);
@@ -268,7 +268,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         private static async Task SerializesObjectProperlyWitDifferentStrategies(IDictionary<string, object> expectedParameters, Action<BoltGraphClient> setupClient)
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()"))
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null))
                 .Returns(Task.FromResult<IResultCursor>(new ServerInfo()));
 
             var mockDriver = new Mock<IDriver>();

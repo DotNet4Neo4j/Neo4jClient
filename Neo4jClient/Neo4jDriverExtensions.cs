@@ -29,6 +29,11 @@ namespace Neo4jClient
             return transaction.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
         }
 
+        public static Task<IResultCursor> RunAsync(this IAsyncQueryRunner queryRunner, CypherQuery query, IGraphClient gc)
+        {
+            return queryRunner.RunAsync(query.QueryText, query.ToNeo4jDriverParameters(gc));
+        }
+
         // public static IStatementResult Run(this ITransaction transaction, CypherQuery query, IGraphClient gc)
         // {
         //     return transaction.Run(query.QueryText, query.ToNeo4jDriverParameters(gc));
