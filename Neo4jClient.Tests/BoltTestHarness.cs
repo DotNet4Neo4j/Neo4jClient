@@ -6,6 +6,20 @@ using Neo4j.Driver;
 
 namespace Neo4jClient.Tests
 {
+    public class TestRecord : IRecord{
+        /// <inheritdoc />
+        public object this[int index] => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public object this[string key] => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<string, object> Values { get; }
+
+        /// <inheritdoc />
+        public IReadOnlyList<string> Keys { get; }
+    }
+
     public class BoltTestHarness : IDisposable
     {
         public BoltTestHarness()
@@ -19,20 +33,16 @@ namespace Neo4jClient.Tests
 
             var mockSession = new Mock<IAsyncSession>(MockBehavior.Loose);
             mockSession
-                .Setup(s => s.RunAsync("CALL dbms.components()"))
+                .Setup(s => s.RunAsync("CALL dbms.components()", null))
                 .Returns(Task.FromResult<IResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
             mockSession
-                .Setup(s => s.RunAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
+                .Setup(s => s.RunAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>(), null))
                 .Throws(new Exception("Should never use synchronous method"));
-            mockSession
-                .Setup(s => s.WriteTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task>>()))
-                .Throws(new Exception("Should never use synchronous method"));
-            mockSession
-                .Setup(s => s.ReadTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task>>()))
-                .Throws(new Exception("Should never use synchronous method"));
+            
             mockSession
                 .Setup(s => s.BeginTransactionAsync(It.IsAny<Action<TransactionConfigBuilder>>()))
                 .Returns(Task.FromResult(mockTransaction.Object));
+            
             mockSession
                 .Setup(s => s.BeginTransactionAsync())
                 .Returns(Task.FromResult(mockTransaction.Object));
@@ -59,15 +69,17 @@ namespace Neo4jClient.Tests
 
         public void SetupCypherRequestResponse(string request, IDictionary<string, object> cypherQueryQueryParameters, IResultCursor response)
         {
-            MockSession.Setup(s => s.RunAsync(request, It.IsAny<IDictionary<string, object>>())).Returns(Task.FromResult(response));
+            MockSession.Setup(s => s.RunAsync(request, It.IsAny<IDictionary<string, object>>(), null)).Returns(Task.FromResult(response));
             var mockTransaction = new Mock<IAsyncTransaction>();
             mockTransaction.Setup(s => s.RunAsync(request, It.IsAny<IDictionary<string, object>>())).Returns(Task.FromResult(response));
-            
-            MockSession.Setup(s => s.WriteTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task<List<IRecord>>>>()))
-                .Returns<Func<IAsyncTransaction, Task<List<IRecord>>>>(async param => await param(mockTransaction.Object));
+        
+            MockSession
+                .Setup(x => x.ExecuteReadAsync(It.IsAny<Func<IAsyncQueryRunner, Task<List<IRecord>>>>(), It.IsAny<Action<TransactionConfigBuilder>>()))
+                .Returns<Func<IAsyncTransaction, Task<List<IRecord>>>, Action<TransactionConfigBuilder>>(async (func, config) => await func(mockTransaction.Object) );
 
-            MockSession.Setup(s => s.ReadTransactionAsync(It.IsAny<Func<IAsyncTransaction, Task<List<IRecord>>>>()))
-                .Returns<Func<IAsyncTransaction, Task<List<IRecord>>>>(async param => await param(mockTransaction.Object));
+            MockSession
+                .Setup(x => x.ExecuteWriteAsync(It.IsAny<Func<IAsyncQueryRunner, Task<List<IRecord>>>>(), It.IsAny<Action<TransactionConfigBuilder>>()))
+                .Returns<Func<IAsyncTransaction, Task<List<IRecord>>>, Action<TransactionConfigBuilder>>(async (func, config) => await func(mockTransaction.Object) );
 
             MockSession
                 .Setup(s => s.BeginTransactionAsync(It.IsAny<Action<TransactionConfigBuilder>>()))

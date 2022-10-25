@@ -20,7 +20,7 @@ namespace Neo4jClient.Tests.Serialization
         public async Task SerializesDateTimeAsNeoDateInBolt()
         {
             var mockSession = new Mock<IAsyncSession>();
-            mockSession.Setup(s => s.RunAsync("CALL dbms.components()")).Returns(Task.FromResult<IResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
+            mockSession.Setup(s => s.RunAsync("CALL dbms.components()", null)).Returns(Task.FromResult<IResultCursor>(new BoltGraphClientTests.BoltGraphClientTests.ServerInfo()));
             var dt = new DateTime(2000, 1, 1, 0, 0, 0);
 
             var mockDriver = new Mock<IDriver>();

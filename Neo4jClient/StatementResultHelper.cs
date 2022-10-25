@@ -530,7 +530,12 @@ namespace Neo4jClient
             public object this[string key] => properties[key];
 
             public IReadOnlyDictionary<string, object> Properties => new ReadOnlyDictionary<string, object>(properties);
+            
+            [Obsolete ("Long versions of the ID will be removed in the future, use ElementId instead")]
             public long Id => int.MinValue;
+
+            /// <inheritdoc />
+            public string ElementId { get; set; }
 
 
             public IReadOnlyList<string> Labels => new List<string>();
@@ -539,7 +544,7 @@ namespace Neo4jClient
 
             protected bool Equals(Neo4jClientNode other)
             {
-                return Equals(properties, other.properties);
+                return Equals(properties, other.properties) && Equals(ElementId, other.ElementId);
             }
 
             public bool Equals(INode other)

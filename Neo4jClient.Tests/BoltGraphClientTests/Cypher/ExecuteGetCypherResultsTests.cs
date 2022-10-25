@@ -62,6 +62,9 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         public string Type { get; set; }
         public long StartNodeId { get; set; }
         public long EndNodeId { get; set; }
+        public string ElementId { get; set; }
+        public string StartNodeElementId { get; set; }
+        public string EndNodeElementId { get; set; }
 
         #endregion
     }
@@ -91,6 +94,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
         #region Implementation of INode
 
         public IReadOnlyList<string> Labels { get; set; }
+        public string ElementId { get; set; }
 
         #endregion
     }

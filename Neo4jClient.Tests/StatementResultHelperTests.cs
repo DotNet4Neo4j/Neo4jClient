@@ -35,23 +35,42 @@ namespace Neo4jClient.Tests
             public TestRelationship(IDictionary<string, object> properties, int id = 99, int startId = 100, int endId = 200)
             {
                 StartNodeId = startId;
+                StartNodeElementId = startId.ToString();
                 EndNodeId = endId;
+                EndNodeElementId = endId.ToString();
                 Properties = new ReadOnlyDictionary<string, object>(properties);
                 Id = id;
+                ElementId = id.ToString();
             }
 
             public object this[string key] => Properties[key];
 
             public IReadOnlyDictionary<string, object> Properties { get; }
+            
+            [Obsolete ("Long versions of the ID will be removed in the future, use ElementId instead")]
             public long Id { get; }
+
+            /// <inheritdoc />
+            public string ElementId { get; }
+
             public bool Equals(IRelationship other)
             {
                 return true;
             }
 
             public string Type { get; }
+
+            [Obsolete ("Long versions of the ID will be removed in the future, use StartNodeElementId instead")]
             public long StartNodeId { get; }
+
+            [Obsolete ("Long versions of the ID will be removed in the future, use EndNodeElementId instead")]
             public long EndNodeId { get; }
+
+            /// <inheritdoc />
+            public string StartNodeElementId { get;  }
+
+            /// <inheritdoc />
+            public string EndNodeElementId { get;  }
         }
 
         private class TestNode : INode
@@ -61,13 +80,20 @@ namespace Neo4jClient.Tests
             {
                 Properties = properties;
                 Id = id;
+                ElementId = id.ToString();
                 Labels = new List<string> { "Foo" };
             }
 
             public object this[string key] => Properties[key];
 
             public IReadOnlyDictionary<string, object> Properties { get; }
+            
+            /// <inheritdoc />
+            [Obsolete ("Long versions of the ID will be removed in the future, use ElementId instead")]
             public long Id { get; }
+
+            /// <inheritdoc />
+            public string ElementId { get; set; }
 
             public bool Equals(INode other)
             {

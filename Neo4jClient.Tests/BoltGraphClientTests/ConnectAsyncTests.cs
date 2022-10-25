@@ -20,7 +20,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             var testSr = new TestStatementResult(new[] {recordMock.Object});
             var sessionMock = new Mock<IAsyncSession>();
             sessionMock
-                .Setup(s => s.RunAsync("CALL dbms.components()"))
+                .Setup(s => s.RunAsync("CALL dbms.components()", null))
                 .Returns(Task.FromResult<IResultCursor>(testSr));
 
             var driverMock = new Mock<IDriver>();
@@ -82,6 +82,9 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
 
         public IReadOnlyList<string> Keys { get; }
         public IRecord Current => records[pos];
+
+        /// <inheritdoc />
+        public bool IsOpen { get; set; }
     }
 
     
@@ -103,7 +106,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
             var testSr = new TestStatementResult(new[] {record1Mock.Object, record2Mock.Object});
             var sessionMock = new Mock<IAsyncSession>();
             sessionMock
-                .Setup(s => s.RunAsync("CALL dbms.components()"))
+                .Setup(s => s.RunAsync("CALL dbms.components()", null))
                 .Returns(Task.FromResult<IResultCursor>(testSr));
 
             var driverMock = new Mock<IDriver>();
