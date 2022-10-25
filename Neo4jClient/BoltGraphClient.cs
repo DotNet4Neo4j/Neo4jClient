@@ -70,7 +70,8 @@ namespace Neo4jClient
         /// <param name="username">The username to connect to Neo4j with.</param>
         /// <param name="password">The password to connect to Neo4j with.</param>
         /// <param name="realm">The realm to connect to Neo4j with.</param>
-        public BoltGraphClient(Uri uri, IEnumerable<Uri> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false)
+        /// <param name="useDriverDateTypes">Configures the client to use the native driver date time types, instead of serialized datetime strings.</param>
+        public BoltGraphClient(Uri uri, IEnumerable<Uri> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false, bool useDriverDateTypes = false)
         {
             var localUris = uris?.ToList();
             if (localUris != null && localUris.Any())
@@ -92,6 +93,7 @@ namespace Neo4jClient
             this.realm = realm;
             this.encryptionLevel = encryptionLevel;
             PolicyFactory = new ExecutionPolicyFactory(this);
+            UseDriverDateTypes = useDriverDateTypes;
 
             JsonConverters = new List<JsonConverter>();
             JsonConverters.AddRange(DefaultJsonConverters);
@@ -111,24 +113,24 @@ namespace Neo4jClient
             transactionManager = new BoltTransactionManager(this);
         }
 
-        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false)
-            : this(uri, null, username, password, realm, encryptionLevel, serializeNullValues)
+        public BoltGraphClient(Uri uri, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false, bool useDriverDateTypes = false)
+            : this(uri, null, username, password, realm, encryptionLevel, serializeNullValues, useDriverDateTypes)
         { }
 
-        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false)
-            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel, serializeNullValues)
+        public BoltGraphClient(IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false, bool useDriverDateTypes = false)
+            : this(new Uri("neo4j://virtual.neo4j.uri"), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel, serializeNullValues, useDriverDateTypes)
         { }
 
-        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false)
-        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel, serializeNullValues)
+        public BoltGraphClient(string uri, IEnumerable<string> uris, string username = null, string password = null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false, bool useDriverDateTypes = false)
+        : this(new Uri(uri), uris?.Select(UriCreator.From).ToList(), username, password, realm, encryptionLevel, serializeNullValues, useDriverDateTypes)
         {}
 
-        public BoltGraphClient(string uri, string username = null, string password= null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false)
-            : this(new Uri(uri), username, password, realm, encryptionLevel, serializeNullValues)
+        public BoltGraphClient(string uri, string username = null, string password= null, string realm = null, EncryptionLevel? encryptionLevel = null, bool serializeNullValues = false, bool useDriverDateTypes = false)
+            : this(new Uri(uri), username, password, realm, encryptionLevel, serializeNullValues, useDriverDateTypes)
         { }
 
-        public BoltGraphClient(IDriver driver)
-            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null, null, false)
+        public BoltGraphClient(IDriver driver, bool useDriverDateTypes = false)
+            : this(new Uri("neo4j://Neo4j-Driver-Does-Not-Supply-This/"), null, null, null, null, false, useDriverDateTypes)
         {
             Driver = driver;
         }
@@ -139,6 +141,11 @@ namespace Neo4jClient
         public IDriver Driver { get; set; }
         internal IServerAddressResolver AddressResolver => addressResolver;
         private IExecutionPolicyFactory PolicyFactory { get; }
+
+        /// <summary>
+        /// Indicates if client should use the native driver date time types, instead of serialized datetime strings.
+        /// </summary>
+        public bool UseDriverDateTypes { get; }
 
         #region Implementation of ICypherGraphClient
 
@@ -295,6 +302,11 @@ namespace Neo4jClient
             }
 
             await session.CloseAsync().ConfigureAwait(false);
+
+            if (ServerVersion < new Version(3, 4) && UseDriverDateTypes)
+            {
+                throw new NotSupportedException("Native datetime types can only be used with Neo4j 3.4 or higher.");
+            }
 
             IsConnected = true;
         }
