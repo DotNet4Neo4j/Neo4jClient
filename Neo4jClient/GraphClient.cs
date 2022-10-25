@@ -53,6 +53,11 @@ namespace Neo4jClient
 
         public bool UseJsonStreamingIfAvailable { get; set; }
 
+        public GraphClient(string rootUri, string username = null, string password = null)
+            : this(new Uri(rootUri), new HttpClientWrapper(username, password))
+        {
+        }
+
         public GraphClient(Uri rootUri, string username = null, string password = null)
             : this(rootUri, new HttpClientWrapper(username, password))
         {
