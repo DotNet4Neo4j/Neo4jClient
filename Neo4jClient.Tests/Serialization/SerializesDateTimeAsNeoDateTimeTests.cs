@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Neo4j.Driver;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace Neo4jClient.Tests.Serialization
