@@ -3,10 +3,10 @@
   <metadata>
     <id>Neo4jClient</id>
     <version>$version$</version>
-    <authors>Readify, Charlotte Skardon</authors>
-    <owners>Tatham Oddie, Charlotte Skardon</owners>
-    <licenseUrl>https://github.com/Readify/Neo4jClient/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/Readify/Neo4jClient</projectUrl>
+    <authors>Readify, Tatham Oddie, Charlotte Skardon</authors>
+    <owners>Charlotte Skardon</owners>
+    <licenseUrl>https://github.com/DotNet4Neo4j/Neo4jClient/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/DotNet4Neo4j/Neo4jClient</projectUrl>
     <description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</description>
     <tags>neo4j nosql cypher bolt graph</tags>
     <dependencies>
