@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0</TargetFrameworks>
         <Company></Company>
-        <Copyright>2020 Readify, Tatham Oddie, Charlotte Skardon</Copyright>
+        <Copyright>2022 Readify, Tatham Oddie, Charlotte Skardon</Copyright>
         <Authors>Readify, Tatham Oddie, Charlotte Skardon</Authors>
-        <PackageProjectUrl>https://github.com/Readify/Neo4jClient</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/DotNet4Neo4j/Neo4jClient</PackageProjectUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <Description>A .NET client for neo4j: an open source, transactional graph database. It's pretty awesome.</Description>
         <PackageTags>neo4j, nosql, cypher, bolt, graph</PackageTags>
@@ -14,7 +14,7 @@
 
     <PropertyGroup>
       <VersionPrefix>4.0.0</VersionPrefix>
-      <RepositoryUrl>https://github.com/Readify/neo4jclient</RepositoryUrl>
+      <RepositoryUrl>https://github.com/DotNet4Neo4j/neo4jclient</RepositoryUrl>
       <RepositoryType>git</RepositoryType>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
@@ -22,8 +22,8 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-      <PackageReference Include="Neo4j.Driver.Signed" Version="5.1.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="Neo4j.Driver.Signed" Version="5.3.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
       <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
       <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
     </ItemGroup>
