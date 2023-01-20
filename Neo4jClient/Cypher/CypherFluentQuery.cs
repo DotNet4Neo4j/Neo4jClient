@@ -148,8 +148,11 @@ namespace Neo4jClient.Cypher
 
         public ICypherFluentQuery WithParam(string key, object value)
         {
+            if (string.IsNullOrWhiteSpace(key) || char.IsDigit(key[0]) || char.IsSymbol(key[0]) || key[0] == '{')
+                throw new ArgumentException("Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.", key);
+
             if (QueryWriter.ContainsParameterWithKey(key))
-                throw new ArgumentException("A parameter with the given key is already defined in the query.", nameof(key));
+                throw new ArgumentException("A parameter with the given key is already defined in the query.", key);
             return Mutate(w => w.CreateParameter(key, value));
         }
 
@@ -157,8 +160,11 @@ namespace Neo4jClient.Cypher
         {
             if (parameters == null || parameters.Count == 0) return this;
 
+            if (parameters.Keys.Any(key => string.IsNullOrWhiteSpace(key) || char.IsDigit(key[0]) || char.IsSymbol(key[0]) || key[0] == '{'))
+                throw new ArgumentException("Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.", parameters.Keys.First(key => string.IsNullOrWhiteSpace(key) || char.IsDigit(key[0]) || char.IsSymbol(key[0])));
+
             if (parameters.Keys.Any(key => QueryWriter.ContainsParameterWithKey(key)))
-                throw new ArgumentException("A parameter with the given key is already defined in the query.", nameof(parameters));
+                throw new ArgumentException("A parameter with the given key is already defined in the query.", parameters.Keys.First(key => QueryWriter.ContainsParameterWithKey(key)));
 
             return Mutate(w => w.CreateParameters(parameters));
         }
@@ -226,7 +232,7 @@ namespace Neo4jClient.Cypher
             if (!Client.CypherCapabilities.SupportsStoredProcedures)
                 throw new InvalidOperationException("CALL not supported in Neo4j versions older than 3.0");
 
-           if(string.IsNullOrWhiteSpace(storedProcedureText))
+            if(string.IsNullOrWhiteSpace(storedProcedureText))
                 throw new ArgumentException("The stored procedure to call can't be null or whitespace.", nameof(storedProcedureText));
 
             return Mutate(w =>
@@ -388,7 +394,7 @@ namespace Neo4jClient.Cypher
             }
 
             string withHeadersEnabledText = string.Empty;
-            string fieldSeperatorEnabledText = string.Empty;
+            string fieldSeparatorEnabledText = string.Empty;
             if (withHeaders)
             {
                 withHeadersEnabledText = " WITH HEADERS";
@@ -396,10 +402,10 @@ namespace Neo4jClient.Cypher
 
             if (!string.IsNullOrEmpty(fieldTerminator))
             {
-                fieldSeperatorEnabledText = $" FIELDTERMINATOR '{fieldTerminator}'";
+                fieldSeparatorEnabledText = $" FIELDTERMINATOR '{fieldTerminator}'";
             }
 
-            return Mutate(w => w.AppendClause($"{periodicCommitText} LOAD CSV{withHeadersEnabledText} FROM '{fileUri.AbsoluteUri}' AS {identifier}{fieldSeperatorEnabledText}".Trim()));
+            return Mutate(w => w.AppendClause($"{periodicCommitText} LOAD CSV{withHeadersEnabledText} FROM '{fileUri.AbsoluteUri}' AS {identifier}{fieldSeparatorEnabledText}".Trim()));
         }
 
         public ICypherFluentQuery Unwind(string collectionName, string columnName)
