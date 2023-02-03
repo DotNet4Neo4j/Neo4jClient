@@ -66,7 +66,7 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
 
             ex = Assert.Throws<ArgumentException>(
-                () => query.WithParams( new { foo = 456})
+                () => query.WithParams( new { foo = 456 })
             );
             Assert.Equal("parameters", ex.ParamName);
             Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: parameters", ex.Message);
