@@ -132,5 +132,10 @@ namespace Neo4jClient
         {
             driver?.Dispose();
         }
+
+        public ValueTask DisposeAsync()
+        {
+            return driver.DisposeAsync();
+        }
     }
 }

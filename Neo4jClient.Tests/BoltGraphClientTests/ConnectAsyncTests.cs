@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -31,7 +32,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
     }
 
-    public class TestStatementResult : IResultCursor
+    public class TestStatementResult : IResultCursor, IAsyncEnumerator<IRecord>
     {
         private readonly IList<IRecord> records;
         private int pos = -1;
@@ -81,10 +82,25 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         }
 
         public IReadOnlyList<string> Keys { get; }
+        public ValueTask<bool> MoveNextAsync()
+        {
+            return new ValueTask<bool>(FetchAsync());
+        }
+
         public IRecord Current => records[pos];
 
         /// <inheritdoc />
-        public bool IsOpen { get; set; }
+        public bool IsOpen => true;
+
+        public IAsyncEnumerator<IRecord> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return this;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return default;
+        }
     }
 
     
