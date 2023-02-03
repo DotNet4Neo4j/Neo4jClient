@@ -55,7 +55,8 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Match("n")
-                .WithParam("foo", 123);
+                .WithParam("foo", 123)
+                .WithParam("bar", 123);
 
             // Assert
             var ex = Assert.Throws<ArgumentException>(
@@ -70,6 +71,11 @@ namespace Neo4jClient.Tests.Cypher
             Assert.Equal("parameters", ex.ParamName);
             Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: parameters", ex.Message);
 
+            ex = Assert.Throws<ArgumentException>(
+                () => query.WithParams(new { foo = 456, bar = 456 })
+            );
+            Assert.Equal("parameters", ex.ParamName);
+            Assert.Equal("Parameters with the given keys 'foo, bar' are already defined in the query." + Environment.NewLine + "Parameter name: parameters", ex.Message);
         }
 
         [Fact]

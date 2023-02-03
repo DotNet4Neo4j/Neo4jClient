@@ -161,11 +161,20 @@ namespace Neo4jClient.Cypher
         {
             if (parameters == null || parameters.Count == 0) return this;
 
-            if (parameters.Keys.Any(key => string.IsNullOrWhiteSpace(key) || char.IsDigit(key[0]) || char.IsSymbol(key[0]) || key[0] == '{'))
-                throw new ArgumentException($"The parameter with the given key '{parameters.Keys.First(key => string.IsNullOrWhiteSpace(key) || char.IsDigit(key[0]) || char.IsSymbol(key[0]))}' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.", nameof(parameters));
+            var invalidParameters = parameters.Keys.Where(key => string.IsNullOrWhiteSpace(key) || char.IsDigit(key[0]) || char.IsSymbol(key[0]) || key[0] == '{').ToList();
 
-            if (parameters.Keys.Any(key => QueryWriter.ContainsParameterWithKey(key)))
-                throw new ArgumentException($"A parameter with the given key '{parameters.Keys.First(key => QueryWriter.ContainsParameterWithKey(key))}' is already defined in the query.", nameof(parameters));
+            if (invalidParameters.Any())
+                throw new ArgumentException((invalidParameters.Count == 1 
+                    ? $"The parameter with the given key '{invalidParameters.First()}' is not valid." 
+                    : $"The parameters with the given keys '{string.Join(", ", invalidParameters)}' are not valid.") + 
+                    " Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.", nameof(parameters));
+
+            var duplicateParameters = parameters.Keys.Where(key => QueryWriter.ContainsParameterWithKey(key)).ToList();
+
+            if (duplicateParameters.Any())
+                throw new ArgumentException(duplicateParameters.Count() == 1
+                    ? $"A parameter with the given key '{duplicateParameters.First()}' is already defined in the query."
+                    : $"Parameters with the given keys '{string.Join(", ", duplicateParameters)}' are already defined in the query.", nameof(parameters));
 
             return Mutate(w => w.CreateParameters(parameters));
         }
