@@ -61,14 +61,14 @@ namespace Neo4jClient.Tests.Cypher
             var ex = Assert.Throws<ArgumentException>(
                 () => query.WithParam("foo", 456)
             );
-            Assert.Equal("foo", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query." + Environment.NewLine + "Parameter name: foo", ex.Message);
+            Assert.Equal("key", ex.ParamName);
+            Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
 
             ex = Assert.Throws<ArgumentException>(
                 () => query.WithParams( new { foo = 456})
             );
-            Assert.Equal("foo", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query." + Environment.NewLine + "Parameter name: foo", ex.Message);
+            Assert.Equal("parameters", ex.ParamName);
+            Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: parameters", ex.Message);
 
         }
 
@@ -85,8 +85,8 @@ namespace Neo4jClient.Tests.Cypher
             var ex = Assert.Throws<ArgumentException>(
                 () => query.WithParam("p0", 456)
             );
-            Assert.Equal("p0", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query." + Environment.NewLine + "Parameter name: p0", ex.Message);
+            Assert.Equal("key", ex.ParamName);
+            Assert.Equal("A parameter with the given key 'p0' is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
         }
 
         [Fact]
@@ -99,15 +99,15 @@ namespace Neo4jClient.Tests.Cypher
             // Assert WithParam
             var ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParam("$uuid", ""));
             ex.Should().NotBeNull();
-            ex.Message.Should().Be("Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: $uuid");
+            ex.Message.Should().Be("The parameter with the given key '$uuid' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: key");
 
             ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParam("0uuid", ""));
             ex.Should().NotBeNull();
-            ex.Message.Should().Be("Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: 0uuid");
+            ex.Message.Should().Be("The parameter with the given key '0uuid' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: key");
 
             ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParam("{uuid}", ""));
             ex.Should().NotBeNull();
-            ex.Message.Should().Be("Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: {uuid}");
+            ex.Message.Should().Be("The parameter with the given key '{uuid}' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: key");
 
             // no exception for correct usage
             var ex2 = Record.Exception(() => new CypherFluentQuery(client).WithParam("uuid", ""));
