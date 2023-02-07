@@ -1,7 +1,9 @@
 ﻿using System;
+using FluentAssertions;
 using Neo4jClient.Cypher;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace Neo4jClient.Tests.Cypher
@@ -53,14 +55,27 @@ namespace Neo4jClient.Tests.Cypher
             var client = Substitute.For<IRawGraphClient>();
             var query = new CypherFluentQuery(client)
                 .Match("n")
-                .WithParam("foo", 123);
+                .WithParam("foo", 123)
+                .WithParam("bar", 123);
 
             // Assert
             var ex = Assert.Throws<ArgumentException>(
                 () => query.WithParam("foo", 456)
             );
             Assert.Equal("key", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
+            Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
+
+            ex = Assert.Throws<ArgumentException>(
+                () => query.WithParams( new { foo = 456 })
+            );
+            Assert.Equal("parameters", ex.ParamName);
+            Assert.Equal("A parameter with the given key 'foo' is already defined in the query." + Environment.NewLine + "Parameter name: parameters", ex.Message);
+
+            ex = Assert.Throws<ArgumentException>(
+                () => query.WithParams(new { foo = 456, bar = 456 })
+            );
+            Assert.Equal("parameters", ex.ParamName);
+            Assert.Equal("Parameters with the given keys 'foo, bar' are already defined in the query." + Environment.NewLine + "Parameter name: parameters", ex.Message);
         }
 
         [Fact]
@@ -77,7 +92,39 @@ namespace Neo4jClient.Tests.Cypher
                 () => query.WithParam("p0", 456)
             );
             Assert.Equal("key", ex.ParamName);
-            Assert.Equal("A parameter with the given key is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
+            Assert.Equal("A parameter with the given key 'p0' is already defined in the query." + Environment.NewLine + "Parameter name: key", ex.Message);
+        }
+
+        [Fact]
+        //(Description = https://github.com/DotNet4Neo4j/Neo4jClient/issues/458)
+        public void ThrowsExceptionForInvalidParamName()
+        {
+            // Arrange
+            var client = Substitute.For<IRawGraphClient>();
+
+            // Assert WithParam
+            var ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParam("$uuid", ""));
+            ex.Should().NotBeNull();
+            ex.Message.Should().Be("The parameter with the given key '$uuid' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: key");
+
+            ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParam("0uuid", ""));
+            ex.Should().NotBeNull();
+            ex.Message.Should().Be("The parameter with the given key '0uuid' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: key");
+
+            ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParam("{uuid}", ""));
+            ex.Should().NotBeNull();
+            ex.Message.Should().Be("The parameter with the given key '{uuid}' is not valid. Parameters may consist of letters and numbers, and any combination of these, but cannot start with a number or a currency symbol.\r\nParameter name: key");
+
+            // no exception for correct usage
+            var ex2 = Record.Exception(() => new CypherFluentQuery(client).WithParam("uuid", ""));
+            Assert.Null(ex2);
+
+            // Assert WithParams
+            //ex = Assert.Throws<ArgumentException>(() => new CypherFluentQuery(client).WithParams(new { $uuid = "" })); // this will not compile anyways
+
+            // no exception for correct usage
+            ex2 = Record.Exception(() => new CypherFluentQuery(client).WithParams(new { uuid = "" }));
+            Assert.Null(ex2);
         }
 
         public class ComplexObjForWithParamTest
