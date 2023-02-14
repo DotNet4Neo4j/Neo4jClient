@@ -77,6 +77,15 @@ namespace Neo4jClient.Cypher
         /// <exception cref="InvalidOperationException">Thrown if this is called against a server version without multiple tenancy.</exception>
         /// <exception cref="ArgumentException">Thrown if the <paramref name="databaseName"/> given is <c>null</c> or whitespace.</exception>
         ICypherFluentQuery StopDatabase(string databaseName);
+        
+        /// <summary>
+        ///     Executes <c>SHOW</c> against the database, passing in the <paramref name="command"/>. <see cref="Yield"/> should be used after to get the results.
+        /// </summary>
+        /// <param name="command">The command to call <c>SHOW</c> with.</param>
+        /// <returns>An <see cref="ICypherFluentQuery" /> instance to continue the query with.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if this is called against a server version that doesn't support <c>SHOW</c>.</exception>
+        /// <exception cref="ArgumentException">Thrown if the <paramref name="command"/> given is <c>null</c> or whitespace.</exception>
+        ICypherFluentQuery Show(string command);
     }
 
 }
