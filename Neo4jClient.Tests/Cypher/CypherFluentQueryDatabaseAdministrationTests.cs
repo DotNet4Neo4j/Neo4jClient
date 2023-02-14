@@ -371,11 +371,20 @@ namespace Neo4jClient.Tests.Cypher
             public void ThrowsInvalidOperationException_IfNotOnASupportedVersion()
             {
                 var client = Substitute.For<IRawGraphClient>();
-                client.CypherCapabilities.Returns(new CypherCapabilities { SupportsMultipleTenancy = false });
+                client.CypherCapabilities.Returns(CypherCapabilities.Cypher30);
 
                 var ex = Assert.Throws<InvalidOperationException>(() => new CypherFluentQuery(client).Show("DATABASES"));
                 ex.Should().NotBeNull();
                 ex.Message.Should().Be("SHOW commands are not supported in Neo4j versions older than 4.0");
+            }
+
+            [Fact]
+            public void ShowIsAccessibleViaTheICypherFluentQueryInterface()
+            {
+                ICypherFluentQuery query = new CypherFluentQuery(MockClient);
+                query = query.Show("DATABASES");
+
+                query.Query.QueryText.Should().Be("SHOW DATABASES");
             }
 
             [Theory]

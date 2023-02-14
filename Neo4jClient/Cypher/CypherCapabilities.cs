@@ -15,6 +15,7 @@ namespace Neo4jClient.Cypher
             SupportsHasFunction = cypherCapabilities.SupportsHasFunction;
             SupportsMultipleTenancy = cypherCapabilities.SupportsMultipleTenancy;
             SupportsStoredProceduresWithTransactionalBatching = cypherCapabilities.SupportsStoredProceduresWithTransactionalBatching;
+            SupportsShow = cypherCapabilities.SupportsShow;
         }
 
         public static readonly CypherCapabilities Cypher19 = new CypherCapabilities
@@ -36,6 +37,7 @@ namespace Neo4jClient.Cypher
         public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23) { SupportsStoredProcedures = true, SupportsHasFunction = false };
         public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher30) { SupportsMultipleTenancy = true, SupportsShow = true };
         public static readonly CypherCapabilities Cypher44 = new CypherCapabilities(Cypher40) { SupportsStoredProceduresWithTransactionalBatching = true };
+        
         public static readonly CypherCapabilities Default = Cypher20;
         
         /// <summary>
