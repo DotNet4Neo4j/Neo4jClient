@@ -22,8 +22,8 @@
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-      <PackageReference Include="Neo4j.Driver.Signed" Version="5.5.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+      <PackageReference Include="Neo4j.Driver.Signed" Version="5.7.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
       <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
     </ItemGroup>

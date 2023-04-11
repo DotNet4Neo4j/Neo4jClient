@@ -103,6 +103,12 @@ namespace Neo4jClient
             return driver.GetServerInfoAsync();
         }
 
+        /// <inheritdoc />
+        public Task<bool> TryVerifyConnectivityAsync()
+        {
+            return driver.TryVerifyConnectivityAsync();
+        }
+
         public Task VerifyConnectivityAsync()
         {
             return driver.VerifyConnectivityAsync();
