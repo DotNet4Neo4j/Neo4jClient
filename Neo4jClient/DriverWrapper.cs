@@ -119,6 +119,24 @@ namespace Neo4jClient
             return driver.SupportsMultiDbAsync();
         }
 
+        /// <inheritdoc />
+        public Task<bool> SupportsSessionAuthAsync()
+        {
+            return driver.SupportsSessionAuthAsync();
+        }
+
+        /// <inheritdoc />
+        public IExecutableQuery<IRecord, IRecord> ExecutableQuery(string cypher)
+        {
+            return driver.ExecutableQuery(cypher);
+        }
+
+        /// <inheritdoc />
+        public Task<bool> VerifyAuthenticationAsync(IAuthToken authToken)
+        {
+            return driver.VerifyAuthenticationAsync(authToken);
+        }
+
         public Config Config => driver.Config;
 
         /// <inheritdoc />
