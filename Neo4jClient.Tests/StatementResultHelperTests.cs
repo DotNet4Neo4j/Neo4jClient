@@ -43,6 +43,16 @@ namespace Neo4jClient.Tests
                 ElementId = id.ToString();
             }
 
+            public T Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
             public object this[string key] => Properties[key];
 
             public IReadOnlyDictionary<string, object> Properties { get; }
@@ -82,6 +92,16 @@ namespace Neo4jClient.Tests
                 Id = id;
                 ElementId = id.ToString();
                 Labels = new List<string> { "Foo" };
+            }
+
+            public T Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
             }
 
             public object this[string key] => Properties[key];

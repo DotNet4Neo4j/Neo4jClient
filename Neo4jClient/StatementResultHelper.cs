@@ -527,6 +527,30 @@ namespace Neo4jClient
                 foreach (var p in properties) this.properties.Add(p.Key, p.Value);
             }
 
+            public T Get<T>(string key)
+            {
+                var value = properties[key];
+                if (value is T typed)
+                {
+                    return typed;
+                }
+
+                throw new InvalidOperationException(
+                    $"Value is not of expected type. {typeof(T).Name} was expected but {value.GetType().Name} was found.");
+            }
+
+            public bool TryGet<T>(string key, out T value)
+            {
+                if (properties.TryGetValue(key, out var temp) && temp is T typed)
+                {
+                    value = typed;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
             public object this[string key] => properties[key];
 
             public IReadOnlyDictionary<string, object> Properties => new ReadOnlyDictionary<string, object>(properties);
@@ -570,6 +594,8 @@ namespace Neo4jClient
 
         private class Neo4jClientRecord : IRecord
         {
+            private IEnumerable<object> values;
+
             public Neo4jClientRecord(object obj, string identifier)
             {
                 Values = new Dictionary<string, object> {{identifier, obj}};
@@ -586,15 +612,99 @@ namespace Neo4jClient
             [Obsolete("This should not be called internally.")]
             object IRecord.this[int index] => throw new NotImplementedException("This should not be called.");
 
-            object IRecord.this[string key] => Values[key];
+            public bool ContainsKey(string key)
+            {
+                return Values.ContainsKey(key);
+            }
+
+            public bool TryGetValue(string key, out object value)
+            {
+                return Values.TryGetValue(key, out value);
+            }
+
+            object IReadOnlyDictionary<string, object>.this[string key] => Values[key];
+            
+            IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
+
+            IEnumerable<object> IReadOnlyDictionary<string, object>.Values => values;
 
             public IReadOnlyDictionary<string, object> Values { get; }
             public IReadOnlyList<string> Keys => Values.Keys.ToList();
+            
+            public T Get<T>(string key)
+            {
+                var value = Values[key];
+                if (value is T typed)
+                {
+                    return typed;
+                }
+
+                throw new InvalidOperationException(
+                    $"Value is not of expected type. {typeof(T).Name} was expected but {value.GetType().Name} was found.");
+            }
+
+            public bool TryGet<T>(string key, out T value)
+            {
+                if (Values.TryGetValue(key, out var temp))
+                {
+                    value = temp.As<T>();
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+            
+            public bool TryGetCaseInsensitive<T>(string key, out T value)
+            {
+                foreach (var kvp in Values)
+                {
+                    if (!kvp.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+                    try
+                    {
+                        value = kvp.Value.As<T>();
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        break;
+                    }
+                }
+
+                value = default;
+                return false;
+            }
+
+            public T GetCaseInsensitive<T>(string key)
+            {
+                foreach (var kvp in Values)
+                {
+                    if (kvp.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return kvp.Value.As<T>();
+                    }
+                }
+
+                throw new KeyNotFoundException();
+            }
 
             public object[] AsParameters(IGraphClient graphClient)
             {
                 return new object[] {this, graphClient};
             }
+
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+            {
+                return Values.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public int Count => Values.Count;
         }
     }
 }

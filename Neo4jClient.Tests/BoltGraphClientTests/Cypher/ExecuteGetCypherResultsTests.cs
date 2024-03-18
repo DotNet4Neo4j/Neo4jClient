@@ -38,6 +38,16 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
     {
         #region Implementation of IEntity
 
+        public T Get<T>(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGet<T>(string key, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
         public object this[string key]
         {
             get { throw new NotImplementedException(); }
@@ -72,6 +82,16 @@ namespace Neo4jClient.Tests.BoltGraphClientTests.Cypher
     public class TestNode : INode {
         #region Implementation of IEntity
 
+        public T Get<T>(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGet<T>(string key, out T value)
+        {
+            throw new NotImplementedException();
+        }
+        
         public object this[string key]
         {
             get { throw new NotImplementedException(); }

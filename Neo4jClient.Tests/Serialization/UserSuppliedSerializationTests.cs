@@ -261,7 +261,10 @@ namespace Neo4jClient.Tests.Serialization
             // Act
             var result = serializer.Serialize(testNode);
 
-            const string expectedValue = "{\r\n  \"Text\": \"foo\",\r\n  \"TestInt\": 42\r\n}";
+            const string expectedValue = @"{
+  ""Text"": ""foo"",
+  ""TestInt"": 42
+}";
 
             // Assert
             Assert.Equal(expectedValue, result);

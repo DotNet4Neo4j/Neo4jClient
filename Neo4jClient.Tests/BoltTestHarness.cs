@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
@@ -7,17 +8,64 @@ using Neo4j.Driver;
 namespace Neo4jClient.Tests
 {
     public class TestRecord : IRecord{
+        private IEnumerable<object> values;
+        public T Get<T>(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGet<T>(string key, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T GetCaseInsensitive<T>(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetCaseInsensitive<T>(string key, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc />
         public object this[int index] => throw new NotImplementedException();
 
+        public bool ContainsKey(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetValue(string key, out object value)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc />
         public object this[string key] => throw new NotImplementedException();
+
+        IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
+
+        IEnumerable<object> IReadOnlyDictionary<string, object>.Values => values;
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object> Values { get; }
 
         /// <inheritdoc />
         public IReadOnlyList<string> Keys { get; }
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public int Count { get; }
     }
 
     public class BoltTestHarness : IDisposable

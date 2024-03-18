@@ -29,7 +29,8 @@ namespace Neo4jClient.Tests.Cypher
                 .InTransactions()
                 .Query;
 
-            Assert.Equal("CALL {arlo()}\r\nIN TRANSACTIONS", query.QueryText);
+            Assert.Equal(@"CALL {arlo()}
+IN TRANSACTIONS", query.QueryText);
         }
 
         [Fact]
@@ -41,7 +42,8 @@ namespace Neo4jClient.Tests.Cypher
                 .InTransactions(1000)
                 .Query;
 
-            Assert.Equal("CALL {arlo()}\r\nIN TRANSACTIONS OF 1000 ROWS", query.QueryText);
+            Assert.Equal(@"CALL {arlo()}
+IN TRANSACTIONS OF 1000 ROWS", query.QueryText);
         }
 
         [Fact]
@@ -53,7 +55,8 @@ namespace Neo4jClient.Tests.Cypher
                 .InTransactions(null)
                 .Query;
 
-            Assert.Equal("CALL {arlo()}\r\nIN TRANSACTIONS", query.QueryText);
+            Assert.Equal(@"CALL {arlo()}
+IN TRANSACTIONS", query.QueryText);
         }
     }
 
@@ -104,7 +107,9 @@ namespace Neo4jClient.Tests.Cypher
         [Fact]
         public void Call_SubQueriesAsLambda()
         {
-            const string expected = "CALL { MATCH (n)\r\nRETURN count(n) AS c }\r\nRETURN c";
+            const string expected = @"CALL { MATCH (n)
+RETURN count(n) AS c }
+RETURN c";
 
             var client = GraphClient_30;
             
@@ -122,7 +127,10 @@ namespace Neo4jClient.Tests.Cypher
          [Fact]
          public void Call_SubQueriesAsLambdaWithParameters()
          {
-             const string expected = "CALL { MATCH (n)\r\nWHERE (n.Id = $p0)\r\nRETURN count(n) AS c }\r\nRETURN c";
+             const string expected = @"CALL { MATCH (n)
+WHERE (n.Id = $p0)
+RETURN count(n) AS c }
+RETURN c";
 
              var client = GraphClient_30;
              var query = new CypherFluentQuery(client)
@@ -141,7 +149,12 @@ namespace Neo4jClient.Tests.Cypher
          [Fact]
          public void Call_SubQueriesAsLambdaWithParametersPriorToCall()
          {
-             const string expected = "MATCH (x)\r\nWHERE (x.Id = $p0)\r\nCALL { MATCH (n)\r\nWHERE (n.Id = $p1)\r\nRETURN count(n) AS c }\r\nRETURN c";
+             const string expected = @"MATCH (x)
+WHERE (x.Id = $p0)
+CALL { MATCH (n)
+WHERE (n.Id = $p1)
+RETURN count(n) AS c }
+RETURN c";
 
              var client = GraphClient_30;
              var query = new CypherFluentQuery(client)
@@ -162,7 +175,12 @@ namespace Neo4jClient.Tests.Cypher
          [Fact]
          public void Call_SubQueriesAsLambdaWithParametersAfterToCall()
          {
-             const string expected = "CALL { MATCH (n)\r\nWHERE (n.Id = $p0)\r\nRETURN count(n) AS c }\r\nMATCH (x)\r\nWHERE (x.Id = $p1)\r\nRETURN c";
+             const string expected = @"CALL { MATCH (n)
+WHERE (n.Id = $p0)
+RETURN count(n) AS c }
+MATCH (x)
+WHERE (x.Id = $p1)
+RETURN c";
 
              var client = GraphClient_30;
              var query = new CypherFluentQuery(client)
@@ -183,7 +201,13 @@ namespace Neo4jClient.Tests.Cypher
          [Fact]
          public void Call_SubQueriesAsLambdaWithParametersPriorToCall_WholeWord()
          {
-             const string expected = "MATCH (x)\r\nWHERE (x.Id = $p0)\r\nCALL { MATCH (n)\r\nWHERE (n.Id = $p1)\r\nAND (n.Something = $p2)\r\nRETURN count(n) AS c }\r\nRETURN c";
+             const string expected = @"MATCH (x)
+WHERE (x.Id = $p0)
+CALL { MATCH (n)
+WHERE (n.Id = $p1)
+AND (n.Something = $p2)
+RETURN count(n) AS c }
+RETURN c";
 
              var client = GraphClient_30;
              var query = new CypherFluentQuery(client)
@@ -209,7 +233,14 @@ namespace Neo4jClient.Tests.Cypher
          [Fact]
          public void Call_SubQueriesAsLambdaWithParametersPriorAndAfterToCall_WholeWord()
          {
-             const string expected = "MATCH (x)\r\nWHERE (x.Id = $p0)\r\nCALL { MATCH (n)\r\nWHERE (n.Id = $p1)\r\nAND (n.Something = $p2)\r\nRETURN count(n) AS c }\r\nWHERE (y.Id = $p3)\r\nRETURN c";
+             const string expected = @"MATCH (x)
+WHERE (x.Id = $p0)
+CALL { MATCH (n)
+WHERE (n.Id = $p1)
+AND (n.Something = $p2)
+RETURN count(n) AS c }
+WHERE (y.Id = $p3)
+RETURN c";
 
              var client = GraphClient_30;
              var query = new CypherFluentQuery(client)

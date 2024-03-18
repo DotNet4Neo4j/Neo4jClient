@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
         private class TestRecord : IRecord
         {
             private IDictionary<string, object> _contents = new Dictionary<string, object>();
+            private IEnumerable<object> values;
 
             public TestRecord()
             {
@@ -29,17 +31,88 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
                 _contents = items;
             }
 
-            object IRecord.this[int index]
+            public T Get<T>(string key)
             {
-                get { throw new NotImplementedException(); }
+                return ValueExtensions.As<T>(_contents[key]);
             }
 
-            object IRecord.this[string key] => _contents[key];
+            public bool TryGet<T>(string key, out T value)
+            {
+                try
+                {
+                    value = ValueExtensions.As<T>(_contents[key]);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    value = default;
+                    return false;
+                }
+            }
+
+            public T GetCaseInsensitive<T>(string key)
+            {
+                foreach (var kvp in _contents)
+                {
+                    if (kvp.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                        return ValueExtensions.As<T>(kvp.Value);
+                }
+
+                throw new KeyNotFoundException();
+            }
+
+            public bool TryGetCaseInsensitive<T>(string key, out T value)
+            {
+                foreach (var kvp in _contents)
+                {
+                    if (!kvp.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+                    try
+                    {
+                        value = ValueExtensions.As<T>(_contents[key]);
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        break;
+                    }
+                }
+                value = default;
+                return false;                
+            }
+
+            object IRecord.this[int index] => _contents.Values.Skip(index + 1).Single();
+
+            public bool ContainsKey(string key)
+            {
+                return _contents.ContainsKey(key);
+            }
+
+            public bool TryGetValue(string key, out object value)
+            {
+                return _contents.TryGetValue(key, out value);
+            }
+
+            object IReadOnlyDictionary<string, object>.this[string key] => _contents[key];
+            IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
+
+            IEnumerable<object> IReadOnlyDictionary<string, object>.Values => values;
 
             public IReadOnlyDictionary<string, object> Values { get; }
             public IReadOnlyList<string> Keys { get; }
 
-           
+
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+            {
+                return _contents.GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public int Count { get; }
         }
         public class ServerInfo : TestStatementResult
         {

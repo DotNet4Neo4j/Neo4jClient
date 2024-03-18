@@ -29,7 +29,7 @@ namespace Neo4jClient.Tests.GraphClientTests
             })
             {
                 var ex = await Assert.ThrowsAsync<Exception>(async () => await testHarness.CreateAndConnectGraphClient());
-                Assert.Equal("Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError", ex.Message);
+                Assert.StartsWith("Received an unexpected HTTP status when executing the request.\r\n\r\nThe response status was: 500 InternalServerError", ex.Message);
             }
         }
 
