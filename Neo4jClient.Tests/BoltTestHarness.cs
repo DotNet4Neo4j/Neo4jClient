@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
@@ -8,16 +9,73 @@ namespace Neo4jClient.Tests
 {
     public class TestRecord : IRecord{
         /// <inheritdoc />
+        T IRecord.Get<T>(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        bool IRecord.TryGet<T>(string key, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        T IRecord.GetCaseInsensitive<T>(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        bool IRecord.TryGetCaseInsensitive<T>(string key, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public object this[int index] => throw new NotImplementedException();
 
         /// <inheritdoc />
+        bool IReadOnlyDictionary<string, object>.ContainsKey(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        bool IReadOnlyDictionary<string, object>.TryGetValue(string key, out object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public object this[string key] => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
+
+        /// <inheritdoc />
+        IEnumerable<object> IReadOnlyDictionary<string, object>.Values => throw new NotImplementedException();
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, object> Values { get; }
 
         /// <inheritdoc />
         public IReadOnlyList<string> Keys { get; }
+
+        /// <inheritdoc />
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        int IReadOnlyCollection<KeyValuePair<string, object>>.Count => throw new NotImplementedException();
     }
 
     public class BoltTestHarness : IDisposable

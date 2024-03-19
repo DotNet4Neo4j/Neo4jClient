@@ -43,6 +43,18 @@ namespace Neo4jClient.Tests
                 ElementId = id.ToString();
             }
 
+            /// <inheritdoc />
+            T IEntity.Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IEntity.TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
             public object this[string key] => Properties[key];
 
             public IReadOnlyDictionary<string, object> Properties { get; }
@@ -82,6 +94,18 @@ namespace Neo4jClient.Tests
                 Id = id;
                 ElementId = id.ToString();
                 Labels = new List<string> { "Foo" };
+            }
+
+            /// <inheritdoc />
+            T IEntity.Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IEntity.TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
             }
 
             public object this[string key] => Properties[key];
