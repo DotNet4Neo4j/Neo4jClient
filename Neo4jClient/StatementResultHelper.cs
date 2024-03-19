@@ -527,6 +527,18 @@ namespace Neo4jClient
                 foreach (var p in properties) this.properties.Add(p.Key, p.Value);
             }
 
+            /// <inheritdoc />
+            T IEntity.Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IEntity.TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
             public object this[string key] => properties[key];
 
             public IReadOnlyDictionary<string, object> Properties => new ReadOnlyDictionary<string, object>(properties);
@@ -582,11 +594,54 @@ namespace Neo4jClient
                     : new Dictionary<string, object> {{identifier, record[identifier]}};
             }
 
+            /// <inheritdoc />
+            T IRecord.Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IRecord.TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            T IRecord.GetCaseInsensitive<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IRecord.TryGetCaseInsensitive<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
             [EditorBrowsable(EditorBrowsableState.Never)]
             [Obsolete("This should not be called internally.")]
             object IRecord.this[int index] => throw new NotImplementedException("This should not be called.");
 
-            object IRecord.this[string key] => Values[key];
+            /// <inheritdoc />
+            bool IReadOnlyDictionary<string, object>.ContainsKey(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IReadOnlyDictionary<string, object>.TryGetValue(string key, out object value)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            object IReadOnlyDictionary<string, object>.this[string key] => Values[key];
+
+            /// <inheritdoc />
+            IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
+
+            /// <inheritdoc />
+            IEnumerable<object> IReadOnlyDictionary<string, object>.Values => throw new NotImplementedException();
 
             public IReadOnlyDictionary<string, object> Values { get; }
             public IReadOnlyList<string> Keys => Values.Keys.ToList();
@@ -595,6 +650,21 @@ namespace Neo4jClient
             {
                 return new object[] {this, graphClient};
             }
+
+            /// <inheritdoc />
+            IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            int IReadOnlyCollection<KeyValuePair<string, object>>.Count => throw new NotImplementedException();
         }
     }
 }

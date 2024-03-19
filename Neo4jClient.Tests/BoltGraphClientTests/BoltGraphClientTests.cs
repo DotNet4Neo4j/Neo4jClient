@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,17 +30,74 @@ namespace Neo4jClient.Tests.BoltGraphClientTests
                 _contents = items;
             }
 
+            /// <inheritdoc />
+            T IRecord.Get<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IRecord.TryGet<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            T IRecord.GetCaseInsensitive<T>(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IRecord.TryGetCaseInsensitive<T>(string key, out T value)
+            {
+                throw new NotImplementedException();
+            }
+
             object IRecord.this[int index]
             {
                 get { throw new NotImplementedException(); }
             }
 
-            object IRecord.this[string key] => _contents[key];
+            /// <inheritdoc />
+            bool IReadOnlyDictionary<string, object>.ContainsKey(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            bool IReadOnlyDictionary<string, object>.TryGetValue(string key, out object value)
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            object IReadOnlyDictionary<string, object>.this[string key] =>  _contents[key];
+
+            /// <inheritdoc />
+            IEnumerable<string> IReadOnlyDictionary<string, object>.Keys => Keys;
+
+            /// <inheritdoc />
+            IEnumerable<object> IReadOnlyDictionary<string, object>.Values => throw new NotImplementedException();
 
             public IReadOnlyDictionary<string, object> Values { get; }
             public IReadOnlyList<string> Keys { get; }
 
-           
+
+            /// <inheritdoc />
+            IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            /// <inheritdoc />
+            int IReadOnlyCollection<KeyValuePair<string, object>>.Count => throw new NotImplementedException();
         }
         public class ServerInfo : TestStatementResult
         {
