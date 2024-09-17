@@ -35,9 +35,10 @@ namespace Neo4jClient.Cypher
         public static readonly CypherCapabilities Cypher226 = new CypherCapabilities(Cypher22) { AutoRollsBackOnError = true };
         public static readonly CypherCapabilities Cypher23 = new CypherCapabilities(Cypher226) {SupportsStartsWith = true};
         public static readonly CypherCapabilities Cypher30 = new CypherCapabilities(Cypher23) { SupportsStoredProcedures = true, SupportsHasFunction = false };
-        public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher30) { SupportsMultipleTenancy = true, SupportsShow = true };
+        public static readonly CypherCapabilities Cypher35 = new CypherCapabilities(Cypher30) { SupportsRuntime = true };
+        public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher35) { SupportsMultipleTenancy = true, SupportsShow = true };
         public static readonly CypherCapabilities Cypher44 = new CypherCapabilities(Cypher40) { SupportsStoredProceduresWithTransactionalBatching = true };
-        
+       
         public static readonly CypherCapabilities Default = Cypher20;
         
         /// <summary>
@@ -50,6 +51,11 @@ namespace Neo4jClient.Cypher
         public bool SupportsNullComparisonsWithIsOperator { get; set; }
         public bool SupportsStartsWith { get; set; }
         public bool SupportsStoredProceduresWithTransactionalBatching { get; set; }
+        
+        /// <summary>
+        /// Runtime is available to be set in 3.5 onwards.
+        /// </summary>
+        public bool SupportsRuntime { get; set; }
 
         /// <summary>
         /// Cypher 3.0 provides support for Stored Procedures via the CALL keyword.
