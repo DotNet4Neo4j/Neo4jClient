@@ -122,6 +122,9 @@ namespace Neo4jClient
                 if (version >= new Version(3, 0))
                     CypherCapabilities = CypherCapabilities.Cypher30;
 
+                if (version >= new Version(3, 5))
+                    CypherCapabilities = CypherCapabilities.Cypher35;
+
                 if (version >= new Version(4, 0))
                     CypherCapabilities = CypherCapabilities.Cypher40;
                 if(ServerVersion >= new Version(4,4))

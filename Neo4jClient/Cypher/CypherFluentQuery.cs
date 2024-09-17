@@ -505,6 +505,33 @@ namespace Neo4jClient.Cypher
             return ParserVersion(new Version(major, minor));
         }
 
+        public ICypherFluentQuery Runtime(string runtime)
+        {
+            if(!Client.CypherCapabilities.SupportsRuntime)
+                throw new InvalidOperationException("'runtime=' not supported in Neo4j versions older than 3.5");
+
+            if (!string.IsNullOrWhiteSpace(this.Query.QueryText))
+                throw new InvalidOperationException("Runtime needs to be defined first.");
+
+            return Mutate(w => w.AppendClause($"CYPHER runtime={runtime}"));
+        }
+
+        public ICypherFluentQuery Runtime(CypherRuntime runtime)
+        {
+            switch (runtime)
+            {
+                case CypherRuntime.Slotted:
+                    return Runtime("slotted");
+                case CypherRuntime.Pipelined:
+                    return Runtime("pipelined");
+                case CypherRuntime.Parallel:
+                    return Runtime("parallel");
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(runtime), runtime, null);
+            }
+            
+        }
+
         public ICypherFluentQuery Planner(string planner)
         {
             if(!Client.CypherCapabilities.SupportsPlanner)

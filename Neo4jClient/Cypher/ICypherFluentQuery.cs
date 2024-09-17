@@ -49,6 +49,9 @@ namespace Neo4jClient.Cypher
 
         ICypherFluentQuery Planner(string planner);
         ICypherFluentQuery Planner(CypherPlanner planner);
+
+        ICypherFluentQuery Runtime(string runtime);
+        ICypherFluentQuery Runtime(CypherRuntime runtime);
        
         ICypherFluentQuery Match(params string[] matchText);
         ICypherFluentQuery UsingIndex(string index);
