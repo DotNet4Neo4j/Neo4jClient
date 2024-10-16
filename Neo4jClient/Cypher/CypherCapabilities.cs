@@ -38,7 +38,8 @@ namespace Neo4jClient.Cypher
         public static readonly CypherCapabilities Cypher35 = new CypherCapabilities(Cypher30) { SupportsRuntime = true };
         public static readonly CypherCapabilities Cypher40 = new CypherCapabilities(Cypher35) { SupportsMultipleTenancy = true, SupportsShow = true };
         public static readonly CypherCapabilities Cypher44 = new CypherCapabilities(Cypher40) { SupportsStoredProceduresWithTransactionalBatching = true };
-       
+        public static readonly CypherCapabilities Cypher50 = new CypherCapabilities(Cypher44) { SupportsNullComparisonsWithIsOperator = true };
+
         public static readonly CypherCapabilities Default = Cypher20;
         
         /// <summary>

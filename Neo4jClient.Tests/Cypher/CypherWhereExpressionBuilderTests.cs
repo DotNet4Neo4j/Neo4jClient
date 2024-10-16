@@ -174,6 +174,36 @@ namespace Neo4jClient.Tests.Cypher
         }
 
         [Fact]
+        public void For50VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNotNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar != fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher50);
+
+            Assert.Equal("(foo.NullableBar is not null)", result);
+        }
+
+        [Fact]
+        public void For50VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNullProperty()
+        {
+            var parameters = new Dictionary<string, object>();
+            var fooWithNulls = new Foo
+            {
+                NullableBar = null
+            };
+            Expression<Func<Foo, bool>> expression = foo => foo.NullableBar == fooWithNulls.NullableBar;
+
+            var result = CypherWhereExpressionBuilder.BuildText(expression, v => CreateParameter(parameters, v), CypherCapabilities.Cypher50);
+
+            Assert.Equal("(foo.NullableBar is null)", result);
+        }
+
+        [Fact]
         public void For30VersionsEvaluateTrueWhenComparingMissingNullablePropertyToNullProperty()
         {
             var parameters = new Dictionary<string, object>();
