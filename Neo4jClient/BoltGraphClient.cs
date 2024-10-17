@@ -301,6 +301,8 @@ namespace Neo4jClient
                     CypherCapabilities = CypherCapabilities.Cypher40;
                 if(ServerVersion >= new Version(4,4))
                     CypherCapabilities = CypherCapabilities.Cypher44;
+                if (ServerVersion >= new Version(5, 0))
+                    CypherCapabilities = CypherCapabilities.Cypher50;
             }
 
             await session.CloseAsync().ConfigureAwait(false);
