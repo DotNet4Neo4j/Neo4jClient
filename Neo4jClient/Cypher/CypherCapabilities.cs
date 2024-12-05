@@ -16,6 +16,7 @@ namespace Neo4jClient.Cypher
             SupportsMultipleTenancy = cypherCapabilities.SupportsMultipleTenancy;
             SupportsStoredProceduresWithTransactionalBatching = cypherCapabilities.SupportsStoredProceduresWithTransactionalBatching;
             SupportsShow = cypherCapabilities.SupportsShow;
+            SupportsRuntime = cypherCapabilities.SupportsRuntime;
         }
 
         public static readonly CypherCapabilities Cypher19 = new CypherCapabilities
@@ -41,7 +42,7 @@ namespace Neo4jClient.Cypher
         public static readonly CypherCapabilities Cypher50 = new CypherCapabilities(Cypher44) { SupportsNullComparisonsWithIsOperator = true };
 
         public static readonly CypherCapabilities Default = Cypher20;
-        
+
         /// <summary>
         /// Neo4j 4.0 provides support for multiple tenancy, which means commands like CREATE DATABASE etc
         /// </summary>
@@ -52,7 +53,7 @@ namespace Neo4jClient.Cypher
         public bool SupportsNullComparisonsWithIsOperator { get; set; }
         public bool SupportsStartsWith { get; set; }
         public bool SupportsStoredProceduresWithTransactionalBatching { get; set; }
-        
+
         /// <summary>
         /// Runtime is available to be set in 3.5 onwards.
         /// </summary>
@@ -70,6 +71,6 @@ namespace Neo4jClient.Cypher
         /// </summary>
         public bool SupportsHasFunction { get; set; }
 
-        
+
     }
 }
